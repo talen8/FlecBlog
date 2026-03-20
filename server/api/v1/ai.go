@@ -36,6 +36,35 @@ func (c *AIController) getAIProvider() (ai.Provider, error) {
 	return provider, nil
 }
 
+// TestConfig 测试AI配置是否可用
+//
+//	@Summary		测试AI配置
+//	@Description	使用提供的配置测试AI服务连通性
+//	@Tags			AI功能
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			request	body		dto.AITestRequest	true	"AI配置"
+//	@Success		200		{object}	response.Response
+//	@Failure		400		{object}	response.Response
+//	@Failure		500		{object}	response.Response
+//	@Router			/admin/ai/test [post]
+func (c *AIController) TestConfig(ctx *gin.Context) {
+	var req dto.AITestRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.ValidateFailed(ctx, err.Error())
+		return
+	}
+
+	provider := ai.NewOpenAIClient(req.BaseURL, req.APIKey, req.Model)
+	if err := provider.Test(); err != nil {
+		response.Failed(ctx, err.Error())
+		return
+	}
+
+	response.Success(ctx, nil)
+}
+
 // Summary 生成文章摘要
 //
 //	@Summary		生成文章摘要

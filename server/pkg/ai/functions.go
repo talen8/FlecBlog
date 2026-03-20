@@ -78,6 +78,46 @@ func (c *OpenAIClient) callOpenAI(prompt string) (string, error) {
 	return result, nil
 }
 
+// Test 测试AI配置是否可用
+func (c *OpenAIClient) Test() error {
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	reqBody := OpenAIRequest{
+		Model: c.Model,
+		Messages: []OpenAIMessage{
+			{Role: "user", Content: "hi"},
+		},
+	}
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return fmt.Errorf("序列化请求失败: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", c.BaseURL+"/chat/completions", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("创建请求失败: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("连接失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("API 返回错误 (状态码: %d): %s", resp.StatusCode, string(body))
+	}
+
+	var openaiResp OpenAIResponse
+	if err := json.Unmarshal(body, &openaiResp); err != nil || len(openaiResp.Choices) == 0 {
+		return fmt.Errorf("响应解析失败，请检查模型名称是否正确")
+	}
+	return nil
+}
+
 // GenerateSummary 生成文章摘要（50-100字，创作者角度）
 func (c *OpenAIClient) GenerateSummary(content string) (string, error) {
 	const fixedPrompt = "你是一个博客作者，需要为自己的文章生成摘要。严格要求：1.摘要字数必须控制在50-100字之间，绝不能超出100字上限；2.以创作者角度介绍这一篇文章；3.只生成摘要内容，不要任何额外说明；4.用中文作答，去除特殊字符与冗余空格；5.请生成简洁、精准且涵盖核心信息的摘要；6.不要总结有什么意义或者价值！！。"

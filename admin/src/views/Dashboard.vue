@@ -229,7 +229,7 @@
               <Right />
             </el-icon>
           </div>
-          <div class="link-item" @click="openLink('/#')">
+          <div class="link-item" @click="openLink('https://ccnlf8xcz6k3.feishu.cn/wiki/space/7618178485001046989')">
             <span class="link-text">文档</span>
             <el-icon class="link-icon">
               <Right />

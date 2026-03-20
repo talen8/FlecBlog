@@ -28,6 +28,19 @@ definitions:
         description: 生成的摘要
         type: string
     type: object
+  dto.AITestRequest:
+    properties:
+      api_key:
+        type: string
+      base_url:
+        type: string
+      model:
+        type: string
+    required:
+    - api_key
+    - base_url
+    - model
+    type: object
   dto.AITitleRequest:
     properties:
       content:
@@ -1736,6 +1749,38 @@ paths:
       security:
       - BearerAuth: []
       summary: 生成文章摘要
+      tags:
+      - AI功能
+  /admin/ai/test:
+    post:
+      consumes:
+      - application/json
+      description: 使用提供的配置测试AI服务连通性
+      parameters:
+      - description: AI配置
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AITestRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 测试AI配置
       tags:
       - AI功能
   /admin/ai/title:

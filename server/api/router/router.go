@@ -425,6 +425,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 
 		// ==================== AI功能相关 ====================
 		aiManagement := adminAPI.Group("/ai")
+		aiManagement.POST("/test", aiController.TestConfig)
 		aiManagement.POST("/summary", aiController.Summary)
 		aiManagement.POST("/ai-summary", aiController.AISummary)
 		aiManagement.POST("/title", aiController.Title)

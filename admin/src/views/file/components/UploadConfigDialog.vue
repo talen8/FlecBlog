@@ -39,7 +39,7 @@
         <el-form-item label="自定义域名">
           <el-input v-model="form.domain" :placeholder="domainPlaceholder" clearable />
         </el-form-item>
-        <el-form-item label="启用 HTTPS">
+        <el-form-item v-if="showUseSSL" label="启用 HTTPS">
           <el-switch v-model="form.use_ssl" :active-value="true" :inactive-value="false" />
         </el-form-item>
       </template>
@@ -202,6 +202,11 @@ const showRegion = computed(() => {
 const showEndpoint = computed(() => {
   const t = form.value.storage_type
   return t === 's3' || t === 'r2' || t === 'minio'
+})
+
+const showUseSSL = computed(() => {
+  const t = form.value.storage_type
+  return t === 'r2' || t === 'minio'
 })
 
 const bucketPlaceholder = computed(() => {

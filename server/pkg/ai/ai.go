@@ -10,6 +10,7 @@ type Provider interface {
 	GenerateSummary(content string) (string, error)
 	GenerateAISummary(content string) (string, error)
 	GenerateTitle(content string) ([]string, error)
+	Test() error
 }
 
 // GetProvider 根据配置获取AI服务提供商

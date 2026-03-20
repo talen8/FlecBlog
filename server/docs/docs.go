@@ -160,6 +160,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/ai/test": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "使用提供的配置测试AI服务连通性",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI功能"
+                ],
+                "summary": "测试AI配置",
+                "parameters": [
+                    {
+                        "description": "AI配置",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AITestRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/ai/title": {
             "post": {
                 "security": [
@@ -6626,6 +6677,25 @@ const docTemplate = `{
             "properties": {
                 "summary": {
                     "description": "生成的摘要",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AITestRequest": {
+            "type": "object",
+            "required": [
+                "api_key",
+                "base_url",
+                "model"
+            ],
+            "properties": {
+                "api_key": {
+                    "type": "string"
+                },
+                "base_url": {
+                    "type": "string"
+                },
+                "model": {
                     "type": "string"
                 }
             }

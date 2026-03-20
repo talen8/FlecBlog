@@ -30,7 +30,7 @@
         :disabled="loading" autocomplete="new-password" />
     </el-form-item>
 
-    <el-form-item label="群聊ID">
+    <el-form-item label="群聊 ID">
       <el-input v-model="form.feishu_chat_id" placeholder="接收通知的群聊ID" :disabled="loading" />
     </el-form-item>
   </el-form>

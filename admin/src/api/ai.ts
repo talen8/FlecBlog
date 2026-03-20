@@ -34,3 +34,10 @@ export function generateAISummary(data: AIAISummaryRequest): Promise<AIAISummary
 export function generateTitle(data: AITitleRequest): Promise<AITitleResponse> {
     return request.post("/admin/ai/title", data);
 }
+
+/**
+ * 测试AI配置是否可用
+ */
+export function testAIConfig(data: { base_url: string; api_key: string; model: string }): Promise<void> {
+    return request.post("/admin/ai/test", data);
+}

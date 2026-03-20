@@ -613,7 +613,7 @@ INSERT INTO settings (key, value, "group", is_public) VALUES
 ('blog.about_motto_sub', '用代码和文字记录生活，分享知识。', 'blog', TRUE),
 ('blog.about_socialize', '[{"name":"GitHub","url":"https://github.com"},{"name":"Email","url":"mailto:contact@example.com"}]', 'blog', TRUE),
 ('blog.about_creation', '[{"name":"掘金","url":"https://juejin.cn"},{"name":"知乎","url":"https://zhihu.com"}]', 'blog', TRUE),
-('blog.about_versions', '[{"name":"FlecBLOG","version":"1.0.0"},{"name":"Vue","version":"3.5.0"},{"name":"Go","version":"1.23.0"}]', 'blog', TRUE),
+('blog.about_versions', '[{"name":"FlecBLOG","version":"x.y.z"},{"name":"Vue","version":"3.5.0"},{"name":"Go","version":"1.25.0"}]', 'blog', TRUE),
 ('blog.about_unions', '[{"name":"BlogFinder","url":"https://bf.zzxworld.com"},{"name":"个站商店","url":"https://storeweb.cn"},{"name":"博友圈","url":"https://www.boyouquan.com"}]', 'blog', TRUE),
 ('blog.about_story', '欢迎来到我的个人博客！这里是我分享技术、记录生活、积累知识的小天地。希望这些内容能对你有所帮助。如果你有任何想法或建议，欢迎随时与我交流！', 'blog', TRUE),
 ('blog.custom_head', '', 'blog', TRUE),

@@ -284,7 +284,7 @@ const originalData = reactive({
 const formRules: FormRules = {
   title: [
     { required: true, message: '请输入文章标题', trigger: 'blur' },
-    { min: 1, max: 200, message: '标题长度在 1 到 200 个字符', trigger: 'blur' }
+    { min: 1, max: 80, message: '标题长度在 1 到 80 个字符', trigger: 'blur' }
   ]
 }
 
