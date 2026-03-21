@@ -1,35 +1,68 @@
 <div align="center">
-  <a href="https://github.com/talen8/FlecBlog">
-    <img src=".github/images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+  <img src=".github/images/logo.png" alt="FlecBlog Logo" width="92" height="92" />
 
-  <h3 align="center">FlecBlog</h3>
+  <h1>FlecBlog</h1>
 
-  <p align="center">
-    一个现代化的全栈博客系统，集成了文章管理、评论互动、友链交换、动态发布、数据统计等完整功能。
-    <br />
-    <br />
-    <a href="https://blog.talen.top">查看演示</a>
-    &middot;
-    <a href="https://github.com/talen8/FlecBlog/issues/new">问题反馈</a>
-    &middot;
-    <a href="">赞助支持</a>
-    &middot;
-    <a href="https://ccnlf8xcz6k3.feishu.cn/wiki/space/7618178485001046989">使用文档</a>
-    &middot;
-    <a href="https://qm.qq.com/q/Zzm9XN6lOi">社群讨论</a>
+  <p>
+    一个有审美、有边界感的现代化全栈博客系统。
+  </p>
+
+  <p>
+    不追求喧闹的功能堆叠，
+    只把内容、管理与展示打磨得干净、完整、耐看。
+  </p>
+
+  <p>
+    <a href="https://blog.talen.top">在线预览</a> /
+    <a href="https://ccnlf8xcz6k3.feishu.cn/wiki/space/7618178485001046989">使用文档</a> /
+    <a href="https://github.com/talen8/FlecBlog/issues/new">问题反馈</a> /
+    <a href="https://qm.qq.com/q/Zzm9XN6lOi">社群交流</a>
+  </p>
+
+  <p>
+    简体中文 / <a href="./README-en.md">English</a>
+  </p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Monorepo-FlecBlog-111111?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAACDUlEQVR4nO3XS4iNYRgH8BNRNhYmkctMkpXJSslth1hiKxsbRmqoQU2NjY2J1GwsbGgsSG5FQ0kozMrKQhZqUCbkMsjdT2/znvo6fd93vjnznSPlX2dx3vN/nv//vT3PeyqV//hXgZt4jSEcRjeuYASf42ckjnVHzlCMuV2GgVGNY7QMA5cmYeBiGQb2T8JAT6Oii7E97ufdmqSrsCZFLG1870REZ+MQntSZVRBZW3D8VBHhqTiIj8rHiXriM3FL87A7T3w67jVR/BPm5Bno11yczRPvwNcmG/iG9r81+yr60sRn4I3W4E6agc1ah1dpBo7lBIRq1o4DIbgEA9/TDAznBKxO8NpiW50I3uECBvEstRvieU6C33iAdYlaUdsLshDeDW0JnWnYmWZgrECyn+hKXNkPBWL6I38DtmJK1hX8UnBGwcTKGNNXgB9W70Xi+74sA48j4WGBpMOJnhGeWBPB0SwDVyOhq855qGJLjFuAXXhbIOYl5mUZ6I2kc1has2xpeIpFifjOOmU85OtMFQ/AEvyKScIjZC6uFdjfR9XE4aGRwTuPWZV6ME4MGEyMbcSNKJaFI5HbU3NYL2N9XeEqsDBxtXprfpuPHTiJ+7GgjMXzsjxy9mAA28LZqDQC4zP+EU2cLrR0ZQObEoXpfewTKzKLSJNMdMS/Vcm9v94yAwkjy3A8PsvPlC3wB5cqDes3vUmxAAAAAElFTkSuQmCC&style=flat-square" alt="Monorepo" />
+    <img src="https://img.shields.io/badge/Server-Go%201.25-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go" />
+    <img src="https://img.shields.io/badge/Admin-Vue%203-42B883?style=flat-square&logo=vuedotjs&logoColor=white" alt="Vue 3" />
+    <img src="https://img.shields.io/badge/Blog-Nuxt%204.2.2-00DC82?style=flat-square&logo=nuxt&logoColor=white" alt="Nuxt 4" />
   </p>
 </div>
 
-![预览图](.github/images/preview.png)
+<p align="center">
+  <img src=".github/images/preview.png" alt="FlecBlog Preview" />
+</p>
 
-## 架构设计
+## 关于
 
-项目采用前后端分离架构，包含三个独立端：
+FlecBlog 是一个三端分离的博客系统，围绕内容创作这件事，做了相对完整的一套产品闭环。
 
-- **Server** - 服务端，基于 Go + Gin + GORM 构建，提供 RESTful API 接口
-- **Admin** - 管理端，基于 Vue 3 + Element Plus 构建，用于内容管理与数据统计
-- **Blog** - 博客端，基于 Nuxt 4 构建，支持 SSR 服务端渲染与 SEO 优化
+把前台博客、后台管理、后端服务拆分成清晰的三个部分，让内容系统既能保持表现力，也能维持长期可维护性。
+
+| 模块 | 技术栈 | 定位 |
+| --- | --- | --- |
+| `server` | Go 1.25 / Gin / GORM / PostgreSQL | 后端服务、认证、接口、数据与定时任务 |
+| `admin` | Vue 3 / Element Plus / Vite | 内容管理、仪表盘、编辑器、运营后台 |
+| `blog` | Nuxt 4.2.2 / Vue 3 / SCSS | 博客前台、SSR、SEO、阅读体验 |
+
+**为什么选择 FlecBlog**
+
+- 有完整工程结构，而不是只做出一个页面展示
+- 管理端与博客端解耦，前后台体验更纯粹
+- 支持文章、评论、友链、统计等博客常见能力
+- 适合个人品牌博客，也适合继续扩展成内容型产品
+
+## 预览
+
+| 博客首页 | 文章详情 |
+| --- | --- |
+| ![Blog Home](.github/images/blog-home.png) | ![Blog Article](.github/images/blog-article.png) |
+
+| 后台仪表盘 | 后台编辑器 |
+| --- | --- |
+| ![Admin Dashboard](.github/images/admin-dashboard.png) | ![Admin Editor](.github/images/admin-editor.png) |
 
 ## 技术栈
 
@@ -53,10 +86,6 @@
 - **图表**: ECharts, echarts-wordcloud
 - **其他**: TypeScript, Vue Router, Axios, dayjs, SCSS
 
-![后台管理 - 仪表盘](.github/images/admin-dashboard.png)
-
-![后台管理 - 编辑器](.github/images/admin-editor.png)
-
 ### Blog - 博客端
 
 - **框架**: [Nuxt 4](https://nuxt.com) - Vue.js 全栈框架
@@ -65,10 +94,6 @@
 - **SEO**: @nuxtjs/seo, Sitemap, Atom Feed
 - **PWA**: @vite-pwa/nuxt
 - **其他**: TypeScript, VueUse, dayjs, Lenis, medium-zoom, APlayer
-
-![博客前台 - 首页](.github/images/blog-home.png)
-
-![博客前台 - 文章详情](.github/images/blog-article.png)
 
 ## 快速部署
 
@@ -239,7 +264,7 @@ docker-compose up -d
 ### 前置要求
 
 - Node.js 20+ (admin, blog)
-- Go 1.25+ (server)
+- Go 1.25 (server)
 - PostgreSQL 12+ (server)
 
 ### 数据库准备
@@ -287,9 +312,9 @@ cp .env.example .env
 npm run dev
 ```
 
-## 配置说明
+### 配置说明
 
-### Server 环境变量
+**Server 环境变量**
 
 ```env
 # JWT 配置
@@ -307,13 +332,13 @@ DB_USER=postgres
 DB_PASSWORD=your_database_password
 ```
 
-### Admin 环境变量
+**Admin 环境变量**
 
 ```env
 VITE_API_URL=https://api.yourdomain.com/api/v1
 ```
 
-### Blog 环境变量
+**Blog 环境变量**
 
 ```env
 NUXT_PUBLIC_API_URL=https://api.yourdomain.com/api/v1
@@ -415,6 +440,16 @@ blog/
 ├── nuxt.config.ts        # Nuxt 配置
 └── Dockerfile            # Docker 配置
 ```
+
+## 理念
+
+FlecBlog 想做的不是“更复杂”，而是“更完整”。
+
+简约，不是把内容做空。
+高级，也不是故作夸张。
+
+它更像一个安静但可靠的内容容器，
+适合长期写作，也适合慢慢生长出自己的品牌风格。
 
 ## 贡献
 
