@@ -55,15 +55,25 @@ const isLoggedIn = useAuth()
 const isReplyMode = computed(() => !!props.replyTo)
 const isUserInfoFilled = computed(() => nickname.value.trim() && email.value.trim())
 const shouldShowSend = computed(() => isLoggedIn.value || isUserInfoFilled.value)
-const mainBtn = computed(() => ({
-  text: isSubmitting.value ? '发送中...' : (shouldShowSend.value ? '发送' : '登录'),
-  icon: isSubmitting.value ? 'ri-loader-4-line rotating' : (shouldShowSend.value ? 'ri-send-plane-fill' : 'ri-login-box-line')
-}))
-const secondaryBtn = computed(() => ({
-  text: isUserInfoFilled.value ? '登录' : '发送',
-  icon: isUserInfoFilled.value ? 'ri-login-box-line' : 'ri-send-plane-fill'
-}))
+const mainBtn = computed(() => {
+  if (isSubmitting.value) return { text: '发送中...', icon: 'ri-loader-4-line rotating' }
+  return shouldShowSend.value
+    ? { text: '发送', icon: 'ri-send-plane-fill' }
+    : { text: '登录', icon: 'ri-login-box-line' }
+})
+
+const secondaryBtn = computed(() =>
+  isUserInfoFilled.value
+    ? { text: '登录', icon: 'ri-login-box-line' }
+    : { text: '发送', icon: 'ri-send-plane-fill' }
+)
 const renderedMarkdown = computed(() => renderSimpleMarkdown(commentContent.value))
+const guestPrivacyNotice = [
+  '游客无需注册即可评论。',
+  '你提交的昵称、邮箱、网址和评论内容会保存在服务端，用于展示评论身份、接收回复及必要的安全审计。',
+  '浏览器会本地保存已填游客信息和评论草稿，方便下次免填。',
+  '回复提醒会通过站内消息和邮件通知。'
+]
 
 // 工具函数
 const resetTextareaHeight = () => {
@@ -74,26 +84,19 @@ const resetTextareaHeight = () => {
 }
 
 const validateForm = () => {
-  // 清空之前的错误
   errors.value = { nickname: '', email: '', website: '', content: '' }
 
-  // 如果未登录，验证游客信息
   if (!isLoggedIn.value) {
-    // 验证昵称
-    if (!nickname.value.trim()) {
+    const nick = nickname.value.trim()
+    if (!nick) {
       errors.value.nickname = '请输入昵称'
       return false
     }
-    if (nickname.value.trim().length < 2) {
-      errors.value.nickname = '昵称至少需要2个字符'
+    if (nick.length < 2 || nick.length > 32) {
+      errors.value.nickname = nick.length < 2 ? '昵称至少需要2个字符' : '昵称不能超过32个字符'
       return false
     }
-    if (nickname.value.trim().length > 32) {
-      errors.value.nickname = '昵称不能超过32个字符'
-      return false
-    }
-    
-    // 验证邮箱
+
     if (!email.value.trim()) {
       errors.value.email = '请输入邮箱'
       return false
@@ -102,15 +105,14 @@ const validateForm = () => {
       errors.value.email = '请输入正确的邮箱格式'
       return false
     }
-    
-    // 验证网站地址格式（选填）
-    if (website.value.trim() && !/^https?:\/\/.+/.test(website.value.trim())) {
+
+    const site = website.value.trim()
+    if (site && !/^https?:\/\/.+/.test(site)) {
       errors.value.website = '网站地址格式不正确'
       return false
     }
   }
 
-  // 验证评论内容
   if (!commentContent.value.trim()) {
     errors.value.content = '请输入评论内容'
     return false
@@ -130,14 +132,12 @@ const handleSubmitComment = async () => {
 
   isSubmitting.value = true
   try {
-    // 先上传所有待上传的图片
     if (pendingImages.value.size > 0) {
       isUploading.value = true
       try {
         await uploadPendingImages()
       } catch (error: any) {
-        const errorMsg = error.message || '图片上传失败'
-        info(errorMsg)
+        info(error.message || '图片上传失败')
         return
       } finally {
         isUploading.value = false
@@ -145,22 +145,18 @@ const handleSubmitComment = async () => {
     }
 
     const content = commentContent.value.trim()
-
-    // 准备游客信息（如果未登录）
     const guestInfo = !isLoggedIn.value ? {
       nickname: nickname.value.trim(),
       email: email.value.trim(),
       website: website.value.trim() || undefined
     } : undefined
 
-    // 根据是否为回复模式调用不同的方法
     if (isReplyMode.value && props.commentId) {
       await context.addReply(props.commentId, content, guestInfo)
     } else {
       await context.addComment(content, guestInfo)
     }
 
-    // 保存游客信息到本地存储
     if (!isLoggedIn.value) {
       localStorage.setItem('guest_info', JSON.stringify({
         nickname: nickname.value.trim(),
@@ -171,36 +167,27 @@ const handleSubmitComment = async () => {
 
     commentContent.value = ''
     resetTextareaHeight()
-
     success('评论发表成功')
 
-    // 评论成功后，提示虚拟邮箱用户绑定真实邮箱（10分钟间隔）
-    if (isLoggedIn.value) {
-      triggerOnComment()
-    }
+    if (isLoggedIn.value) triggerOnComment()
   } catch (error: any) {
-    const errorMsg = error.message || error.response?.data?.message || '评论发表失败'
-    errors.value.email = errorMsg
+    errors.value.email = error.message || error.response?.data?.message || '评论发表失败'
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleLogin = () => context.showLogin()
-
 const handleMainAction = () => shouldShowSend.value ? handleSubmitComment() : handleLogin()
-
 const handleSecondaryAction = (event: Event) => {
   event.stopPropagation()
   showExpandedBtn.value = false
   isUserInfoFilled.value ? handleLogin() : handleSubmitComment()
 }
-
 const toggleExpandedBtn = (event: Event) => {
   event.stopPropagation()
   showExpandedBtn.value = !showExpandedBtn.value
 }
-
 const togglePreview = () => showPreview.value = !showPreview.value
 
 const handleCancelReply = () => {
@@ -220,28 +207,24 @@ const emojiButtonRef = ref<HTMLElement | null>(null)
 const emojiPickerRef = ref<HTMLElement | null>(null)
 
 const handleImageUpload = () => fileInputRef.value?.click()
-
 const handleFileSelect = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (file) {
     insertImagePlaceholder(file)
-    ;(event.target as HTMLInputElement).value = ''
+      ; (event.target as HTMLInputElement).value = ''
   }
 }
 
 const insertImagePlaceholder = (file: File) => {
-  // 验证文件
   const error = validateFile(file, '评论贴图')
   if (error) {
     info(error)
     return
   }
 
-  // 创建 blob URL 并暂存
   const blobUrl = URL.createObjectURL(file)
   pendingImages.value.set(blobUrl, file)
 
-  // 插入到光标位置
   const textarea = textareaRef.value
   if (!textarea) return
 
@@ -310,7 +293,6 @@ const uploadPendingImages = async () => {
 
   const results = await Promise.all(uploads)
 
-  // 替换 blob URL 为真实 URL
   results.forEach(({ blobUrl, realUrl }) => {
     commentContent.value = commentContent.value.replace(blobUrl, realUrl)
     URL.revokeObjectURL(blobUrl)
@@ -353,34 +335,44 @@ onUnmounted(() => {
 
 <template>
   <div class="comment-input" :class="{ 'reply-mode': isReplyMode }">
-    <div v-if="!isLoggedIn" class="user-info-row">
-      <div class="input-wrapper">
-        <input v-model="nickname" type="text" placeholder="昵称 *" :disabled="isSubmitting"
-          :class="{ error: errors.nickname }" @input="clearError('nickname')" />
-        <transition name="fade">
-          <div v-if="errors.nickname" class="error-tooltip">{{ errors.nickname }}</div>
-        </transition>
+    <template v-if="!isLoggedIn">
+      <div class="user-info-row">
+        <div class="input-wrapper">
+          <input v-model="nickname" type="text" placeholder="昵称 *" :disabled="isSubmitting"
+            :class="{ error: errors.nickname }" @input="clearError('nickname')" />
+          <transition name="fade">
+            <div v-if="errors.nickname" class="error-tooltip">{{ errors.nickname }}</div>
+          </transition>
+        </div>
+        <div class="input-wrapper">
+          <input v-model="email" type="email" placeholder="邮箱 *" :disabled="isSubmitting"
+            :class="{ error: errors.email }" @input="clearError('email')" />
+          <transition name="fade">
+            <div v-if="errors.email" class="error-tooltip">{{ errors.email }}</div>
+          </transition>
+        </div>
+        <div class="input-wrapper policy-input">
+          <input v-model="website" type="url" placeholder="网址" :disabled="isSubmitting"
+            :class="{ error: errors.website }" @input="clearError('website')" />
+          <div class="guest-policy-tip">
+            <button type="button" class="guest-policy-trigger" aria-label="游客评论信息说明" title="游客评论信息说明">
+              <i class="ri-information-line"></i>
+            </button>
+            <div class="guest-policy-tooltip" role="note">
+              <p v-for="line in guestPrivacyNotice" :key="line">{{ line }}</p>
+            </div>
+          </div>
+          <transition name="fade">
+            <div v-if="errors.website" class="error-tooltip">{{ errors.website }}</div>
+          </transition>
+        </div>
       </div>
-      <div class="input-wrapper">
-        <input v-model="email" type="email" placeholder="邮箱 *" :disabled="isSubmitting" :class="{ error: errors.email }"
-          @input="clearError('email')" />
-        <transition name="fade">
-          <div v-if="errors.email" class="error-tooltip">{{ errors.email }}</div>
-        </transition>
-      </div>
-      <div class="input-wrapper">
-        <input v-model="website" type="url" placeholder="网址" :disabled="isSubmitting" :class="{ error: errors.website }"
-          @input="clearError('website')" />
-        <transition name="fade">
-          <div v-if="errors.website" class="error-tooltip">{{ errors.website }}</div>
-        </transition>
-      </div>
-    </div>
+    </template>
 
     <div class="editor-container">
       <textarea ref="textareaRef" v-model="commentContent" placeholder="写下你的评论...支持 Markdown 语法" rows="3"
-        :disabled="isSubmitting" :class="{ error: errors.content }" @input="clearError('content'); resetTextareaHeight()"
-        @paste="handlePaste" />
+        :disabled="isSubmitting" :class="{ error: errors.content }"
+        @input="clearError('content'); resetTextareaHeight()" @paste="handlePaste" />
       <transition name="fade">
         <div v-if="errors.content" class="error-tooltip content-error">{{ errors.content }}</div>
       </transition>
@@ -405,14 +397,15 @@ onUnmounted(() => {
           </button>
         </div>
         <transition name="fade-scale">
-          <FeaturesCommentEmojiPicker v-if="showEmojiPicker" ref="emojiPickerRef" class="emoji-picker-portal" @select="handleEmojiSelect" />
+          <FeaturesCommentEmojiPicker v-if="showEmojiPicker" ref="emojiPickerRef" class="emoji-picker-portal"
+            @select="handleEmojiSelect" />
         </transition>
         <button class="tool-btn" @click="handleImageUpload" title="图片" aria-label="上传图片"
           :disabled="isSubmitting || isUploading" :class="{ uploading: isUploading }">
           <i :class="isUploading ? 'ri-loader-4-line rotating' : 'ri-image-line'"></i>
         </button>
-        <input ref="fileInputRef" type="file" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" style="display: none"
-          @change="handleFileSelect" />
+        <input ref="fileInputRef" type="file" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+          style="display: none" @change="handleFileSelect" />
         <button class="tool-btn" @click="togglePreview" :title="showPreview ? '编辑' : 'Markdown预览'"
           :aria-label="showPreview ? '切换到编辑模式' : '切换到预览模式'" :class="{ active: showPreview }"
           :disabled="isSubmitting || isUploading">
@@ -501,6 +494,95 @@ textarea {
   gap: 8px;
 }
 
+.guest-policy-tip {
+  position: relative;
+  display: inline-flex;
+}
+
+
+.policy-input {
+  input {
+    padding-right: 40px;
+  }
+
+  .guest-policy-tip {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+}
+
+.guest-policy-trigger {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--flec-border-color);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--theme-meta-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+
+  i {
+    font-size: 0.9rem;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--theme-color);
+    border-color: rgba(73, 177, 245, 0.35);
+    background: rgba(73, 177, 245, 0.08);
+  }
+}
+
+.guest-policy-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(360px, calc(100vw - 48px));
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(20, 24, 31, 0.96);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+  font-size: 0.76rem;
+  line-height: 1.65;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  z-index: 20;
+
+  &::before {
+    content: '';
+    position: absolute;
+    right: 8px;
+    bottom: 100%;
+    border: 6px solid transparent;
+    border-bottom-color: rgba(20, 24, 31, 0.96);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  p+p {
+    margin-top: 6px;
+  }
+}
+
+.guest-policy-tip:hover .guest-policy-tooltip,
+.guest-policy-tip:focus-within .guest-policy-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
 .input-wrapper {
   position: relative;
 }
@@ -518,7 +600,7 @@ textarea {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 10;
   white-space: nowrap;
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -528,11 +610,11 @@ textarea {
     border: 4px solid transparent;
     border-top-color: rgba(0, 0, 0, 0.85);
   }
-  
+
   &.content-error {
     left: 20px;
     transform: translateX(0);
-    
+
     &::after {
       left: 20px;
       transform: translateX(0);
@@ -565,10 +647,10 @@ textarea {
   min-height: 60px;
   max-height: 300px;
   overflow-y: hidden;
-  
+
   &.error {
     border-color: #ef4444;
-    
+
     &:focus {
       border-color: #ef4444;
     }
@@ -642,6 +724,7 @@ textarea {
 }
 
 .fade-scale {
+
   &-enter-active,
   &-leave-active {
     transition: all 0.2s ease;
@@ -822,7 +905,13 @@ textarea {
   .user-info-row {
     grid-template-columns: 1fr;
   }
-  
+
+  .guest-policy-tooltip {
+    right: -4px;
+    width: min(320px, calc(100vw - 32px));
+    font-size: 0.74rem;
+  }
+
   .error-tooltip {
     font-size: 0.7rem;
     padding: 5px 10px;

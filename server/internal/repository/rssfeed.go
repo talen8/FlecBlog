@@ -115,10 +115,10 @@ func (r *RssFeedRepository) ExistsByLink(ctx context.Context, link string) (bool
 	return count > 0, nil
 }
 
-// GetFriendsWithRSS 获取所有配置了RSS的友链
+// GetFriendsWithRSS 获取所有配置了RSS且未失效的友链
 func (r *RssFeedRepository) GetFriendsWithRSS(ctx context.Context) ([]model.Friend, error) {
 	var friends []model.Friend
-	err := r.db.WithContext(ctx).Where("rss_url != '' AND rss_url IS NOT NULL").Find(&friends).Error
+	err := r.db.WithContext(ctx).Where("rss_url != '' AND rss_url IS NOT NULL AND is_invalid = ?", false).Find(&friends).Error
 	return friends, err
 }
 

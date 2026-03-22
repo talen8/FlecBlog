@@ -172,11 +172,11 @@ func (r *FriendRepository) GetFriendsForWeb(ctx context.Context) ([]model.Friend
 
 // ============ 友链检测 ============
 
-// GetAllForCheck 获取所有友链用于检测（排除待审核和忽略检查的）
+// GetAllForCheck 获取所有友链用于检测（排除待审核、失效和忽略检查的）
 func (r *FriendRepository) GetAllForCheck(ctx context.Context) ([]model.Friend, error) {
 	var friends []model.Friend
 	err := r.db.WithContext(ctx).
-		Where("is_pending = ? AND accessible != ?", false, -1).
+		Where("is_pending = ? AND is_invalid = ? AND accessible != ?", false, false, -1).
 		Find(&friends).Error
 	if err != nil {
 		return nil, err

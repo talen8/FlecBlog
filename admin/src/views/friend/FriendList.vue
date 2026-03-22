@@ -24,9 +24,9 @@
     <el-table-column label="友链名称" min-width="130">
       <template #default="{ row }">
         <span>{{ row.name }}</span>
-        <el-tag v-if="row.accessible > 0" type="danger" size="small" style="margin-left: 8px">异常({{ row.accessible }})</el-tag>
+        <el-tag v-if="row.is_invalid" type="warning" size="small" style="margin-left: 8px">失效</el-tag>
+        <el-tag v-else-if="row.accessible > 0" type="danger" size="small" style="margin-left: 8px">异常({{ row.accessible }})</el-tag>
         <el-tag v-else-if="row.is_pending" type="info" size="small" style="margin-left: 8px">待审核</el-tag>
-        <el-tag v-else-if="row.is_invalid" type="warning" size="small" style="margin-left: 8px">失效</el-tag>
       </template>
     </el-table-column>
 
