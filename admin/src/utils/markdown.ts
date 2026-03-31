@@ -725,6 +725,7 @@ export function extractToc(markdown: string): TocItem[] {
   // 移除代码块
   let cleanedMarkdown = markdown
     .replace(/```[\s\S]*?```/g, '')
+    .replace(/~~~[\s\S]*?~~~\s*/g, '')
     .replace(/^(    |\t).+$/gm, '')
 
   // 处理单行自定义块
