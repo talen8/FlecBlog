@@ -116,6 +116,28 @@ func (s *NotificationService) NotifyFriendApply(ctx context.Context, friendID ui
 	return s.sendToAdmins(ctx, model.TypeFriendApply, title, content, link, data, applicantID, nil, nil)
 }
 
+// NotifyFriendAbnormal 异常友链通知管理员（仅站内信）
+func (s *NotificationService) NotifyFriendAbnormal(ctx context.Context, friendID uint, siteName string, abnormalCount int) error {
+	title := "收到了异常友链提醒"
+	content := fmt.Sprintf("%s已连续 %d 次检测异常", siteName, abnormalCount)
+	link := "/friends"
+	data := map[string]interface{}{
+		"friend_id":      friendID,
+		"site_name":      siteName,
+		"abnormal_count": abnormalCount,
+	}
+
+	adminIDs, err := s.repo.GetAllAdmins(ctx)
+	if err != nil {
+		return err
+	}
+	if len(adminIDs) == 0 {
+		return nil
+	}
+
+	return s.sendInApp(ctx, model.TypeFriendAbnormal, title, content, link, data, nil, &friendID, adminIDs)
+}
+
 // NotifyRssFeedDaily RSS订阅日报通知管理员
 func (s *NotificationService) NotifyRssFeedDaily(unreadCount int, articles interface{}) error {
 	if s.notificationSvc == nil {
@@ -175,6 +197,7 @@ func (s *NotificationService) List(ctx context.Context, userID uint, req *dto.No
 		model.TypeCommentNew,
 		model.TypeFeedbackNew,
 		model.TypeFriendApply,
+		model.TypeFriendAbnormal,
 		model.TypeSystemAlert,
 	})
 }
@@ -436,11 +459,12 @@ func getReportTypeText(reportType string) string {
 // getNotificationTypeText 获取通知类型文本
 func getNotificationTypeText(notifType string) string {
 	typeMap := map[string]string{
-		"comment_reply": "评论回复",
-		"comment_new":   "新评论",
-		"feedback_new":  "反馈投诉",
-		"friend_apply":  "友链申请",
-		"system_alert":  "系统通知",
+		"comment_reply":   "评论回复",
+		"comment_new":     "新评论",
+		"feedback_new":    "反馈投诉",
+		"friend_apply":    "友链申请",
+		"friend_abnormal": "异常友链",
+		"system_alert":    "系统通知",
 	}
 	if text, ok := typeMap[notifType]; ok {
 		return text

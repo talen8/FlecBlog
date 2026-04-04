@@ -432,6 +432,9 @@ func (s *FriendService) CheckAllFriends() error {
 		newStatus := 0
 		if !s.checkAccessibility(ctx, friend.URL) {
 			newStatus = friend.Accessible + 1
+			if s.notificationService != nil {
+				_ = s.notificationService.NotifyFriendAbnormal(ctx, friend.ID, friend.Name, newStatus)
+			}
 		}
 		_ = s.repo.UpdateCheckStatus(ctx, friend.ID, newStatus)
 	}
