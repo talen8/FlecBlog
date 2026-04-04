@@ -43,6 +43,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	feedbackRepo := repository.NewFeedbackRepository(db.DB)
 	subscriberRepo := repository.NewSubscriberRepository(db.DB)
 	rssFeedRepo := repository.NewRssFeedRepository(db.DB)
+	settingRepo := repository.NewSettingRepository(db.DB)
 
 	// 初始化上传系统
 	uploadManager := upload.InitializeUploadSystem(conf, r)
@@ -59,6 +60,8 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	// Swagger API文档
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	fileService := service.NewFileService(fileRepo, uploadManager)
+	fileUsageChecker := service.NewFileUsageChecker(articleRepo, friendRepo, momentRepo, settingRepo, userRepo, menuRepo, feedbackRepo, commentRepo)
+	fileService.SetUsageChecker(fileUsageChecker)
 
 	// 初始化服务
 	emailClient := email.Initialize(conf)
@@ -461,7 +464,7 @@ func initScheduler(fileService *service.FileService, userService *service.UserSe
 
 	// 注册清理任务
 	_ = s.AddJob(scheduler.NewJob("清理过期验证码", "0 0 2 * * *", verificationService.CleanExpiredVerifications))
-	_ = s.AddJob(scheduler.NewJob("清理未使用文件", "0 0 3 * * *", fileService.CleanupUnusedFiles))
+	_ = s.AddJob(scheduler.NewJob("清理未使用文件", "0 0 3 * * *", fileService.DeleteUnusedFiles))
 	_ = s.AddJob(scheduler.NewJob("清理过期Token黑名单", "0 0 4 * * *", userService.CleanupExpiredTokens))
 
 	// RSS订阅相关任务

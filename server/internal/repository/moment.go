@@ -74,6 +74,13 @@ func (r *MomentRepository) Update(ctx context.Context, moment *model.Moment) err
 	return r.db.WithContext(ctx).Save(moment).Error
 }
 
+// ExistsByContentURL 检查是否有动态内容引用该文件
+func (r *MomentRepository) ExistsByContentURL(url string) (bool, error) {
+	var count int64
+	err := r.db.Model(&model.Moment{}).Where("content LIKE ?", "%"+url+"%").Count(&count).Error
+	return count > 0, err
+}
+
 // Delete 删除动态
 func (r *MomentRepository) Delete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).Delete(&model.Moment{}, id).Error

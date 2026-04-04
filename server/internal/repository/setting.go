@@ -61,17 +61,13 @@ func (r *SettingRepository) UpdateGroup(group string, updates map[string]string)
 	})
 }
 
-// GetByKeys 根据键列表获取配置
-func (r *SettingRepository) GetByKeys(keys []string) (map[string]string, error) {
-	var settings []model.Setting
-	err := r.db.Where("\"key\" IN ?", keys).Find(&settings).Error
-	if err != nil {
-		return nil, err
+// ExistsByValueAndKeys 检查指定配置键中是否引用该文件
+func (r *SettingRepository) ExistsByValueAndKeys(value string, keys []string) (bool, error) {
+	var count int64
+	query := r.db.Model(&model.Setting{}).Where("value = ?", value)
+	if len(keys) > 0 {
+		query = query.Where("\"key\" IN ?", keys)
 	}
-
-	result := make(map[string]string)
-	for _, s := range settings {
-		result[s.Key] = s.Value
-	}
-	return result, nil
+	err := query.Count(&count).Error
+	return count > 0, err
 }

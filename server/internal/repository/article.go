@@ -292,6 +292,20 @@ func (r *ArticleRepository) Delete(id uint) error {
 	return r.db.Unscoped().Delete(&model.Article{}, id).Error
 }
 
+// ExistsByCover 检查是否有文章使用该封面
+func (r *ArticleRepository) ExistsByCover(url string) (bool, error) {
+	var count int64
+	err := r.db.Model(&model.Article{}).Where("cover = ?", url).Count(&count).Error
+	return count > 0, err
+}
+
+// ExistsByContentURL 检查是否有文章正文引用该文件
+func (r *ArticleRepository) ExistsByContentURL(url string) (bool, error) {
+	var count int64
+	err := r.db.Model(&model.Article{}).Where("content LIKE ?", "%"+url+"%").Count(&count).Error
+	return count > 0, err
+}
+
 // ============ 辅助方法 ============
 
 // CheckSlugExists 检查slug是否已存在

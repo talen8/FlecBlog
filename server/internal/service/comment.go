@@ -192,10 +192,13 @@ func (s *CommentService) Update(ctx context.Context, id uint, req *dto.UpdateCom
 		return nil, errors.New("无权修改此评论")
 	}
 
+	oldContent := comment.Content
 	comment.Content = req.Content
 	if err := s.repo.Update(ctx, comment); err != nil {
 		return nil, err
 	}
+
+	s.updateImageStatus(oldContent, req.Content)
 
 	return s.toCommentResponse(comment), nil
 }
@@ -216,7 +219,11 @@ func (s *CommentService) DeleteForWeb(ctx context.Context, id uint, userID uint)
 	}
 
 	// 只删除评论本身，子评论保留
-	return s.repo.Delete(ctx, id)
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ============ 后台管理服务 ============
@@ -278,7 +285,11 @@ func (s *CommentService) Delete(ctx context.Context, id uint) error {
 	}
 
 	// 只删除评论本身，子评论保留
-	return s.repo.Delete(ctx, id)
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Restore 恢复已删除的评论
@@ -577,19 +588,74 @@ func (s *CommentService) markImagesAsUsed(content string) {
 		return
 	}
 
-	// 提取 Markdown 图片语法中的 URL: ![alt](url)
-	re := regexp.MustCompile(`!\[.*?\]\((.*?)\)`)
-	matches := re.FindAllStringSubmatch(content, -1)
+	for _, imageURL := range extractCommentImageURLs(content) {
+		_ = s.fileService.MarkAsUsed(imageURL)
+	}
+}
 
-	for _, match := range matches {
-		if len(match) > 1 {
-			imageURL := match[1]
-			// 异步标记，避免阻塞评论创建
-			go func(url string) {
-				_ = s.fileService.MarkAsUsed(url)
-			}(imageURL)
+// markImagesAsUnused 标记评论内容中的图片为未使用
+func (s *CommentService) markImagesAsUnused(content string) {
+	if s.fileService == nil || content == "" {
+		return
+	}
+
+	for _, imageURL := range extractCommentImageURLs(content) {
+		_ = s.fileService.MarkAsUnused(imageURL)
+	}
+}
+
+// updateImageStatus 对比评论内容变化，更新图片状态
+func (s *CommentService) updateImageStatus(oldContent, newContent string) {
+	if s.fileService == nil || oldContent == newContent {
+		return
+	}
+
+	oldImages := extractCommentImageURLs(oldContent)
+	newImages := extractCommentImageURLs(newContent)
+
+	oldMap := make(map[string]bool, len(oldImages))
+	for _, url := range oldImages {
+		oldMap[url] = true
+	}
+
+	newMap := make(map[string]bool, len(newImages))
+	for _, url := range newImages {
+		newMap[url] = true
+		if !oldMap[url] {
+			_ = s.fileService.MarkAsUsed(url)
 		}
 	}
+
+	for _, url := range oldImages {
+		if !newMap[url] {
+			_ = s.fileService.MarkAsUnused(url)
+		}
+	}
+}
+
+func extractCommentImageURLs(content string) []string {
+	if content == "" {
+		return nil
+	}
+
+	re := regexp.MustCompile(`!\[.*?\]\((.*?)\)`)
+	matches := re.FindAllStringSubmatch(content, -1)
+	urls := make([]string, 0, len(matches))
+	seen := make(map[string]bool, len(matches))
+
+	for _, match := range matches {
+		if len(match) <= 1 {
+			continue
+		}
+		url := strings.TrimSpace(match[1])
+		if url == "" || seen[url] {
+			continue
+		}
+		seen[url] = true
+		urls = append(urls, url)
+	}
+
+	return urls
 }
 
 // ============ 数据导入导出方法 ============

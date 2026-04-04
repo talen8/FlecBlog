@@ -184,6 +184,15 @@ func (r *FriendRepository) GetAllForCheck(ctx context.Context) ([]model.Friend, 
 	return friends, nil
 }
 
+// ExistsByAvatarOrScreenshot 检查是否有友链引用该文件
+func (r *FriendRepository) ExistsByAvatarOrScreenshot(url string) (bool, error) {
+	var count int64
+	err := r.db.Model(&model.Friend{}).
+		Where("avatar = ? OR screenshot = ?", url, url).
+		Count(&count).Error
+	return count > 0, err
+}
+
 // UpdateCheckStatus 更新友链检测状态
 func (r *FriendRepository) UpdateCheckStatus(ctx context.Context, id uint, accessible int) error {
 	return r.db.WithContext(ctx).

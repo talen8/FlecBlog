@@ -85,6 +85,13 @@ func (r *FileRepository) GetByUploadType(uploadType string, offset, limit int) (
 	return files, total, nil
 }
 
+// GetByStatus 根据状态获取文件列表
+func (r *FileRepository) GetByStatus(status int) ([]model.File, error) {
+	var files []model.File
+	err := r.db.Where("status = ?", status).Order("created_at ASC").Find(&files).Error
+	return files, err
+}
+
 // ============ 辅助方法 ============
 
 // UpdateStatus 更新文件使用状态

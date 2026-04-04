@@ -194,101 +194,47 @@ func (s *SettingService) UpdateGroup(group string, updates map[string]string) er
 		return err
 	}
 
-	// 处理基本配置中的图片文件状态切换
-	if group == model.SettingGroupBasic && s.fileService != nil {
-		// 获取旧的配置值
-		oldSettings, err := s.repo.GetByGroup(group)
+	var oldSettings map[string]string
+	if s.fileService != nil && (group == model.SettingGroupBasic || group == model.SettingGroupBlog) {
+		settings, err := s.repo.GetByGroup(group)
 		if err == nil {
-			// 处理站长头像
-			if newAvatar, ok := updates[KeyBasicAuthorAvatar]; ok {
-				oldAvatar := oldSettings[KeyBasicAuthorAvatar]
-				if oldAvatar != newAvatar {
-					if oldAvatar != "" {
-						_ = s.fileService.MarkAsUnused(oldAvatar)
-					}
-					if newAvatar != "" {
-						_ = s.fileService.MarkAsUsed(newAvatar)
-					}
-				}
-			}
-
-			// 处理站长形象
-			if newPhoto, ok := updates[KeyBasicAuthorPhoto]; ok {
-				oldPhoto := oldSettings[KeyBasicAuthorPhoto]
-				if oldPhoto != newPhoto {
-					if oldPhoto != "" {
-						_ = s.fileService.MarkAsUnused(oldPhoto)
-					}
-					if newPhoto != "" {
-						_ = s.fileService.MarkAsUsed(newPhoto)
-					}
-				}
-			}
-		}
-	}
-
-	// 处理博客配置中的图片文件状态切换
-	if group == model.SettingGroupBlog && s.fileService != nil {
-		// 获取旧的配置值
-		oldSettings, err := s.repo.GetByGroup(group)
-		if err == nil {
-			// 处理网站图标
-			if newFavicon, ok := updates[KeyBlogFavicon]; ok {
-				oldFavicon := oldSettings[KeyBlogFavicon]
-				if oldFavicon != newFavicon {
-					if oldFavicon != "" {
-						_ = s.fileService.MarkAsUnused(oldFavicon)
-					}
-					if newFavicon != "" {
-						_ = s.fileService.MarkAsUsed(newFavicon)
-					}
-				}
-			}
-
-			// 处理背景图片
-			if newBg, ok := updates[KeyBlogBackgroundImage]; ok {
-				oldBg := oldSettings[KeyBlogBackgroundImage]
-				if oldBg != newBg {
-					if oldBg != "" {
-						_ = s.fileService.MarkAsUnused(oldBg)
-					}
-					if newBg != "" {
-						_ = s.fileService.MarkAsUsed(newBg)
-					}
-				}
-			}
-
-			// 处理展览图片
-			if newExhibition, ok := updates[KeyBlogAboutExhibition]; ok {
-				oldExhibition := oldSettings[KeyBlogAboutExhibition]
-				if oldExhibition != newExhibition {
-					if oldExhibition != "" {
-						_ = s.fileService.MarkAsUnused(oldExhibition)
-					}
-					if newExhibition != "" {
-						_ = s.fileService.MarkAsUsed(newExhibition)
-					}
-				}
-			}
-
-			// 处理站点截图
-			if newScreenshot, ok := updates[KeyBlogScreenshot]; ok {
-				oldScreenshot := oldSettings[KeyBlogScreenshot]
-				if oldScreenshot != newScreenshot {
-					if oldScreenshot != "" {
-						_ = s.fileService.MarkAsUnused(oldScreenshot)
-					}
-					if newScreenshot != "" {
-						_ = s.fileService.MarkAsUsed(newScreenshot)
-					}
-				}
-			}
+			oldSettings = settings
 		}
 	}
 
 	// 更新数据库
 	if err := s.repo.UpdateGroup(group, updates); err != nil {
 		return err
+	}
+
+	if s.fileService != nil && oldSettings != nil {
+		handleImageChange := func(key string) {
+			newValue, ok := updates[key]
+			if !ok {
+				return
+			}
+			oldValue := oldSettings[key]
+			if oldValue == newValue {
+				return
+			}
+			if oldValue != "" {
+				_ = s.fileService.MarkAsUnused(oldValue)
+			}
+			if newValue != "" {
+				_ = s.fileService.MarkAsUsed(newValue)
+			}
+		}
+
+		if group == model.SettingGroupBasic {
+			handleImageChange(KeyBasicAuthorAvatar)
+			handleImageChange(KeyBasicAuthorPhoto)
+		}
+		if group == model.SettingGroupBlog {
+			handleImageChange(KeyBlogFavicon)
+			handleImageChange(KeyBlogBackgroundImage)
+			handleImageChange(KeyBlogAboutExhibition)
+			handleImageChange(KeyBlogScreenshot)
+		}
 	}
 
 	// 自动重载配置到内存（热重载）

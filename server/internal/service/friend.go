@@ -385,6 +385,15 @@ func (s *FriendService) ApplyFriend(ctx context.Context, req *dto.ApplyFriendReq
 		return err
 	}
 
+	if s.fileService != nil {
+		if req.Avatar != "" {
+			_ = s.fileService.MarkAsUsed(req.Avatar)
+		}
+		if req.Screenshot != "" {
+			_ = s.fileService.MarkAsUsed(req.Screenshot)
+		}
+	}
+
 	// 发送友链申请通知给管理员
 	if s.notificationService != nil {
 		_ = s.notificationService.NotifyFriendApply(ctx, friend.ID, req.Name, req.URL, req.Description, req.Avatar, req.Screenshot, &userID)

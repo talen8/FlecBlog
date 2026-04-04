@@ -119,7 +119,13 @@ func (r *UserRepository) List(offset, limit int) ([]model.User, int64, error) {
 	return users, total, nil
 }
 
-// ============ 辅助方法 ============
+
+// ExistsByAvatar 检查是否有用户头像引用该文件
+func (r *UserRepository) ExistsByAvatar(url string) (bool, error) {
+	var count int64
+	err := r.db.Model(&model.User{}).Where("avatar = ?", url).Count(&count).Error
+	return count > 0, err
+}
 
 // UpdateAvatar 更新用户头像
 func (r *UserRepository) UpdateAvatar(userID uint, avatarURL string) error {

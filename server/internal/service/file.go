@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
@@ -12,10 +13,87 @@ import (
 	"flec_blog/pkg/utils"
 )
 
+var reconciledSettingImageKeys = []string{
+	KeyBasicAuthorAvatar,
+	KeyBasicAuthorPhoto,
+	KeyBlogFavicon,
+	KeyBlogBackgroundImage,
+	KeyBlogAboutExhibition,
+	KeyBlogScreenshot,
+}
+
+// FileUsageChecker 文件引用检查器
+type FileUsageChecker struct {
+	articleRepo  *repository.ArticleRepository
+	friendRepo   *repository.FriendRepository
+	momentRepo   *repository.MomentRepository
+	settingRepo  *repository.SettingRepository
+	userRepo     *repository.UserRepository
+	menuRepo     *repository.MenuRepository
+	feedbackRepo *repository.FeedbackRepository
+	commentRepo  *repository.CommentRepository
+}
+
+// NewFileUsageChecker 创建文件引用检查器
+func NewFileUsageChecker(
+	articleRepo *repository.ArticleRepository,
+	friendRepo *repository.FriendRepository,
+	momentRepo *repository.MomentRepository,
+	settingRepo *repository.SettingRepository,
+	userRepo *repository.UserRepository,
+	menuRepo *repository.MenuRepository,
+	feedbackRepo *repository.FeedbackRepository,
+	commentRepo *repository.CommentRepository,
+) *FileUsageChecker {
+	return &FileUsageChecker{
+		articleRepo:  articleRepo,
+		friendRepo:   friendRepo,
+		momentRepo:   momentRepo,
+		settingRepo:  settingRepo,
+		userRepo:     userRepo,
+		menuRepo:     menuRepo,
+		feedbackRepo: feedbackRepo,
+		commentRepo:  commentRepo,
+	}
+}
+
+// IsActuallyUsed 检查文件是否仍被业务引用
+func (c *FileUsageChecker) IsActuallyUsed(fileURL string) (bool, string, error) {
+	checks := []struct {
+		name string
+		fn   func(string) (bool, error)
+	}{
+		{name: "文章封面", fn: c.articleRepo.ExistsByCover},
+		{name: "文章正文", fn: c.articleRepo.ExistsByContentURL},
+		{name: "友链图片", fn: c.friendRepo.ExistsByAvatarOrScreenshot},
+		{name: "动态内容", fn: c.momentRepo.ExistsByContentURL},
+		{name: "设置图片", fn: func(url string) (bool, error) {
+			return c.settingRepo.ExistsByValueAndKeys(url, reconciledSettingImageKeys)
+		}},
+		{name: "用户头像", fn: c.userRepo.ExistsByAvatar},
+		{name: "菜单图标", fn: c.menuRepo.ExistsByIcon},
+		{name: "反馈附件", fn: c.feedbackRepo.ExistsByAttachmentURL},
+		{name: "评论内容", fn: c.commentRepo.ExistsByContentURL},
+	}
+
+	for _, check := range checks {
+		used, err := check.fn(fileURL)
+		if err != nil {
+			return false, "", err
+		}
+		if used {
+			return true, check.name, nil
+		}
+	}
+
+	return false, "", nil
+}
+
 // FileService 文件服务
 type FileService struct {
 	fileRepo      *repository.FileRepository
 	uploadManager *upload.Manager
+	usageChecker  *FileUsageChecker
 }
 
 // NewFileService 创建文件服务
@@ -24,6 +102,11 @@ func NewFileService(fileRepo *repository.FileRepository, uploadManager *upload.M
 		fileRepo:      fileRepo,
 		uploadManager: uploadManager,
 	}
+}
+
+// SetUsageChecker 设置文件引用检查器
+func (s *FileService) SetUsageChecker(checker *FileUsageChecker) {
+	s.usageChecker = checker
 }
 
 // ============ 通用服务 ============
@@ -275,10 +358,13 @@ func (s *FileService) createFileFromUploadInfo(info *upload.FileInfo) *model.Fil
 
 // ============ 定时任务方法 ============
 
-// CleanupUnusedFiles 清理未使用的文件（超过15天未使用）
-func (s *FileService) CleanupUnusedFiles() error {
-	// 获取超过15天未使用的文件
-	files, err := s.fileRepo.GetUnusedFiles(15)
+// DeleteUnusedFiles 删除未使用文件，先纠正误标，再清理超过15天仍未使用的文件
+func (s *FileService) DeleteUnusedFiles() error {
+	if s.usageChecker == nil {
+		return nil
+	}
+
+	files, err := s.fileRepo.GetByStatus(0)
 	if err != nil {
 		return fmt.Errorf("获取未使用文件失败: %w", err)
 	}
@@ -287,9 +373,33 @@ func (s *FileService) CleanupUnusedFiles() error {
 		return nil
 	}
 
-	// 删除物理文件
-	var deletedIDs []uint
+	deleteBefore := time.Now().AddDate(0, 0, -15)
+	usedURLs := make([]string, 0)
+	deletableFiles := make([]model.File, 0)
+
 	for _, file := range files {
+		used, source, err := s.usageChecker.IsActuallyUsed(file.FileURL)
+		if err != nil {
+			logger.Warn("检查文件引用失败 %s: %v", file.FileURL, err)
+			continue
+		}
+		if used {
+			usedURLs = append(usedURLs, file.FileURL)
+			logger.Info("文件引用自检纠正成功 %s -> %s", file.FileURL, source)
+			continue
+		}
+
+		if file.CreatedAt.Before(deleteBefore) {
+			deletableFiles = append(deletableFiles, file)
+		}
+	}
+
+	if err := s.fileRepo.UpdateFileStatusByUrls(usedURLs, 1); err != nil {
+		return fmt.Errorf("批量纠正文件状态失败: %w", err)
+	}
+
+	deletedIDs := make([]uint, 0, len(deletableFiles))
+	for _, file := range deletableFiles {
 		if err := s.uploadManager.DeleteFileByStorageType(file.FilePath, file.StorageType); err != nil {
 			logger.Warn("删除物理文件失败 %s: %v", file.FilePath, err)
 			continue
@@ -297,11 +407,8 @@ func (s *FileService) CleanupUnusedFiles() error {
 		deletedIDs = append(deletedIDs, file.ID)
 	}
 
-	// 批量删除数据库记录
-	if len(deletedIDs) > 0 {
-		if err := s.fileRepo.DeleteByIDs(deletedIDs); err != nil {
-			return fmt.Errorf("删除文件记录失败: %w", err)
-		}
+	if err := s.fileRepo.DeleteByIDs(deletedIDs); err != nil {
+		return fmt.Errorf("删除文件记录失败: %w", err)
 	}
 
 	return nil

@@ -129,8 +129,7 @@ func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.Logi
 	go func() {
 		avatarURL, err := s.downloadAndSaveCravatarAvatar(req.Email, user.ID, host)
 		if err == nil && avatarURL != "" {
-			_ = s.repo.UpdateAvatar(user.ID, avatarURL)
-			if s.fileService != nil {
+			if err := s.repo.UpdateAvatar(user.ID, avatarURL); err == nil && s.fileService != nil {
 				_ = s.fileService.MarkAsUsed(avatarURL)
 			}
 		}
@@ -169,8 +168,7 @@ func (s *UserService) upgradeGuest(guestUser *model.User, req *dto.RegisterReque
 		go func() {
 			avatarURL, err := s.downloadAndSaveCravatarAvatar(req.Email, guestUser.ID, host)
 			if err == nil && avatarURL != "" {
-				_ = s.repo.UpdateAvatar(guestUser.ID, avatarURL)
-				if s.fileService != nil {
+				if err := s.repo.UpdateAvatar(guestUser.ID, avatarURL); err == nil && s.fileService != nil {
 					_ = s.fileService.MarkAsUsed(avatarURL)
 				}
 			}
@@ -279,8 +277,9 @@ func (s *UserService) downloadSocialAvatar(userID uint, email, avatarURL, host s
 	}
 
 	if err == nil && savedURL != "" {
-		_ = s.repo.UpdateAvatar(userID, savedURL)
-		_ = s.fileService.MarkAsUsed(savedURL)
+		if err := s.repo.UpdateAvatar(userID, savedURL); err == nil {
+			_ = s.fileService.MarkAsUsed(savedURL)
+		}
 	}
 }
 

@@ -46,6 +46,14 @@ func (r *FeedbackRepository) List(ctx context.Context, offset, limit int) ([]mod
 	return feedbacks, total, err
 }
 
+
+// ExistsByAttachmentURL 检查是否有反馈附件引用该文件
+func (r *FeedbackRepository) ExistsByAttachmentURL(url string) (bool, error) {
+	var count int64
+	err := r.db.Model(&model.Feedback{}).Where("form_content LIKE ?", "%"+url+"%").Count(&count).Error
+	return count > 0, err
+}
+
 // Update 更新反馈
 func (r *FeedbackRepository) Update(ctx context.Context, feedback *model.Feedback) error {
 	return r.db.WithContext(ctx).Save(feedback).Error
