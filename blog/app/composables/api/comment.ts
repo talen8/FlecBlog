@@ -18,3 +18,8 @@ export const getComments = async (params: GetCommentsParams) => {
 export const createComment = async (params: CreateCommentParams) => {
   return commentApi.create(params)
 }
+
+/** 删除评论（仅可删除自己的评论） */
+export const deleteComment = async (id: number) => {
+  return commentApi.delete(id)
+}

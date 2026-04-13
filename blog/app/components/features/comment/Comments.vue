@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 
 // 使用评论 store
-const { comments, fetchComments, addComment, resetComments, flattenComments } = useComments()
+const { comments, fetchComments, addComment, removeComment, resetComments, flattenComments } = useComments()
 
 // 加载表情映射
 const { blogConfig } = useSysConfig()
@@ -136,6 +136,7 @@ provideCommentContext({
   targetKey: computed(() => props.targetKey),
   addComment: handleAddComment,
   addReply: handleAddReply,
+  deleteComment: removeComment,
   showLogin: openLogin,
   replyState: {
     replyingToId,

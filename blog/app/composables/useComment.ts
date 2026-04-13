@@ -43,6 +43,8 @@ export interface CommentContext {
   addComment: (content: string, guestInfo?: GuestInfo) => Promise<void>
   // 添加回复
   addReply: (commentId: number, content: string, guestInfo?: GuestInfo) => Promise<void>
+  // 删除评论
+  deleteComment: (commentId: number) => Promise<void>
   // 显示登录模态框
   showLogin: () => void
   // 回复状态管理

@@ -394,6 +394,7 @@ func (s *CommentService) toCommentResponse(comment *model.Comment) *dto.CommentR
 
 	// 处理已删除评论
 	if comment.DeletedAt.Valid {
+		resp.IsDeleted = true
 		resp.Content = "该评论已被删除"
 		resp.User.ID = comment.User.ID
 		resp.User.Nickname = "匿名用户"

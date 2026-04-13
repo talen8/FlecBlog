@@ -9,6 +9,38 @@ interface Props {
 
 const props = defineProps<Props>()
 const context = useCommentContext()
+const { userInfo } = useUser()
+const isLoggedIn = useAuth()
+
+/** 判断当前登录用户是否为该评论的作者 */
+const isCommentOwner = computed(() =>
+  isLoggedIn.value && !props.comment.is_deleted && userInfo.value?.id === props.comment.user.id
+)
+
+/** 是否正在删除中 */
+const isDeleting = ref(false)
+
+/** 是否显示删除确认弹窗 */
+const showDeleteDialog = ref(false)
+
+/** 点击删除按钮，弹出确认框 */
+const handleDeleteClick = () => {
+  showDeleteDialog.value = true
+}
+
+/** 确认删除评论 */
+const handleDeleteConfirm = async () => {
+  if (isDeleting.value) return
+  isDeleting.value = true
+  try {
+    await context.deleteComment(props.comment.id)
+  } catch (error) {
+    console.error('删除评论失败:', error)
+  } finally {
+    isDeleting.value = false
+    showDeleteDialog.value = false
+  }
+}
 
 // 是否正在回复此评论
 const isReplying = computed(() =>
@@ -98,6 +130,9 @@ const handleReplyClick = () => {
         <button class="action-btn" @click="handleReplyClick" aria-label="回复评论">
           回复
         </button>
+        <button v-if="isCommentOwner" class="action-btn delete-btn" :disabled="isDeleting" @click="handleDeleteClick" aria-label="删除评论">
+          {{ isDeleting ? '删除中...' : '删除' }}
+        </button>
       </div>
 
       <!-- 回复输入框 -->
@@ -108,6 +143,18 @@ const handleReplyClick = () => {
       <!-- 子评论插槽 -->
       <slot name="replies"></slot>
     </div>
+
+    <!-- 删除确认弹窗 -->
+    <UiBaseDialog
+      v-model="showDeleteDialog"
+      title="删除评论"
+      confirm-text="确认删除"
+      :loading="isDeleting"
+      style="--dialog-width: 400px"
+      @confirm="handleDeleteConfirm"
+    >
+      <p>确定要删除这条评论吗？删除后将无法恢复。</p>
+    </UiBaseDialog>
   </div>
 </template>
 
@@ -277,6 +324,17 @@ const handleReplyClick = () => {
 
   i {
     font-size: 0.95rem;
+  }
+
+  &.delete-btn {
+    &:hover:not(:disabled) {
+      color: var(--flec-danger, #f56c6c);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 }
 

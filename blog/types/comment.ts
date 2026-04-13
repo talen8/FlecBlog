@@ -11,6 +11,7 @@ export type CommentTargetType = 'article' | 'page' | 'moment'
 export interface Comment {
   id: number
   content: string
+  is_deleted: boolean
   parent_id: number | null
   created_at: string
   location?: string  // 地理位置

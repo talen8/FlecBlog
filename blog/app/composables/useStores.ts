@@ -1,5 +1,5 @@
 import { getArticlesForWeb, getArticleBySlug } from '@/composables/api/article'
-import { getComments, createComment } from '@/composables/api/comment'
+import { getComments, createComment, deleteComment } from '@/composables/api/comment'
 import { flattenComments } from '@/composables/useComment'
 import { getMoments } from '@/composables/api/moment'
 import { getNotifications, markAsRead, markAllAsRead } from '@/composables/api/notification'
@@ -134,10 +134,36 @@ export function useComments() {
     return newComment
   }
 
+  const removeComment = async (commentId: number) => {
+    await deleteComment(commentId)
+
+    const removeFromList = (commentList: Comment[]): boolean => {
+      const index = commentList.findIndex(c => c.id === commentId)
+      if (index !== -1) {
+        commentList.splice(index, 1)
+        return true
+      }
+      for (const comment of commentList) {
+        if (comment.replies?.length && removeFromList(comment.replies)) return true
+      }
+      return false
+    }
+    removeFromList(comments.value)
+
+    if (currentTargetType.value === 'article' && currentTargetKey.value) {
+      const article = articles.value.find(a => a.slug === currentTargetKey.value)
+      if (article) {
+        article.comment_count = Math.max(0, (article.comment_count || 0) - 1)
+      }
+      refreshNuxtData('articles-list')
+    }
+  }
+
   return {
     comments,
     fetchComments,
     addComment,
+    removeComment,
     resetComments: () => {
       comments.value = []
       currentTargetType.value = null

@@ -32,6 +32,7 @@ type UpdateCommentRequest struct {
 type CommentResponse struct {
 	ID        uint           `json:"id"`
 	Content   string         `json:"content"`
+	IsDeleted bool           `json:"is_deleted"`
 	ParentID  *uint          `json:"parent_id"`
 	CreatedAt utils.JSONTime `json:"created_at"`
 	Location  string         `json:"location,omitempty"` // 地理位置
