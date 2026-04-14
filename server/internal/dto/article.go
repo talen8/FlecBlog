@@ -192,6 +192,16 @@ type ImportArticlesResult struct {
 	Errors          []ImportArticleError `json:"errors,omitempty"`
 }
 
+// AddError 添加错误信息
+func (r *ImportArticlesResult) AddError(filename, title, errMsg string) {
+	r.Failed++
+	r.Errors = append(r.Errors, ImportArticleError{
+		Filename: filename,
+		Title:    title,
+		Error:    errMsg,
+	})
+}
+
 // ImportArticleError 导入错误信息
 type ImportArticleError struct {
 	Filename string `json:"filename"`

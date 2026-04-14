@@ -10,15 +10,36 @@
   </el-form>
 
   <!-- 文章导入对话框 -->
-  <el-dialog v-model="articleImportVisible" title="导入文章" width="500px" :close-on-click-modal="false">
-    <el-upload :auto-upload="false" :file-list="articleFileList" :on-change="handleArticleFileChange"
-      :on-remove="handleArticleFileRemove" accept=".md,.markdown" :limit="100" multiple drag :disabled="readonly">
-      <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-      <div class="el-upload__text">拖拽或点击选择 Markdown 文件</div>
-      <template #tip>
-        <div class="el-upload__tip">支持 Hexo/Markdown 格式文章，最多 100 个文件</div>
-      </template>
-    </el-upload>
+  <el-dialog v-model="articleImportVisible" title="导入文章" width="600px" :close-on-click-modal="false">
+    <el-form label-width="100px">
+      <el-form-item label="数据来源">
+        <el-select v-model="articleSourceType" placeholder="请选择数据来源" style="width: 100%" :disabled="readonly">
+          <el-option label="Hexo 格式" value="hexo" />
+          <el-option label="Markdown 格式" value="markdown" />
+        </el-select>
+        <div class="form-tip">
+          Hexo 格式需要包含 Front Matter，Markdown 格式 仅需 Markdown 内容
+        </div>
+      </el-form-item>
+
+      <el-form-item label="上传文件">
+        <el-upload :auto-upload="false" :file-list="articleFileList" :on-change="handleArticleFileChange"
+          :on-remove="handleArticleFileRemove" accept=".md,.markdown" :limit="100" multiple drag :disabled="readonly">
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">拖拽或点击选择文件</div>
+          <template #tip>
+            <div class="el-upload__tip">最多添加 100 个文件，如遇上传失败请减少数量后重试</div>
+          </template>
+        </el-upload>
+      </el-form-item>
+
+      <el-form-item label="图片处理">
+        <el-switch v-model="articleUploadImages" :disabled="readonly" />
+        <div class="form-tip" style="margin: 0 15px;">
+          开启后将自动下载并上传文章中的图片
+        </div>
+      </el-form-item>
+    </el-form>
 
     <el-alert v-if="articleImportResult" :type="articleImportResult.failed > 0 ? 'warning' : 'success'"
       :closable="false" style="margin-top: 16px">
@@ -117,6 +138,8 @@ const articleImportVisible = ref(false)
 const articleFileList = ref<UploadUserFile[]>([])
 const articleUploading = ref(false)
 const articleImportResult = ref<ImportArticlesResult | undefined>()
+const articleSourceType = ref<string>('hexo')
+const articleUploadImages = ref(false)
 
 const handleArticleFileChange = (file: UploadFile, files: UploadUserFile[]) => {
   articleFileList.value = files
@@ -139,6 +162,8 @@ const handleArticleImport = async () => {
     articleImportResult.value = undefined
 
     const formData = new FormData()
+    formData.append('source_type', articleSourceType.value)
+    formData.append('upload_images', String(articleUploadImages.value))
     articleFileList.value.forEach(file => {
       if (file.raw) formData.append('files', file.raw)
     })
@@ -167,6 +192,8 @@ watch(articleImportVisible, (val) => {
     setTimeout(() => {
       articleFileList.value = []
       articleImportResult.value = undefined
+      articleSourceType.value = 'hexo'
+      articleUploadImages.value = false
     }, 300)
   }
 })

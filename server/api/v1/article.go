@@ -9,6 +9,7 @@ import (
 	"flec_blog/internal/dto"
 	"flec_blog/internal/service"
 	"flec_blog/pkg/response"
+	"flec_blog/pkg/upload"
 
 	"github.com/gin-gonic/gin"
 )
@@ -279,12 +280,13 @@ func (c *ArticleController) Delete(ctx *gin.Context) {
 // ImportArticles 导入文章数据
 //
 //	@Summary		导入文章数据
-//	@Description	从Hexo等静态博客系统导入文章数据，上传Markdown文件（支持多文件）
+//	@Description	从Hexo或Markdown格式导入文章数据，支持多文件
 //	@Tags			文章管理
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			source_type	formData	string	true	"来源类型，目前支持：hexo"	Enums(hexo)
+//	@Param			source_type	formData	string	true	"来源类型，支持：hexo, markdown"	Enums(hexo, markdown)
+//	@Param			upload_images formData	bool	false	"是否上传文章中的图片（默认false）"
 //	@Param			files		formData	[]file	true	"文章文件（.md或.markdown格式，支持多文件）"
 //	@Success		200			{object}	response.Response{data=dto.ImportArticlesResult}
 //	@Failure		400			{object}	response.Response
@@ -309,6 +311,17 @@ func (c *ArticleController) ImportArticles(ctx *gin.Context) {
 		return
 	}
 
+	sourceType := ctx.PostForm("source_type")
+	if sourceType != "hexo" && sourceType != "markdown" {
+		response.ValidateFailed(ctx, "不支持的来源类型，仅支持 hexo 和 markdown")
+		return
+	}
+
+	uploadImages := ctx.PostForm("upload_images") == "true"
+
+	// 提取 host 用于生成完整的图片 URL
+	host := upload.ExtractHostFromContext(ctx)
+
 	// Markdown/Hexo 文件导入
 	const maxFileSize = 10 << 20 // 10MB
 	fileContents := make(map[string]string)
@@ -327,7 +340,9 @@ func (c *ArticleController) ImportArticles(ctx *gin.Context) {
 		fileContents[fileHeader.Filename] = string(fileBytes)
 	}
 
-	result, err := c.articleService.ImportFromHexo(ctx.Request.Context(), fileContents)
+	var result *dto.ImportArticlesResult
+	result, err = c.articleService.ImportArticles(ctx.Request.Context(), fileContents, sourceType, uploadImages, host)
+
 	if err != nil {
 		response.Failed(ctx, err.Error())
 		return

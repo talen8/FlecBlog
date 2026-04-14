@@ -4,11 +4,13 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"flec_blog/internal/dto"
@@ -81,46 +83,6 @@ func NewArticleService(articleRepo *repository.ArticleRepository, tagRepo *repos
 // SetSubscriberService 设置订阅者服务（避免循环依赖）
 func (s *ArticleService) SetSubscriberService(subscriberService *SubscriberService) {
 	s.subscriberService = subscriberService
-}
-
-// ============ 通用服务 ============
-
-// Get 获取文章详情
-func (s *ArticleService) Get(_ context.Context, id uint) (*dto.ArticleAdminDetailResponse, error) {
-	article, err := s.articleRepo.Get(id)
-	if err != nil {
-		return nil, fmt.Errorf("获取文章失败: %w", err)
-	}
-
-	response := &dto.ArticleAdminDetailResponse{
-		ID:          article.ID,
-		Title:       article.Title,
-		Content:     article.Content,
-		Summary:     article.Summary,
-		AISummary:   article.AISummary,
-		Cover:       article.Cover,
-		Location:    article.Location,
-		IsPublish:   article.IsPublish,
-		IsTop:       article.IsTop,
-		IsEssence:   article.IsEssence,
-		IsOutdated:  article.IsOutdated,
-		PublishTime: utils.ToJSONTime(article.PublishTime),
-		UpdateTime:  utils.ToJSONTime(article.UpdateTime),
-	}
-
-	// 填充分类信息
-	response.Category.ID = article.Category.ID
-	response.Category.Name = article.Category.Name
-
-	// 填充标签信息
-	for _, tag := range article.Tags {
-		response.Tags = append(response.Tags, struct {
-			ID   uint   `json:"id"`
-			Name string `json:"name"`
-		}{tag.ID, tag.Name})
-	}
-
-	return response, nil
 }
 
 // ============ 前台服务 ============
@@ -399,6 +361,44 @@ func (s *ArticleService) List(ctx context.Context, req *dto.ListArticlesRequest)
 	return response, total, nil
 }
 
+// Get 获取文章详情
+func (s *ArticleService) Get(_ context.Context, id uint) (*dto.ArticleAdminDetailResponse, error) {
+	article, err := s.articleRepo.Get(id)
+	if err != nil {
+		return nil, fmt.Errorf("获取文章失败: %w", err)
+	}
+
+	response := &dto.ArticleAdminDetailResponse{
+		ID:          article.ID,
+		Title:       article.Title,
+		Content:     article.Content,
+		Summary:     article.Summary,
+		AISummary:   article.AISummary,
+		Cover:       article.Cover,
+		Location:    article.Location,
+		IsPublish:   article.IsPublish,
+		IsTop:       article.IsTop,
+		IsEssence:   article.IsEssence,
+		IsOutdated:  article.IsOutdated,
+		PublishTime: utils.ToJSONTime(article.PublishTime),
+		UpdateTime:  utils.ToJSONTime(article.UpdateTime),
+	}
+
+	// 填充分类信息
+	response.Category.ID = article.Category.ID
+	response.Category.Name = article.Category.Name
+
+	// 填充标签信息
+	for _, tag := range article.Tags {
+		response.Tags = append(response.Tags, struct {
+			ID   uint   `json:"id"`
+			Name string `json:"name"`
+		}{tag.ID, tag.Name})
+	}
+
+	return response, nil
+}
+
 // Create 创建文章
 func (s *ArticleService) Create(ctx context.Context, req *dto.CreateArticleRequest) (*dto.ArticleAdminDetailResponse, error) {
 	// 验证分类是否存在
@@ -673,31 +673,46 @@ func (s *ArticleService) updateContentFileStatus(oldContent, newContent string) 
 	}
 }
 
-// ============ 数据导入导出方法 ============
+// ============ 文章导入方法 ============
 
-// ImportFromHexo 从Hexo格式导入文章
-func (s *ArticleService) ImportFromHexo(ctx context.Context, files map[string]string) (*dto.ImportArticlesResult, error) {
+// ImportArticles 导入文章数据
+func (s *ArticleService) ImportArticles(ctx context.Context, files map[string]string, sourceType string, uploadImages bool, host string) (*dto.ImportArticlesResult, error) {
 	if len(files) == 0 {
 		return nil, fmt.Errorf("没有找到有效的文章数据")
 	}
 
-	result := &dto.ImportArticlesResult{
-		Total: len(files),
-	}
-
-	// 缓存已创建的分类和标签
+	result := &dto.ImportArticlesResult{Total: len(files)}
 	categoryCache := make(map[string]*model.Category)
 	tagCache := make(map[string]*model.Tag)
 
-	// 处理每篇文章
 	for filename, content := range files {
-		if err := s.importSingleHexoArticle(ctx, content, categoryCache, tagCache); err != nil {
-			result.Failed++
-			result.Errors = append(result.Errors, dto.ImportArticleError{
-				Filename: filename,
-				Title:    extractTitle(content),
-				Error:    err.Error(),
-			})
+		parsed, err := s.parseAndUploadImages(ctx, filename, content, sourceType, uploadImages, host)
+		if err != nil {
+			title := "未知标题"
+			for _, line := range strings.Split(content, "\n") {
+				if line = strings.TrimSpace(line); strings.HasPrefix(line, "title:") {
+					title = strings.TrimSpace(strings.TrimPrefix(line, "title:"))
+					break
+				}
+			}
+			result.AddError(filename, title, err.Error())
+			continue
+		}
+
+		categoryID, err := s.resolveCategory(ctx, parsed.Category, categoryCache)
+		if err != nil {
+			result.AddError(filename, parsed.Title, fmt.Sprintf("分类处理失败: %v", err))
+			continue
+		}
+
+		tagIDs, err := s.resolveTags(ctx, parsed.Tags, tagCache)
+		if err != nil {
+			result.AddError(filename, parsed.Title, fmt.Sprintf("标签处理失败: %v", err))
+			continue
+		}
+
+		if err := s.createArticle(parsed, categoryID, tagIDs); err != nil {
+			result.AddError(filename, parsed.Title, fmt.Sprintf("保存失败: %v", err))
 		} else {
 			result.Success++
 		}
@@ -705,147 +720,201 @@ func (s *ArticleService) ImportFromHexo(ctx context.Context, files map[string]st
 
 	result.CategoriesAdded = len(categoryCache)
 	result.TagsAdded = len(tagCache)
-
 	return result, nil
 }
 
-// importSingleHexoArticle 导入单篇Hexo文章
-func (s *ArticleService) importSingleHexoArticle(
-	ctx context.Context,
-	content string,
-	categoryCache map[string]*model.Category,
-	tagCache map[string]*model.Tag,
-) error {
-	// 解析Hexo文章
-	parsed, err := parseHexoArticle(content)
+// parseAndUploadImages 解析文章并上传图片
+func (s *ArticleService) parseAndUploadImages(ctx context.Context, filename, content, sourceType string, uploadImages bool, host string) (*ParsedArticle, error) {
+	var parsed *ParsedArticle
+	var err error
+
+	if sourceType == "markdown" {
+		parsed, err = parseMarkdownArticle(filename, content)
+	} else {
+		parsed, err = parseHexoArticle(content)
+	}
 	if err != nil {
-		return fmt.Errorf("解析失败: %w", err)
+		return nil, err
 	}
 
-	// 处理分类
-	var categoryID *uint
-	if parsed.Category != "" {
-		category, err := s.getOrCreateCategory(ctx, parsed.Category, categoryCache)
+	if uploadImages {
+		if newContent, err := s.uploadContentImages(ctx, parsed.Content, host); err == nil {
+			parsed.Content = newContent
+		}
+		if parsed.Cover != "" {
+			if newCover, err := s.uploadSingleImage(ctx, parsed.Cover, host); err == nil {
+				parsed.Cover = newCover
+			}
+		}
+	}
+	return parsed, nil
+}
+
+// resolveCategory 解析分类ID
+func (s *ArticleService) resolveCategory(ctx context.Context, name string, cache map[string]*model.Category) (*uint, error) {
+	if name == "" {
+		return nil, nil
+	}
+	if c, ok := cache[name]; ok {
+		return &c.ID, nil
+	}
+	c, err := s.categoryRepo.GetBySlug(ctx, name)
+	if err != nil {
+		c = &model.Category{Name: name, Slug: name}
+		if err := s.categoryRepo.Create(ctx, c); err != nil {
+			return nil, err
+		}
+	}
+	cache[name] = c
+	return &c.ID, nil
+}
+
+// resolveTags 解析标签ID列表
+func (s *ArticleService) resolveTags(ctx context.Context, names []string, cache map[string]*model.Tag) ([]uint, error) {
+	var ids []uint
+	for _, name := range names {
+		if t, ok := cache[name]; ok {
+			ids = append(ids, t.ID)
+			continue
+		}
+		t, err := s.tagRepo.GetBySlug(ctx, name)
 		if err != nil {
-			return fmt.Errorf("分类处理失败: %w", err)
+			t = &model.Tag{Name: name, Slug: name}
+			if err := s.tagRepo.Create(ctx, t); err != nil {
+				return nil, err
+			}
 		}
-		categoryID = &category.ID
+		cache[name] = t
+		ids = append(ids, t.ID)
 	}
+	return ids, nil
+}
 
-	// 处理标签
-	var tagIDs []uint
-	for _, tagName := range parsed.Tags {
-		tag, err := s.getOrCreateTag(ctx, tagName, tagCache)
-		if err != nil {
-			return fmt.Errorf("标签处理失败: %w", err)
-		}
-		tagIDs = append(tagIDs, tag.ID)
-	}
-
-	// 处理 slug：优先使用原有的，否则生成新的
-	articleSlug := parsed.Slug
-	if articleSlug != "" {
-		if exists, _ := s.articleRepo.CheckSlugExists(articleSlug); exists {
-			articleSlug = "" // slug 已存在，需要生成新的
+// createArticle 创建文章记录
+func (s *ArticleService) createArticle(parsed *ParsedArticle, categoryID *uint, tagIDs []uint) error {
+	slug := parsed.Slug
+	if slug != "" {
+		if exists, _ := s.articleRepo.CheckSlugExists(slug); exists {
+			slug = ""
 		}
 	}
-	if articleSlug == "" {
-		articleSlug, _ = random.UniqueCode(8, s.articleRepo.CheckSlugExists)
+	if slug == "" {
+		slug, _ = random.UniqueCode(8, s.articleRepo.CheckSlugExists)
 	}
 
-	// 创建文章
 	article := &model.Article{
 		Title:       parsed.Title,
-		Slug:        articleSlug,
+		Slug:        slug,
 		Content:     parsed.Content,
 		Summary:     parsed.Summary,
 		Cover:       parsed.Cover,
-		IsPublish:   false, // 导入的文章默认为草稿
-		IsTop:       false,
+		IsPublish:   false,
 		CategoryID:  categoryID,
 		PublishTime: parsed.PublishTime,
 		UpdateTime:  parsed.UpdateTime,
 	}
-
-	if err := s.articleRepo.Create(article, tagIDs); err != nil {
-		return fmt.Errorf("保存失败: %w", err)
-	}
-
-	return nil
+	return s.articleRepo.Create(article, tagIDs)
 }
 
-// getOrCreateCategory 获取或创建分类
-func (s *ArticleService) getOrCreateCategory(ctx context.Context, name string, cache map[string]*model.Category) (*model.Category, error) {
-	// 检查缓存
-	if category, exists := cache[name]; exists {
-		return category, nil
+// uploadContentImages 上传文章内容中的所有图片，返回替换后的内容
+func (s *ArticleService) uploadContentImages(ctx context.Context, content string, host string) (string, error) {
+	if s.fileService == nil {
+		return content, nil
 	}
 
-	// 尝试从数据库获取
-	category, err := s.categoryRepo.GetBySlug(ctx, name)
-	if err == nil {
-		cache[name] = category
-		return category, nil
+	imageURLs := extractContentImages(content)
+	if len(imageURLs) == 0 {
+		return content, nil
 	}
 
-	// 不存在则创建
-	category = &model.Category{
-		Name:        name,
-		Slug:        name,
-		Description: "",
+	uniqueURLs := make(map[string]bool)
+	for _, url := range imageURLs {
+		uniqueURLs[url] = true
 	}
 
-	if err := s.categoryRepo.Create(ctx, category); err != nil {
-		return nil, err
-	}
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	replacements := make(map[string]string)
+	sem := make(chan struct{}, 10)
 
-	cache[name] = category
-	return category, nil
-}
-
-// getOrCreateTag 获取或创建标签
-func (s *ArticleService) getOrCreateTag(ctx context.Context, name string, cache map[string]*model.Tag) (*model.Tag, error) {
-	// 检查缓存
-	if tag, exists := cache[name]; exists {
-		return tag, nil
-	}
-
-	// 尝试从数据库获取
-	tag, err := s.tagRepo.GetBySlug(ctx, name)
-	if err == nil {
-		cache[name] = tag
-		return tag, nil
-	}
-
-	// 不存在则创建
-	tag = &model.Tag{
-		Name:        name,
-		Slug:        name,
-		Description: "",
-	}
-
-	if err := s.tagRepo.Create(ctx, tag); err != nil {
-		return nil, err
-	}
-
-	cache[name] = tag
-	return tag, nil
-}
-
-// extractTitle 从内容中提取标题
-func extractTitle(content string) string {
-	lines := strings.Split(content, "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "title:") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "title:"))
+	for url := range uniqueURLs {
+		if strings.HasPrefix(url, "./") || strings.HasPrefix(url, "../") || strings.HasPrefix(url, "/") {
+			continue
 		}
+
+		wg.Add(1)
+		go func(imgURL string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			if newURL, err := s.uploadSingleImage(ctx, imgURL, host); err == nil {
+				mu.Lock()
+				replacements[imgURL] = newURL
+				mu.Unlock()
+			}
+		}(url)
 	}
-	return "未知标题"
+	wg.Wait()
+
+	for old, new := range replacements {
+		content = strings.ReplaceAll(content, old, new)
+	}
+	return content, nil
 }
 
-// HexoParsedArticle 解析后的Hexo文章
-type HexoParsedArticle struct {
+// uploadSingleImage 上传单张图片，返回新的URL
+func (s *ArticleService) uploadSingleImage(ctx context.Context, imgURL string, host string) (string, error) {
+	if s.fileService == nil || imgURL == "" {
+		return imgURL, nil
+	}
+
+	if strings.HasPrefix(imgURL, "./") || strings.HasPrefix(imgURL, "../") || strings.HasPrefix(imgURL, "/") {
+		return imgURL, nil
+	}
+
+	data, ext, err := s.fetchImage(ctx, imgURL)
+	if err != nil {
+		return imgURL, fmt.Errorf("下载图片失败: %w", err)
+	}
+
+	hashBytes := sha256.Sum256(data)
+	hashStr := fmt.Sprintf("%x", hashBytes)[:12]
+	filename := fmt.Sprintf("import_%s%s", hashStr, ext)
+
+	mimeType := "image/jpeg"
+	switch strings.ToLower(ext) {
+	case ".png":
+		mimeType = "image/png"
+	case ".gif":
+		mimeType = "image/gif"
+	case ".webp":
+		mimeType = "image/webp"
+	case ".avif":
+		mimeType = "image/avif"
+	case ".svg":
+		mimeType = "image/svg+xml"
+	case ".bmp":
+		mimeType = "image/bmp"
+	case ".tiff", ".tif":
+		mimeType = "image/tiff"
+	}
+
+	reader := bytes.NewReader(data)
+	uploadedURL, err := s.fileService.UploadFromReader(reader, filename, mimeType, "文章图片", 0, host)
+	if err != nil {
+		return imgURL, fmt.Errorf("上传图片失败: %w", err)
+	}
+
+	if err := s.fileService.MarkAsUsed(uploadedURL); err != nil {
+		logger.Warn("标记文件状态失败: %v", err)
+	}
+
+	return uploadedURL, nil
+}
+
+// ParsedArticle 解析后的文章数据
+type ParsedArticle struct {
 	Title       string
 	Slug        string
 	Content     string
@@ -857,14 +926,24 @@ type HexoParsedArticle struct {
 	UpdateTime  *time.Time
 }
 
+// generateSummary 从内容生成摘要
+func generateSummary(content string, maxLen int) string {
+	content = strings.NewReplacer("#", "", "*", "", "`", "", "\n", " ").Replace(content)
+	content = strings.TrimSpace(content)
+
+	runes := []rune(content)
+	if len(runes) > maxLen {
+		return string(runes[:maxLen]) + "..."
+	}
+	return content
+}
+
 // parseHexoArticle 解析Hexo文章格式（Front Matter + Markdown）
-func parseHexoArticle(content string) (*HexoParsedArticle, error) {
-	// 检查是否包含Front Matter标记
+func parseHexoArticle(content string) (*ParsedArticle, error) {
 	if !strings.HasPrefix(content, "---") {
 		return nil, fmt.Errorf("无效的Hexo格式：缺少Front Matter")
 	}
 
-	// 分割Front Matter和内容
 	parts := strings.SplitN(content, "---", 3)
 	if len(parts) < 3 {
 		return nil, fmt.Errorf("无效的Hexo格式：Front Matter格式错误")
@@ -873,9 +952,27 @@ func parseHexoArticle(content string) (*HexoParsedArticle, error) {
 	frontMatter := parts[1]
 	markdown := strings.TrimSpace(parts[2])
 
-	// 解析Front Matter
-	parsed := &HexoParsedArticle{
+	parsed := &ParsedArticle{
 		Content: markdown,
+	}
+
+	// 日期格式列表
+	dateFormats := []string{
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05Z",
+		"2006-01-02T15:04:05-07:00",
+		"2006-01-02 15:04",
+		"2006-01-02",
+	}
+
+	// 解析日期的辅助函数
+	parseDate := func(dateStr string) *time.Time {
+		for _, format := range dateFormats {
+			if t, err := time.Parse(format, dateStr); err == nil {
+				return &t
+			}
+		}
+		return nil
 	}
 
 	lines := strings.Split(frontMatter, "\n")
@@ -888,7 +985,6 @@ func parseHexoArticle(content string) (*HexoParsedArticle, error) {
 			continue
 		}
 
-		// 处理标签数组
 		if inTags {
 			if strings.HasPrefix(line, "-") {
 				tagValue := strings.TrimSpace(strings.TrimPrefix(line, "-"))
@@ -901,7 +997,6 @@ func parseHexoArticle(content string) (*HexoParsedArticle, error) {
 			}
 		}
 
-		// 解析键值对
 		if strings.Contains(line, ":") && !strings.HasPrefix(line, "-") {
 			parts := strings.SplitN(line, ":", 2)
 			key := strings.TrimSpace(parts[0])
@@ -915,21 +1010,15 @@ func parseHexoArticle(content string) (*HexoParsedArticle, error) {
 			case "title":
 				parsed.Title = value
 			case "date":
-				if t, err := parseHexoDate(value); err == nil {
-					parsed.PublishTime = t
-				}
+				parsed.PublishTime = parseDate(value)
 			case "updated":
-				if t, err := parseHexoDate(value); err == nil {
-					parsed.UpdateTime = t
-				}
+				parsed.UpdateTime = parseDate(value)
 			case "categories", "category":
 				if value != "" {
 					parsed.Category = value
 				}
-				// 如果value为空，可能是数组格式，下一行开始
 			case "tags":
 				if value != "" {
-					// 内联格式: tags: [tag1, tag2]
 					value = strings.Trim(value, "[]")
 					for _, tag := range strings.Split(value, ",") {
 						tag = strings.TrimSpace(tag)
@@ -939,7 +1028,6 @@ func parseHexoArticle(content string) (*HexoParsedArticle, error) {
 						}
 					}
 				} else {
-					// 数组格式
 					inTags = true
 				}
 			case "cover", "thumbnail":
@@ -952,17 +1040,14 @@ func parseHexoArticle(content string) (*HexoParsedArticle, error) {
 		}
 	}
 
-	// 添加收集的标签
 	if len(tagLines) > 0 {
 		parsed.Tags = append(parsed.Tags, tagLines...)
 	}
 
-	// 验证必需字段
 	if parsed.Title == "" {
 		return nil, fmt.Errorf("文章缺少标题")
 	}
 
-	// 如果没有摘要，从内容中生成
 	if parsed.Summary == "" {
 		parsed.Summary = generateSummary(parsed.Content, 200)
 	}
@@ -970,41 +1055,31 @@ func parseHexoArticle(content string) (*HexoParsedArticle, error) {
 	return parsed, nil
 }
 
-// parseHexoDate 解析Hexo日期格式
-func parseHexoDate(dateStr string) (*time.Time, error) {
-	// 支持多种日期格式
-	formats := []string{
-		"2006-01-02 15:04:05",
-		"2006-01-02T15:04:05Z",
-		"2006-01-02T15:04:05-07:00",
-		"2006-01-02 15:04",
-		"2006-01-02",
+// parseMarkdownArticle 解析Markdown格式文章
+func parseMarkdownArticle(filename, content string) (*ParsedArticle, error) {
+	parsed := &ParsedArticle{
+		Tags:        []string{},
+		PublishTime: nil,
+		UpdateTime:  nil,
 	}
 
-	for _, format := range formats {
-		if t, err := time.Parse(format, dateStr); err == nil {
-			return &t, nil
+	if filename != "" {
+		lowerName := strings.ToLower(filename)
+		if strings.HasSuffix(lowerName, ".md") {
+			parsed.Title = strings.TrimSpace(filename[:len(filename)-3])
+		} else {
+			parsed.Title = strings.TrimSpace(filename)
 		}
 	}
 
-	return nil, fmt.Errorf("无法解析日期: %s", dateStr)
-}
-
-// generateSummary 从内容生成摘要
-func generateSummary(content string, maxLen int) string {
-	// 移除Markdown标记
-	content = strings.ReplaceAll(content, "#", "")
-	content = strings.ReplaceAll(content, "*", "")
-	content = strings.ReplaceAll(content, "`", "")
-	content = strings.ReplaceAll(content, "\n", " ")
-	content = strings.TrimSpace(content)
-
-	// 截取指定长度
-	runes := []rune(content)
-	if len(runes) > maxLen {
-		return string(runes[:maxLen]) + "..."
+	if parsed.Title == "" {
+		parsed.Title = "未命名文章"
 	}
-	return content
+
+	parsed.Summary = generateSummary(content, 200)
+	parsed.Content = content
+
+	return parsed, nil
 }
 
 // ============ 微信公众号导出 ============
@@ -1066,6 +1141,8 @@ func (s *ArticleService) fetchImage(ctx context.Context, imgURL string) ([]byte,
 			ext = ".gif"
 		case "image/webp":
 			ext = ".webp"
+		case "image/avif":
+			ext = ".avif"
 		}
 	} else if idx := strings.LastIndex(imgURL, "."); idx > 0 {
 		if e := imgURL[idx:]; len(e) <= 5 {
