@@ -99,6 +99,7 @@ type ArticleWebResponse struct {
 // CreateArticleRequest 创建文章请求
 type CreateArticleRequest struct {
 	Title      string `json:"title" binding:"required"`
+	Slug       string `json:"slug"` // 自定义文章Slug
 	Content    string `json:"content" binding:"required"`
 	Summary    string `json:"summary"`
 	Cover      string `json:"cover"`
@@ -114,6 +115,7 @@ type CreateArticleRequest struct {
 // UpdateArticleRequest 更新文章请求
 type UpdateArticleRequest struct {
 	Title       string          `json:"title"`
+	Slug        string          `json:"slug"` // 自定义文章Slug
 	Content     string          `json:"content"`
 	Summary     string          `json:"summary"`
 	AISummary   string          `json:"ai_summary"` // AI 总结
@@ -135,6 +137,7 @@ type UpdateArticleRequest struct {
 type ArticleListResponse struct {
 	ID           uint            `json:"id"`
 	Title        string          `json:"title"`
+	Slug         string          `json:"slug"`
 	Cover        string          `json:"cover"`
 	Location     string          `json:"location"`
 	IsPublish    bool            `json:"is_publish"`
@@ -159,6 +162,7 @@ type ArticleListResponse struct {
 type ArticleAdminDetailResponse struct {
 	ID          uint            `json:"id"`
 	Title       string          `json:"title"`
+	Slug        string          `json:"slug"`
 	Content     string          `json:"content"`
 	Summary     string          `json:"summary"`
 	AISummary   string          `json:"ai_summary"`

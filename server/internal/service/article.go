@@ -333,6 +333,7 @@ func (s *ArticleService) List(ctx context.Context, req *dto.ListArticlesRequest)
 		item := dto.ArticleListResponse{
 			ID:           article.ID,
 			Title:        article.Title,
+			Slug:         article.Slug,
 			Cover:        article.Cover,
 			Location:     article.Location,
 			IsPublish:    article.IsPublish,
@@ -371,6 +372,7 @@ func (s *ArticleService) Get(_ context.Context, id uint) (*dto.ArticleAdminDetai
 	response := &dto.ArticleAdminDetailResponse{
 		ID:          article.ID,
 		Title:       article.Title,
+		Slug:        article.Slug,
 		Content:     article.Content,
 		Summary:     article.Summary,
 		AISummary:   article.AISummary,
@@ -444,12 +446,19 @@ func (s *ArticleService) Create(ctx context.Context, req *dto.CreateArticleReque
 		article.PublishTime = &now
 	}
 
-	// 生成唯一slug
-	generatedSlug, err := random.UniqueCode(8, s.articleRepo.CheckSlugExists)
-	if err != nil {
-		return nil, fmt.Errorf("生成 slug 失败: %w", err)
+	// 优先使用自定义 slug，否则自动生成
+	if req.Slug != "" {
+		if exists, _ := s.articleRepo.CheckSlugExists(req.Slug); exists {
+			return nil, fmt.Errorf("slug '%s' 已存在，请使用其他值", req.Slug)
+		}
+		article.Slug = req.Slug
+	} else {
+		generatedSlug, err := random.UniqueCode(8, s.articleRepo.CheckSlugExists)
+		if err != nil {
+			return nil, fmt.Errorf("生成 slug 失败: %w", err)
+		}
+		article.Slug = generatedSlug
 	}
-	article.Slug = generatedSlug
 
 	// 创建文章并关联标签
 	if err := s.articleRepo.Create(article, req.TagIDs); err != nil {
@@ -498,6 +507,14 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 	// 更新字段
 	if req.Title != "" {
 		article.Title = req.Title
+	}
+	// 处理 slug 更新
+	if req.Slug != "" && req.Slug != article.Slug {
+		// 验证新 slug 是否已存在
+		if exists, _ := s.articleRepo.CheckSlugExists(req.Slug); exists {
+			return nil, fmt.Errorf("slug '%s' 已存在，请使用其他值", req.Slug)
+		}
+		article.Slug = req.Slug
 	}
 	if req.Content != "" {
 		article.Content = req.Content
