@@ -35,8 +35,14 @@ type LocalStorage struct {
 
 // NewLocalStorage 创建本地存储
 func NewLocalStorage(basePath string) Storage {
+	// 确保使用绝对路径
+	absPath, err := filepath.Abs(basePath)
+	if err != nil {
+		absPath = basePath
+	}
+
 	return &LocalStorage{
-		basePath: basePath,
+		basePath: absPath,
 	}
 }
 

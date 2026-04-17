@@ -56,7 +56,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	r.Use(middleware.Recovery())              // 错误恢复
 
 	// 注册本地静态文件服务
-	r.Static("/uploads", "./uploads")
+	r.Static("/uploads", "/app/data/uploads")
 
 	// 根路径欢迎页面
 	r.GET("/", func(c *gin.Context) { c.String(200, "Flec-Server 运行成功") })

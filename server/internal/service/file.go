@@ -298,14 +298,15 @@ func (s *FileService) Delete(id uint) error {
 		return fmt.Errorf("文件不存在: %w", err)
 	}
 
-	// 根据文件的存储类型删除物理文件
-	if err := s.uploadManager.DeleteFileByStorageType(file.FilePath, file.StorageType); err != nil {
-		return fmt.Errorf("删除存储文件失败: %w", err)
-	}
-
 	// 删除数据库记录
 	if err := s.fileRepo.Delete(id); err != nil {
 		return fmt.Errorf("删除文件记录失败: %w", err)
+	}
+
+	// 删除物理文件
+	if err := s.uploadManager.DeleteFileByStorageType(file.FilePath, file.StorageType); err != nil {
+		fmt.Printf("删除文件失败，文件路径: %s, 存储类型: %s, 错误: %v\n",
+			file.FilePath, file.StorageType, err)
 	}
 
 	return nil

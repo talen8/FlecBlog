@@ -307,7 +307,7 @@ func (m *Manager) DeleteFileByStorageType(filePath string, storageType string) e
 
 	switch storageType {
 	case "local":
-		targetStorage = storage.NewLocalStorage("./uploads")
+		targetStorage = storage.NewLocalStorage("/app/data/uploads")
 	case "s3":
 		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload, "s3")
 	case "cos":

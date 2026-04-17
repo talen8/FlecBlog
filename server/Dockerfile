@@ -28,16 +28,12 @@ COPY --from=builder /app/flec_blog .
 # 只读资源打包在镜像内
 COPY --from=builder /app/templates ./templates
 
-# 统一挂载点：所有需要持久化的数据都在 /app/data 下
-RUN mkdir -p data/uploads data/logs
-
-# 软链接让应用代码访问 /app/uploads 时实际指向 /app/data/uploads
-RUN ln -s /app/data/uploads /app/uploads && \
-    ln -s /app/data/logs /app/logs && \
+# 统一挂载点：所有需要持久化的数据都在 /app/data/uploads 下
+RUN mkdir -p /app/data/uploads /app/data/logs && \
     chown -R appuser:appuser /app
 
 EXPOSE 8080
 
-# 启动脚本：以 root 创建目录并设置权限，然后降权运行应用
-ENTRYPOINT ["sh", "-c", "mkdir -p /app/data/uploads /app/data/logs && chown -R appuser:appuser /app/data && exec su-exec appuser \"$@\"", "--"]
+# 启动脚本：以 root 确保目录存在并设置权限，然后降权运行应用
+ENTRYPOINT ["sh", "-c", "mkdir -p /app/data/uploads /app/data/logs && chown -R appuser:appuser /app/data && ls -la /app/data && exec su-exec appuser \"$@\"", "--"]
 CMD ["./flec_blog"]

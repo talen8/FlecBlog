@@ -83,10 +83,16 @@ func (s *S3UnifiedStorage) ensureClient() error {
 		region = "us-east-1"
 	}
 
+	bucketLookup := minio.BucketLookupAuto
+	if s.storageType == "cos" || s.storageType == "oss" || s.storageType == "kodo" {
+		bucketLookup = minio.BucketLookupDNS
+	}
+
 	client, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(s.cfg.AccessKey, s.cfg.SecretKey, ""),
-		Secure: useSSL,
-		Region: region,
+		Creds:        credentials.NewStaticV4(s.cfg.AccessKey, s.cfg.SecretKey, ""),
+		Secure:       useSSL,
+		Region:       region,
+		BucketLookup: bucketLookup,
 	})
 	if err != nil {
 		return fmt.Errorf("创建存储实例失败: %w", err)
@@ -113,7 +119,7 @@ func buildBaseURL(endpoint, bucket string, useSSL bool, customDomain string) str
 		scheme = "https"
 	}
 
-	return fmt.Sprintf("%s://%s/%s", scheme, endpoint, bucket)
+	return fmt.Sprintf("%s://%s.%s", scheme, bucket, endpoint)
 }
 
 // Save 实现 Storage 接口 - 保存文件

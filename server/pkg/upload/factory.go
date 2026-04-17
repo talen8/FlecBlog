@@ -25,7 +25,7 @@ func NewStorage(uploadCfg *config.UploadConfig) (storage.Storage, error) {
 
 	switch storageType {
 	case "", StorageTypeLocal: // 空值默认使用本地存储
-		return storage.NewLocalStorage("./uploads"), nil
+		return storage.NewLocalStorage("/app/data/uploads"), nil
 
 	case StorageTypeS3:
 		return storage.NewS3UnifiedStorage(*uploadCfg, "s3")
@@ -67,7 +67,8 @@ func MustNewStorage(uploadCfg *config.UploadConfig) storage.Storage {
 func InitializeUploadSystem(globalCfg *config.Config) *Manager {
 	uploadStorage := MustNewStorage(&globalCfg.Upload)
 
-	_ = storage.NewHelper(uploadStorage).CreateUploadDir("./uploads")
+	// 使用与存储路径一致的绝对路径创建目录
+	_ = storage.NewHelper(uploadStorage).CreateUploadDir("/app/data/uploads")
 
 	return NewManager(uploadStorage, NewValidator(), globalCfg)
 }
