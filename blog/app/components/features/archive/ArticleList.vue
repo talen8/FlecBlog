@@ -19,7 +19,7 @@ const displayTotal = computed(() => {
 
 // 按年份对文章进行分组
 const groupedArticles = computed(() => {
-  if (!props.groupByYear) {
+  if (!props.groupByYear || !props.articles) {
     return null;
   }
 

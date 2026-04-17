@@ -32,7 +32,7 @@ const { data: initialData } = await useAsyncData('moments-list', async () => {
 
 // 初始化数据
 if (initialData.value) {
-  moments.value = initialData.value.list;
+  moments.value = initialData.value.list || [];
 }
 
 const { waterfall, isLayoutReady } = useWaterfall({

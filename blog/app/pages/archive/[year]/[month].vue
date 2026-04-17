@@ -39,8 +39,8 @@ const { data: initialData } = await useAsyncData(
 
 // 初始化数据
 if (initialData.value) {
-  articles.value = initialData.value.articles;
-  total.value = initialData.value.total;
+  articles.value = initialData.value.articles || [];
+  total.value = initialData.value.total || 0;
   currentPage.value = 1;
 }
 

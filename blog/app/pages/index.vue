@@ -29,8 +29,8 @@ const { data: initialData } = await useAsyncData('articles-list', async () => {
 
 // 初始化数据
 if (initialData.value) {
-  articles.value = initialData.value.list.slice(0, 10);
-  total.value = initialData.value.total;
+  articles.value = (initialData.value.list || []).slice(0, 10);
+  total.value = initialData.value.total || 0;
   currentPage.value = 1;
 }
 

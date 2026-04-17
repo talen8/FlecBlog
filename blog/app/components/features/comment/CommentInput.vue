@@ -33,6 +33,10 @@ onMounted(() => {
   }
   // 加载评论草稿
   commentContent.value = localStorage.getItem('comment_draft') || '';
+  // 根据草稿内容调整输入框高度
+  nextTick(() => {
+    resetTextareaHeight();
+  });
 });
 
 const isSubmitting = ref(false);
@@ -80,6 +84,13 @@ const resetTextareaHeight = () => {
   if (textareaRef.value) {
     textareaRef.value.style.height = 'auto';
     textareaRef.value.style.height = textareaRef.value.scrollHeight + 'px';
+  }
+};
+
+// 重置输入框为默认高度
+const resetToDefaultHeight = () => {
+  if (textareaRef.value) {
+    textareaRef.value.style.height = 'auto';
   }
 };
 
@@ -163,6 +174,8 @@ const handleSubmitComment = async () => {
 
     if (isReplyMode.value && props.commentId) {
       await context.addReply(props.commentId, content, guestInfo);
+      // 回复成功后关闭回复输入框
+      context.replyState.cancelReply();
     } else {
       await context.addComment(content, guestInfo);
     }
@@ -179,7 +192,7 @@ const handleSubmitComment = async () => {
     }
 
     commentContent.value = '';
-    resetTextareaHeight();
+    resetToDefaultHeight();
     success('评论发表成功');
 
     if (isLoggedIn.value) triggerOnComment();
@@ -413,14 +426,24 @@ onUnmounted(() => {
         v-model="commentContent"
         placeholder="写下你的评论...支持 Markdown 语法"
         rows="3"
+        maxlength="500"
         :disabled="isSubmitting"
         :class="{ error: errors.content }"
+        data-lenis-prevent
         @input="handleTextareaInput"
         @paste="handlePaste"
       />
       <transition name="fade">
         <div v-if="errors.content" class="error-tooltip content-error">{{ errors.content }}</div>
       </transition>
+      <!-- 字符数提示，超过450字后显示 -->
+      <div
+        v-if="commentContent.length > 450"
+        class="char-count"
+        :class="{ 'near-limit': commentContent.length > 480 }"
+      >
+        {{ commentContent.length }}/500
+      </div>
       <transition name="expand">
         <div
           v-if="showPreview"
@@ -737,6 +760,23 @@ textarea {
   width: 100%;
 }
 
+// 字符数提示样式
+.char-count {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 0.75rem;
+  color: var(--theme-meta-color);
+  padding: 6px;
+  border-radius: 4px;
+  pointer-events: none;
+
+  &.near-limit {
+    color: #ef4444;
+    font-weight: 500;
+  }
+}
+
 textarea {
   width: 100%;
   padding: 10px 12px;
@@ -745,7 +785,14 @@ textarea {
   resize: none;
   min-height: 60px;
   max-height: 300px;
-  overflow-y: hidden;
+  overflow-y: auto;
+  // 隐藏滚动条但保持可滚动
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &.error {
     border-color: #ef4444;
@@ -763,7 +810,7 @@ textarea {
   line-height: 1.6;
   min-height: 80px;
   max-height: 300px;
-  overflow-y: hidden;
+  overflow-y: auto;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 6px;
   background-color: rgba(0, 0, 0, 0.02);

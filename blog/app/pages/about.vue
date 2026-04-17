@@ -65,9 +65,9 @@ const { data: tagsData } = await useAsyncData('about-tags', async () => {
   return { total: resTotal };
 });
 
-if (articlesData.value) articleTotal.value = articlesData.value.total;
-if (categoriesData.value) categoryTotal.value = categoriesData.value.total;
-if (tagsData.value) tagTotal.value = tagsData.value.total;
+if (articlesData.value) articleTotal.value = articlesData.value.total || 0;
+if (categoriesData.value) categoryTotal.value = categoriesData.value.total || 0;
+if (tagsData.value) tagTotal.value = tagsData.value.total || 0;
 
 const parseJSON = <T = any,>(jsonStr: string | undefined, fallback: T): T => {
   try {

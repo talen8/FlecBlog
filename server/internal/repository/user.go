@@ -126,6 +126,13 @@ func (r *UserRepository) ExistsByAvatar(url string) (bool, error) {
 	return count > 0, err
 }
 
+// CountSuperAdmins 统计超级管理员数量
+func (r *UserRepository) CountSuperAdmins() (int64, error) {
+	var count int64
+	err := r.db.Model(&model.User{}).Where("role = ?", model.RoleSuperAdmin).Count(&count).Error
+	return count, err
+}
+
 // UpdateAvatar 更新用户头像
 func (r *UserRepository) UpdateAvatar(userID uint, avatarURL string) error {
 	return r.db.Model(&model.User{}).Where("id = ?", userID).Update("avatar", avatarURL).Error

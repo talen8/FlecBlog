@@ -30,10 +30,12 @@ export function useArticles() {
         page_size: pageSize.value,
         ...query,
       });
-      articles.value = list;
-      total.value = resTotal;
+      articles.value = list || [];
+      total.value = resTotal || 0;
     } catch (error) {
       console.error('获取文章列表失败:', error);
+      articles.value = [];
+      total.value = 0;
     }
   };
 
@@ -70,10 +72,12 @@ export function useCategories() {
 
     try {
       const { list, total: resTotal } = await getCategories();
-      categories.value = list;
-      total.value = resTotal;
+      categories.value = list || [];
+      total.value = resTotal || 0;
     } catch (error) {
       console.error('获取分类列表失败:', error);
+      categories.value = [];
+      total.value = 0;
     }
   };
 
@@ -97,7 +101,7 @@ export function useComments() {
         target_type: targetType,
         target_key: targetKey,
       });
-      comments.value = data.list;
+      comments.value = data.list || [];
     } catch (error) {
       console.error('获取评论失败:', error);
       comments.value = [];
@@ -229,10 +233,10 @@ export function useMoments() {
         page: currentPage.value,
         page_size: pageSize.value,
       });
-      moments.value = list;
-      total.value = resTotal;
-      currentPage.value = resPage;
-      pageSize.value = resPageSize;
+      moments.value = list || [];
+      total.value = resTotal || 0;
+      currentPage.value = resPage || 1;
+      pageSize.value = resPageSize || 30;
     } catch (error) {
       console.error('获取动态列表失败:', error);
       moments.value = [];
@@ -258,9 +262,9 @@ export function useNotifications() {
         page: params?.page ?? currentPage.value,
         page_size: params?.page_size ?? pageSize.value,
       });
-      notifications.value = response.list;
-      total.value = response.total;
-      unreadCount.value = response.unread_count;
+      notifications.value = response.list || [];
+      total.value = response.total || 0;
+      unreadCount.value = response.unread_count || 0;
       params?.page && (currentPage.value = params.page);
     } catch (error) {
       console.error('获取通知列表失败:', error);
@@ -420,10 +424,12 @@ export function useTags() {
 
     try {
       const { list, total: resTotal } = await getTags();
-      tags.value = list;
-      total.value = resTotal;
+      tags.value = list || [];
+      total.value = resTotal || 0;
     } catch (error) {
       console.error('获取标签列表失败:', error);
+      tags.value = [];
+      total.value = 0;
     }
   };
 

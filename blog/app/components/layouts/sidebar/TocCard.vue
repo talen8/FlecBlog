@@ -88,7 +88,7 @@ onMounted(() => {
       <span>目录</span>
     </div>
 
-    <nav ref="tocListRef" class="toc-list" aria-label="文章目录">
+    <nav ref="tocListRef" class="toc-list" aria-label="文章目录" data-lenis-prevent>
       <button
         v-for="item in toc"
         :key="item.id"
@@ -114,12 +114,16 @@ onMounted(() => {
 
   // 自定义滚动条样式
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--flec-btn-hover);
-    border-radius: 4px;
+    background: color-mix(in srgb, var(--flec-btn-hover) 50%, transparent);
+    border-radius: 3px;
+
+    &:hover {
+      background: color-mix(in srgb, var(--flec-btn-hover) 70%, transparent);
+    }
   }
 
   &::-webkit-scrollbar-track {

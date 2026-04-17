@@ -6,7 +6,7 @@ import { getMoments } from '@/composables/api/moment';
 const { data: moments } = await useAsyncData('moments-widget', async () => {
   try {
     const { list } = await getMoments({ page: 1, page_size: 10 });
-    return list;
+    return list || [];
   } catch (error) {
     console.error('获取动态列表失败:', error);
     return [];

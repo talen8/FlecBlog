@@ -698,6 +698,16 @@ func (s *UserService) Update(operator *model.User, id uint, req *dto.AdminUpdate
 	}
 
 	if req.Role != "" {
+		// 如果要将超级管理员改为其他角色，检查是否至少保留一个超级管理员
+		if user.Role == model.RoleSuperAdmin && req.Role != model.RoleSuperAdmin {
+			superAdminCount, err := s.repo.CountSuperAdmins()
+			if err != nil {
+				return err
+			}
+			if superAdminCount <= 1 {
+				return errors.New("系统中至少需要保留一个超级管理员")
+			}
+		}
 		user.Role = req.Role
 	}
 
@@ -736,6 +746,17 @@ func (s *UserService) Delete(operator *model.User, id uint) error {
 
 	if err := s.ensureCanDeleteUser(operator, user); err != nil {
 		return err
+	}
+
+	// 如果要删除的是超级管理员，检查是否至少保留一个
+	if user.Role == model.RoleSuperAdmin {
+		superAdminCount, err := s.repo.CountSuperAdmins()
+		if err != nil {
+			return err
+		}
+		if superAdminCount <= 1 {
+			return errors.New("系统中至少需要保留一个超级管理员")
+		}
 	}
 
 	// 标记头像为未使用

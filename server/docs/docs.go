@@ -7341,6 +7341,9 @@ const docTemplate = `{
                 "publish_time": {
                     "$ref": "#/definitions/utils.JSONTime"
                 },
+                "slug": {
+                    "type": "string"
+                },
                 "summary": {
                     "type": "string"
                 },
@@ -7786,6 +7789,10 @@ const docTemplate = `{
                 },
                 "location": {
                     "description": "发布地点",
+                    "type": "string"
+                },
+                "slug": {
+                    "description": "自定义文章Slug",
                     "type": "string"
                 },
                 "summary": {
@@ -9127,6 +9134,10 @@ const docTemplate = `{
                 },
                 "publish_time": {
                     "$ref": "#/definitions/utils.JSONTime"
+                },
+                "slug": {
+                    "description": "自定义文章Slug",
+                    "type": "string"
                 },
                 "summary": {
                     "type": "string"
