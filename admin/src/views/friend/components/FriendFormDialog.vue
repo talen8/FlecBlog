@@ -122,14 +122,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleCancel">取消</el-button>
-        <el-button
-          type="primary"
-          @click="handleSubmit"
-          :loading="submitLoading"
-          :disabled="!!(parseLoading || (formData.url && !formData.avatar && !formData.screenshot))"
-        >
-          确定
-        </el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitLoading"> 确定 </el-button>
       </span>
     </template>
   </el-dialog>
