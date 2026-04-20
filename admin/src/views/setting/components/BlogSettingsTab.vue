@@ -62,15 +62,33 @@
         />
       </el-form-item>
 
-      <el-form-item label="背景图片">
-        <ImageUploader
-          ref="backgroundUploaderRef"
-          v-model="form.background_image"
-          upload-type="博客背景"
-          width="213px"
-          height="120px"
-          :disabled="loading"
-        />
+      <el-form-item>
+        <template #label>
+          <span class="clickable-label" @click="toggleBackgroundMode"> 背景图片 </span>
+        </template>
+        <div class="background-image-input">
+          <ImageUploader
+            v-if="backgroundInputMode === 'upload'"
+            ref="backgroundUploaderRef"
+            v-model="form.background_image"
+            upload-type="博客背景"
+            width="213px"
+            height="120px"
+            :disabled="loading"
+          />
+          <div v-else class="url-input-wrapper">
+            <el-input
+              v-model="form.background_image"
+              placeholder="输入图片链接"
+              :disabled="loading"
+              clearable
+            >
+              <template #prefix>
+                <i class="ri-link"></i>
+              </template>
+            </el-input>
+          </div>
+        </div>
       </el-form-item>
 
       <el-form-item label="站点截图">
@@ -445,6 +463,13 @@ const backgroundUploaderRef = ref<InstanceType<typeof ImageUploader>>();
 const screenshotUploaderRef = ref<InstanceType<typeof ImageUploader>>();
 const aboutExhibitionUploaderRef = ref<InstanceType<typeof ImageUploader>>();
 
+// 背景图片输入模式
+const backgroundInputMode = ref<'upload' | 'url'>('upload');
+
+const toggleBackgroundMode = () => {
+  backgroundInputMode.value = backgroundInputMode.value === 'upload' ? 'url' : 'upload';
+};
+
 // 预设的常用社交平台图标
 const commonIcons = [
   'github-line',
@@ -599,6 +624,37 @@ defineExpose({
       margin-bottom: 22px;
     }
   }
+
+  :deep(.el-form-item__content) {
+    align-items: flex-start !important;
+  }
+
+  .background-image-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .url-input-wrapper {
+      width: 213px;
+
+      .ri-link {
+        font-size: 14px;
+        color: #909399;
+      }
+    }
+  }
+
+  .clickable-label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--el-color-primary);
+    }
+  }
 }
 
 .motto-inputs {
@@ -616,6 +672,12 @@ defineExpose({
 
     .motto-inputs {
       flex-direction: column;
+    }
+
+    .background-image-input {
+      .url-input-wrapper {
+        width: 100%;
+      }
     }
   }
 
