@@ -8,7 +8,7 @@ export const refreshToken = ref<string | null>(null);
 export const isLoggedIn = computed(() => !!accessToken.value && accessToken.value !== '');
 
 // 从 localStorage 初始化 token（仅客户端）
-if (process.client) {
+if (import.meta.client) {
   accessToken.value = localStorage.getItem('access_token');
   refreshToken.value = localStorage.getItem('refresh_token');
 }
@@ -21,7 +21,7 @@ export const setTokens = (access: string, refresh: string): void => {
   refreshToken.value = refresh;
 
   // 同步到 localStorage（仅客户端）
-  if (process.client) {
+  if (import.meta.client) {
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
   }
@@ -34,7 +34,7 @@ export const setAccessToken = (access: string): void => {
   accessToken.value = access;
 
   // 同步到 localStorage（仅客户端）
-  if (process.client) {
+  if (import.meta.client) {
     localStorage.setItem('access_token', access);
   }
 };
@@ -45,7 +45,7 @@ export const setAccessToken = (access: string): void => {
 export const logout = (): void => {
   accessToken.value = null;
   refreshToken.value = null;
-  if (process.client) {
+  if (import.meta.client) {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
   }

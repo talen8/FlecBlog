@@ -1,20 +1,18 @@
 import MarkdownIt from 'markdown-it';
 import anchor from 'markdown-it-anchor';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error 该第三方库缺少 TypeScript 类型定义文件
 import taskLists from 'markdown-it-task-lists';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error 该第三方库缺少 TypeScript 类型定义文件
 import mark from 'markdown-it-mark';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error 该第三方库缺少 TypeScript 类型定义文件
 import linkAttributes from 'markdown-it-link-attributes';
-// @ts-ignore - 没有类型定义
 import kbd from 'markdown-it-kbd';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error 该第三方库缺少 TypeScript 类型定义文件
 import sub from 'markdown-it-sub';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error 该第三方库缺少 TypeScript 类型定义文件
 import sup from 'markdown-it-sup';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error 该第三方库缺少 TypeScript 类型定义文件
 import underline from 'markdown-it-plugin-underline';
-// @ts-ignore - 没有类型定义
 import katex from '@traptitech/markdown-it-katex';
 
 import DOMPurify from 'isomorphic-dompurify';
@@ -497,7 +495,7 @@ function customBlocksPlugin(md: MarkdownIt) {
     const endTagFull = `end${tag}`;
     let nextLine = startLine + 1;
     let foundEnd = false;
-    let contentLines: string[] = [];
+    const contentLines: string[] = [];
 
     // 特殊处理 tabs
     if (tag === 'tabs') {
@@ -864,7 +862,7 @@ export function countWords(markdown: string): number {
   if (!markdown) return 0;
 
   // 服务端渲染时，直接从 markdown 统计
-  if (!process.client) {
+  if (!import.meta.client) {
     const text = markdown
       .replace(/```[\s\S]*?```/g, '') // 移除代码块
       .replace(/`[^`]+`/g, '') // 移除行内代码
@@ -916,7 +914,7 @@ export function extractToc(markdown: string): TocItem[] {
   let cleanedMarkdown = markdown
     .replace(/```[\s\S]*?```/g, '')
     .replace(/~~~[\s\S]*?~~~\s*/g, '')
-    .replace(/^(    |\t).+$/gm, '');
+    .replace(/^( {4}|\t).+$/gm, '');
 
   // 处理单行自定义块
   cleanedMarkdown = cleanedMarkdown.replace(/^:::link\s+.*?:::$/gm, '');
@@ -1019,7 +1017,7 @@ export function renderSimpleMarkdown(markdown: string): string {
     ],
     ALLOWED_ATTR: ['href', 'title', 'src', 'alt', 'width', 'height', 'class'],
     ALLOWED_URI_REGEXP:
-      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|blob):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
     ALLOW_DATA_ATTR: false,
   });
 }
@@ -1163,7 +1161,7 @@ export function seekAudio(audioId: string, event: MouseEvent): void {
   audio.currentTime = percent * audio.duration;
 }
 
-export function toggleMusicPlay(audioId: string, server: string, musicId: string): void {
+export function toggleMusicPlay(audioId: string, _server: string, _musicId: string): void {
   const container = document.querySelector(`[data-audio-id="${audioId}"]`);
   if (!container) return;
 
@@ -1276,7 +1274,6 @@ function initMusicEvents(container: Element): void {
   const progressBar = container.querySelector('.custom-audio-progress-bar') as HTMLElement;
   const currentTimeEl = container.querySelector('.custom-audio-current') as HTMLElement;
   const durationTime = container.querySelector('.custom-audio-duration') as HTMLElement;
-  const btn = container.querySelector('.custom-audio-btn i');
 
   if (!audio) return;
 
@@ -1414,13 +1411,22 @@ function initMusicCard(container: Element): void {
 
 // 挂载全局函数供内联 onclick 使用
 if (typeof window !== 'undefined') {
-  (window as any).copyCodeBlock = copyCodeBlock;
-  (window as any).switchTab = switchTab;
-  (window as any).toggleFold = toggleFold;
-  (window as any).toggleAudioPlay = toggleAudioPlay;
-  (window as any).seekAudio = seekAudio;
-  (window as any).toggleMusicPlay = toggleMusicPlay;
-  (window as any).seekMusic = seekMusic;
+  const win = window as unknown as Window & {
+    copyCodeBlock: typeof copyCodeBlock;
+    switchTab: typeof switchTab;
+    toggleFold: typeof toggleFold;
+    toggleAudioPlay: typeof toggleAudioPlay;
+    seekAudio: typeof seekAudio;
+    toggleMusicPlay: typeof toggleMusicPlay;
+    seekMusic: typeof seekMusic;
+  };
+  win.copyCodeBlock = copyCodeBlock;
+  win.switchTab = switchTab;
+  win.toggleFold = toggleFold;
+  win.toggleAudioPlay = toggleAudioPlay;
+  win.seekAudio = seekAudio;
+  win.toggleMusicPlay = toggleMusicPlay;
+  win.seekMusic = seekMusic;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', observeAudioPlayers);

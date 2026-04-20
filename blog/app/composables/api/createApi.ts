@@ -3,10 +3,13 @@ import { get, post, put, patch, del } from '@/utils/request';
 
 interface ApiFactoryOptions {
   stringifyTargetKey?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 转换函数，输入输出类型由调用方决定
   transformParams?: (params: any) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 转换函数，输入输出类型由调用方决定
   transformBody?: (body: any) => any;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- 处理任意数据结构
 function processData(data: any, options: ApiFactoryOptions, isBody: boolean) {
   let processed = { ...data };
 
@@ -36,11 +39,13 @@ export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) 
       return response.data;
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
     create: async (data: any): Promise<T> => {
       const response = await post<ApiResponse<T>>(endpoint, processData(data, options, true));
       return response.data;
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
     update: async (id: number | string, data: any): Promise<T> => {
       const response = await put<ApiResponse<T>>(
         `${endpoint}/${id}`,
@@ -49,6 +54,7 @@ export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) 
       return response.data;
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
     patch: async (id: number | string, data: any): Promise<T> => {
       const response = await patch<ApiResponse<T>>(
         `${endpoint}/${id}`,
@@ -61,6 +67,7 @@ export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) 
       await del(`${endpoint}/${id}`);
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 参数类型由调用方决定
     get: async <R = T>(url: string, params?: any): Promise<R> => {
       const response = await get<ApiResponse<R>>(`${endpoint}${url}`, {
         params: processData(params, options, false),
@@ -68,6 +75,7 @@ export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) 
       return response.data;
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
     post: async <R = T>(url: string, data?: any): Promise<R> => {
       const response = await post<ApiResponse<R>>(
         `${endpoint}${url}`,
@@ -76,6 +84,7 @@ export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) 
       return response.data;
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
     put: async <R = T>(url: string, data?: any): Promise<R> => {
       const response = await put<ApiResponse<R>>(
         `${endpoint}${url}`,
@@ -84,6 +93,7 @@ export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) 
       return response.data;
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
     patchRequest: async <R = T>(url: string, data?: any): Promise<R> => {
       const response = await patch<ApiResponse<R>>(
         `${endpoint}${url}`,
@@ -92,11 +102,11 @@ export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) 
       return response.data;
     },
 
-    deleteRequest: async <R = void>(url: string, data?: any): Promise<R> => {
-      const response = await del<ApiResponse<R>>(`${endpoint}${url}`, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
+    deleteRequest: async (url: string, data?: any): Promise<void> => {
+      await del(`${endpoint}${url}`, {
         body: processData(data, options, true),
       });
-      return response.data;
     },
   };
 }

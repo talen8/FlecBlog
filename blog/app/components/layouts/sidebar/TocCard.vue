@@ -82,9 +82,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="card-widget" v-if="hasToc">
+  <div v-if="hasToc" class="card-widget">
     <div class="item-headline">
-      <i class="ri-list-unordered"></i>
+      <i class="ri-list-unordered" />
       <span>目录</span>
     </div>
 
@@ -94,9 +94,9 @@ onMounted(() => {
         :key="item.id"
         :data-toc-id="item.id"
         :class="['toc-item', `toc-level-${item.level}`, { active: activeId === item.id }]"
-        @click="scrollToHeading(item.id)"
         :aria-label="`跳转到 ${item.text}`"
         :aria-current="activeId === item.id ? 'location' : undefined"
+        @click="scrollToHeading(item.id)"
       >
         <span class="toc-text">{{ item.text }}</span>
       </button>

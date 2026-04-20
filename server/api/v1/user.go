@@ -99,7 +99,8 @@ func (c *UserController) AuthCallback(ctx *gin.Context) {
 	var action string
 	var bindUserID uint
 	var redirect string
-	if strings.HasPrefix(state, "bind:") {
+	switch {
+	case strings.HasPrefix(state, "bind:"):
 		action = "bind"
 		parts := strings.Split(state, "|")
 		if len(parts) > 0 {
@@ -111,10 +112,10 @@ func (c *UserController) AuthCallback(ctx *gin.Context) {
 		if len(parts) > 1 && strings.HasPrefix(parts[1], "redirect:") {
 			redirect = strings.TrimPrefix(parts[1], "redirect:")
 		}
-	} else if strings.HasPrefix(state, "redirect:") {
+	case strings.HasPrefix(state, "redirect:"):
 		action = "login"
 		redirect = strings.TrimPrefix(state, "redirect:")
-	} else {
+	default:
 		action = "login"
 	}
 

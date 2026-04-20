@@ -73,7 +73,7 @@ async function loadData() {
   try {
     const res = await getTags();
     list.value = res.list;
-  } catch (err) {
+  } catch (_error) {
     ElMessage.error('加载标签列表失败');
   } finally {
     loading.value = false;
@@ -114,7 +114,7 @@ async function save() {
     await loadData();
     formVisible.value = false;
     ElMessage.success('保存成功');
-  } catch (err) {
+  } catch (_error) {
     ElMessage.error('保存失败');
   } finally {
     loading.value = false;

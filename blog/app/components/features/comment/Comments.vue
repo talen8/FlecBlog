@@ -170,9 +170,9 @@ provideCommentContext({
   <div class="comments-section">
     <div class="comments-header">
       <h3 class="comments-title">
-        <i class="ri-chat-3-line"></i>
+        <i class="ri-chat-3-line" />
         评论
-        <span class="comments-count" v-if="totalCommentsCount > 0">({{ totalCommentsCount }})</span>
+        <span v-if="totalCommentsCount > 0" class="comments-count">({{ totalCommentsCount }})</span>
       </h3>
     </div>
 

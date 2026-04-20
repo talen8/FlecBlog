@@ -86,7 +86,7 @@ onUnmounted(() => {
       </div>
     </div>
     <div class="scroll-indicator" @click="scrollToContent">
-      <i class="ri-arrow-down-s-line ri-2x"></i>
+      <i class="ri-arrow-down-s-line ri-2x" />
     </div>
   </header>
 </template>

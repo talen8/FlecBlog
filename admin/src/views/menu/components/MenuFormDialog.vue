@@ -263,7 +263,7 @@ const fetchParentMenuOptions = async () => {
     }
 
     parentMenuOptions.value = options;
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('获取父菜单列表失败');
   }
 };

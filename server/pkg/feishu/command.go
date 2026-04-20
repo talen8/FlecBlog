@@ -46,7 +46,7 @@ func handleCommand(_ context.Context, event *larkim.P2MessageReceiveV1) error {
 		Text string `json:"text"`
 	}
 	if err := json.Unmarshal([]byte(*event.Event.Message.Content), &content); err != nil {
-		return nil
+		return err
 	}
 
 	text := strings.TrimSpace(content.Text)
@@ -268,24 +268,6 @@ func formatBytes(bytes uint64) string {
 	}
 
 	return fmt.Sprintf("%.1f %ciB", float64(bytes)/float64(div), "KMGTPE"[exp])
-}
-
-func formatUptime(seconds int64) string {
-	if seconds <= 0 {
-		return "0m"
-	}
-
-	days := seconds / 86400
-	hours := (seconds % 86400) / 3600
-	minutes := (seconds % 3600) / 60
-
-	if days > 0 {
-		return fmt.Sprintf("%dd %dh %dm", days, hours, minutes)
-	}
-	if hours > 0 {
-		return fmt.Sprintf("%dh %dm", hours, minutes)
-	}
-	return fmt.Sprintf("%dm", minutes)
 }
 
 // sendBindSuccessCard 发送绑定成功卡片

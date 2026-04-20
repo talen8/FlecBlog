@@ -20,7 +20,7 @@ export interface FeedbackNotificationData {
   ticket_no: string;
   report_url: string;
   report_type: string;
-  form_content: any;
+  form_content: Record<string, unknown>;
   status: string;
 }
 
@@ -53,7 +53,7 @@ export interface Notification {
     | FeedbackNotificationData
     | SystemAlertNotificationData
     | FriendApplyNotificationData
-    | Record<string, any>;
+    | Record<string, unknown>;
   target_id?: number;
   is_read: boolean;
   read_at: string | null;
@@ -71,4 +71,4 @@ export interface NotificationListData {
 }
 
 // 通知列表查询参数
-export interface NotificationQueryParams extends PaginationQuery {}
+export type NotificationQueryParams = PaginationQuery;

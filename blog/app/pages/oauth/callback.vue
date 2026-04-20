@@ -5,7 +5,7 @@ const { fetchUserInfo } = useUser();
 
 onMounted(async () => {
   // 只在客户端执行
-  if (!process.client) return;
+  if (!import.meta.client) return;
 
   const token = route.query.token as string;
   const refreshToken = route.query.refresh_token as string;
@@ -34,7 +34,7 @@ onMounted(async () => {
 <template>
   <div class="callback-page">
     <div class="loading-content">
-      <i class="ri-loader-4-line spin"></i>
+      <i class="ri-loader-4-line spin" />
       <p>正在登录中，请稍候...</p>
     </div>
   </div>

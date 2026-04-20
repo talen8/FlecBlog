@@ -1,5 +1,5 @@
 import type { Comment, CommentTargetType, CreateCommentParams } from '@@/types/comment';
-import type { PaginationData, PaginationQuery } from '@@/types/request';
+import type { PaginationQuery } from '@@/types/request';
 import { createApi } from './createApi';
 
 interface GetCommentsParams extends PaginationQuery {

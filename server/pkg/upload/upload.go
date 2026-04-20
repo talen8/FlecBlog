@@ -231,7 +231,9 @@ func (m *Manager) HandleUpload(req *Request, host string) (*Response, error) {
 	if err != nil {
 		return m.createErrorResponse(fmt.Sprintf("打开文件失败: %v", err)), err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	// 5. 保存文件
 	if err := m.storage.Save(file, filePath); err != nil {
@@ -388,7 +390,9 @@ func (m *Manager) CalculateFileHash(fileHeader *multipart.FileHeader) (string, e
 	if err != nil {
 		return "", fmt.Errorf("打开文件失败: %v", err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	hash := sha256.New()
 	if _, err := io.Copy(hash, file); err != nil {

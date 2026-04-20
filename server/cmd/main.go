@@ -49,13 +49,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 	defer logger.Close()
 	defer middleware.ClosePanicLogFile()
 
 	// 执行数据库迁移
 	if err := database.RunMigrations(db.DB); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		middleware.ClosePanicLogFile()
+		logger.Close()
+		_ = db.Close()
+		log.Fatalf("Failed to run migrations: %v", err) //nolint:gocritic // 已手动关闭资源
 	}
 
 	// 从数据库加载运行时配置（邮箱、上传等）

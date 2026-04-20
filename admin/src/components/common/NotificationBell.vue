@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, type Component } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { Bell, ChatDotRound, QuestionFilled, Warning, Link } from '@element-plus/icons-vue';
@@ -139,8 +139,8 @@ const loadNotifications = async (reset = false) => {
 
     // 加载成功后才增加页码
     if (!reset) currentPage.value++;
-  } catch (error) {
-    console.error('加载通知失败:', error);
+  } catch (_error) {
+    console.error('加载通知失败:', _error);
   } finally {
     loading.value = false;
   }
@@ -163,7 +163,7 @@ const handleMarkAllRead = async () => {
     await markAllAsRead();
     ElMessage.success('已全部标记为已读');
     await loadNotifications(true);
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('操作失败');
   }
 };
@@ -221,7 +221,7 @@ const requestNotificationPermission = async () => {
 };
 
 // 通知图标配置
-const notificationIconConfig: Record<NotificationType, { icon: any; color: string }> = {
+const notificationIconConfig: Record<NotificationType, { icon: Component; color: string }> = {
   comment_new: { icon: ChatDotRound, color: '#409EFF' },
   feedback_new: { icon: QuestionFilled, color: '#E6A23C' },
   system_alert: { icon: Warning, color: '#F56C6C' },

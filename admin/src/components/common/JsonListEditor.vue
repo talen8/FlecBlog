@@ -108,8 +108,10 @@ export interface FieldConfig {
 }
 
 export interface JsonListEditorProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   modelValue: any[];
   fields: FieldConfig[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultItem?: Record<string, any>;
   disabled?: boolean;
   hideControls?: boolean;
@@ -122,10 +124,12 @@ const props = withDefaults(defineProps<JsonListEditorProps>(), {
 });
 
 const emit = defineEmits<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   'update:modelValue': [value: any[]];
 }>();
 
 // 内部值（深拷贝避免直接修改 prop）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const internalValue = ref<any[]>([]);
 
 // 监听 modelValue 变化

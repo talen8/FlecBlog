@@ -1,7 +1,7 @@
 package service
 
 import (
-	"crypto/md5"
+	"crypto/md5" // #nosec G501 - MD5 用于生成访客标识，不需要加密安全
 	"fmt"
 	"math"
 	"time"
@@ -363,6 +363,7 @@ func (s *StatsService) GetVisitLogs(req *dto.GetVisitLogsRequest) ([]dto.VisitLo
 // generateVisitorID 生成访客唯一标识
 func (s *StatsService) generateVisitorID(ip, userAgent string) string {
 	data := fmt.Sprintf("%s:%s", ip, userAgent)
+	// #nosec G401 - MD5 用于生成访客标识，不需要加密安全
 	hash := md5.Sum([]byte(data))
 	return fmt.Sprintf("%x", hash)
 }

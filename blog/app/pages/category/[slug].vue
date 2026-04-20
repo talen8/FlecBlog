@@ -27,8 +27,9 @@ const { data: initialData } = await useAsyncData(`category-${route.params.slug}`
       }),
     ]);
     return { category: categoryData, articles: articlesData.list, total: articlesData.total };
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    const err = error as Error & { response?: { status?: number } };
+    if (err.response?.status === 404) {
       router.replace('/404');
     }
     return null;
@@ -68,8 +69,9 @@ const fetchData = async (page = 1) => {
     });
     articles.value = articlesData.list;
     total.value = articlesData.total;
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    const err = error as Error & { response?: { status?: number } };
+    if (err.response?.status === 404) {
       router.replace('/404');
     }
   }
@@ -78,7 +80,7 @@ const fetchData = async (page = 1) => {
 // 处理分页变化
 const handlePageChange = (page: number) => {
   fetchData(page);
-  if (process.client) {
+  if (import.meta.client) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 };

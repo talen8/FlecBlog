@@ -7,7 +7,7 @@ interface Emits {
 }
 
 const emit = defineEmits<Emits>();
-const { success, error, warning } = useToast();
+const { success, error: errorToast, warning } = useToast();
 
 // 提交成功状态
 const submitSuccess = ref(false);
@@ -237,8 +237,9 @@ const handleSubmit = async () => {
     submitSuccess.value = true;
     resetForm();
     emit('success');
-  } catch (err: any) {
-    error(err.message || '提交失败，请稍后重试');
+  } catch (error: unknown) {
+    const err = error as Error;
+    errorToast(err.message || '提交失败，请稍后重试');
   } finally {
     submitting.value = false;
   }
@@ -304,8 +305,9 @@ const handleQueryTicket = async () => {
   try {
     queryResult.value = await getFeedbackByTicketNo(queryTicketNo.value.trim());
     success('查询成功');
-  } catch (err: any) {
-    error(err.message || '未找到该工单，请检查工单号是否正确');
+  } catch (error: unknown) {
+    const err = error as Error;
+    errorToast(err.message || '未找到该工单，请检查工单号是否正确');
     queryResult.value = null;
   } finally {
     queryLoading.value = false;
@@ -334,13 +336,13 @@ const formatDate = (date?: string) => {
     <!-- 成功状态 -->
     <div v-if="submitSuccess" class="success-state">
       <div class="success-icon">
-        <i class="ri-checkbox-circle-fill"></i>
+        <i class="ri-checkbox-circle-fill" />
       </div>
       <h3 class="success-title">提交成功！我们会尽快处理</h3>
       <div class="ticket-no">{{ submittedTicketNo }}</div>
       <p class="success-notice">请妥善保存工单号，这将作为结果查询的唯一方式</p>
       <button type="button" class="back-btn" @click="backToForm">
-        <i class="ri-arrow-left-line"></i>
+        <i class="ri-arrow-left-line" />
         返回
       </button>
     </div>
@@ -415,7 +417,7 @@ const formatDate = (date?: string) => {
             placeholder="请详细说明侵权情况"
             rows="6"
             :disabled="submitting"
-          ></textarea>
+          />
         </div>
 
         <div class="form-group">
@@ -436,7 +438,7 @@ const formatDate = (date?: string) => {
               @change="handleFileUpload($event, 'copyrightProof')"
             />
             <div class="upload-area" @click="copyrightProofInputRef?.click()">
-              <i class="ri-add-line"></i>
+              <i class="ri-add-line" />
               <span>点击选择<br />图片/文件</span>
             </div>
           </div>
@@ -448,14 +450,14 @@ const formatDate = (date?: string) => {
                 :key="index"
                 class="file-item"
               >
-                <i class="ri-file-line"></i>
+                <i class="ri-file-line" />
                 <span class="file-name">{{ file.name }}</span>
                 <button
                   type="button"
                   class="remove-btn"
                   @click="removeFile(index, 'copyrightProof')"
                 >
-                  <i class="ri-close-line"></i>
+                  <i class="ri-close-line" />
                 </button>
               </div>
             </div>
@@ -478,7 +480,7 @@ const formatDate = (date?: string) => {
               @change="handleFileUpload($event, 'copyrightInfringement')"
             />
             <div class="upload-area" @click="copyrightInfringementInputRef?.click()">
-              <i class="ri-add-line"></i>
+              <i class="ri-add-line" />
               <span>点击选择<br />图片/文件</span>
             </div>
           </div>
@@ -490,14 +492,14 @@ const formatDate = (date?: string) => {
                 :key="index"
                 class="file-item"
               >
-                <i class="ri-file-line"></i>
+                <i class="ri-file-line" />
                 <span class="file-name">{{ file.name }}</span>
                 <button
                   type="button"
                   class="remove-btn"
                   @click="removeFile(index, 'copyrightInfringement')"
                 >
-                  <i class="ri-close-line"></i>
+                  <i class="ri-close-line" />
                 </button>
               </div>
             </div>
@@ -517,8 +519,8 @@ const formatDate = (date?: string) => {
               <input
                 type="checkbox"
                 :checked="formData.inappropriateReasons.includes(reason)"
-                @change="toggleReason(reason)"
                 :disabled="submitting"
+                @change="toggleReason(reason)"
               />
               <span class="checkbox-label">{{ reason }}</span>
             </label>
@@ -536,7 +538,7 @@ const formatDate = (date?: string) => {
             placeholder="请输入"
             rows="6"
             :disabled="submitting"
-          ></textarea>
+          />
         </div>
 
         <div class="form-group">
@@ -554,7 +556,7 @@ const formatDate = (date?: string) => {
               @change="handleFileUpload($event, 'inappropriateEvidence')"
             />
             <div class="upload-area" @click="inappropriateEvidenceInputRef?.click()">
-              <i class="ri-add-line"></i>
+              <i class="ri-add-line" />
               <span>点击选择<br />图片/文件</span>
             </div>
           </div>
@@ -566,14 +568,14 @@ const formatDate = (date?: string) => {
                 :key="index"
                 class="file-item"
               >
-                <i class="ri-file-line"></i>
+                <i class="ri-file-line" />
                 <span class="file-name">{{ file.name }}</span>
                 <button
                   type="button"
                   class="remove-btn"
                   @click="removeFile(index, 'inappropriateEvidence')"
                 >
-                  <i class="ri-close-line"></i>
+                  <i class="ri-close-line" />
                 </button>
               </div>
             </div>
@@ -620,7 +622,7 @@ const formatDate = (date?: string) => {
             placeholder="请输入"
             rows="6"
             :disabled="submitting"
-          ></textarea>
+          />
         </div>
 
         <div class="form-group">
@@ -638,7 +640,7 @@ const formatDate = (date?: string) => {
               @change="handleFileUpload($event, 'summaryScreenshot')"
             />
             <div class="upload-area" @click="summaryScreenshotInputRef?.click()">
-              <i class="ri-add-line"></i>
+              <i class="ri-add-line" />
               <span>点击选择<br />图片/文件</span>
             </div>
           </div>
@@ -650,14 +652,14 @@ const formatDate = (date?: string) => {
                 :key="index"
                 class="file-item"
               >
-                <i class="ri-file-line"></i>
+                <i class="ri-file-line" />
                 <span class="file-name">{{ file.name }}</span>
                 <button
                   type="button"
                   class="remove-btn"
                   @click="removeFile(index, 'summaryScreenshot')"
                 >
-                  <i class="ri-close-line"></i>
+                  <i class="ri-close-line" />
                 </button>
               </div>
             </div>
@@ -678,7 +680,7 @@ const formatDate = (date?: string) => {
             placeholder="请详细描述您希望增加的功能"
             rows="4"
             :disabled="submitting"
-          ></textarea>
+          />
         </div>
 
         <div class="form-group">
@@ -692,7 +694,7 @@ const formatDate = (date?: string) => {
             placeholder="请描述该功能的具体使用场景和解决的问题"
             rows="4"
             :disabled="submitting"
-          ></textarea>
+          />
         </div>
 
         <div class="form-group">
@@ -711,7 +713,7 @@ const formatDate = (date?: string) => {
               @change="handleFileUpload($event, 'suggestionAttachment')"
             />
             <div class="upload-area" @click="suggestionAttachmentInputRef?.click()">
-              <i class="ri-add-line"></i>
+              <i class="ri-add-line" />
               <span>点击选择<br />图片/文件</span>
             </div>
           </div>
@@ -723,14 +725,14 @@ const formatDate = (date?: string) => {
                 :key="index"
                 class="file-item"
               >
-                <i class="ri-file-line"></i>
+                <i class="ri-file-line" />
                 <span class="file-name">{{ file.name }}</span>
                 <button
                   type="button"
                   class="remove-btn"
                   @click="removeFile(index, 'suggestionAttachment')"
                 >
-                  <i class="ri-close-line"></i>
+                  <i class="ri-close-line" />
                 </button>
               </div>
             </div>
@@ -741,11 +743,11 @@ const formatDate = (date?: string) => {
       <!-- 提交按钮 -->
       <div class="form-actions">
         <button type="submit" class="submit-btn" :disabled="submitting">
-          <i class="ri-send-plane-fill" :class="{ 'ri-loader-4-line ri-spin': submitting }"></i>
+          <i class="ri-send-plane-fill" :class="{ 'ri-loader-4-line ri-spin': submitting }" />
           {{ submitting ? '提交中...' : '提交反馈' }}
         </button>
         <button type="button" class="query-btn" @click="openQueryDialog">
-          <i class="ri-search-line"></i>
+          <i class="ri-search-line" />
           工单查询
         </button>
       </div>
@@ -757,7 +759,7 @@ const formatDate = (date?: string) => {
         <div class="dialog-header">
           <h3>工单查询</h3>
           <button class="close-btn" @click="closeQueryDialog">
-            <i class="ri-close-line"></i>
+            <i class="ri-close-line" />
           </button>
         </div>
 
@@ -776,7 +778,7 @@ const formatDate = (date?: string) => {
               :disabled="queryLoading"
               @click="handleQueryTicket"
             >
-              <i class="ri-search-line" :class="{ 'ri-loader-4-line ri-spin': queryLoading }"></i>
+              <i class="ri-search-line" :class="{ 'ri-loader-4-line ri-spin': queryLoading }" />
               {{ queryLoading ? '查询中...' : '查询' }}
             </button>
           </div>
@@ -806,7 +808,7 @@ const formatDate = (date?: string) => {
             </div>
 
             <div v-if="!queryResult.admin_reply" class="result-empty">
-              <i class="ri-time-line"></i>
+              <i class="ri-time-line" />
               <p>您的反馈正在处理中，请耐心等待...</p>
             </div>
           </div>

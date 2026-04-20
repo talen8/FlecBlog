@@ -378,7 +378,7 @@ func (s *CommentService) createComment(ctx context.Context, req *dto.CreateComme
 	s.markImagesAsUsed(comment.Content)
 
 	// 异步发送通知
-	go s.sendNotifications(context.Background(), comment, userID)
+	go s.sendNotifications(ctx, comment, userID)
 
 	return s.GetForWeb(ctx, comment.ID)
 }
@@ -591,17 +591,6 @@ func (s *CommentService) markImagesAsUsed(content string) {
 
 	for _, imageURL := range extractCommentImageURLs(content) {
 		_ = s.fileService.MarkAsUsed(imageURL)
-	}
-}
-
-// markImagesAsUnused 标记评论内容中的图片为未使用
-func (s *CommentService) markImagesAsUnused(content string) {
-	if s.fileService == nil || content == "" {
-		return
-	}
-
-	for _, imageURL := range extractCommentImageURLs(content) {
-		_ = s.fileService.MarkAsUnused(imageURL)
 	}
 }
 

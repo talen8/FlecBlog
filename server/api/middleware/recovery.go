@@ -28,7 +28,7 @@ const (
 func init() {
 	// 确保日志目录存在
 	logDir := "./logs"
-	if err := os.MkdirAll(logDir, 0755); err != nil {
+	if err := os.MkdirAll(logDir, 0750); err != nil {
 		logger.Warn("创建日志目录失败: %v", err)
 		return
 	}
@@ -36,7 +36,8 @@ func init() {
 	// 打开 panic 日志文件（追加模式）
 	panicLogPath := filepath.Join(logDir, "panic.log")
 	var err error
-	panicLogFile, err = os.OpenFile(panicLogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	// #nosec G304 - panic.log 是固定的日志文件名，不是用户输入
+	panicLogFile, err = os.OpenFile(panicLogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		logger.Warn("打开 panic 日志文件失败: %v", err)
 		return
@@ -314,6 +315,6 @@ func padRight(s string, length int) string {
 // ClosePanicLogFile 关闭 panic 日志文件（在程序退出时调用）
 func ClosePanicLogFile() {
 	if panicLogFile != nil {
-		panicLogFile.Close()
+		_ = panicLogFile.Close()
 	}
 }

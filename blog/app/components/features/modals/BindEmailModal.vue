@@ -37,8 +37,8 @@ const handleSubmit = async () => {
     showSuccess('邮箱绑定成功');
     emit('success');
     emit('update:modelValue', false);
-  } catch (error: any) {
-    showError(error.message || '绑定失败');
+  } catch (error: unknown) {
+    showError((error as Error).message || '绑定失败');
   } finally {
     loading.value = false;
   }
@@ -67,24 +67,24 @@ watch(
     <Transition name="modal">
       <div v-if="modelValue" class="modal-overlay" @click.self="handleRemindLater">
         <div class="modal-container">
-          <button class="close-btn" @click="handleRemindLater" :disabled="loading">
-            <i class="ri-close-line"></i>
+          <button class="close-btn" :disabled="loading" @click="handleRemindLater">
+            <i class="ri-close-line" />
           </button>
 
           <div class="modal-header">
-            <i class="ri-mail-send-line header-icon"></i>
+            <i class="ri-mail-send-line header-icon" />
             <h3>绑定邮箱</h3>
           </div>
 
           <div class="modal-body">
             <p class="description">绑定真实邮箱后，您可以：</p>
             <ul class="benefits">
-              <li><i class="ri-notification-3-line"></i>及时接收评论回复通知</li>
-              <li><i class="ri-lock-password-line"></i>使用邮箱+密码登录</li>
-              <li><i class="ri-key-2-line"></i>找回密码时使用</li>
+              <li><i class="ri-notification-3-line" />及时接收评论回复通知</li>
+              <li><i class="ri-lock-password-line" />使用邮箱+密码登录</li>
+              <li><i class="ri-key-2-line" />找回密码时使用</li>
             </ul>
 
-            <form @submit.prevent="handleSubmit" class="bind-form">
+            <form class="bind-form" @submit.prevent="handleSubmit">
               <div class="form-group">
                 <input
                   v-model="email"
@@ -101,8 +101,8 @@ watch(
                 <button
                   type="button"
                   class="btn-secondary"
-                  @click="handleRemindLater"
                   :disabled="loading"
+                  @click="handleRemindLater"
                 >
                   稍后再说
                 </button>

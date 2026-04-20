@@ -1,12 +1,12 @@
 import request from '@/utils/request';
-import type { Subscriber, SubscriberQuery } from '@/types/subscriber';
+import type { SubscriberQuery, SubscriberListData } from '@/types/subscriber';
 
 /**
  * 获取订阅者列表
  * @param params 查询参数
- * @returns Promise<any>
+ * @returns Promise<SubscriberListData>
  */
-export function getSubscribers(params: SubscriberQuery): Promise<any> {
+export function getSubscribers(params: SubscriberQuery): Promise<SubscriberListData> {
   return request.get('/admin/subscribers', { params });
 }
 

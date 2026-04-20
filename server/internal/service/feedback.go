@@ -61,7 +61,7 @@ func (s *FeedbackService) Submit(ctx context.Context, req *dto.SubmitFeedbackReq
 	}
 
 	go s.markFilesAsUsed(ctx, req)
-	go s.notifyAdmins(context.Background(), feedback)
+	go s.notifyAdmins(ctx, feedback)
 
 	return s.toDTO(feedback), nil
 }

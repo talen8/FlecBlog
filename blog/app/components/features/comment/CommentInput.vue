@@ -155,8 +155,8 @@ const handleSubmitComment = async () => {
       isUploading.value = true;
       try {
         await uploadPendingImages();
-      } catch (error: any) {
-        info(error.message || '图片上传失败');
+      } catch (error: unknown) {
+        info((error as Error).message || '图片上传失败');
         return;
       } finally {
         isUploading.value = false;
@@ -196,8 +196,9 @@ const handleSubmitComment = async () => {
     success('评论发表成功');
 
     if (isLoggedIn.value) triggerOnComment();
-  } catch (error: any) {
-    errors.value.email = error.message || error.response?.data?.message || '评论发表失败';
+  } catch (error: unknown) {
+    const err = error as Error & { response?: { data?: { message?: string } } };
+    errors.value.email = err.message || err.response?.data?.message || '评论发表失败';
   } finally {
     isSubmitting.value = false;
   }
@@ -208,7 +209,11 @@ const handleMainAction = () => (shouldShowSend.value ? handleSubmitComment() : h
 const handleSecondaryAction = (event: Event) => {
   event.stopPropagation();
   showExpandedBtn.value = false;
-  isUserInfoFilled.value ? handleLogin() : handleSubmitComment();
+  if (isUserInfoFilled.value) {
+    handleLogin();
+  } else {
+    handleSubmitComment();
+  }
 };
 const toggleExpandedBtn = (event: Event) => {
   event.stopPropagation();
@@ -407,7 +412,7 @@ onUnmounted(() => {
               aria-label="游客评论信息说明"
               title="游客评论信息说明"
             >
-              <i class="ri-information-line"></i>
+              <i class="ri-information-line" />
             </button>
             <div class="guest-policy-tooltip" role="note">
               <p v-for="line in guestPrivacyNotice" :key="line">{{ line }}</p>
@@ -445,11 +450,13 @@ onUnmounted(() => {
         {{ commentContent.length }}/500
       </div>
       <transition name="expand">
+        <!-- eslint-disable vue/no-v-html -->
         <div
           v-if="showPreview"
           class="preview-area markdown-body"
           v-html="renderedMarkdown || '<p class=\'empty-hint\'>暂无内容</p>'"
-        ></div>
+        />
+        <!-- eslint-enable vue/no-v-html -->
       </transition>
     </div>
 
@@ -459,24 +466,24 @@ onUnmounted(() => {
           <span class="reply-tag-text">回复 {{ replyTo }}</span>
           <button
             class="reply-tag-close"
-            @click="handleCancelReply"
             :disabled="isSubmitting"
             aria-label="取消回复"
+            @click="handleCancelReply"
           >
-            <i class="ri-close-line"></i>
+            <i class="ri-close-line" />
           </button>
         </div>
         <div class="emoji-wrapper">
           <button
             ref="emojiButtonRef"
             class="tool-btn"
-            @click="toggleEmojiPicker"
             title="表情"
             aria-label="插入表情"
             :disabled="isSubmitting || isUploading"
             :class="{ active: showEmojiPicker }"
+            @click="toggleEmojiPicker"
           >
-            <i class="ri-emotion-line"></i>
+            <i class="ri-emotion-line" />
           </button>
         </div>
         <transition name="fade-scale">
@@ -489,13 +496,13 @@ onUnmounted(() => {
         </transition>
         <button
           class="tool-btn"
-          @click="handleImageUpload"
           title="图片"
           aria-label="上传图片"
           :disabled="isSubmitting || isUploading"
           :class="{ uploading: isUploading }"
+          @click="handleImageUpload"
         >
-          <i :class="isUploading ? 'ri-loader-4-line rotating' : 'ri-image-line'"></i>
+          <i :class="isUploading ? 'ri-loader-4-line rotating' : 'ri-image-line'" />
         </button>
         <input
           ref="fileInputRef"
@@ -506,42 +513,42 @@ onUnmounted(() => {
         />
         <button
           class="tool-btn"
-          @click="togglePreview"
           :title="showPreview ? '编辑' : 'Markdown预览'"
           :aria-label="showPreview ? '切换到编辑模式' : '切换到预览模式'"
           :class="{ active: showPreview }"
           :disabled="isSubmitting || isUploading"
+          @click="togglePreview"
         >
-          <i :class="showPreview ? 'ri-edit-line' : 'ri-eye-line'"></i>
+          <i :class="showPreview ? 'ri-edit-line' : 'ri-eye-line'" />
         </button>
       </div>
       <div ref="buttonGroupRef" class="button-group">
         <button
           class="submit-btn main-btn"
-          @click="handleMainAction"
           :disabled="isSubmitting"
           :aria-label="mainBtn.text"
+          @click="handleMainAction"
         >
-          <i :class="mainBtn.icon"></i>{{ mainBtn.text }}
+          <i :class="mainBtn.icon" />{{ mainBtn.text }}
         </button>
         <template v-if="!isLoggedIn">
           <button
             class="submit-btn expand-btn"
-            @click="toggleExpandedBtn"
             :disabled="isSubmitting"
             aria-label="更多选项"
+            @click="toggleExpandedBtn"
           >
-            <i class="ri-more-2-fill"></i>
+            <i class="ri-more-2-fill" />
           </button>
           <transition name="slide-fade">
             <button
               v-if="showExpandedBtn"
               class="submit-btn secondary-btn"
-              @click="handleSecondaryAction"
               :disabled="isSubmitting"
               :aria-label="secondaryBtn.text"
+              @click="handleSecondaryAction"
             >
-              <i :class="secondaryBtn.icon"></i>{{ secondaryBtn.text }}
+              <i :class="secondaryBtn.icon" />{{ secondaryBtn.text }}
             </button>
           </transition>
         </template>

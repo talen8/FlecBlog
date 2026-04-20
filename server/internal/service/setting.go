@@ -106,18 +106,19 @@ const (
 )
 
 // 配置键常量 - OAuth 相关
+// #nosec G101 - 这些是配置项键名，不是实际凭证
 const (
 	KeyOAuthGithubEnabled         = "oauth.github.enabled"
 	KeyOAuthGithubClientID        = "oauth.github.client_id"
-	KeyOAuthGithubClientSecret    = "oauth.github.client_secret"
+	KeyOAuthGithubClientSecret    = "oauth.github.client_secret" // #nosec G101 - 配置键名
 	KeyOAuthGithubRedirectURL     = "oauth.github.redirect_url"
 	KeyOAuthGoogleEnabled         = "oauth.google.enabled"
 	KeyOAuthGoogleClientID        = "oauth.google.client_id"
-	KeyOAuthGoogleClientSecret    = "oauth.google.client_secret"
+	KeyOAuthGoogleClientSecret    = "oauth.google.client_secret" // #nosec G101 - 配置键名
 	KeyOAuthGoogleRedirectURL     = "oauth.google.redirect_url"
 	KeyOAuthQQEnabled             = "oauth.qq.enabled"
 	KeyOAuthQQClientID            = "oauth.qq.client_id"     // QQ AppID
-	KeyOAuthQQClientSecret        = "oauth.qq.client_secret" // QQ AppKey
+	KeyOAuthQQClientSecret        = "oauth.qq.client_secret" // QQ AppKey #nosec G101 - 配置键名
 	KeyOAuthQQRedirectURL         = "oauth.qq.redirect_url"
 	KeyOAuthMicrosoftEnabled      = "oauth.microsoft.enabled"
 	KeyOAuthMicrosoftClientID     = "oauth.microsoft.client_id"

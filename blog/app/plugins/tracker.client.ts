@@ -9,7 +9,7 @@
 // 类型声明
 export interface TrackerPlugin {
   trackPageView: (path?: string, articleId?: number) => void;
-  trackEvent: (name: string, data?: Record<string, any>) => void;
+  trackEvent: (name: string, data?: Record<string, unknown>) => void;
   setArticleId: (id?: number) => void;
 }
 
@@ -42,7 +42,7 @@ export default defineNuxtPlugin({
 
     const send = (
       type: string,
-      extra: Record<string, any> = {},
+      extra: Record<string, unknown> = {},
       url?: string,
       articleId?: number
     ) => {
@@ -54,8 +54,11 @@ export default defineNuxtPlugin({
       const blob = new Blob([JSON.stringify(payload)], {
         type: 'application/json',
       });
-      navigator.sendBeacon?.(endpoint, blob) ||
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(endpoint, blob);
+      } else {
         fetch(endpoint, { method: 'POST', body: blob, keepalive: true }).catch(() => {});
+      }
     };
 
     const sendDuration = (url?: string, articleId?: number) => {
@@ -65,7 +68,11 @@ export default defineNuxtPlugin({
 
     // 页面隐藏/卸载时发送停留时长
     document.addEventListener('visibilitychange', () => {
-      document.hidden ? sendDuration(undefined, currentArticleId) : (pageStartTime = Date.now());
+      if (document.hidden) {
+        sendDuration(undefined, currentArticleId);
+      } else {
+        pageStartTime = Date.now();
+      }
     });
     window.addEventListener('beforeunload', () => sendDuration(undefined, currentArticleId));
 
@@ -85,7 +92,7 @@ export default defineNuxtPlugin({
         tracker: {
           trackPageView: (path?: string, articleId?: number) =>
             send('pageview', {}, path, articleId),
-          trackEvent: (name: string, data?: Record<string, any>) =>
+          trackEvent: (name: string, data?: Record<string, unknown>) =>
             name && send('event', { event_name: name, event_data: data }),
           setArticleId: (id?: number) => {
             currentArticleId = id;

@@ -18,7 +18,7 @@ const currentSlide = ref(0);
 const slideWrapper = ref<HTMLElement>();
 
 const topAggregateMenus = computed(() =>
-  aggregateMenus.value.filter((menu: { parent_id: any }) => !menu.parent_id)
+  aggregateMenus.value.filter((menu: { parent_id: number | null }) => !menu.parent_id)
 );
 
 const isIconUrl = (icon: string) => {
@@ -99,12 +99,12 @@ watch(
                   <template v-for="menu in navigationMenus" :key="menu.id">
                     <template v-if="menu.children?.length">
                       <div class="nav-item parent-item" @click="toggleSubmenu(menu.id)">
-                        <i v-if="menu.icon && !isIconUrl(menu.icon)" :class="menu.icon"></i>
+                        <i v-if="menu.icon && !isIconUrl(menu.icon)" :class="menu.icon" />
                         <span>{{ menu.title }}</span>
                         <i
                           class="ri-arrow-right-s-line"
                           :class="{ rotate: expandedMenus.has(menu.id) }"
-                        ></i>
+                        />
                       </div>
                       <Transition name="submenu">
                         <div v-show="expandedMenus.has(menu.id)" class="submenu">
@@ -121,7 +121,7 @@ watch(
                       </Transition>
                     </template>
                     <a v-else :href="menu.url" class="nav-item" @click="close">
-                      <i v-if="menu.icon && !isIconUrl(menu.icon)" :class="menu.icon"></i>
+                      <i v-if="menu.icon && !isIconUrl(menu.icon)" :class="menu.icon" />
                       <span>{{ menu.title }}</span>
                     </a>
                   </template>
@@ -131,8 +131,8 @@ watch(
                 <div class="aggregate-wrapper">
                   <div
                     v-for="menu in topAggregateMenus"
-                    :key="menu.id"
                     v-show="menu.children?.length"
+                    :key="menu.id"
                   >
                     <div class="section-title">{{ menu.title }}</div>
                     <div class="aggregate-grid">
@@ -149,7 +149,7 @@ watch(
                           :alt="child.title"
                           loading="lazy"
                         />
-                        <i v-else-if="child.icon" :class="child.icon"></i>
+                        <i v-else-if="child.icon" :class="child.icon" />
                         <span>{{ child.title }}</span>
                       </a>
                     </div>
@@ -163,12 +163,12 @@ watch(
                   class="indicator-dot"
                   :class="{ active: currentSlide === 0 }"
                   @click="switchSlide(0)"
-                ></div>
+                />
                 <div
                   class="indicator-dot"
                   :class="{ active: currentSlide === 1 }"
                   @click="switchSlide(1)"
-                ></div>
+                />
               </div>
             </div>
           </div>

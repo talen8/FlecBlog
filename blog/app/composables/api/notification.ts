@@ -10,10 +10,10 @@ export const getNotifications = async (params: GetNotificationsParams) => {
 
 /** 标记单条通知已读 */
 export const markAsRead = async (id: number) => {
-  return notificationApi.put<void>(`/notifications/${id}/read`);
+  await notificationApi.put(`/notifications/${id}/read`);
 };
 
 /** 标记全部通知已读 */
 export const markAllAsRead = async () => {
-  return notificationApi.put<void>('/notifications/read-all');
+  await notificationApi.put('/notifications/read-all');
 };

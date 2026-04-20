@@ -34,7 +34,7 @@ const articleUrl = computed(() => {
           <span class="label">发布时间</span>
           <span class="value">{{ formatDate(article.publish_time) }}</span>
         </div>
-        <div class="info-item" v-if="article.update_time">
+        <div v-if="article.update_time" class="info-item">
           <span class="label">更新时间</span>
           <span class="value">{{ formatDate(article.update_time) }}</span>
         </div>
@@ -54,7 +54,7 @@ const articleUrl = computed(() => {
       </div>
     </div>
     <div class="copyright-icon">
-      <i class="ri-creative-commons-line"></i>
+      <i class="ri-creative-commons-line" />
     </div>
   </div>
 </template>

@@ -58,7 +58,7 @@ import { Refresh } from '@element-plus/icons-vue';
 withDefaults(
   defineProps<{
     title: string;
-    data: any[];
+    data: unknown[];
     loading?: boolean;
     total?: number;
     page?: number;

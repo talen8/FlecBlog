@@ -1,7 +1,7 @@
 export const isDark = ref(false);
 
 // 客户端初始化
-if (process.client) {
+if (import.meta.client) {
   // 从 DOM 读取已设置的主题（由 nuxt.config.ts 内联脚本提前设置）
   const currentTheme = document.documentElement.getAttribute('data-theme');
   isDark.value = currentTheme === 'dark';

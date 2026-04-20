@@ -56,7 +56,7 @@ const search = async (newPage = 1) => {
     });
     articles.value = data.list;
     total.value = data.total;
-  } catch (error) {
+  } catch {
     articles.value = [];
     total.value = 0;
   } finally {
@@ -100,7 +100,7 @@ watch(
           <!-- 标题栏 -->
           <div class="header">
             <span class="title">搜索</span>
-            <button class="close" @click="close"><i class="ri-close-line"></i></button>
+            <button class="close" @click="close"><i class="ri-close-line" /></button>
           </div>
 
           <!-- 搜索栏 -->
@@ -111,14 +111,14 @@ watch(
               placeholder="输入关键词搜索..."
               @keyup.esc="close"
             />
-            <i v-if="loading" class="ri-loader-4-line spin loading-icon"></i>
+            <i v-if="loading" class="ri-loader-4-line spin loading-icon" />
           </div>
 
           <!-- 结果区域 -->
           <div v-if="hasSearched" class="results">
             <!-- 加载中 -->
             <div v-if="loading" class="loading">
-              <i class="ri-loader-4-line spin"></i>
+              <i class="ri-loader-4-line spin" />
             </div>
             <!-- 有结果 -->
             <template v-else-if="articles.length > 0">
@@ -131,8 +131,10 @@ watch(
               >
                 <NuxtImg v-if="item.cover" :src="item.cover" :alt="item.title" loading="lazy" />
                 <div class="info">
-                  <h3 v-html="highlight(item.title)"></h3>
-                  <p v-if="item.excerpt" class="excerpt" v-html="highlight(item.excerpt)"></p>
+                  <!-- eslint-disable-next-line vue/no-v-html -- 高亮关键词已转义特殊字符 -->
+                  <h3 v-html="highlight(item.title)" />
+                  <!-- eslint-disable-next-line vue/no-v-html -- 高亮关键词已转义特殊字符 -->
+                  <p v-if="item.excerpt" class="excerpt" v-html="highlight(item.excerpt)" />
                   <div class="meta">
                     <span>{{ formatDate(item.publish_time) }}</span>
                     <span v-if="item.category">{{ item.category.name }}</span>
@@ -142,18 +144,18 @@ watch(
 
               <!-- 分页 -->
               <div v-if="totalPages > 1" class="pagination">
-                <button @click="prevPage" :disabled="page <= 1">
-                  <i class="ri-arrow-left-s-line"></i>
+                <button :disabled="page <= 1" @click="prevPage">
+                  <i class="ri-arrow-left-s-line" />
                 </button>
                 <span>{{ page }} / {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="page >= totalPages">
-                  <i class="ri-arrow-right-s-line"></i>
+                <button :disabled="page >= totalPages" @click="nextPage">
+                  <i class="ri-arrow-right-s-line" />
                 </button>
               </div>
             </template>
             <!-- 无结果 -->
             <div v-else class="empty">
-              <i class="ri-search-line"></i>
+              <i class="ri-search-line" />
               <p>未找到相关文章</p>
             </div>
           </div>

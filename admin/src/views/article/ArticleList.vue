@@ -392,23 +392,6 @@ const downloadBlob = (blob: Blob, filename: string) => {
   URL.revokeObjectURL(url);
 };
 
-// 复制到剪贴板（纯文本）
-const copyToClipboard = async (text: string) => {
-  if (navigator.clipboard) {
-    await navigator.clipboard.writeText(text);
-  } else {
-    // 降级方案
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-  }
-};
-
 // 复制富文本到剪贴板（HTML 格式）
 const copyRichText = async (html: string) => {
   try {

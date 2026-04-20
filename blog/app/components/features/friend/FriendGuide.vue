@@ -12,7 +12,7 @@ const contactEmail = computed(() => basicConfig.value.author_email || '');
 
 const siteConfig = computed(() => ({
   name: blogConfig.value.title,
-  link: process.client ? window.location.origin : '',
+  link: import.meta.client ? window.location.origin : '',
   avatar: blogConfig.value.favicon,
   description: blogConfig.value.slogan,
   screenshot: blogConfig.value.screenshot,
@@ -104,10 +104,10 @@ const submitApplyForm = async () => {
 
     // 关闭弹窗（表单会被watch自动重置）
     showForm.value = false;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('申请失败:', error);
     // 这里应该用error toast，暂时用alert
-    alert(error.message || '申请失败，请稍后重试');
+    alert((error as Error).message || '申请失败，请稍后重试');
   } finally {
     formSubmitting.value = false;
   }
@@ -327,7 +327,7 @@ watch(showForm, newValue => {
           required
           maxlength="500"
           rows="3"
-        ></textarea>
+        />
       </div>
 
       <div class="form-group">

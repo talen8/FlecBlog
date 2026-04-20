@@ -36,7 +36,7 @@ if (initialData.value) {
 
 const handlePageChange = async (page: number) => {
   await fetchArticles({ page });
-  if (process.client) {
+  if (import.meta.client) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   setTimeout(() => waterfall(), 100);
@@ -44,7 +44,7 @@ const handlePageChange = async (page: number) => {
 
 onMounted(async () => {
   // 只在客户端初始化瀑布流（仅针对瀑布流布局）
-  if (process.client && homeLayout.value === 'waterfall') {
+  if (import.meta.client && homeLayout.value === 'waterfall') {
     await nextTick();
     requestAnimationFrame(() => {
       waterfall();
@@ -57,7 +57,7 @@ const route = useRoute();
 watch(
   () => route.path,
   async newPath => {
-    if (newPath === '/' && process.client && homeLayout.value === 'waterfall') {
+    if (newPath === '/' && import.meta.client && homeLayout.value === 'waterfall') {
       await nextTick();
       setTimeout(() => {
         waterfall();
@@ -100,27 +100,27 @@ useSeoMeta({
           <NuxtLink class="article-title" :to="article.url">{{ article.title }}</NuxtLink>
           <div class="article-meta-wrap">
             <span class="article-date">
-              <i class="ri-calendar-2-fill"></i>
+              <i class="ri-calendar-2-fill" />
               <span class="article-meta-label">发表于</span>
               <span>{{ formatDate(article.publish_time) }}</span>
             </span>
-            <span class="article-meta" v-if="article.category">
-              <i class="ri-inbox-2-fill"></i>
+            <span v-if="article.category" class="article-meta">
+              <i class="ri-inbox-2-fill" />
               <NuxtLink class="article-meta__categories" :to="article.category.url">{{
                 article.category.name
               }}</NuxtLink>
             </span>
-            <span class="article-meta tags" v-if="article.tags?.length">
+            <span v-if="article.tags?.length" class="article-meta tags">
               <template v-for="(tag, index) in article.tags" :key="tag.id">
                 <template v-if="Number(index) > 0">
                   <span class="article-meta-link">•</span>
                 </template>
-                <i class="ri-price-tag-3-fill"></i>
+                <i class="ri-price-tag-3-fill" />
                 <NuxtLink class="article-meta__tags" :to="tag.url">{{ tag.name }}</NuxtLink>
               </template>
             </span>
             <span class="article-meta comments">
-              <i class="ri-message-3-fill"></i>
+              <i class="ri-message-3-fill" />
               <span>{{ article.comment_count }}条评论</span>
             </span>
           </div>
@@ -138,21 +138,21 @@ useSeoMeta({
           <NuxtLink class="single-column-title" :to="article.url">{{ article.title }}</NuxtLink>
           <div class="single-column-meta">
             <span class="article-date">
-              <i class="ri-calendar-2-fill"></i>
+              <i class="ri-calendar-2-fill" />
               <span>{{ formatDate(article.publish_time) }}</span>
             </span>
-            <span class="article-meta" v-if="article.category">
-              <i class="ri-inbox-2-fill"></i>
+            <span v-if="article.category" class="article-meta">
+              <i class="ri-inbox-2-fill" />
               <NuxtLink class="article-meta__categories" :to="article.category.url">{{
                 article.category.name
               }}</NuxtLink>
             </span>
-            <span class="article-meta tags" v-if="article.tags?.length">
+            <span v-if="article.tags?.length" class="article-meta tags">
               <template v-for="(tag, index) in article.tags" :key="tag.id">
                 <template v-if="Number(index) > 0">
                   <span class="article-meta-link">•</span>
                 </template>
-                <i class="ri-price-tag-3-fill"></i>
+                <i class="ri-price-tag-3-fill" />
                 <NuxtLink class="article-meta__tags" :to="tag.url">{{ tag.name }}</NuxtLink>
               </template>
             </span>
@@ -161,7 +161,7 @@ useSeoMeta({
             {{ article.summary }}
           </div>
         </div>
-        <div class="single-column-cover" v-if="article.cover">
+        <div v-if="article.cover" class="single-column-cover">
           <div v-if="article.is_top || article.is_essence" class="single-column-badge">
             <span v-if="article.is_top" class="badge-top">置顶</span>
             <span v-else-if="article.is_essence" class="badge-essence">精选</span>

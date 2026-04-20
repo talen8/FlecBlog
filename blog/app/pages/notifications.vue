@@ -50,7 +50,7 @@ const handleNotificationClick = (notification: Notification) => {
 
 onMounted(() => {
   // 只在客户端获取需要认证的数据
-  if (process.client) {
+  if (import.meta.client) {
     resetPage();
     loadNotifications();
   }
@@ -91,7 +91,7 @@ onMounted(() => {
               {{ notification.content }}
             </p>
           </div>
-          <div v-if="!notification.is_read" class="unread-indicator"></div>
+          <div v-if="!notification.is_read" class="unread-indicator" />
         </div>
       </div>
 

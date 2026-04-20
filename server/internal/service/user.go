@@ -843,7 +843,7 @@ func (s *UserService) downloadAndSaveCravatarAvatar(email string, userID uint, h
 	// 下载头像
 	reader, err := utils.DownloadCravatarAvatar(email)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	// 生成文件名
@@ -861,7 +861,7 @@ func (s *UserService) downloadAndSaveCravatarAvatar(email string, userID uint, h
 	)
 
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return fileURL, nil

@@ -78,7 +78,7 @@ func GenerateExcerpt(content, keyword string, maxLength int) string {
 		excerpt = "..." + excerpt
 	}
 	if end < totalLength {
-		excerpt = excerpt + "..."
+		excerpt += "..."
 	}
 
 	return excerpt

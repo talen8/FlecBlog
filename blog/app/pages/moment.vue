@@ -113,7 +113,7 @@ const handleCommentClick = (moment: Moment) => {
     <h1 class="page-title">动态</h1>
 
     <div v-if="moments.length === 0" class="empty-state">
-      <i class="ri-chat-3-line"></i>
+      <i class="ri-chat-3-line" />
       <p>暂无动态</p>
     </div>
 
@@ -158,7 +158,7 @@ const handleCommentClick = (moment: Moment) => {
                 v-if="index === 5 && moment.content.images.length > 6"
                 class="more-images-overlay"
               >
-                <i class="ri-image-line"></i>
+                <i class="ri-image-line" />
                 <span>+{{ moment.content.images.length - 6 }}</span>
               </div>
             </div>
@@ -171,7 +171,7 @@ const handleCommentClick = (moment: Moment) => {
               :src="moment.content.video.url"
               controls
               preload="metadata"
-            ></video>
+            />
 
             <iframe
               v-else-if="moment.content.video.platform === 'bilibili'"
@@ -181,7 +181,7 @@ const handleCommentClick = (moment: Moment) => {
               frameborder="no"
               framespacing="0"
               allowfullscreen="true"
-            ></iframe>
+            />
 
             <iframe
               v-else-if="moment.content.video.platform === 'youtube'"
@@ -196,7 +196,7 @@ const handleCommentClick = (moment: Moment) => {
                 picture-in-picture;
               "
               allowfullscreen
-            ></iframe>
+            />
           </div>
 
           <!-- 音乐内容 -->
@@ -223,7 +223,7 @@ const handleCommentClick = (moment: Moment) => {
               <div class="link-title">{{ moment.content.link.title }}</div>
               <div class="link-url">{{ moment.content.link.url }}</div>
             </div>
-            <i class="ri-external-link-line"></i>
+            <i class="ri-external-link-line" />
           </a>
         </div>
 
@@ -231,17 +231,17 @@ const handleCommentClick = (moment: Moment) => {
         <div class="moment-footer">
           <div class="moment-info">
             <span v-if="moment.content.location" class="location">
-              <i class="ri-map-pin-line"></i>
+              <i class="ri-map-pin-line" />
               {{ moment.content.location }}
             </span>
             <span v-if="moment.content.tags" class="tags">
-              <i class="ri-price-tag-3-line"></i>
+              <i class="ri-price-tag-3-line" />
               {{ moment.content.tags }}
             </span>
           </div>
           <div class="moment-actions">
-            <button class="comment-btn" @click="handleCommentClick(moment)" title="评论此动态">
-              <i class="ri-chat-3-line"></i>
+            <button class="comment-btn" title="评论此动态" @click="handleCommentClick(moment)">
+              <i class="ri-chat-3-line" />
             </button>
           </div>
         </div>
@@ -250,7 +250,7 @@ const handleCommentClick = (moment: Moment) => {
 
     <!-- 底部提示 -->
     <div v-if="moments.length > 0" class="moment-tip">
-      <i class="ri-information-line"></i>
+      <i class="ri-information-line" />
       <span>只显示最近{{ momentsPageSize }}条动态</span>
     </div>
 

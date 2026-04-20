@@ -33,16 +33,16 @@ const displayArchives = computed(() => {
 <template>
   <div class="card-widget card-archives">
     <div class="item-headline" :class="{ 'is-expanded': isExpanded }">
-      <i class="ri-archive-fill"></i>
+      <i class="ri-archive-fill" />
       <span>归档</span>
       <i
         class="collapse-icon ri-arrow-left-s-fill"
         :class="{ 'is-expanded': isExpanded }"
         @click="toggleExpand"
-      ></i>
+      />
     </div>
     <ul class="card-list" :class="{ 'is-expanded': isExpanded }">
-      <li class="card-list-item" v-for="(archive, i) in displayArchives" :key="i">
+      <li v-for="(archive, i) in displayArchives" :key="i" class="card-list-item">
         <router-link
           class="card-list-link"
           :to="archive.isEarlier ? '/archive' : `/archive/${archive.year}/${archive.month}`"

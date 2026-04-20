@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="article-nav" v-if="prev || next">
+  <div v-if="prev || next" class="article-nav">
     <a v-if="prev" :href="prev.url" class="nav-item prev">
       <div class="label">← 上一篇</div>
       <div class="title">{{ prev.title }}</div>

@@ -2,7 +2,7 @@ package utils
 
 import (
 	"bytes"
-	"crypto/md5"
+	"crypto/md5" // #nosec G501 - MD5 用于 Gravatar 头像哈希，是标准做法
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -14,6 +14,7 @@ import (
 // GetEmailHash 计算邮箱的 MD5 哈希
 func GetEmailHash(email string) string {
 	email = strings.TrimSpace(strings.ToLower(email))
+	// #nosec G401 - MD5 用于 Gravatar 头像哈希，是标准做法
 	hash := md5.Sum([]byte(email))
 	return hex.EncodeToString(hash[:])
 }
@@ -32,7 +33,9 @@ func DownloadRemoteImage(url string) (io.Reader, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("HTTP %d", resp.StatusCode)

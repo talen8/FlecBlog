@@ -6,7 +6,7 @@
 
 <template>
   <div class="outdated-notice">
-    <i class="ri-error-warning-line"></i>
+    <i class="ri-error-warning-line" />
     <span>本文内容可能已过时或不再适用，请结合实际情况谨慎参考。</span>
   </div>
 </template>

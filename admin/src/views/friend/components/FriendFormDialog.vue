@@ -399,8 +399,10 @@ const handleSubmit = async () => {
           .then(uploadedUrl => {
             if (uploadedUrl) formData.value[field] = uploadedUrl;
           })
-          .catch((error: any) => {
-            ElMessage.error(error.message || `${field === 'avatar' ? '头像' : '截图'}上传失败`);
+          .catch((error: unknown) => {
+            ElMessage.error(
+              (error as Error)?.message || `${field === 'avatar' ? '头像' : '截图'}上传失败`
+            );
           })
       );
     }

@@ -93,7 +93,7 @@ const fetchList = async () => {
     const res = await getFeedbackList(params);
     list.value = res.list || [];
     total.value = res.total || 0;
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('获取反馈列表失败');
     list.value = [];
     total.value = 0;
@@ -115,7 +115,7 @@ const handleDelete = async (id: number) => {
     await deleteFeedback(id);
     ElMessage.success('删除成功');
     fetchList();
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败');
     }
@@ -132,8 +132,11 @@ const getReportTypeLabel = (reportType: string) => {
   return labels[reportType] || reportType;
 };
 
-const getReportTypeTagType = (reportType: string) => {
-  const types: Record<string, any> = {
+// Element Plus 标签类型
+type TagType = 'success' | 'warning' | 'danger' | 'info';
+
+const getReportTypeTagType = (reportType: string): TagType => {
+  const types: Record<string, TagType> = {
     copyright: 'warning',
     inappropriate: 'danger',
     summary: 'info',
@@ -151,8 +154,8 @@ const getStatusLabel = (status: FeedbackStatus) => {
   return labels[status] || status;
 };
 
-const getStatusTagType = (status: FeedbackStatus) => {
-  const types: Record<FeedbackStatus, any> = {
+const getStatusTagType = (status: FeedbackStatus): TagType => {
+  const types: Record<FeedbackStatus, TagType> = {
     pending: 'warning',
     resolved: 'success',
     closed: 'info',

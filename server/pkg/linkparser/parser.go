@@ -43,7 +43,9 @@ func Parse(urlStr string) (*Metadata, error) {
 	if err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("HTTP状态码: %d", resp.StatusCode)

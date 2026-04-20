@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { ApiResponse } from '@@/types/request';
+
 definePageMeta({
   showSidebar: false,
 });
@@ -12,7 +14,7 @@ const route = useRoute();
 const {
   public: { apiUrl },
 } = useRuntimeConfig();
-const { success, error } = useToast();
+const { success, error: errorToast } = useToast();
 
 // 订阅
 const showSubscribeDialog = ref(false);
@@ -45,7 +47,7 @@ const handleSubscribe = async () => {
 
   subscribeLoading.value = true;
   try {
-    const res: any = await $fetch(`${apiUrl}/subscribe`, {
+    const res = await $fetch<ApiResponse>(`${apiUrl}/subscribe`, {
       method: 'POST',
       body: { email: email.value },
     });
@@ -55,10 +57,11 @@ const handleSubscribe = async () => {
       email.value = '';
       success('订阅成功！');
     } else {
-      error(res.message || '订阅失败');
+      errorToast(res.message || '订阅失败');
     }
-  } catch (err: any) {
-    error(err.data?.message || '订阅失败');
+  } catch (error: unknown) {
+    const err = error as Error & { data?: { message?: string } };
+    errorToast(err.data?.message || '订阅失败');
   } finally {
     subscribeLoading.value = false;
   }
@@ -68,12 +71,13 @@ const handleSubscribe = async () => {
 const handleUnsubscribe = async (token: string) => {
   unsubscribeLoading.value = true;
   try {
-    const res: any = await $fetch(`${apiUrl}/subscribe/unsubscribe?token=${token}`);
+    const res = await $fetch<ApiResponse>(`${apiUrl}/subscribe/unsubscribe?token=${token}`);
     unsubscribeSuccess.value = res.code === 0;
     unsubscribeMessage.value = res.code === 0 ? '退订成功！' : res.message || '退订失败';
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error & { data?: { message?: string } };
     unsubscribeSuccess.value = false;
-    unsubscribeMessage.value = error.data?.message || '退订失败';
+    unsubscribeMessage.value = err.data?.message || '退订失败';
   } finally {
     unsubscribeLoading.value = false;
   }
@@ -98,7 +102,7 @@ const closeUnsubscribeDialog = () => {
         <div class="subscribe-info-group">
           <div class="subscribe-title">公众号订阅</div>
           <div class="subscribe-info">推荐的订阅方式</div>
-          <i class="ri-wechat-fill subscribe-icon"></i>
+          <i class="ri-wechat-fill subscribe-icon" />
         </div>
       </a>
 
@@ -113,7 +117,7 @@ const closeUnsubscribeDialog = () => {
         <div class="subscribe-info-group">
           <div class="subscribe-title">邮件订阅</div>
           <div class="subscribe-info">推荐的订阅方式</div>
-          <i class="ri-mail-fill subscribe-icon"></i>
+          <i class="ri-mail-fill subscribe-icon" />
         </div>
       </a>
 
@@ -123,7 +127,7 @@ const closeUnsubscribeDialog = () => {
         <div class="subscribe-info-group">
           <div class="subscribe-title">RSS</div>
           <div class="subscribe-info">备用订阅方式</div>
-          <i class="ri-rss-fill subscribe-icon"></i>
+          <i class="ri-rss-fill subscribe-icon" />
         </div>
       </a>
     </div>
@@ -166,7 +170,7 @@ const closeUnsubscribeDialog = () => {
     >
       <div class="dialog-content unsubscribe-content">
         <div v-if="unsubscribeLoading" class="loading-state">
-          <i class="ri-loader-4-line loading-icon"></i>
+          <i class="ri-loader-4-line loading-icon" />
           <p>{{ unsubscribeMessage }}</p>
         </div>
 
@@ -177,7 +181,7 @@ const closeUnsubscribeDialog = () => {
                 ? 'ri-checkbox-circle-line success-icon'
                 : 'ri-close-circle-line error-icon'
             "
-          ></i>
+          />
           <h3>{{ unsubscribeMessage }}</h3>
         </div>
       </div>

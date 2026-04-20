@@ -19,8 +19,8 @@ export interface MomentContent {
     favicon?: string;
   };
   location?: string;
-  book?: Record<string, any>;
-  movie?: Record<string, any>;
+  book?: Record<string, unknown>;
+  movie?: Record<string, unknown>;
 }
 
 // 动态实体

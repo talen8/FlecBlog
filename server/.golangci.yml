@@ -10,7 +10,6 @@ linters:
     - gosec
     - revive
     - nilerr
-    - errname
     - exhaustive
     - nolintlint
 

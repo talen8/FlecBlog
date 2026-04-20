@@ -22,7 +22,7 @@ watch(
   isLoggedIn,
   loggedIn => {
     // 只在客户端执行
-    if (!process.client) return;
+    if (!import.meta.client) return;
 
     // 清理旧定时器
     if (pollingTimer) {
@@ -82,22 +82,22 @@ const handleLogout = () => {
 
 <template>
   <div class="nav-button">
-    <button class="brighten" @click="openSearch" aria-label="搜索">
-      <i class="ri-search-line ri-xl"></i>
+    <button class="brighten" aria-label="搜索" @click="openSearch">
+      <i class="ri-search-line ri-xl" />
     </button>
     <!-- 主题切换按钮 - 使用 CSS 控制图标显示，避免 SSR 闪烁 -->
-    <button class="brighten theme-toggle" @click="toggleTheme" aria-label="切换主题">
-      <i class="ri-moon-line ri-xl theme-icon-moon"></i>
-      <i class="ri-sun-line ri-xl theme-icon-sun"></i>
+    <button class="brighten theme-toggle" aria-label="切换主题" @click="toggleTheme">
+      <i class="ri-moon-line ri-xl theme-icon-moon" />
+      <i class="ri-sun-line ri-xl theme-icon-sun" />
     </button>
     <!-- 登录按钮 - 客户端渲染避免 hydration mismatch -->
     <ClientOnly>
-      <button v-if="!isLoggedIn" class="brighten login-btn" @click="openLogin" aria-label="登录">
-        <i class="ri-user-line ri-xl"></i>
+      <button v-if="!isLoggedIn" class="brighten login-btn" aria-label="登录" @click="openLogin">
+        <i class="ri-user-line ri-xl" />
       </button>
       <div v-else ref="userMenuRef" class="user-menu">
-        <button class="brighten user-btn" @click="toggleUserMenu" aria-label="用户菜单">
-          <i class="ri-user-3-fill ri-xl"></i>
+        <button class="brighten user-btn" aria-label="用户菜单" @click="toggleUserMenu">
+          <i class="ri-user-3-fill ri-xl" />
         </button>
         <Transition name="dropdown">
           <div v-show="showUserMenu" class="user-dropdown" @click.stop>
@@ -109,7 +109,7 @@ const handleLogout = () => {
               </div>
             </div>
             <a href="/profile" class="dropdown-item" @click="showUserMenu = false">
-              <i class="ri-user-settings-line"></i>
+              <i class="ri-user-settings-line" />
               个人设置
             </a>
             <a
@@ -117,14 +117,14 @@ const handleLogout = () => {
               class="dropdown-item notification-item"
               @click="showUserMenu = false"
             >
-              <i class="ri-notification-3-line"></i>
+              <i class="ri-notification-3-line" />
               <span>通知中心</span>
               <span v-if="unreadCount > 0" class="notification-badge">{{
                 unreadCount > 99 ? '99+' : unreadCount
               }}</span>
             </a>
             <button class="dropdown-item" @click="handleLogout">
-              <i class="ri-logout-box-line"></i>
+              <i class="ri-logout-box-line" />
               退出登录
             </button>
           </div>
@@ -132,12 +132,12 @@ const handleLogout = () => {
       </div>
       <template #fallback>
         <button class="brighten login-btn" aria-label="登录">
-          <i class="ri-user-line ri-xl"></i>
+          <i class="ri-user-line ri-xl" />
         </button>
       </template>
     </ClientOnly>
-    <button class="button-menu brighten" @click="emit('toggleDrawer')" aria-label="打开菜单">
-      <i class="ri-menu-line ri-xl"></i>
+    <button class="button-menu brighten" aria-label="打开菜单" @click="emit('toggleDrawer')">
+      <i class="ri-menu-line ri-xl" />
     </button>
   </div>
 

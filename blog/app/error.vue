@@ -52,12 +52,12 @@ const errorInfo = computed(() => {
       <h1 class="error-title">{{ errorInfo.title }}</h1>
       <p class="error-description">{{ errorInfo.description }}</p>
       <div class="error-actions">
-        <button @click="goBack" class="btn btn-secondary">
-          <i class="ri-arrow-left-line"></i>
+        <button class="btn btn-secondary" @click="goBack">
+          <i class="ri-arrow-left-line" />
           返回上一页
         </button>
-        <button @click="handleError" class="btn btn-primary">
-          <i class="ri-home-line"></i>
+        <button class="btn btn-primary" @click="handleError">
+          <i class="ri-home-line" />
           返回首页
         </button>
       </div>

@@ -100,7 +100,7 @@ const fetchMenuTree = async () => {
   try {
     const data = await getMenuTree(selectedType.value);
     menuTree.value = data;
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('获取菜单列表失败');
   } finally {
     loading.value = false;

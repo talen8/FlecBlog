@@ -98,7 +98,9 @@ func getExecutedMigrations(db *sql.DB) (map[string]bool, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	executed := make(map[string]bool)
 	for rows.Next() {
@@ -159,7 +161,7 @@ func executeMigration(db *sql.DB, filename string) error {
 	}
 
 	if _, err := tx.Exec(string(content)); err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return err
 	}
 

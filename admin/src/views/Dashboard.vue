@@ -679,7 +679,7 @@ const renderCalendarChart = () => {
   const option = {
     tooltip: {
       position: 'top',
-      formatter: (params: any) => {
+      formatter: (params: { data: [string, number] }) => {
         return `${params.data[0]}<br/>文章数: ${params.data[1]}篇`;
       },
     },

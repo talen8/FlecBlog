@@ -159,7 +159,7 @@ const getVideoPlatformName = (platform?: string) => {
 };
 
 // 获取音乐标签
-const getMusicLabel = (music: any) => {
+const getMusicLabel = (music: { server: string; type: string }) => {
   const serverName =
     MUSIC_LABELS.server[music.server as keyof typeof MUSIC_LABELS.server] || music.server;
   const typeName = MUSIC_LABELS.type[music.type as keyof typeof MUSIC_LABELS.type] || music.type;

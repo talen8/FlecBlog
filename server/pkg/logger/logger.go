@@ -30,18 +30,18 @@ var (
 // 初始化日志文件
 func init() {
 	logDir := "./logs"
-	if err := os.MkdirAll(logDir, 0755); err != nil {
+	if err := os.MkdirAll(logDir, 0750); err != nil {
 		log.Printf("创建日志目录失败: %v", err)
 		return
 	}
 
 	var err error
-	logFile, err = os.OpenFile(filepath.Join(logDir, "app.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err = os.OpenFile(filepath.Join(logDir, "app.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		log.Printf("打开日志文件失败: %v", err)
 	}
 
-	errorLogFile, err = os.OpenFile(filepath.Join(logDir, "error.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	errorLogFile, err = os.OpenFile(filepath.Join(logDir, "error.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		log.Printf("打开错误日志文件失败: %v", err)
 	}
@@ -206,9 +206,9 @@ func Close() {
 	mu.Lock()
 	defer mu.Unlock()
 	if logFile != nil {
-		logFile.Close()
+		_ = logFile.Close()
 	}
 	if errorLogFile != nil {
-		errorLogFile.Close()
+		_ = errorLogFile.Close()
 	}
 }

@@ -37,20 +37,20 @@ const handleConfirm = () => {
           <!-- 头部 -->
           <div v-if="title" class="dialog-header">
             <h3 class="dialog-title">{{ title }}</h3>
-            <button class="dialog-close" @click="handleClose" :disabled="loading">
-              <i class="ri-close-line"></i>
+            <button class="dialog-close" :disabled="loading" @click="handleClose">
+              <i class="ri-close-line" />
             </button>
           </div>
 
           <!-- 内容 -->
           <div class="dialog-body">
-            <slot></slot>
+            <slot />
           </div>
 
           <!-- 底部 -->
           <div v-if="confirmText" class="dialog-footer">
-            <button class="btn btn-primary" @click="handleConfirm" :disabled="loading">
-              <i v-if="loading" class="ri-loader-4-line loading"></i>
+            <button class="btn btn-primary" :disabled="loading" @click="handleConfirm">
+              <i v-if="loading" class="ri-loader-4-line loading" />
               <span>{{ loading ? '处理中..' : confirmText }}</span>
             </button>
           </div>

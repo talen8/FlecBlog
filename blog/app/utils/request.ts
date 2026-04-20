@@ -41,6 +41,7 @@ const doRefreshToken = async (): Promise<boolean> => {
 };
 
 // 封装请求，支持自动 Token 和 401 刷新
+/* eslint-disable @typescript-eslint/no-explicit-any -- 通用请求封装，返回类型由调用方指定 */
 export async function apiRequest<T = any>(
   url: string,
   options: Omit<FetchOptions, 'method'> & { method?: HttpMethod; _retry?: boolean } = {}
@@ -76,20 +77,24 @@ export async function apiRequest<T = any>(
     throw error;
   }
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * GET请求
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- 通用请求封装，返回类型由调用方指定 */
 export async function get<T = any>(
   url: string,
   options: Omit<FetchOptions, 'method'> = {}
 ): Promise<T> {
   return await apiRequest<T>(url, { ...options, method: 'GET' });
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * POST请求
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- 通用请求封装，返回类型和请求体由调用方指定 */
 export async function post<T = any>(
   url: string,
   body?: any,
@@ -97,10 +102,12 @@ export async function post<T = any>(
 ): Promise<T> {
   return await apiRequest<T>(url, { ...options, method: 'POST', body });
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * PUT请求
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- 通用请求封装，返回类型和请求体由调用方指定 */
 export async function put<T = any>(
   url: string,
   body?: any,
@@ -108,10 +115,12 @@ export async function put<T = any>(
 ): Promise<T> {
   return await apiRequest<T>(url, { ...options, method: 'PUT', body });
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * PATCH请求
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- 通用请求封装，返回类型和请求体由调用方指定 */
 export async function patch<T = any>(
   url: string,
   body?: any,
@@ -119,13 +128,16 @@ export async function patch<T = any>(
 ): Promise<T> {
   return await apiRequest<T>(url, { ...options, method: 'PATCH', body });
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * DELETE请求
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- 通用请求封装，返回类型由调用方指定 */
 export async function del<T = any>(
   url: string,
   options: Omit<FetchOptions, 'method'> = {}
 ): Promise<T> {
   return await apiRequest<T>(url, { ...options, method: 'DELETE' });
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */

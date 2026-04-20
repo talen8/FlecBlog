@@ -3,7 +3,7 @@ defineProps<{ article: { tags: Array<{ id: number; name: string; url: string }> 
 </script>
 
 <template>
-  <div class="article-tags" v-if="article.tags?.length">
+  <div v-if="article.tags?.length" class="article-tags">
     <a v-for="tag in article.tags" :key="tag.id" :href="tag.url">{{ tag.name }}</a>
   </div>
 </template>

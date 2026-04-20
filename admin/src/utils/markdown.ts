@@ -1,20 +1,18 @@
 import MarkdownIt from 'markdown-it';
 import anchor from 'markdown-it-anchor';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error - 没有类型定义
 import taskLists from 'markdown-it-task-lists';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error - 没有类型定义
 import mark from 'markdown-it-mark';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error - 没有类型定义
 import linkAttributes from 'markdown-it-link-attributes';
-// @ts-ignore - 没有类型定义
 import kbd from 'markdown-it-kbd';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error - 没有类型定义
 import sub from 'markdown-it-sub';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error - 没有类型定义
 import sup from 'markdown-it-sup';
-// @ts-ignore - 没有类型定义
+// @ts-expect-error - 没有类型定义
 import underline from 'markdown-it-plugin-underline';
-// @ts-ignore - 没有类型定义
 import katex from '@traptitech/markdown-it-katex';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js';
@@ -85,6 +83,7 @@ function getOffsetForLine(lineStarts: number[], line: number, sourceLength: numb
 }
 
 function setTokenSourceMeta(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   token: any,
   sourceStartLine: number,
   sourceEndLine: number,
@@ -461,7 +460,12 @@ function createMarkdownRenderer(): MarkdownIt {
   return instance;
 }
 
-function renderFence(token: any, escapeHtml: (value: string) => string, sourceAttrs = ''): string {
+function renderFence(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  token: any,
+  escapeHtml: (value: string) => string,
+  sourceAttrs = ''
+): string {
   const code = token.content;
   const lang = token.info.trim();
 
@@ -570,7 +574,7 @@ function customBlocksPlugin(md: MarkdownIt) {
     const endTagFull = `end${tag}`;
     let nextLine = startLine + 1;
     let foundEnd = false;
-    let contentLines: string[] = [];
+    const contentLines: string[] = [];
 
     // 特殊处理 tabs
     if (tag === 'tabs') {
@@ -999,7 +1003,11 @@ function createLineNumberMd(): MarkdownIt {
     });
   });
 
-  const applySourceAttrsToToken = (token: any, kind: 'block' | 'text' = 'block') => {
+  const applySourceAttrsToToken = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    token: any,
+    kind: 'block' | 'text' = 'block'
+  ) => {
     const meta = token?.meta;
     if (!meta) return;
 
@@ -1200,7 +1208,7 @@ export function extractToc(markdown: string): TocItem[] {
   let cleanedMarkdown = markdown
     .replace(/```[\s\S]*?```/g, '')
     .replace(/~~~[\s\S]*?~~~\s*/g, '')
-    .replace(/^(    |\t).+$/gm, '');
+    .replace(/^( {4}|\t).+$/gm, '');
 
   // 处理单行自定义块
   cleanedMarkdown = cleanedMarkdown.replace(/^:::link\s+.*?:::$/gm, '');
@@ -1407,7 +1415,7 @@ export function seekAudio(audioId: string, event: MouseEvent): void {
   audio.currentTime = percent * audio.duration;
 }
 
-export function toggleMusicPlay(audioId: string, server: string, musicId: string): void {
+export function toggleMusicPlay(audioId: string, _server: string, _musicId: string): void {
   const container = document.querySelector(`[data-audio-id="${audioId}"]`);
   if (!container) return;
 
@@ -1661,13 +1669,22 @@ function initMusicCard(container: Element): void {
 
 // 挂载全局函数供内联 onclick 使用
 if (typeof window !== 'undefined') {
-  (window as any).copyCodeBlock = copyCodeBlock;
-  (window as any).switchTab = switchTab;
-  (window as any).toggleFold = toggleFold;
-  (window as any).toggleAudioPlay = toggleAudioPlay;
-  (window as any).seekAudio = seekAudio;
-  (window as any).toggleMusicPlay = toggleMusicPlay;
-  (window as any).seekMusic = seekMusic;
+  const win = window as unknown as Window & {
+    copyCodeBlock: typeof copyCodeBlock;
+    switchTab: typeof switchTab;
+    toggleFold: typeof toggleFold;
+    toggleAudioPlay: typeof toggleAudioPlay;
+    seekAudio: typeof seekAudio;
+    toggleMusicPlay: typeof toggleMusicPlay;
+    seekMusic: typeof seekMusic;
+  };
+  win.copyCodeBlock = copyCodeBlock;
+  win.switchTab = switchTab;
+  win.toggleFold = toggleFold;
+  win.toggleAudioPlay = toggleAudioPlay;
+  win.seekAudio = seekAudio;
+  win.toggleMusicPlay = toggleMusicPlay;
+  win.seekMusic = seekMusic;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', observeAudioPlayers);

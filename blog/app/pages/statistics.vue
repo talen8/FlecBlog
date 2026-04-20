@@ -162,7 +162,7 @@ const visitCards = computed(() => [
       <div class="overview-grid">
         <article v-for="item in overviewCards" :key="item.key" class="stat-card">
           <div class="stat-card__icon">
-            <i :class="item.icon"></i>
+            <i :class="item.icon" />
           </div>
           <div class="stat-card__content">
             <span class="stat-card__label">{{ item.label }}</span>

@@ -8,7 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "format": "prettier --write app/**/*.{ts,vue,scss}"
+    "lint": "eslint .",
+    "type-check": "nuxt typecheck"
   },
   "dependencies": {
     "@nuxt/image": "^2.0.0",
@@ -39,11 +40,14 @@
     "vue": "^3.5.29"
   },
   "devDependencies": {
+    "@nuxt/eslint-config": "^1.0.0",
     "@nuxtjs/critters": "^0.9.0",
     "@nuxtjs/seo": "^3.4.0",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^25.3.2",
     "@vite-pwa/nuxt": "^1.1.1",
+    "eslint": "^9.0.0",
+    "eslint-plugin-prettier": "^5.5.5",
     "prettier": "^3.8.2",
     "sass": "^1.97.3",
     "typescript": "^5.9.3",

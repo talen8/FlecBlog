@@ -1,6 +1,7 @@
 import request from '@/utils/request';
 import type {
   Article,
+  ArticleListData,
   CreateArticleRequest,
   UpdateArticleRequest,
   ImportArticlesResult,
@@ -11,9 +12,9 @@ import type { PaginationQuery } from '@/types/request';
 /**
  * 获取文章列表
  * @param params 查询参数
- * @returns Promise<ArticleListResponse>
+ * @returns Promise<ArticleListData>
  */
-export function getArticles(params: PaginationQuery): Promise<any> {
+export function getArticles(params: PaginationQuery): Promise<ArticleListData> {
   return request.get('/admin/articles', { params });
 }
 

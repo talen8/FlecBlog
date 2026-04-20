@@ -136,7 +136,7 @@ const isEllipsis = (page: number | string): page is string => {
         :disabled="!hasPrev"
         @click="prevPage"
       >
-        <i class="ri-arrow-left-s-line"></i>
+        <i class="ri-arrow-left-s-line" />
       </button>
 
       <!-- 页码 -->
@@ -159,7 +159,7 @@ const isEllipsis = (page: number | string): page is string => {
         :disabled="!hasNext"
         @click="nextPage"
       >
-        <i class="ri-arrow-right-s-line"></i>
+        <i class="ri-arrow-right-s-line" />
       </button>
     </div>
   </div>

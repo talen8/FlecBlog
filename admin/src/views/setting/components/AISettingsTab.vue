@@ -104,7 +104,7 @@ interface AIForm {
 
 const form = defineModel<AIForm>('form', { required: true });
 
-const props = defineProps<{
+defineProps<{
   loading?: boolean;
 }>();
 
@@ -124,8 +124,8 @@ async function handleTest() {
       model: form.value.model,
     });
     ElMessage.success('连接成功，配置可用');
-  } catch (e: any) {
-    ElMessage.error(e?.message || '连接失败，请检查配置');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '连接失败，请检查配置');
   } finally {
     testing.value = false;
   }
@@ -147,8 +147,8 @@ async function resetSecret() {
     const data = await resetMCPSecret();
     form.value.mcp_secret = data.secret || '';
     ElMessage.success('MCP Secret 已重置');
-  } catch (e: any) {
-    ElMessage.error(e?.message || '重置失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '重置失败');
   } finally {
     resetting.value = false;
   }

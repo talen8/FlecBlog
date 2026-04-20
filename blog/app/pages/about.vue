@@ -2,6 +2,7 @@
 import { getArticlesForWeb } from '@/composables/api/article';
 import { getCategories } from '@/composables/api/category';
 import { getTags } from '@/composables/api/tag';
+import { parseJSON } from '@/utils/json';
 
 definePageMeta({
   showSidebar: false,
@@ -68,14 +69,6 @@ const { data: tagsData } = await useAsyncData('about-tags', async () => {
 if (articlesData.value) articleTotal.value = articlesData.value.total || 0;
 if (categoriesData.value) categoryTotal.value = categoriesData.value.total || 0;
 if (tagsData.value) tagTotal.value = tagsData.value.total || 0;
-
-const parseJSON = <T = any,>(jsonStr: string | undefined, fallback: T): T => {
-  try {
-    return jsonStr ? JSON.parse(jsonStr) : fallback;
-  } catch {
-    return fallback;
-  }
-};
 
 const info = computed(() => {
   const blog = blogConfig.value;

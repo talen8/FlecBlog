@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { getAccessToken, getRefreshToken, setTokens, redirectToLogin } from '@/utils/auth';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ApiResponse<T = any> {
   code: number;
   data: T;
@@ -10,7 +11,6 @@ interface ApiResponse<T = any> {
 
 // 获取 API URL（优先使用运行时配置）
 const getApiUrl = () => {
-  // @ts-ignore
   return (
     window.__APP_CONFIG__?.apiUrl || import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1'
   );
@@ -27,11 +27,14 @@ const request = axios.create({
 let isRefreshing = false;
 // 存储待重试的请求
 let failedQueue: Array<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resolve: (value?: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reject: (reason?: any) => void;
 }> = [];
 
 // 处理队列中的请求
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const processQueue = (error: any = null) => {
   failedQueue.forEach(promise => {
     if (error) {

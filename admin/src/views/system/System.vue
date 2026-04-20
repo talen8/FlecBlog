@@ -280,15 +280,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import {
-  Monitor,
-  Cpu,
-  Coin,
-  DataLine,
-  FolderOpened,
-  Connection,
-  Bell,
-} from '@element-plus/icons-vue';
+import { Monitor, Cpu, Coin, DataLine, FolderOpened, Connection } from '@element-plus/icons-vue';
 import { getSystemStatic, getSystemDynamic } from '@/api/system';
 import type { SystemStatic, SystemDynamic } from '@/types/system';
 
@@ -334,7 +326,7 @@ const dynamicInfo = ref<SystemDynamic>({
 const fetchStaticInfo = async () => {
   try {
     staticInfo.value = await getSystemStatic();
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('获取系统静态信息失败');
   }
 };
@@ -342,7 +334,7 @@ const fetchStaticInfo = async () => {
 const fetchDynamicInfo = async () => {
   try {
     dynamicInfo.value = await getSystemDynamic();
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('获取系统动态信息失败');
   }
 };

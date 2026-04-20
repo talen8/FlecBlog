@@ -103,7 +103,7 @@ async function loadData() {
   try {
     const res = await getFriendTypes();
     list.value = res.list;
-  } catch (err) {
+  } catch (_error) {
     ElMessage.error('加载友链类型列表失败');
   } finally {
     loading.value = false;
@@ -172,7 +172,7 @@ async function save() {
     formVisible.value = false;
     emit('success');
     ElMessage.success('保存成功');
-  } catch (err) {
+  } catch (_error) {
     ElMessage.error('保存失败');
   } finally {
     loading.value = false;

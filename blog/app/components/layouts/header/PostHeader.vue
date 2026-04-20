@@ -46,35 +46,35 @@ const goToCategory = () => {
       <!-- 移动端：合并为一行 -->
       <div class="post-meta post-meta-mobile">
         <span class="post-meta-item">
-          <i class="ri-calendar-line"></i>
+          <i class="ri-calendar-line" />
           <span>发表于 {{ formatFriendly(article.publish_time) }}</span>
         </span>
         <span v-if="article.update_time" class="post-meta-item">
-          <i class="ri-refresh-line"></i>
+          <i class="ri-refresh-line" />
           <span>更新于 {{ formatFriendly(article.update_time) }}</span>
         </span>
         <span v-if="article.location" class="post-meta-item">
-          <i class="ri-map-pin-line"></i>
+          <i class="ri-map-pin-line" />
           <span>{{ article.location }}</span>
         </span>
         <span v-if="article.category" class="post-meta-item clickable" @click="goToCategory">
-          <i class="ri-folder-line"></i>
+          <i class="ri-folder-line" />
           <span>{{ article.category.name }}</span>
         </span>
         <span class="post-meta-item">
-          <i class="ri-file-word-line"></i>
+          <i class="ri-file-word-line" />
           <span>总字数: {{ wordCount }}</span>
         </span>
         <span class="post-meta-item">
-          <i class="ri-time-line"></i>
+          <i class="ri-time-line" />
           <span>阅读时长: {{ readingTime }}分钟</span>
         </span>
         <span class="post-meta-item">
-          <i class="ri-eye-line"></i>
+          <i class="ri-eye-line" />
           <span>浏览量: {{ article.view_count }}</span>
         </span>
         <span class="post-meta-item clickable" @click="scrollToElement('.comment-input')">
-          <i class="ri-message-3-line"></i>
+          <i class="ri-message-3-line" />
           <span>评论数: {{ commentCount }}</span>
         </span>
       </div>
@@ -83,37 +83,37 @@ const goToCategory = () => {
       <div class="post-meta-desktop">
         <div class="post-meta">
           <span class="post-meta-item">
-            <i class="ri-calendar-line"></i>
+            <i class="ri-calendar-line" />
             <span>发表于 {{ formatFriendly(article.publish_time) }}</span>
           </span>
           <span v-if="article.update_time" class="post-meta-item">
-            <i class="ri-refresh-line"></i>
+            <i class="ri-refresh-line" />
             <span>更新于 {{ formatFriendly(article.update_time) }}</span>
           </span>
           <span v-if="article.location" class="post-meta-item">
-            <i class="ri-map-pin-line"></i>
+            <i class="ri-map-pin-line" />
             <span>{{ article.location }}</span>
           </span>
           <span v-if="article.category" class="post-meta-item clickable" @click="goToCategory">
-            <i class="ri-folder-line"></i>
+            <i class="ri-folder-line" />
             <span>{{ article.category.name }}</span>
           </span>
         </div>
         <div class="post-meta">
           <span class="post-meta-item">
-            <i class="ri-file-word-line"></i>
+            <i class="ri-file-word-line" />
             <span>总字数: {{ wordCount }}</span>
           </span>
           <span class="post-meta-item">
-            <i class="ri-time-line"></i>
+            <i class="ri-time-line" />
             <span>阅读时长: {{ readingTime }}分钟</span>
           </span>
           <span class="post-meta-item">
-            <i class="ri-eye-line"></i>
+            <i class="ri-eye-line" />
             <span>浏览量: {{ article.view_count }}</span>
           </span>
           <span class="post-meta-item clickable" @click="scrollToElement('.comment-input')">
-            <i class="ri-message-3-line"></i>
+            <i class="ri-message-3-line" />
             <span>评论数: {{ commentCount }}</span>
           </span>
         </div>

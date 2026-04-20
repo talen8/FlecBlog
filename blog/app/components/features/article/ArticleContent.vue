@@ -39,8 +39,7 @@ const emojiMap = ref<Map<string, string> | null>(null);
 // 渲染内容
 const renderedContent = computed(() => {
   if (!props.content) return '';
-  // 引用 emojiMap 触发重新渲染
-  emojiMap.value;
+  void emojiMap.value;
   return renderMarkdown(props.content);
 });
 
@@ -87,7 +86,8 @@ onUnmounted(() => {
 
 <template>
   <article class="post-content">
-    <div class="markdown-content" v-html="renderedContent"></div>
+    <!-- eslint-disable-next-line vue/no-v-html -- 内容经过 DOMPurify 净化处理 -->
+    <div class="markdown-content" v-html="renderedContent" />
   </article>
 </template>
 

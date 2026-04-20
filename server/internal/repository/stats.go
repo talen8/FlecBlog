@@ -320,17 +320,18 @@ func (r *StatsRepository) GetArticleContribution(year *int, month *int) ([]dto.A
 		Where("is_publish = ?", true)
 
 	// 根据参数构建查询条件
-	if year != nil && month != nil {
+	switch {
+	case year != nil && month != nil:
 		// 查询指定年月的数据
 		startDate := time.Date(*year, time.Month(*month), 1, 0, 0, 0, 0, time.UTC)
 		endDate := startDate.AddDate(0, 1, 0).Add(-time.Second) // 月末最后一秒
 		query = query.Where("publish_time >= ? AND publish_time <= ?", startDate, endDate)
-	} else if year != nil {
+	case year != nil:
 		// 查询指定年份全年的数据
 		startDate := time.Date(*year, 1, 1, 0, 0, 0, 0, time.UTC)
 		endDate := time.Date(*year, 12, 31, 23, 59, 59, 0, time.UTC)
 		query = query.Where("publish_time >= ? AND publish_time <= ?", startDate, endDate)
-	} else {
+	default:
 		// 默认查询过去一年的数据
 		oneYearAgo := time.Now().AddDate(-1, 0, 0)
 		query = query.Where("publish_time >= ?", oneYearAgo)

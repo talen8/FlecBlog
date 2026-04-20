@@ -6,16 +6,16 @@ const { isExpanded, toggleExpand } = useExpandable();
 <template>
   <div class="card-widget card-categories">
     <div class="item-headline" :class="{ 'is-expanded': isExpanded }">
-      <i class="ri-folder-6-fill"></i>
+      <i class="ri-folder-6-fill" />
       <span>分类</span>
       <i
         class="collapse-icon ri-arrow-left-s-fill"
         :class="{ 'is-expanded': isExpanded }"
         @click="toggleExpand"
-      ></i>
+      />
     </div>
     <ul class="card-list" :class="{ 'is-expanded': isExpanded }">
-      <li class="card-list-item" v-for="category in categories" :key="category.id">
+      <li v-for="category in categories" :key="category.id" class="card-list-item">
         <router-link
           class="card-list-link"
           :to="category.url"

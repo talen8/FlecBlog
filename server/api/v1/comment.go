@@ -386,7 +386,9 @@ func (c *CommentController) ImportComments(ctx *gin.Context) {
 		response.ValidateFailed(ctx, "请选择要导入的文件")
 		return
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	// 检查文件大小（10MB限制）
 	const maxFileSize = 10 << 20

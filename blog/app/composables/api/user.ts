@@ -44,30 +44,30 @@ export const updateUserProfile = async (data: UpdateProfileParams) => {
 
 /** 忘记密码 */
 export const forgotPassword = async (data: ForgotPasswordParams) => {
-  return authApi.post<void>('/forgot-password', data);
+  await authApi.post('/forgot-password', data);
 };
 
 /** 重置密码 */
 export const resetPassword = async (data: ResetPasswordParams) => {
-  return authApi.post<void>('/reset-password', data);
+  await authApi.post('/reset-password', data);
 };
 
 /** 修改密码 */
 export const changePassword = async (data: ChangePasswordParams) => {
-  return userApi.put<void>('/user/password', data);
+  await userApi.put('/user/password', data);
 };
 
 /** 设置密码（OAuth 用户首次设置密码） */
 export const setPassword = async (data: { password: string; confirm_password: string }) => {
-  return userApi.post<void>('/user/password', data);
+  await userApi.post('/user/password', data);
 };
 
 /** 注销账户 */
 export const deactivateAccount = async (data: DeactivateAccountParams) => {
-  return userApi.deleteRequest<void>('/user/deactivate', data);
+  await userApi.deleteRequest('/user/deactivate', data);
 };
 
 /** 解绑第三方账号 */
 export const unbindOAuth = async (provider: string) => {
-  return userApi.deleteRequest<void>(`/user/oauth/${provider}`);
+  await userApi.deleteRequest(`/user/oauth/${provider}`);
 };

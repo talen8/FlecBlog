@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import type { FileInfo, FileListData, FileListQuery } from '@/types/file';
+import type { FileListData, FileListQuery } from '@/types/file';
 
 /**
  * 上传文件响应接口
@@ -24,9 +24,10 @@ export async function uploadFile(file: File, type = 'image'): Promise<UploadResp
     return await request.post('/admin/files', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-  } catch (error: any) {
-    const serverMessage = error.response?.data?.message;
-    const errorMessage = serverMessage || error.message || '上传失败';
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { message?: string } }; message?: string };
+    const serverMessage = err.response?.data?.message;
+    const errorMessage = serverMessage || err.message || '上传失败';
     throw new Error(errorMessage);
   }
 }

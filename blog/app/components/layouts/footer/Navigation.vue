@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { FriendGroupedResponse, Friend } from '@@/types/friend';
+import type { Friend } from '@@/types/friend';
 import { getFriends } from '@/composables/api/friend';
 
 const { footerMenus } = useMenus();
@@ -99,9 +99,9 @@ const refreshFriends = () => {
         <i
           class="refresh-icon ri-refresh-line"
           :class="{ 'is-loading': isLoadingFriends }"
-          @click="refreshFriends"
           :aria-label="isLoadingFriends ? '正在加载友链' : '刷新友链'"
-        ></i>
+          @click="refreshFriends"
+        />
       </div>
       <nav class="item-content friend-content" aria-label="友情链接">
         <a

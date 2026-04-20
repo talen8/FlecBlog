@@ -39,7 +39,7 @@ const { data: globalData } = await useAsyncData('global-data', async () => {
   ]);
 
   // 处理配置数据
-  const processConfig = (config: any, prefix: string) => {
+  const processConfig = (config: Record<string, unknown>, prefix: string) => {
     const processed: Record<string, string> = {};
     Object.entries(config).forEach(([key, value]) => {
       if (key.startsWith(`${prefix}.`)) {
@@ -189,7 +189,7 @@ useHead({
 
 <template>
   <!-- 背景图片 -->
-  <div class="web_bg" :style="{ backgroundImage: `url(${bgImage})` }"></div>
+  <div class="web_bg" :style="{ backgroundImage: `url(${bgImage})` }" />
 
   <!-- Nuxt 布局和页面系统 -->
   <NuxtLayout>

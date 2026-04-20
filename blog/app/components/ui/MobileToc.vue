@@ -83,10 +83,6 @@ const handleScroll = () => {
   }
 };
 
-const handleClose = () => {
-  emit('close');
-};
-
 watch(
   () => props.visible,
   newVal => {
@@ -108,7 +104,7 @@ onMounted(() => {
       <div v-if="visible && hasToc" ref="tocPopoverRef" class="mobile-toc-popover">
         <div class="toc-header">
           <div class="header-left">
-            <i class="ri-menu-line"></i>
+            <i class="ri-menu-line" />
             <span>目录</span>
           </div>
           <span class="toc-count">{{ toc.length }}</span>
@@ -120,9 +116,9 @@ onMounted(() => {
             :key="item.id"
             :data-toc-id="item.id"
             :class="['toc-item', `toc-level-${item.level}`, { active: activeId === item.id }]"
-            @click="scrollToHeading(item.id)"
             :aria-label="`跳转到 ${item.text}`"
             :aria-current="activeId === item.id ? 'location' : undefined"
+            @click="scrollToHeading(item.id)"
           >
             <span class="toc-text">{{ item.text }}</span>
           </button>

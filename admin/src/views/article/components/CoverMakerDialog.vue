@@ -476,7 +476,7 @@ async function searchPhotos() {
     } else {
       ElMessage.warning('没有找到相关图片');
     }
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('搜索图片失败');
   } finally {
     loadingPhotos.value = false;
@@ -503,7 +503,7 @@ async function loadMorePhotos() {
       currentPage.value = nextPage;
       hasMorePhotos.value = photos.length >= perPage.value;
     }
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('加载更多图片失败');
   } finally {
     loadingMore.value = false;
@@ -516,6 +516,7 @@ function selectPhoto(photo: PlatformPhoto) {
   imageLoaded.value = true;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function handleImageUpload(file: any) {
   const reader = new FileReader();
   reader.onload = e => {
@@ -643,7 +644,7 @@ async function generateImageDataUrl() {
       }
     }
     return canvas.toDataURL('image/png', 0.95);
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('生成图片失败');
     return null;
   }

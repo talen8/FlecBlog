@@ -48,22 +48,32 @@ func NewLocalStorage(basePath string) Storage {
 
 // Save 保存文件
 func (s *LocalStorage) Save(reader io.Reader, path string) error {
+	// 清理路径，防止路径遍历攻击
+	path = filepath.Clean(path)
+	// 确保路径不以 .. 开头，防止访问上级目录
+	if strings.HasPrefix(path, "..") || strings.Contains(path, "../") || strings.Contains(path, "..") {
+		return fmt.Errorf("非法的文件路径")
+	}
+
 	fullPath := filepath.Join(s.basePath, path)
 
 	dir := filepath.Dir(fullPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return fmt.Errorf("创建目录失败: %v", err)
 	}
 
+	// #nosec G304 - 文件路径已在函数开头进行安全检查
 	file, err := os.Create(fullPath)
 	if err != nil {
 		return fmt.Errorf("创建文件失败: %v", err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	_, err = io.Copy(file, reader)
 	if err != nil {
-		os.Remove(fullPath)
+		_ = os.Remove(fullPath)
 		return fmt.Errorf("写入文件失败: %v", err)
 	}
 
@@ -177,7 +187,7 @@ func (h *Helper) GenerateFilePath(uploadType string, userID uint, originalName s
 
 // CreateUploadDir 创建上传目录
 func (h *Helper) CreateUploadDir(basePath string) error {
-	if err := os.MkdirAll(basePath, 0755); err != nil {
+	if err := os.MkdirAll(basePath, 0750); err != nil {
 		return fmt.Errorf("创建上传目录失败: %v", err)
 	}
 	return nil

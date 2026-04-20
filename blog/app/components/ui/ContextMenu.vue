@@ -1,6 +1,14 @@
 <script setup lang="ts">
 type TargetType = 'link' | 'media' | 'text' | 'input' | 'none';
 
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: string;
+  action?: () => void;
+  route?: string;
+}
+
 const router = useRouter();
 const { info, success, error } = useToast();
 
@@ -205,7 +213,11 @@ const mediaItems = computed(() => {
       label: paused ? '播放' : '暂停',
       icon: paused ? 'ri-play-line' : 'ri-pause-line',
       action: () => {
-        paused ? element.play() : element.pause();
+        if (paused) {
+          element.play();
+        } else {
+          element.pause();
+        }
       },
     });
   }
@@ -368,8 +380,12 @@ const adjust = () => {
   pos.value = { x, y };
 };
 
-const click = (item: any) => {
-  item.action ? item.action() : item.route && router.push(item.route);
+const click = (item: MenuItem) => {
+  if (item.action) {
+    item.action();
+  } else if (item.route) {
+    router.push(item.route);
+  }
   close();
 };
 
@@ -409,7 +425,7 @@ onUnmounted(() => {
             :title="b.tooltip"
             @click="b.action"
           >
-            <i :class="b.icon"></i>
+            <i :class="b.icon" />
           </button>
         </div>
         <!-- 动态菜单组（链接、媒体、文本、输入框） -->
@@ -420,19 +436,19 @@ onUnmounted(() => {
           class="group line"
         >
           <div v-for="i in items" :key="i.id" class="item" @click="click(i)">
-            <i :class="i.icon"></i><span>{{ i.label }}</span>
+            <i :class="i.icon" /><span>{{ i.label }}</span>
           </div>
         </div>
         <!-- 快速跳转 -->
         <div class="group line">
           <div v-for="i in jumpItems" :key="i.id" class="item" @click="click(i)">
-            <i :class="i.icon"></i><span>{{ i.label }}</span>
+            <i :class="i.icon" /><span>{{ i.label }}</span>
           </div>
         </div>
         <!-- 工具菜单 -->
         <div class="group line">
           <div v-for="i in toolItems" :key="i.id" class="item" @click="click(i)">
-            <i :class="i.icon"></i><span>{{ i.label }}</span>
+            <i :class="i.icon" /><span>{{ i.label }}</span>
           </div>
         </div>
       </div>

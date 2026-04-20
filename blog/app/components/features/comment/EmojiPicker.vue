@@ -18,13 +18,13 @@ const { blogConfig } = useSysConfig();
 const emojiGroups = ref<EmojiGroup[]>([]);
 const activeTab = ref(0);
 const loading = ref(true);
-const error = ref('');
+const errorMsg = ref('');
 
 // 加载表情包数据
 const loadEmojis = async () => {
   const emojisUrl = blogConfig.value.emojis;
   if (!emojisUrl) {
-    error.value = '未配置表情包';
+    errorMsg.value = '未配置表情包';
     loading.value = false;
     return;
   }
@@ -33,8 +33,9 @@ const loadEmojis = async () => {
     const response = await fetch(emojisUrl);
     if (!response.ok) throw new Error('加载表情包失败');
     emojiGroups.value = await response.json();
-  } catch (err: any) {
-    error.value = err.message || '加载表情包失败';
+  } catch (error: unknown) {
+    const err = error as Error;
+    errorMsg.value = err.message || '加载表情包失败';
   } finally {
     loading.value = false;
   }
@@ -51,13 +52,13 @@ onMounted(loadEmojis);
 <template>
   <div class="emoji-picker">
     <div v-if="loading" class="emoji-state">
-      <i class="ri-loader-4-line rotating"></i>
+      <i class="ri-loader-4-line rotating" />
       <span>加载中...</span>
     </div>
 
-    <div v-else-if="error" class="emoji-state">
-      <i class="ri-emotion-unhappy-line"></i>
-      <span>{{ error }}</span>
+    <div v-else-if="errorMsg" class="emoji-state">
+      <i class="ri-emotion-unhappy-line" />
+      <span>{{ errorMsg }}</span>
     </div>
 
     <template v-else>

@@ -235,7 +235,7 @@ func (s *NotificationService) send(ctx context.Context, notifType model.Notifica
 			return err
 		}
 		notification.Data = string(dataJSON)
-		go s.sendEmails(notification, receiverIDs)
+		go s.sendEmails(notification, receiverIDs) // #nosec G118 - 邮件发送使用独立上下文
 	}
 
 	return nil

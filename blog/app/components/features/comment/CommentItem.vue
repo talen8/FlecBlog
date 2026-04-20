@@ -81,7 +81,7 @@ const handleReplyClick = () => {
 </script>
 
 <template>
-  <div class="comment-item" :class="{ 'is-reply': depth > 0 }" :id="`comment-${comment.id}`">
+  <div :id="`comment-${comment.id}`" class="comment-item" :class="{ 'is-reply': depth > 0 }">
     <!-- 左：头像 -->
     <div class="comment-left">
       <a
@@ -117,7 +117,7 @@ const handleReplyClick = () => {
             comment.user.badge
           }}</span>
           <span v-if="comment.reply_user" class="reply-arrow">
-            <i class="ri-arrow-right-s-fill"></i>
+            <i class="ri-arrow-right-s-fill" />
             {{ comment.reply_user.nickname }}
             <span
               v-if="comment.reply_user.badge"
@@ -134,28 +134,29 @@ const handleReplyClick = () => {
       </div>
 
       <!-- 中：内容 -->
-      <div class="comment-body markdown-body" v-html="renderedContent"></div>
+      <!-- eslint-disable-next-line vue/no-v-html -- 评论内容经过 DOMPurify 净化处理 -->
+      <div class="comment-body markdown-body" v-html="renderedContent" />
 
       <!-- 长评论展开/折叠按钮 -->
       <button
         v-if="isLongComment"
         class="expand-btn"
-        @click="toggleExpand"
         aria-label="展开/折叠评论"
+        @click="toggleExpand"
       >
         {{ isExpanded ? '收起' : '展开全文' }}
-        <i :class="isExpanded ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+        <i :class="isExpanded ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'" />
       </button>
 
       <!-- 下：功能按钮 -->
       <div class="comment-actions">
-        <button class="action-btn" @click="handleReplyClick" aria-label="回复评论">回复</button>
+        <button class="action-btn" aria-label="回复评论" @click="handleReplyClick">回复</button>
         <button
           v-if="isCommentOwner"
           class="action-btn delete-btn"
           :disabled="isDeleting"
-          @click="handleDeleteClick"
           aria-label="删除评论"
+          @click="handleDeleteClick"
         >
           {{ isDeleting ? '删除中...' : '删除' }}
         </button>
@@ -170,7 +171,7 @@ const handleReplyClick = () => {
       </div>
 
       <!-- 子评论插槽 -->
-      <slot name="replies"></slot>
+      <slot name="replies" />
     </div>
 
     <!-- 删除确认弹窗 -->

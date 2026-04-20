@@ -70,7 +70,7 @@ const isEmpty = computed(() => {
         class="friend-section"
       >
         <h2 class="section-title">
-          <i class="ri-links-line"></i>
+          <i class="ri-links-line" />
           {{ group.type_name }}
         </h2>
 
@@ -108,7 +108,7 @@ const isEmpty = computed(() => {
         class="friend-section inactive-section"
       >
         <h2 class="section-title">
-          <i class="ri-links-line"></i>
+          <i class="ri-links-line" />
           失联友链
         </h2>
 
@@ -126,7 +126,7 @@ const isEmpty = computed(() => {
 
       <!-- 空状态-->
       <div v-if="isEmpty" class="empty-state">
-        <i class="ri-links-line"></i>
+        <i class="ri-links-line" />
         <p>暂无友链数据</p>
       </div>
     </div>

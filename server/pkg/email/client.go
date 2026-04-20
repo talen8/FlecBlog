@@ -104,6 +104,7 @@ func (c *Client) SendEmail(to, subject, htmlBody, fromName string) error {
 
 	// 发送邮件
 	dialer := gomail.NewDialer(cfg.EmailHost, cfg.EmailPort, cfg.EmailUsername, cfg.EmailPassword)
+	// #nosec G402 - 允许自签名证书，用于兼容某些邮件服务器配置
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	if err := dialer.DialAndSend(msg); err != nil {
@@ -122,11 +123,12 @@ func (c *Client) HealthCheck() error {
 	}
 	cfg := c.config.Notification
 	dialer := gomail.NewDialer(cfg.EmailHost, cfg.EmailPort, cfg.EmailUsername, cfg.EmailPassword)
+	// #nosec G402 - 允许自签名证书，用于兼容某些邮件服务器配置
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	conn, err := dialer.Dial()
 	if err != nil {
 		return err
 	}
-	conn.Close()
+	_ = conn.Close()
 	return nil
 }

@@ -17,7 +17,7 @@ import (
 
 const (
 	authURL     = "https://graph.qq.com/oauth2.0/authorize"
-	tokenURL    = "https://graph.qq.com/oauth2.0/token"
+	tokenURL    = "https://graph.qq.com/oauth2.0/token" // #nosec G101 - QQ OAuth 标准接口地址
 	openIDURL   = "https://graph.qq.com/oauth2.0/me"
 	userInfoURL = "https://graph.qq.com/user/get_user_info"
 )
@@ -175,7 +175,9 @@ func (p *Provider) getUserInfo(accessToken, openID string) (*qqUserInfo, error) 
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -219,7 +221,9 @@ func (p *Provider) exchangeToken(code string) (string, string, int, error) {
 	if err != nil {
 		return "", "", 0, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -273,7 +277,9 @@ func (p *Provider) getOpenID(accessToken string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -346,11 +352,11 @@ func (p *Provider) CompleteAuth(session goth.Session, params goth.Params) (goth.
 
 // Session QQ OAuth Session
 type Session struct {
-	AuthURL      string
-	AccessToken  string
-	RefreshToken string
-	ExpiresAt    time.Time
-	OpenID       string
+	AuthURL      string    `json:"auth_url"`
+	AccessToken  string    `json:"access_token"`  // #nosec G101 - OAuth 标准字段名
+	RefreshToken string    `json:"refresh_token"` // #nosec G101 - OAuth 标准字段名
+	ExpiresAt    time.Time `json:"expires_at"`
+	OpenID       string    `json:"openid"`
 }
 
 // GetAuthURL 获取授权 URL
@@ -373,6 +379,7 @@ func (s *Session) Authorize(provider goth.Provider, params goth.Params) (string,
 
 // Marshal 序列化 session
 func (s *Session) Marshal() string {
+	// #nosec G117 - 这是 OAuth Session 的标准序列化，字段名是 OAuth 标准命名
 	b, _ := json.Marshal(s)
 	return string(b)
 }

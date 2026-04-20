@@ -87,7 +87,7 @@ const onMouseLeave = () => {
     <NuxtLink to="/moment" class="moment-container">
       <!-- 左侧图标 -->
       <div class="widget-icon">
-        <i class="ri-send-ins-line"></i>
+        <i class="ri-send-ins-line" />
       </div>
 
       <!-- 中间滚动内容 -->
@@ -99,10 +99,10 @@ const onMouseLeave = () => {
             </span>
             <span class="content-icons">
               <template v-for="type in getContentTypes(currentMoment)" :key="type">
-                <i v-if="type === 'image'" class="ri-image-fill"></i>
-                <i v-if="type === 'video'" class="ri-video-fill"></i>
-                <i v-if="type === 'link'" class="ri-link"></i>
-                <i v-if="type === 'music'" class="ri-music-2-fill"></i>
+                <i v-if="type === 'image'" class="ri-image-fill" />
+                <i v-if="type === 'video'" class="ri-video-fill" />
+                <i v-if="type === 'link'" class="ri-link" />
+                <i v-if="type === 'music'" class="ri-music-2-fill" />
               </template>
             </span>
           </div>
@@ -111,7 +111,7 @@ const onMouseLeave = () => {
 
       <!-- 右侧箭头 -->
       <div class="widget-icon">
-        <i class="ri-arrow-right-s-line"></i>
+        <i class="ri-arrow-right-s-line" />
       </div>
     </NuxtLink>
   </div>

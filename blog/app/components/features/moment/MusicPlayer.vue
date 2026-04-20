@@ -9,6 +9,17 @@ interface AudioTrack {
   lrc?: string;
 }
 
+interface MusicApiResponse {
+  name?: string;
+  title?: string;
+  artist?: string;
+  author?: string;
+  url: string;
+  pic?: string;
+  cover?: string;
+  lrc?: string;
+}
+
 interface LyricLine {
   time: number;
   text: string;
@@ -87,7 +98,7 @@ const fetchMusicData = async () => {
     const data = await response.json();
     const list = Array.isArray(data) ? data : [data];
 
-    audioList.value = list.map((item: any) => ({
+    audioList.value = list.map((item: MusicApiResponse) => ({
       name: item.name || item.title || '未知歌曲',
       artist: item.artist || item.author || '未知艺术家',
       url: item.url,
@@ -112,9 +123,11 @@ const fetchMusicData = async () => {
 // 播放/暂停切换
 const togglePlay = () => {
   if (!audioRef.value || !currentTrack.value?.url) return;
-  isPlaying.value
-    ? audioRef.value.pause()
-    : audioRef.value.play().catch(() => (loadError.value = true));
+  if (isPlaying.value) {
+    audioRef.value.pause();
+  } else {
+    audioRef.value.play().catch(() => (loadError.value = true));
+  }
 };
 
 // 播放指定歌曲
@@ -193,12 +206,12 @@ onMounted(() => fetchMusicData());
 <template>
   <div class="flec-music-player">
     <div v-if="isLoading" class="player-status">
-      <i class="ri-loader-4-line spin"></i>
+      <i class="ri-loader-4-line spin" />
       <span>加载中...</span>
     </div>
 
     <div v-else-if="loadError || !currentTrack" class="player-status">
-      <i class="ri-error-warning-line"></i>
+      <i class="ri-error-warning-line" />
       <span>音乐加载失败</span>
     </div>
 
@@ -220,11 +233,11 @@ onMounted(() => fetchMusicData());
           <div class="player-cover">
             <img v-if="currentTrack.cover" :src="currentTrack.cover" alt="cover" />
             <div v-else class="cover-placeholder">
-              <i class="ri-music-2-fill"></i>
+              <i class="ri-music-2-fill" />
             </div>
           </div>
           <button class="play-btn" @click="togglePlay">
-            <i :class="isPlaying ? 'ri-pause-fill' : 'ri-play-fill'"></i>
+            <i :class="isPlaying ? 'ri-pause-fill' : 'ri-play-fill'" />
           </button>
         </div>
 
@@ -251,13 +264,13 @@ onMounted(() => fetchMusicData());
 
           <div class="player-progress">
             <div class="progress-bar" @click="seekTo">
-              <div class="progress-played" :style="{ width: `${progress}%` }"></div>
+              <div class="progress-played" :style="{ width: `${progress}%` }" />
             </div>
             <div class="progress-time">
               {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
             </div>
             <button v-if="hasPlaylist" class="ctrl-btn" @click="showPlaylist = !showPlaylist">
-              <i class="ri-menu-fill"></i>
+              <i class="ri-menu-fill" />
             </button>
           </div>
         </div>
@@ -272,7 +285,7 @@ onMounted(() => fetchMusicData());
           @click="playTrack(index)"
         >
           <span class="item-index">
-            <i v-if="index === currentIndex && isPlaying" class="ri-equalizer-fill"></i>
+            <i v-if="index === currentIndex && isPlaying" class="ri-equalizer-fill" />
             <template v-else>{{ index + 1 }}</template>
           </span>
           <span class="item-name">{{ track.name }}</span>

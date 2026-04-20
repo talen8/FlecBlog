@@ -254,7 +254,7 @@ import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus';
 import { Setting, ArrowLeft } from '@element-plus/icons-vue';
-import type { FormInstance, FormRules } from 'element-plus';
+import type { FormInstance } from 'element-plus';
 import type { Article } from '@/types/article';
 import type { Category } from '@/types/category';
 import type { Tag } from '@/types/tag';
@@ -371,14 +371,6 @@ const originalData = reactive({
   update_time: null as Date | null,
 });
 
-// 表单验证规则
-const formRules: FormRules = {
-  title: [
-    { required: true, message: '请输入文章标题', trigger: 'blur' },
-    { min: 1, max: 80, message: '标题长度在 1 到 80 个字符', trigger: 'blur' },
-  ],
-};
-
 // 自动保存草稿（30秒一次 + 离开页面时）
 const saveDraftSilently = async () => {
   // 组件已卸载，不执行
@@ -398,6 +390,7 @@ const saveDraftSilently = async () => {
 
   try {
     // 准备保存数据
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const saveData: any = {
       title:
         formData.title.trim() ||
@@ -431,7 +424,7 @@ const saveDraftSilently = async () => {
       const result = await createArticle(saveData);
       draftArticleId.value = result.id;
     }
-  } catch (error) {
+  } catch (_error) {
     // 自动保存失败，静默处理
   }
 };
@@ -465,7 +458,11 @@ watch(
 
 // ==================== 数据获取函数 ====================
 
-const fetchData = async (fetchFn: Function, target: any, errorMsg: string) => {
+const fetchData = async (
+  fetchFn: () => Promise<{ list: Category[] | Tag[] }>,
+  target: { value: Category[] | Tag[] },
+  errorMsg: string
+) => {
   try {
     const response = await fetchFn();
     target.value = response.list;
@@ -497,9 +494,11 @@ const fetchArticle = async (id: number) => {
       cover: article.cover || '',
       category_id: article.category?.id || undefined,
       tag_ids: article.tags?.map(tag => tag.id) || [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       location: (article as any).location || '',
       is_top: article.is_top || false,
       is_essence: article.is_essence || false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       is_outdated: (article as any).is_outdated || false,
       is_publish: article.is_publish || false,
       publish_time: parseBackendDate(article.publish_time),
@@ -513,7 +512,7 @@ const fetchArticle = async (id: number) => {
       publish_time: data.publish_time ? new Date(data.publish_time) : null,
       update_time: data.update_time ? new Date(data.update_time) : null,
     });
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('获取文章详情失败');
     router.push('/articles');
   } finally {
@@ -575,8 +574,8 @@ const handleSave = async (autoRedirect: boolean = true) => {
 
           // 清空在线图片URL
           onlineImageUrl.value = '';
-        } catch (error: any) {
-          ElMessage.error(error.message || '在线图片下载失败');
+        } catch (error: unknown) {
+          ElMessage.error((error as Error)?.message || '在线图片下载失败');
           return;
         } finally {
           downloadingImage.value = false;
@@ -592,13 +591,14 @@ const handleSave = async (autoRedirect: boolean = true) => {
       else if (coverUploaderRef.value) {
         await coverUploaderRef.value.uploadPendingFile();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       loading.value = false;
-      ElMessage.error(error.message || '封面上传失败');
+      ElMessage.error((error as Error)?.message || '封面上传失败');
       return;
     }
 
     // 准备提交数据
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const submitData: any = {
       title: formData.title.trim(),
       slug: formData.slug.trim(),
@@ -632,7 +632,7 @@ const handleSave = async (autoRedirect: boolean = true) => {
     // 自动生成摘要
     if (!submitData.summary && submitData.content) {
       submitData.summary = submitData.content
-        .replace(/[#*`>\-\[\]]/g, '')
+        .replace(/[#*`>\-[\]]/g, '')
         .replace(/\s+/g, ' ')
         .trim()
         .slice(0, 200);
@@ -729,8 +729,8 @@ const handleGenerateAISummary = async () => {
     const result = await generateAISummary({ content: formData.content });
     formData.ai_summary = result.summary;
     ElMessage.success('AI总结生成成功');
-  } catch (error: any) {
-    ElMessage.error(error.message || 'AI总结生成失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || 'AI总结生成失败');
   } finally {
     generatingAISummary.value = false;
   }
@@ -748,8 +748,8 @@ const handleGenerateSummary = async () => {
     const result = await generateSummary({ content: formData.content });
     formData.summary = result.summary;
     ElMessage.success('文章摘要生成成功');
-  } catch (error: any) {
-    ElMessage.error(error.message || '文章摘要生成失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '文章摘要生成失败');
   } finally {
     generatingSummary.value = false;
   }
@@ -771,8 +771,8 @@ const handleGenerateTitle = async () => {
     } else {
       ElMessage.warning('未生成有效标题');
     }
-  } catch (error: any) {
-    ElMessage.error(error.message || '标题生成失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '标题生成失败');
   } finally {
     generatingTitle.value = false;
   }
@@ -781,8 +781,8 @@ const handleGenerateTitle = async () => {
 // 创建新项目的通用函数
 const createNewItem = async (
   name: string,
-  createFn: Function,
-  refreshFn: Function,
+  createFn: (data: { name: string; description: string; sort: number }) => Promise<Category | Tag>,
+  refreshFn: () => Promise<void>,
   type: 'category' | 'tag'
 ) => {
   const maxLength = type === 'category' ? 50 : 50;
@@ -811,7 +811,7 @@ const createNewItem = async (
 };
 
 // 处理分类选择变化
-const handleCategorySelect = async (value: any) => {
+const handleCategorySelect = async (value: string | number) => {
   if (typeof value !== 'string') return;
 
   const categoryName = value.trim();
@@ -845,7 +845,7 @@ const handleCategorySelect = async (value: any) => {
 };
 
 // 处理标签选择变化
-const handleTagSelect = async (values: any[]) => {
+const handleTagSelect = async (values: (string | number)[]) => {
   const { validIds, newNames } = values.reduce(
     (acc, value) => {
       if (typeof value === 'string') {
@@ -997,7 +997,7 @@ onBeforeRouteLeave(async (to, from, next) => {
         try {
           await handleSave(false);
           next();
-        } catch (error) {
+        } catch (_error) {
           next(false);
         }
       } catch (action) {

@@ -186,7 +186,3 @@ func convertToRssFeedItem(item dto.RssArticleResponse) RssFeedItem {
 		CreatedAt:   ToTimeStringPtr(item.CreatedAt),
 	}
 }
-
-func rssFeedStringPtr(t interface{ String() string }) *string {
-	return ToTimeStringPtr(t)
-}

@@ -17,15 +17,15 @@ const isImageIcon = (icon: string) => {
 <template>
   <div v-if="topAggregateMenus.length > 0" class="nav-aggregate">
     <div class="aggregate-trigger brighten">
-      <i class="ri-apps-line ri-lg"></i>
+      <i class="ri-apps-line ri-lg" />
     </div>
 
     <!-- 聚合下拉菜单 -->
     <div class="aggregate-dropdown">
       <div
         v-for="menu in topAggregateMenus"
-        :key="menu.id"
         v-show="menu.children && menu.children.length > 0"
+        :key="menu.id"
         class="aggregate-group"
       >
         <!-- 主菜单标题 -->
@@ -48,7 +48,7 @@ const isImageIcon = (icon: string) => {
               class="icon-img"
               loading="lazy"
             />
-            <i v-else-if="child.icon" :class="child.icon + ' ri-lg'"></i>
+            <i v-else-if="child.icon" :class="child.icon + ' ri-lg'" />
             <span>{{ child.title }}</span>
           </a>
         </div>

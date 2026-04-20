@@ -118,7 +118,9 @@ func (c *ToolsController) DownloadImage(ctx *gin.Context) {
 		response.Failed(ctx, fmt.Sprintf("下载图片失败: %v", err))
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		response.Failed(ctx, fmt.Sprintf("HTTP状态码: %d", resp.StatusCode))

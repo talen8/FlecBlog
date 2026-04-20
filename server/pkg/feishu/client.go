@@ -223,15 +223,16 @@ func (c *Client) start() {
 		return
 	}
 
+	// #nosec G118 - cancel 函数保存在 c.cancel 中，在 stop/Reload 时调用
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 	c.wsClient = larkws.NewClient(c.appID, c.appSecret, larkws.WithEventHandler(createEventHandler()))
 
-	go func() {
+	go func(ctx context.Context) {
 		if err := c.wsClient.Start(ctx); err != nil {
 			logger.Error("[Feishu] WebSocket 连接失败: %v", err)
 		}
-	}()
+	}(ctx)
 }
 
 // createEventHandler 创建事件处理器
@@ -243,9 +244,7 @@ func createEventHandler() *dispatcher.EventDispatcher {
 			}
 			return nil
 		}).
-		OnP2CardActionTrigger(func(ctx context.Context, event *callback.CardActionTriggerEvent) (*callback.CardActionTriggerResponse, error) {
-			return handleCardAction(ctx, event)
-		})
+		OnP2CardActionTrigger(handleCardAction)
 }
 
 // Initialize 初始化飞书客户端
@@ -284,15 +283,16 @@ func Reload(appID, appSecret, chatID string) {
 
 	if globalClient.enable {
 		globalClient.client = lark.NewClient(appID, appSecret)
+		// #nosec G118 - cancel 函数保存在 globalClient.cancel 中，在 Reload 时调用
 		ctx, cancel := context.WithCancel(context.Background())
 		globalClient.cancel = cancel
 		globalClient.wsClient = larkws.NewClient(appID, appSecret, larkws.WithEventHandler(createEventHandler()))
 
-		go func() {
+		go func(ctx context.Context) {
 			if err := globalClient.wsClient.Start(ctx); err != nil {
 				logger.Error("[Feishu] WebSocket 连接失败: %v", err)
 			}
-		}()
+		}(ctx)
 	}
 }
 

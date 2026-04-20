@@ -1,22 +1,20 @@
-import { getSettingGroup } from '~/composables/api/sysconfig'
+import { getSettingGroup } from '~/composables/api/sysconfig';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async event => {
   try {
-    const [blogConfig] = await Promise.all([
-      getSettingGroup('blog')
-    ])
+    const [blogConfig] = await Promise.all([getSettingGroup('blog')]);
 
-    const processConfig = (config: any, prefix: string) => {
-      const processed: Record<string, string> = {}
+    const processConfig = (config: Record<string, unknown>, prefix: string) => {
+      const processed: Record<string, string> = {};
       Object.entries(config).forEach(([key, value]) => {
         if (key.startsWith(`${prefix}.`)) {
-          processed[key.substring(prefix.length + 1)] = value as string
+          processed[key.substring(prefix.length + 1)] = value as string;
         }
-      })
-      return processed
-    }
+      });
+      return processed;
+    };
 
-    const blog = processConfig(blogConfig, 'blog')
+    const blog = processConfig(blogConfig, 'blog');
 
     const manifest = {
       name: blog.title || 'Flec Blog',
@@ -30,19 +28,19 @@ export default defineEventHandler(async (event) => {
         {
           src: blog.favicon || '/favicon.ico',
           sizes: '192x192',
-          type: 'image/png'
+          type: 'image/png',
         },
         {
           src: blog.favicon || '/favicon.ico',
           sizes: '512x512',
-          type: 'image/png'
-        }
-      ]
-    }
+          type: 'image/png',
+        },
+      ],
+    };
 
-    setHeader(event, 'Content-Type', 'application/manifest+json')
-    return manifest
-  } catch (error) {
+    setHeader(event, 'Content-Type', 'application/manifest+json');
+    return manifest;
+  } catch {
     return {
       name: 'Flec Blog',
       short_name: 'Flec',
@@ -50,7 +48,7 @@ export default defineEventHandler(async (event) => {
       background_color: '#ffffff',
       display: 'standalone',
       start_url: '/',
-      icons: [{ src: '/favicon.ico', sizes: '192x192', type: 'image/png' }]
-    }
+      icons: [{ src: '/favicon.ico', sizes: '192x192', type: 'image/png' }],
+    };
   }
-})
+});

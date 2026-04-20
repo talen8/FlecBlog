@@ -361,7 +361,9 @@ func readUploadFile(fileHeader *multipart.FileHeader, maxSize int64) ([]byte, er
 	if err != nil {
 		return nil, fmt.Errorf("打开文件失败: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	return io.ReadAll(file)
 }

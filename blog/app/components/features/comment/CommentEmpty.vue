@@ -1,6 +1,6 @@
 <template>
   <div class="comments-empty">
-    <i class="ri-chat-off-line"></i>
+    <i class="ri-chat-off-line" />
     <p>暂无评论，快来发表第一条评论吧！</p>
   </div>
 </template>

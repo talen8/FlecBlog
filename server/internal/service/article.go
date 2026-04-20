@@ -477,11 +477,11 @@ func (s *ArticleService) Create(ctx context.Context, req *dto.CreateArticleReque
 
 	// 如果是发布状态，异步发送订阅推送
 	if article.IsPublish && s.subscriberService != nil {
-		go func() {
-			if err := s.subscriberService.SendArticleNotification(context.Background(), article); err != nil {
-				logger.Warn("发送文章推送失败 (文章ID: %d): %v", article.ID, err)
+		go func(ctx context.Context, articleID uint) {
+			if err := s.subscriberService.SendArticleNotification(ctx, article); err != nil {
+				logger.Warn("发送文章推送失败 (文章ID: %d): %v", articleID, err)
 			}
-		}()
+		}(ctx, article.ID)
 	}
 
 	return s.Get(ctx, article.ID)
@@ -580,11 +580,11 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 
 	// 如果从草稿变为发布状态，异步发送订阅推送
 	if !oldIsPublish && article.IsPublish && s.subscriberService != nil {
-		go func() {
-			if err := s.subscriberService.SendArticleNotification(context.Background(), article); err != nil {
-				logger.Warn("发送文章推送失败 (文章ID: %d): %v", article.ID, err)
+		go func(ctx context.Context, articleID uint) {
+			if err := s.subscriberService.SendArticleNotification(ctx, article); err != nil {
+				logger.Warn("发送文章推送失败 (文章ID: %d): %v", articleID, err)
 			}
-		}()
+		}(ctx, article.ID)
 	}
 
 	return s.Get(ctx, id)
@@ -1303,7 +1303,9 @@ func (s *ArticleService) fetchImage(ctx context.Context, imgURL string) ([]byte,
 	if err != nil {
 		return nil, "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, "", fmt.Errorf("下载图片失败，状态码: %d", resp.StatusCode)
@@ -1380,7 +1382,9 @@ func (s *ArticleService) DownloadZip(ctx context.Context, id uint) ([]byte, stri
 
 	buf := new(bytes.Buffer)
 	zipWriter := zip.NewWriter(buf)
-	defer zipWriter.Close()
+	defer func() {
+		_ = zipWriter.Close()
+	}()
 
 	imageMap := make(map[string]string)
 
@@ -1406,10 +1410,10 @@ func (s *ArticleService) DownloadZip(ctx context.Context, id uint) ([]byte, stri
 		frontMatter := s.buildYAMLFrontMatter(article, imageMap)
 		mdContent := frontMatter + "\n" + article.Content
 		filename := s.sanitizeFilename(article.Title) + ".md"
-		if w, _ := zipWriter.Create(filename); w != nil {
-			w.Write([]byte(mdContent))
+		if w, err := zipWriter.Create(filename); err == nil && w != nil {
+			_, _ = w.Write([]byte(mdContent))
 		}
-		zipWriter.Close()
+		_ = zipWriter.Close()
 		return buf.Bytes(), s.sanitizeFilename(article.Title) + ".zip", nil
 	}
 
@@ -1484,8 +1488,8 @@ func (s *ArticleService) DownloadZip(ctx context.Context, id uint) ([]byte, stri
 		if result.err != nil {
 			continue
 		}
-		if w, _ := zipWriter.Create(result.filename); w != nil {
-			w.Write(result.data)
+		if w, err := zipWriter.Create(result.filename); err == nil && w != nil {
+			_, _ = w.Write(result.data)
 			imageMap[result.url] = result.filename
 		}
 	}
@@ -1500,11 +1504,11 @@ func (s *ArticleService) DownloadZip(ctx context.Context, id uint) ([]byte, stri
 	frontMatter := s.buildYAMLFrontMatter(article, imageMap)
 	mdContent := frontMatter + "\n" + content
 	filename := s.sanitizeFilename(article.Title) + ".md"
-	if w, _ := zipWriter.Create(filename); w != nil {
-		w.Write([]byte(mdContent))
+	if w, err := zipWriter.Create(filename); err == nil && w != nil {
+		_, _ = w.Write([]byte(mdContent))
 	}
 
-	zipWriter.Close()
+	_ = zipWriter.Close()
 	return buf.Bytes(), s.sanitizeFilename(article.Title) + ".zip", nil
 }
 

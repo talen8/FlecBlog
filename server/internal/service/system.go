@@ -236,7 +236,9 @@ func (s *SystemService) fetchManifest(ctx context.Context) (*versionManifest, er
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
@@ -280,6 +282,7 @@ func (s *SystemService) setDynamicMemory(info *dto.SystemDynamicInfo) {
 // setDynamicHost 填充主机动态信息
 func (s *SystemService) setDynamicHost(info *dto.SystemDynamicInfo) {
 	if hi, err := host.Info(); err == nil {
+		// #nosec G115 - Uptime 是从系统获取的正常运行时间，值在合理范围内
 		info.HostUptime = int64(hi.Uptime)
 	}
 }

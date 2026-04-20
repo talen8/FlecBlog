@@ -76,8 +76,9 @@ export async function uploadFile(file: File, type: UploadType): Promise<UploadRe
     baseURL,
     method: 'POST',
     body: formData,
-  }).catch((error: any) => {
-    throw new Error(error?.data?.message || error?.message || '文件上传失败');
+  }).catch((error: unknown) => {
+    const err = error as { data?: { message?: string }; message?: string };
+    throw new Error(err?.data?.message || err?.message || '文件上传失败');
   });
 
   if (response.code !== 0) {

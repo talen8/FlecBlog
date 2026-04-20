@@ -350,7 +350,7 @@ const fetchDetail = async () => {
   try {
     const res = await getFeedbackDetail(feedbackId.value);
     feedback.value = res;
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('获取反馈详情失败');
     handleBack();
   } finally {
@@ -371,7 +371,7 @@ const handleSubmit = async () => {
     form.value.admin_reply = '';
     // 刷新详情
     await fetchDetail();
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('更新失败');
   } finally {
     submitting.value = false;
@@ -392,8 +392,11 @@ const getReportTypeLabel = (reportType: ReportType) => {
   return labels[reportType] || reportType;
 };
 
-const getReportTypeTagType = (reportType: ReportType) => {
-  const types: Record<string, any> = {
+// Element Plus 标签类型
+type TagType = 'success' | 'warning' | 'danger' | 'info';
+
+const getReportTypeTagType = (reportType: ReportType): TagType => {
+  const types: Record<string, TagType> = {
     copyright: 'warning',
     inappropriate: 'danger',
     summary: 'info',
@@ -411,8 +414,8 @@ const getStatusLabel = (status: FeedbackStatus) => {
   return labels[status] || status;
 };
 
-const getStatusTagType = (status: FeedbackStatus) => {
-  const types: Record<FeedbackStatus, any> = {
+const getStatusTagType = (status: FeedbackStatus): TagType => {
+  const types: Record<FeedbackStatus, TagType> = {
     pending: 'warning',
     resolved: 'success',
     closed: 'info',
@@ -437,6 +440,7 @@ const getFileName = (url: string) => {
 /**
  * 获取版权侵权的权利人证明文件
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getCopyrightProofFiles = (content: any) => {
   if (!content.attachmentFiles?.length) return [];
 
@@ -454,6 +458,7 @@ const getCopyrightProofFiles = (content: any) => {
 /**
  * 获取版权侵权的侵权内容证明文件
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getCopyrightInfringementFiles = (content: any) => {
   if (!content.attachmentFiles?.length) return [];
 

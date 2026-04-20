@@ -1,4 +1,4 @@
-import { getArticlesForWeb, getArticleBySlug } from '@/composables/api/article';
+import { getArticlesForWeb } from '@/composables/api/article';
 import { getComments, createComment, deleteComment } from '@/composables/api/comment';
 import { flattenComments } from '@/composables/useComment';
 import { getMoments } from '@/composables/api/moment';
@@ -265,7 +265,9 @@ export function useNotifications() {
       notifications.value = response.list || [];
       total.value = response.total || 0;
       unreadCount.value = response.unread_count || 0;
-      params?.page && (currentPage.value = params.page);
+      if (params?.page) {
+        currentPage.value = params.page;
+      }
     } catch (error) {
       console.error('获取通知列表失败:', error);
       notifications.value = [];

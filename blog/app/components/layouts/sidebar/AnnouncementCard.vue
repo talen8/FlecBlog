@@ -76,10 +76,11 @@ const showAnnouncement = computed(() => hasVisibleAnnouncementContent(announceme
 <template>
   <div v-if="showAnnouncement" class="card-widget card-announcement">
     <div class="item-headline">
-      <i class="ri-megaphone-line announcement-icon"></i>
+      <i class="ri-megaphone-line announcement-icon" />
       <span>公告</span>
     </div>
-    <div class="announcement-content" v-html="announcementHtml"></div>
+    <!-- eslint-disable-next-line vue/no-v-html -- 公告内容来自后台配置，为可信内容 -->
+    <div class="announcement-content" v-html="announcementHtml" />
   </div>
 </template>
 

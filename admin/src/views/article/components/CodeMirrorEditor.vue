@@ -840,7 +840,6 @@ const emit = defineEmits<{
 const editorRef = ref<HTMLElement>();
 const previewPaneRef = ref<HTMLElement>();
 const imageInputRef = ref<HTMLInputElement>();
-const photoUploadTarget = ref<{ row: number; index: number } | null>(null);
 const viewMode = ref<ViewMode>('split');
 const isBrowserFullscreen = ref(false);
 const isPageFullscreen = ref(false);
@@ -1614,8 +1613,8 @@ const uploadArticleImages = async (files: File[], onFinally?: () => void) => {
     insertText(results.map(result => `![图片](${result.file_url})`).join('\n'));
     ElMessage.success(`成功上传 ${imageFiles.length} 张图片`);
     return results;
-  } catch (error: any) {
-    ElMessage.error(error.message || '图片上传失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '图片上传失败');
     return [];
   } finally {
     loading.close();
@@ -1672,8 +1671,8 @@ const handleOnlineImageDownload = async () => {
       ElMessage.success('图片下载并上传成功');
       document.body.click();
     }
-  } catch (error: any) {
-    ElMessage.error(error.message || '图片下载失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '图片下载失败');
   } finally {
     downloadingImage.value = false;
   }
@@ -1832,8 +1831,8 @@ const handleVideoUpload = async (file: File) => {
     const results = await uploadFile(file, '文章视频');
     videoDialog.videoUrl = results.file_url;
     ElMessage.success('视频上传成功');
-  } catch (error: any) {
-    ElMessage.error(error.message || '视频上传失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '视频上传失败');
   } finally {
     videoDialog.uploading = false;
   }
@@ -1889,8 +1888,8 @@ const handleAudioUpload = async (file: File) => {
     const results = await uploadFile(file, '文章音频');
     audioDialog.audioUrl = results.file_url;
     ElMessage.success('音频上传成功');
-  } catch (error: any) {
-    ElMessage.error(error.message || '音频上传失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '音频上传失败');
   } finally {
     audioDialog.uploading = false;
   }
@@ -1919,7 +1918,7 @@ const handleParseMusic = async () => {
     } else {
       throw new Error('未获取到音乐信息');
     }
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('解析失败，请检查音乐ID是否正确');
     audioDialog.musicInfo = null;
   } finally {
@@ -1994,8 +1993,8 @@ const handlePhotoImageUpload = async (rowIndex: number, imgIndex: number, file: 
       row[imgIndex] = results.file_url;
     }
     ElMessage.success('图片上传成功');
-  } catch (error: any) {
-    ElMessage.error(error.message || '图片上传失败');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '图片上传失败');
   } finally {
     photoDialog.uploading = false;
   }
@@ -2052,7 +2051,7 @@ const handleInsertPhoto = () => {
   const rows = photoDialog.rows.filter(row => row.some(img => img.trim()));
   let photoBlocks;
   if (rows.length === 0) {
-    photoBlocks = '图片1\n图片2\n\:::n\n图片3\n图片4';
+    photoBlocks = '图片1\n图片2\n:::n\n图片3\n图片4';
   } else {
     photoBlocks = rows.map(row => row.filter(img => img.trim()).join('\n')).join('\n:::n\n');
   }

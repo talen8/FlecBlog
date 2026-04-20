@@ -20,7 +20,8 @@ const { data: initialData } = await useAsyncData(`post-${route.params.slug}`, as
     const articleData = await getArticleBySlug(slug);
     setCurrentArticle(articleData);
     return { article: articleData };
-  } catch (err: any) {
+  } catch (error: unknown) {
+    const err = error as Error & { response?: { status?: number } };
     if (err.response?.status === 404) {
       router.replace('/404');
     }
@@ -79,7 +80,8 @@ const fetchArticle = async () => {
         }
       });
     }
-  } catch (err: any) {
+  } catch (error: unknown) {
+    const err = error as Error & { response?: { status?: number } };
     clearCurrentArticle();
     $tracker?.setArticleId(undefined);
 
@@ -109,7 +111,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="post" v-if="article">
+  <div v-if="article" id="post">
     <FeaturesArticleAISummary v-if="article.ai_summary" :summary="article.ai_summary" />
 
     <FeaturesArticleOutdatedNotice v-if="article.is_outdated" />

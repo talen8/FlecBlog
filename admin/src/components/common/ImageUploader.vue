@@ -118,9 +118,9 @@ const uploadPendingFile = async (): Promise<string | null> => {
     emit('update:modelValue', result.file_url);
     loading.close();
     return result.file_url;
-  } catch (error: any) {
+  } catch (error: unknown) {
     loading.close();
-    ElMessage.error(error.message || '上传失败');
+    ElMessage.error((error as Error)?.message || '上传失败');
     throw error;
   }
 };

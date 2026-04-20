@@ -1,17 +1,11 @@
 <script setup lang="ts">
+import { parseJSON } from '@/utils/json';
+
 const { basicConfig, blogConfig } = useSysConfig();
 const { total: articlesTotal, fetchArticles } = useArticles();
 const avatarUrl = computed(() => basicConfig.value.author_avatar || '/avatar.webp');
 const { total: categoriesTotal } = useCategories();
 const { total: tagsTotal } = useTags();
-
-const parseJSON = <T = any,>(jsonStr: string | undefined, fallback: T): T => {
-  try {
-    return jsonStr ? JSON.parse(jsonStr) : fallback;
-  } catch {
-    return fallback;
-  }
-};
 
 const contacts = computed(() => {
   const socialList = parseJSON<Array<{ name: string; url: string; icon: string }>>(
@@ -60,7 +54,7 @@ onMounted(async () => {
         :aria-label="`访问 ${contact.name}`"
         rel="noopener noreferrer"
       >
-        <i :class="'ri-' + contact.icon" aria-hidden="true"></i>
+        <i :class="'ri-' + contact.icon" aria-hidden="true" />
       </a>
     </div>
   </div>

@@ -171,7 +171,7 @@ const toggleEnvelope = () => {
           </div>
         </div>
 
-        <div class="hint" v-show="!isOpen">点击开启</div>
+        <div v-show="!isOpen" class="hint">点击开启</div>
       </div>
     </div>
 

@@ -289,8 +289,11 @@ const loadBlogConfigs = async () => {
     });
 
     // 解析 JSON 字段
-    const parsed = parseJSON(configs.typing_texts || '', []);
-    blogForm.value.typingTextsList = parsed.map((item: any) =>
+    const parsed = parseJSON<(string | { value: string } | { label: string; value: string })[]>(
+      configs.typing_texts || '',
+      []
+    );
+    blogForm.value.typingTextsList = parsed.map(item =>
       typeof item === 'string' ? { value: item } : item
     );
 

@@ -40,7 +40,7 @@ onMounted(() => {
   <div v-if="summary" class="ai-summary">
     <div class="ai-title">
       <div class="ai-title-left">
-        <i class="ri-sparkling-line"></i>
+        <i class="ri-sparkling-line" />
         <div class="ai-title-text">{{ chatTitle }}</div>
       </div>
       <div class="ai-tag">{{ modelName }}</div>

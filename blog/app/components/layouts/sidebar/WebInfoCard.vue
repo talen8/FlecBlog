@@ -13,7 +13,7 @@ const runningDays = computed(() => {
 <template>
   <div class="card-widget card-webinfo">
     <div class="item-headline">
-      <i class="ri-line-chart-fill"></i>
+      <i class="ri-line-chart-fill" />
       <span>网站信息</span>
     </div>
     <div class="webinfo">

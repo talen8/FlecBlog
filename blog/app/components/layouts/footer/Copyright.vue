@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { parseJSON } from '@/utils/json';
+
 const { basicConfig, blogConfig } = useSysConfig();
 const startYear = 2024;
 const copyrightYear = ref(`${startYear}`);
@@ -8,20 +10,6 @@ onMounted(() => {
   copyrightYear.value =
     startYear === currentYear ? `${currentYear}` : `${startYear} - ${currentYear}`;
 });
-
-/**
- * 解析 JSON 字符串
- * @param jsonStr - JSON 字符串
- * @param fallback - 解析失败时的默认值
- * @returns 解析后的数据
- */
-const parseJSON = <T = any,>(jsonStr: string | undefined, fallback: T): T => {
-  try {
-    return jsonStr ? JSON.parse(jsonStr) : fallback;
-  } catch {
-    return fallback;
-  }
-};
 
 /**
  * 页脚右侧链接列表

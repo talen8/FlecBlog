@@ -10,6 +10,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   groupByYear: false,
+  title: undefined,
+  total: undefined,
 });
 
 // 显示的文章数量：优先使用 total，否则使用 articles.length
@@ -55,7 +57,7 @@ const groupedArticles = computed(() => {
     <div v-if="title" class="article-sort-header">
       <h1 class="article-sort-title">{{ title }}</h1>
       <div class="article-sort-meta">
-        <i class="ri-file-list-line"></i>
+        <i class="ri-file-list-line" />
         <span>共 {{ displayTotal }} 篇文章</span>
       </div>
     </div>
@@ -70,7 +72,7 @@ const groupedArticles = computed(() => {
           </NuxtLink>
           <div class="article-sort-item-info">
             <div class="article-sort-item-time">
-              <i class="ri-calendar-2-fill"></i>
+              <i class="ri-calendar-2-fill" />
               <span>{{ formatDate(article.publish_time) }}</span>
             </div>
             <NuxtLink :to="article.url" class="article-sort-item-title">{{
@@ -89,7 +91,7 @@ const groupedArticles = computed(() => {
         </NuxtLink>
         <div class="article-sort-item-info">
           <div class="article-sort-item-time">
-            <i class="ri-calendar-2-fill"></i>
+            <i class="ri-calendar-2-fill" />
             <span>{{ formatDate(article.publish_time) }}</span>
           </div>
           <NuxtLink :to="article.url" class="article-sort-item-title">{{ article.title }}</NuxtLink>

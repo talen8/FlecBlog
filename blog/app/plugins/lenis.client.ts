@@ -2,7 +2,7 @@ import Lenis from 'lenis';
 
 export default defineNuxtPlugin({
   setup() {
-    if (!process.client) return;
+    if (!import.meta.client) return;
 
     const lenis = new Lenis({
       duration: 1.2,

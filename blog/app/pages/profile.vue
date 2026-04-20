@@ -110,8 +110,9 @@ const handleAvatarUpload = async () => {
       editErrors.value = {};
       const result = await uploadFile(file, '用户头像');
       editForm.value.avatar = result.file_url;
-    } catch (error: any) {
-      editErrors.value.avatar = error.message || '头像上传失败';
+    } catch (error: unknown) {
+      const err = error as Error;
+      editErrors.value.avatar = err.message || '头像上传失败';
     } finally {
       uploading.value = false;
     }
@@ -145,8 +146,9 @@ const handleEditSubmit = async () => {
       userInfo.value = data;
       showEditDialog.value = false;
     }, 1000);
-  } catch (error: any) {
-    showError(error.message || '保存失败');
+  } catch (error: unknown) {
+    const err = error as Error;
+    showError(err.message || '保存失败');
   } finally {
     editLoading.value = false;
   }
@@ -180,8 +182,9 @@ const handleBadgeSubmit = async () => {
       userInfo.value = data;
       showBadgeDialog.value = false;
     }, 1000);
-  } catch (error: any) {
-    showError(error.message || '设置失败');
+  } catch (error: unknown) {
+    const err = error as Error;
+    showError(err.message || '设置失败');
   } finally {
     badgeLoading.value = false;
   }
@@ -221,8 +224,9 @@ const handlePasswordSubmit = async () => {
       logout();
       router.push('/');
     }, 1500);
-  } catch (error: any) {
-    const errorMsg = error?.message || '密码修改失败';
+  } catch (error: unknown) {
+    const err = error as Error & { message?: string };
+    const errorMsg = err?.message || '密码修改失败';
     if (errorMsg.includes('旧密码')) {
       passwordErrors.value.old_password = '原密码错误';
     } else {
@@ -260,8 +264,9 @@ const handleSetPasswordSubmit = async () => {
     showSuccess('密码设置成功');
     showSetPasswordDialog.value = false;
     await fetchProfile(); // 刷新用户信息
-  } catch (error: any) {
-    showError(error?.message || '密码设置失败');
+  } catch (error: unknown) {
+    const err = error as Error;
+    showError(err?.message || '密码设置失败');
   } finally {
     setPasswordLoading.value = false;
   }
@@ -356,7 +361,8 @@ const handleUnbindSubmit = async () => {
     showSuccess(`已解绑 ${getProviderName(unbindProvider.value)}`);
     showUnbindDialog.value = false;
     await fetchProfile();
-  } catch (err: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     showError(err?.message || '解绑失败');
   } finally {
     unbindLoading.value = false;
@@ -378,7 +384,8 @@ const handleDeactivateSubmit = async () => {
       logout();
       router.push('/');
     }, 1500);
-  } catch (err: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     const errorMsg = err?.message || '账户注销失败';
     if (errorMsg.includes('密码') || errorMsg.includes('password')) {
       deactivateErrors.value.password = '密码错误，请重新输入';
@@ -397,7 +404,7 @@ onMounted(async () => {
   }
 
   // 只在客户端获取需要认证的数据
-  if (process.client) {
+  if (import.meta.client) {
     await fetchProfile();
 
     // 处理 OAuth 绑定回调消息
@@ -426,8 +433,8 @@ onMounted(async () => {
       <div class="info-card">
         <div class="card-header">
           <h3 class="card-title">基础信息</h3>
-          <button @click="showEditDialog = true" class="btn-primary">
-            <i class="ri-edit-line"></i> 编辑资料
+          <button class="btn-primary" @click="showEditDialog = true">
+            <i class="ri-edit-line" /> 编辑资料
           </button>
         </div>
         <div class="info-list">
@@ -469,8 +476,8 @@ onMounted(async () => {
             <span class="value">
               <span v-if="userInfo.badge" class="badge-text">{{ userInfo.badge }}</span>
               <span v-else class="empty">未设置</span>
-              <button @click="showBadgeDialog = true" class="btn-icon" title="设置铭牌">
-                <i class="ri-settings-4-line"></i>
+              <button class="btn-icon" title="设置铭牌" @click="showBadgeDialog = true">
+                <i class="ri-settings-4-line" />
               </button>
             </span>
           </div>
@@ -489,7 +496,7 @@ onMounted(async () => {
                   :title="userInfo?.has_password ? '密码登录' : '设置密码'"
                   @click="handleLoginMethodClick('password', userInfo?.has_password ?? false)"
                 >
-                  <i class="ri-lock-password-line"></i>
+                  <i class="ri-lock-password-line" />
                 </div>
 
                 <!-- GitHub登录方式 -->
@@ -517,8 +524,8 @@ onMounted(async () => {
                         )
                   "
                 >
-                  <i v-if="oauthBindLoading === 'github'" class="ri-loader-4-line spin"></i>
-                  <i v-else class="ri-github-fill"></i>
+                  <i v-if="oauthBindLoading === 'github'" class="ri-loader-4-line spin" />
+                  <i v-else class="ri-github-fill" />
                 </div>
 
                 <!-- Google登录方式 -->
@@ -546,8 +553,8 @@ onMounted(async () => {
                         )
                   "
                 >
-                  <i v-if="oauthBindLoading === 'google'" class="ri-loader-4-line spin"></i>
-                  <i v-else class="ri-google-fill"></i>
+                  <i v-if="oauthBindLoading === 'google'" class="ri-loader-4-line spin" />
+                  <i v-else class="ri-google-fill" />
                 </div>
 
                 <!-- QQ登录方式 -->
@@ -575,8 +582,8 @@ onMounted(async () => {
                         )
                   "
                 >
-                  <i v-if="oauthBindLoading === 'qq'" class="ri-loader-4-line spin"></i>
-                  <i v-else class="ri-qq-fill"></i>
+                  <i v-if="oauthBindLoading === 'qq'" class="ri-loader-4-line spin" />
+                  <i v-else class="ri-qq-fill" />
                 </div>
 
                 <!-- Microsoft登录方式 -->
@@ -604,8 +611,8 @@ onMounted(async () => {
                         )
                   "
                 >
-                  <i v-if="oauthBindLoading === 'microsoft'" class="ri-loader-4-line spin"></i>
-                  <i v-else class="ri-microsoft-fill"></i>
+                  <i v-if="oauthBindLoading === 'microsoft'" class="ri-loader-4-line spin" />
+                  <i v-else class="ri-microsoft-fill" />
                 </div>
               </div>
             </span>
@@ -635,8 +642,8 @@ onMounted(async () => {
                 <span class="action-title">退出登录</span>
                 <span class="action-desc">退出当前账户，需要重新登录</span>
               </div>
-              <button @click="handleLogout" class="btn-secondary">
-                <i class="ri-logout-box-line"></i> 退出
+              <button class="btn-secondary" @click="handleLogout">
+                <i class="ri-logout-box-line" /> 退出
               </button>
             </div>
           </div>
@@ -652,13 +659,13 @@ onMounted(async () => {
               </div>
               <button
                 v-if="userInfo?.has_password"
-                @click="showPasswordDialog = true"
                 class="btn-secondary"
+                @click="showPasswordDialog = true"
               >
-                <i class="ri-lock-password-line"></i> 修改密码
+                <i class="ri-lock-password-line" /> 修改密码
               </button>
-              <button v-else @click="showSetPasswordDialog = true" class="btn-secondary">
-                <i class="ri-lock-password-line"></i> 设置密码
+              <button v-else class="btn-secondary" @click="showSetPasswordDialog = true">
+                <i class="ri-lock-password-line" /> 设置密码
               </button>
             </div>
           </div>
@@ -668,8 +675,8 @@ onMounted(async () => {
                 <span class="action-title">注销账户</span>
                 <span class="action-desc">永久删除账户及所有数据，此操作不可恢复</span>
               </div>
-              <button @click="showDeactivateDialog = true" class="btn-danger">
-                <i class="ri-delete-bin-line"></i> 注销账户
+              <button class="btn-danger" @click="showDeactivateDialog = true">
+                <i class="ri-delete-bin-line" /> 注销账户
               </button>
             </div>
           </div>
@@ -680,15 +687,15 @@ onMounted(async () => {
     <!-- 编辑资料对话框 -->
     <UiBaseDialog
       v-model="showEditDialog"
-      @confirm="handleEditSubmit"
       title="编辑个人信息"
       style="--dialog-width: 500px"
       :loading="editLoading"
       confirm-text="保存"
+      @confirm="handleEditSubmit"
     >
       <form
-        @submit.prevent="handleEditSubmit"
         style="display: flex; flex-direction: column; gap: 20px"
+        @submit.prevent="handleEditSubmit"
       >
         <div class="form-group">
           <label>头像</label>
@@ -698,7 +705,7 @@ onMounted(async () => {
               alt="头像"
               loading="lazy"
             />
-            <button type="button" @click="handleAvatarUpload" :disabled="uploading || editLoading">
+            <button type="button" :disabled="uploading || editLoading" @click="handleAvatarUpload">
               {{ uploading ? '上传中...' : '更换头像' }}
             </button>
           </div>
@@ -749,15 +756,15 @@ onMounted(async () => {
     <!-- 铭牌设置对话框 -->
     <UiBaseDialog
       v-model="showBadgeDialog"
-      @confirm="handleBadgeSubmit"
       title="设置铭牌标识"
       :loading="badgeLoading"
       confirm-text="保存"
       style="--dialog-width: 400px"
+      @confirm="handleBadgeSubmit"
     >
       <form
-        @submit.prevent="handleBadgeSubmit"
         style="display: flex; flex-direction: column; gap: 20px"
+        @submit.prevent="handleBadgeSubmit"
       >
         <div class="form-group">
           <input
@@ -776,14 +783,14 @@ onMounted(async () => {
     <!-- 修改密码对话框 -->
     <UiBaseDialog
       v-model="showPasswordDialog"
-      @confirm="handlePasswordSubmit"
       title="修改密码"
       :loading="passwordLoading"
       confirm-text="确认修改"
+      @confirm="handlePasswordSubmit"
     >
       <form
-        @submit.prevent="handlePasswordSubmit"
         style="display: flex; flex-direction: column; gap: 20px"
+        @submit.prevent="handlePasswordSubmit"
       >
         <div class="form-group">
           <label class="form-label">旧密码</label>
@@ -834,7 +841,7 @@ onMounted(async () => {
         </div>
 
         <div class="tip">
-          <i class="ri-information-line"></i>
+          <i class="ri-information-line" />
           <span>密码修改成功后，系统将自动退出登录，请使用新密码重新登录</span>
         </div>
       </form>
@@ -843,11 +850,11 @@ onMounted(async () => {
     <!-- 注销账户对话框 -->
     <UiBaseDialog
       v-model="showDeactivateDialog"
-      @confirm="handleDeactivateSubmit"
       title="注销账户"
       style="--dialog-width: 520px"
       :loading="deactivateLoading"
       confirm-text="确认注销"
+      @confirm="handleDeactivateSubmit"
     >
       <div style="display: flex; flex-direction: column; gap: 24px">
         <div class="warning">
@@ -856,8 +863,8 @@ onMounted(async () => {
         </div>
 
         <form
-          @submit.prevent="handleDeactivateSubmit"
           style="display: flex; flex-direction: column; gap: 20px"
+          @submit.prevent="handleDeactivateSubmit"
         >
           <div class="form-group">
             <label class="checkbox-label">
@@ -891,11 +898,11 @@ onMounted(async () => {
     <!-- 解绑 OAuth 对话框 -->
     <UiBaseDialog
       v-model="showUnbindDialog"
-      @confirm="handleUnbindSubmit"
       :title="`解绑 ${getProviderName(unbindProvider)}`"
       style="--dialog-width: 400px"
       :loading="unbindLoading"
       confirm-text="确认解绑"
+      @confirm="handleUnbindSubmit"
     >
       <div style="display: flex; flex-direction: column; gap: 16px">
         <p>确定要解绑 {{ getProviderName(unbindProvider) }} 登录方式吗？</p>
@@ -906,17 +913,17 @@ onMounted(async () => {
     <!-- 设置密码对话框（OAuth 用户首次设置密码）-->
     <UiBaseDialog
       v-model="showSetPasswordDialog"
-      @confirm="handleSetPasswordSubmit"
       title="设置密码"
       :loading="setPasswordLoading"
       confirm-text="确认设置"
+      @confirm="handleSetPasswordSubmit"
     >
       <form
-        @submit.prevent="handleSetPasswordSubmit"
         style="display: flex; flex-direction: column; gap: 20px"
+        @submit.prevent="handleSetPasswordSubmit"
       >
         <div class="tip">
-          <i class="ri-information-line"></i>
+          <i class="ri-information-line" />
           <span>设置密码后可使用邮箱+密码登录</span>
         </div>
 

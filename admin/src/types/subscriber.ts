@@ -10,4 +10,12 @@ export interface Subscriber {
 }
 
 // 订阅者查询参数
-export interface SubscriberQuery extends PaginationQuery {}
+export type SubscriberQuery = PaginationQuery;
+
+// 订阅者列表数据
+export interface SubscriberListData {
+  list: Subscriber[];
+  total: number;
+  page: number;
+  page_size: number;
+}

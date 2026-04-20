@@ -3,15 +3,33 @@
  * 自动将自定义 head 和 body 代码注入到页面中
  */
 
+interface TagData {
+  tag: string;
+  innerHTML?: string;
+  [key: string]: string | undefined;
+}
+
+interface HeadPayload {
+  meta: Record<string, string>[];
+  link: Record<string, string>[];
+  script: (Record<string, string> & { innerHTML?: string })[];
+  style: (Record<string, string> & { innerHTML?: string })[];
+}
+
+interface FontResult {
+  link: { rel: string; href: string }[];
+  style: { innerHTML: string }[];
+}
+
 export default defineNuxtPlugin({
   name: 'custom-code',
   setup() {
     const { blogConfig } = useSysConfig();
 
-    const parseHtmlTags = (html: string) => {
+    const parseHtmlTags = (html: string): TagData[] => {
       if (!html) return [];
 
-      const tags: any[] = [];
+      const tags: TagData[] = [];
       const tagRegex = /<(\w+)([^>]*)>([\s\S]*?)<\/\1>|<(\w+)([^>]*)\s*\/>/gi;
       let match;
 
@@ -22,7 +40,7 @@ export default defineNuxtPlugin({
         const attrsStr = match[2] || match[5];
         const innerHTML = match[3];
 
-        const tagData: any = { tag: tagName.toLowerCase() };
+        const tagData: TagData = { tag: tagName.toLowerCase() };
 
         if (attrsStr) {
           const attrRegex = /(\S+)=["']([^"']*)["']/g;
@@ -42,11 +60,11 @@ export default defineNuxtPlugin({
       return tags;
     };
 
-    const buildHeadPayload = (headCode: string) => {
+    const buildHeadPayload = (headCode: string): HeadPayload | null => {
       if (!headCode) return null;
 
       const tags = parseHtmlTags(headCode);
-      const headPayload: { meta: any[]; link: any[]; script: any[]; style: any[] } = {
+      const headPayload: HeadPayload = {
         meta: [],
         link: [],
         script: [],
@@ -56,18 +74,23 @@ export default defineNuxtPlugin({
       tags.forEach(tag => {
         const { tag: tagName, innerHTML, ...attrs } = tag;
 
+        // 过滤掉 undefined 值，转换为 Record<string, string>
+        const filteredAttrs = Object.fromEntries(
+          Object.entries(attrs).filter(([, v]) => v !== undefined)
+        ) as Record<string, string>;
+
         switch (tagName) {
           case 'meta':
-            headPayload.meta.push(attrs);
+            headPayload.meta.push(filteredAttrs);
             break;
           case 'link':
-            headPayload.link.push(attrs);
+            headPayload.link.push(filteredAttrs);
             break;
           case 'script':
-            headPayload.script.push(innerHTML ? { ...attrs, innerHTML } : attrs);
+            headPayload.script.push(innerHTML ? { ...filteredAttrs, innerHTML } : filteredAttrs);
             break;
           case 'style':
-            headPayload.style.push(innerHTML ? { ...attrs, innerHTML } : attrs);
+            headPayload.style.push(innerHTML ? { ...filteredAttrs, innerHTML } : filteredAttrs);
             break;
         }
       });
@@ -75,7 +98,7 @@ export default defineNuxtPlugin({
       return headPayload;
     };
 
-    const buildFontLink = (fontConfig: string) => {
+    const buildFontLink = (fontConfig: string): FontResult => {
       if (!fontConfig) return { link: [], style: [] };
 
       // 从配置中提取 URL 和字体名称
@@ -85,7 +108,7 @@ export default defineNuxtPlugin({
 
       if (!url) return { link: [], style: [] };
 
-      const result: any = {
+      const result: FontResult = {
         link: [
           {
             rel: 'stylesheet',
@@ -122,7 +145,7 @@ export default defineNuxtPlugin({
     const injectBodyCode = () => {
       const bodyCode = blogConfig.value.custom_body || '';
 
-      if (bodyCode && process.client) {
+      if (bodyCode && import.meta.client) {
         const oldContainer = document.getElementById('custom-body-inject');
         if (oldContainer) {
           oldContainer.remove();

@@ -7,7 +7,8 @@
     "dev": "vite --mode development",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview --mode development",
-    "format": "prettier --write src/**/*.{ts,vue,scss}"
+    "lint": "eslint .",
+    "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.0",
@@ -46,11 +47,18 @@
   },
   "devDependencies": {
     "@types/node": "^25.3.2",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/tsconfig": "^0.8.1",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-vue": "^9.0.0",
     "prettier": "^3.8.2",
     "sass": "^1.97.3",
     "typescript": "~5.9.3",
+    "typescript-eslint": "^8.58.2",
     "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0",
     "vue-tsc": "^3.2.5"

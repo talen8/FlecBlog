@@ -44,7 +44,9 @@ func GetIPLocation(ip string) string {
 	if err != nil {
 		return "未知"
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result ipAPIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {

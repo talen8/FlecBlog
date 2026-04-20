@@ -38,7 +38,7 @@ const loadData = async (page: number = 1) => {
 // 处理分页变化
 const handlePageChange = async (page: number) => {
   await loadData(page);
-  if (process.client) {
+  if (import.meta.client) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 };

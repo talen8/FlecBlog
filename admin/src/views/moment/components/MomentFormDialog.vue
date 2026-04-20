@@ -525,14 +525,6 @@ const formData = reactive<CreateMomentRequest>({
 const publishTime = ref('');
 
 // 计算属性
-const hasContent = computed(
-  () =>
-    formData.content.link?.url ||
-    imageItems.value.length ||
-    formData.content.music?.id ||
-    videoItem.value
-);
-
 const otherContentPreviews = computed(() => {
   const previews = [];
   if (formData.content.link?.url) {
@@ -653,7 +645,7 @@ const handleParseLink = async () => {
       formData.content.link.favicon = result.favicon || '';
     }
     ElMessage.success('解析成功');
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('解析失败，请手动填写信息');
   } finally {
     fetchingLink.value = false;
@@ -692,7 +684,7 @@ const handleParseMusic = async () => {
     } else {
       throw new Error('未获取到音乐信息');
     }
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('解析失败，请检查音乐ID是否正确');
     musicInfo.value = null;
   } finally {
@@ -796,7 +788,7 @@ const addVideoUrl = async () => {
     };
     videoUrlInput.value = '';
     ElMessage.success(`已识别：${getPlatformName(result.platform)} - ${result.video_id}`);
-  } catch (error) {
+  } catch (_error) {
     ElMessage.error('无法识别的视频链接，请检查URL格式（支持B站、YouTube）');
   } finally {
     fetchingVideo.value = false;
@@ -928,6 +920,7 @@ const handleSubmit = async () => {
     const uploadedVideo = await uploadVideo();
 
     // 清理数据，只传递有值的字段
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const content: any = {};
     if (formData.content.text?.trim()) content.text = formData.content.text.trim();
     if (formData.content.tags?.trim()) content.tags = formData.content.tags.trim();
@@ -958,6 +951,7 @@ const handleSubmit = async () => {
         content.link.favicon = formData.content.link.favicon.trim();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const saveData: any = { content, is_publish: formData.is_publish };
     // 如果没有设置发布时间，使用当前时间
     saveData.publish_time = publishTime.value || formatForBackend(new Date());
