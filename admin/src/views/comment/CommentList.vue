@@ -102,27 +102,8 @@
 
     <el-table-column label="操作" width="220" align="center" fixed="right">
       <template #default="{ row }">
-        <el-button
-          v-if="!row.deleted_at"
-          type="primary"
-          link
-          size="small"
-          @click="openReplyDialog(row)"
-        >
-          回复
-        </el-button>
-        <el-button
-          v-if="row.deleted_at"
-          type="success"
-          link
-          size="small"
-          @click="handleRestore(row.id)"
-        >
-          恢复
-        </el-button>
-        <el-button v-else type="danger" link size="small" @click="handleDelete(row.id)">
-          删除
-        </el-button>
+        <el-button type="primary" link size="small" @click="openReplyDialog(row)"> 回复 </el-button>
+        <el-button type="danger" link size="small" @click="handleDelete(row.id)"> 删除 </el-button>
       </template>
     </el-table-column>
   </common-list>
@@ -176,13 +157,7 @@ import { User } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
 import type { Comment } from '@/types/comment';
 import type { PaginationQuery } from '@/types/request';
-import {
-  getComments,
-  deleteComment,
-  restoreComment,
-  toggleCommentStatus,
-  createComment,
-} from '@/api/comment';
+import { getComments, deleteComment, toggleCommentStatus, createComment } from '@/api/comment';
 import { formatDateTime } from '@/utils/date';
 
 const loading = ref(false);
@@ -236,19 +211,6 @@ const handleDelete = async (id: number) => {
     });
     await deleteComment(id);
     ElMessage.success('删除成功');
-    fetchComments();
-  } catch (error) {
-    if (error !== 'cancel' && error instanceof Error) ElMessage.error(error.message);
-  }
-};
-
-const handleRestore = async (id: number) => {
-  try {
-    await ElMessageBox.confirm('确定要恢复这条评论吗？', '提示', {
-      type: 'info',
-    });
-    await restoreComment(id);
-    ElMessage.success('恢复成功');
     fetchComments();
   } catch (error) {
     if (error !== 'cancel' && error instanceof Error) ElMessage.error(error.message);

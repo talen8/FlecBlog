@@ -87,22 +87,20 @@ func (s *CommentService) GetByTarget(ctx context.Context, targetType, targetKey 
 		return nil, 0, err
 	}
 
-	// 构建回复映射表（过滤已删除或隐藏的）
+	// 构建回复映射表
 	repliesMap := make(map[uint][]dto.CommentResponse)
 	for _, reply := range replies {
 		if reply.RootID != nil {
-			// 跳过已删除或隐藏的回复
-			if reply.DeletedAt.Valid || reply.Status == 0 {
-				continue
-			}
 			replyDTO := s.toCommentResponse(&reply)
 			replyDTO.Replies = []dto.CommentResponse{}
 			repliesMap[*reply.RootID] = append(repliesMap[*reply.RootID], *replyDTO)
 		}
 	}
 
-	// 构建扁平化结构
-	result := make([]dto.CommentResponse, 0, len(topComments))
+	// 构建扁平化结构，将正常评论和已删除/隐藏评论分开
+	var normalComments []dto.CommentResponse
+	var hiddenComments []dto.CommentResponse
+
 	for _, comment := range topComments {
 		commentResp := s.toCommentResponse(&comment)
 
@@ -113,15 +111,17 @@ func (s *CommentService) GetByTarget(ctx context.Context, targetType, targetKey 
 			commentResp.Replies = []dto.CommentResponse{}
 		}
 
-		// 如果顶级评论已删除或隐藏，只在有可见子评论时保留
+		// 区分正常评论和已删除/隐藏评论
 		if comment.DeletedAt.Valid || comment.Status == 0 {
-			if len(commentResp.Replies) > 0 {
-				result = append(result, *commentResp)
-			}
+			hiddenComments = append(hiddenComments, *commentResp)
 		} else {
-			result = append(result, *commentResp)
+			normalComments = append(normalComments, *commentResp)
 		}
 	}
+
+	// 正常评论在前，已删除/隐藏评论在后（排序到末尾）
+	//nolint:gocritic // 有意创建新切片，不修改原切片
+	result := append(normalComments, hiddenComments...)
 
 	return result, total, nil
 }
@@ -219,7 +219,7 @@ func (s *CommentService) DeleteForWeb(ctx context.Context, id uint, userID uint)
 	}
 
 	// 只删除评论本身，子评论保留
-	if err := s.repo.Delete(ctx, id); err != nil {
+	if err := s.repo.DeleteForWeb(ctx, id); err != nil {
 		return err
 	}
 
@@ -275,7 +275,7 @@ func (s *CommentService) ToggleStatus(ctx context.Context, id uint) error {
 	return s.repo.UpdateStatus(ctx, id, comment.Status)
 }
 
-// Delete 软删除评论
+// Delete 硬删除评论
 func (s *CommentService) Delete(ctx context.Context, id uint) error {
 	if _, err := s.repo.Get(ctx, id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -284,30 +284,11 @@ func (s *CommentService) Delete(ctx context.Context, id uint) error {
 		return err
 	}
 
-	// 只删除评论本身，子评论保留
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// Restore 恢复已删除的评论
-func (s *CommentService) Restore(ctx context.Context, id uint) error {
-	comment, err := s.repo.Get(ctx, id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("评论不存在")
-		}
-		return err
-	}
-
-	// 检查是否已被删除
-	if !comment.DeletedAt.Valid {
-		return errors.New("该评论未被删除，无需恢复")
-	}
-
-	return s.repo.Restore(ctx, id)
 }
 
 // ============ 辅助方法 ============

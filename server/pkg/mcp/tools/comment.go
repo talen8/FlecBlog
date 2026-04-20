@@ -15,7 +15,6 @@ const (
 	commentActionList         = "list"
 	commentActionGet          = "get"
 	commentActionToggleStatus = "toggle_status"
-	commentActionRestore      = "restore"
 	commentActionDelete       = "delete"
 )
 
@@ -76,7 +75,7 @@ type CommentManagePayload struct {
 	PageSize int  `json:"page_size"`
 	Status   *int `json:"status"`
 
-	// 用于 get/toggle_status/restore/delete
+	// 用于 get/toggle_status/delete
 	ID uint `json:"id"`
 }
 
@@ -91,7 +90,7 @@ type CommentManageOutput struct {
 	// get 结果
 	Item *CommentDetailItem `json:"item,omitempty"`
 
-	// toggle_status/restore/delete 结果
+	// toggle_status/delete 结果
 	Success *bool `json:"success,omitempty"`
 	ID      *uint `json:"id,omitempty"`
 
@@ -126,8 +125,6 @@ func (w *CommentWrapper) ManageComment(
 		return w.getComment(input.Payload)
 	case commentActionToggleStatus:
 		return w.toggleStatus(input.Payload)
-	case commentActionRestore:
-		return w.restoreComment(input.Payload)
 	case commentActionDelete:
 		return w.deleteComment(input.Payload)
 	default:
@@ -192,21 +189,6 @@ func (w *CommentWrapper) toggleStatus(payload CommentManagePayload) (*sdkmcp.Cal
 	return nil, CommentManageOutput{Success: &success, ID: &payload.ID}, nil
 }
 
-// restoreComment 恢复评论
-func (w *CommentWrapper) restoreComment(payload CommentManagePayload) (*sdkmcp.CallToolResult, CommentManageOutput, error) {
-	if payload.ID == 0 {
-		return nil, CommentManageOutput{Error: "评论 ID 不能为空"}, nil
-	}
-
-	err := w.commentService.Restore(context.Background(), payload.ID)
-	if err != nil {
-		return nil, CommentManageOutput{Error: fmt.Sprintf("恢复评论失败: %v", err)}, nil
-	}
-
-	success := true
-	return nil, CommentManageOutput{Success: &success, ID: &payload.ID}, nil
-}
-
 // deleteComment 删除评论
 func (w *CommentWrapper) deleteComment(payload CommentManagePayload) (*sdkmcp.CallToolResult, CommentManageOutput, error) {
 	if payload.ID == 0 {
@@ -245,7 +227,6 @@ func CommentManageInputSchema() *jsonschema.Schema {
 					commentActionList,
 					commentActionGet,
 					commentActionToggleStatus,
-					commentActionRestore,
 					commentActionDelete,
 				},
 			},
@@ -256,8 +237,7 @@ func CommentManageInputSchema() *jsonschema.Schema {
 			BuildActionSchema(commentActionList, "获取评论列表", listPayload),
 			BuildActionSchema(commentActionGet, "获取评论详情", idPayload),
 			BuildActionSchema(commentActionToggleStatus, "切换评论显示/隐藏状态", idPayload),
-			BuildActionSchema(commentActionRestore, "恢复已删除的评论", idPayload),
-			BuildActionSchema(commentActionDelete, "删除评论。风险操作，谨慎使用", idPayload),
+			BuildActionSchema(commentActionDelete, "删除评论（硬删除，不可恢复）。风险操作，谨慎使用", idPayload),
 		},
 	}
 }

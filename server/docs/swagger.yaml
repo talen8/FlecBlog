@@ -2522,7 +2522,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 软删除评论，子评论会保留，可通过恢复接口还原
+      description: 硬删除评论，将从数据库中彻底删除，不可恢复
       parameters:
       - description: 评论 ID
         in: path
@@ -2598,45 +2598,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 评论详情
-      tags:
-      - 评论管理
-  /admin/comments/{id}/restore:
-    put:
-      consumes:
-      - application/json
-      description: 恢复已删除的评论
-      parameters:
-      - description: 评论 ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/response.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
-      summary: 恢复评论
       tags:
       - 评论管理
   /admin/comments/{id}/toggle-status:

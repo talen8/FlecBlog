@@ -34,7 +34,7 @@ func (s *publicServer) registerTools(server *sdkmcp.Server) {
 	// comment_manage - 评论管理聚合 Tool
 	sdkmcp.AddTool(server, &sdkmcp.Tool{
 		Name:        "comment_manage",
-		Description: "评论管理。action：list/get/toggle_status/delete/restore。",
+		Description: "评论管理。action：list/get/toggle_status/delete。",
 		InputSchema: tools.CommentManageInputSchema(),
 	}, commentWrapper.ManageComment)
 

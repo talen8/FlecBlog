@@ -265,7 +265,7 @@ func (c *CommentController) ToggleStatus(ctx *gin.Context) {
 // Delete 删除评论
 //
 //	@Summary		删除评论
-//	@Description	软删除评论，子评论会保留，可通过恢复接口还原
+//	@Description	硬删除评论，将从数据库中彻底删除，不可恢复
 //	@Tags			评论管理
 //	@Accept			json
 //	@Produce		json
@@ -285,36 +285,6 @@ func (c *CommentController) Delete(ctx *gin.Context) {
 	}
 
 	if err := c.commentService.Delete(ctx.Request.Context(), uint(id)); err != nil {
-		response.Failed(ctx, err.Error())
-		return
-	}
-
-	response.Success(ctx, nil)
-}
-
-// Restore 恢复已删除的评论
-//
-//	@Summary		恢复评论
-//	@Description	恢复已删除的评论
-//	@Tags			评论管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"评论 ID"
-//	@Success		200	{object}	response.Response
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/admin/comments/{id}/restore [put]
-func (c *CommentController) Restore(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		response.ValidateFailed(ctx, err.Error())
-		return
-	}
-
-	if err := c.commentService.Restore(ctx.Request.Context(), uint(id)); err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}

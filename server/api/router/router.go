@@ -369,8 +369,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 			commentManagement.GET("", commentController.List)                           // 获取评论列表
 			commentManagement.GET("/:id", commentController.Get)                        // 获取评论详情
 			commentManagement.PUT("/:id/toggle-status", commentController.ToggleStatus) // 切换评论状态
-			commentManagement.PUT("/:id/restore", commentController.Restore)            // 恢复已删除的评论
-			commentManagement.DELETE("/:id", commentController.Delete)                  // 删除评论（管理员）
+			commentManagement.DELETE("/:id", commentController.Delete)                  // 删除评论（管理员硬删除）
 
 			// 数据导入
 			commentManagement.POST("/import", commentController.ImportComments) // 导入评论数据（Artalk等）

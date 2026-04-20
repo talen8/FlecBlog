@@ -44,15 +44,6 @@ export function deleteComment(id: number): Promise<void> {
 }
 
 /**
- * 恢复已删除的评论
- * @param id 评论ID
- * @returns Promise<void>
- */
-export function restoreComment(id: number): Promise<void> {
-  return request.put(`/admin/comments/${id}/restore`);
-}
-
-/**
  * 导入评论
  * @param formData 包含文件和参数的 FormData
  * @returns Promise<ImportCommentsResult>

@@ -1456,7 +1456,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "软删除评论，子评论会保留，可通过恢复接口还原",
+                "description": "硬删除评论，将从数据库中彻底删除，不可恢复",
                 "consumes": [
                     "application/json"
                 ],
@@ -1467,67 +1467,6 @@ const docTemplate = `{
                     "评论管理"
                 ],
                 "summary": "删除评论",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "评论 ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/comments/{id}/restore": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "恢复已删除的评论",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "评论管理"
-                ],
-                "summary": "恢复评论",
                 "parameters": [
                     {
                         "type": "integer",
