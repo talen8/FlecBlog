@@ -184,4 +184,13 @@ export default defineNuxtConfig({
       scrollBehaviorType: 'smooth',
     },
   },
+
+  // 排除不应出现在 sitemap 中的路径
+  routeRules: {
+    '/oauth/**': { sitemap: false },
+    '/profile': { sitemap: false },
+    '/notifications': { sitemap: false },
+    '/feedback': { sitemap: false },
+    '/subscribe': { sitemap: false },
+  },
 });

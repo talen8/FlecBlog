@@ -2,6 +2,8 @@
 
 interface SitemapArticle {
   url: string;
+  title?: string;
+  cover?: string;
   update_time?: string;
   publish_time?: string;
 }
@@ -32,11 +34,68 @@ interface TagsResponse {
   };
 }
 
+interface SitemapImage {
+  loc: string;
+  caption?: string;
+}
+
 interface SitemapUrl {
   loc: string;
   lastmod?: string;
   changefreq: 'weekly';
   priority: number;
+  images?: SitemapImage[];
+}
+
+/**
+ * 将日期字符串转换为 W3C 标准的 ISO 8601 格式
+ * @param dateStr - 后端返回的日期字符串 (如 "2026-04-20 12:09:14")
+ * @returns ISO 8601 格式的日期字符串 (如 "2026-04-20T12:09:14+00:00")
+ */
+function formatW3CDate(dateStr: string | undefined): string | undefined {
+  if (!dateStr) return undefined;
+
+  // 将 "2026-04-20 12:09:14" 转换为 Date 对象
+  const date = new Date(dateStr.replace(' ', 'T'));
+
+  if (isNaN(date.getTime())) return undefined;
+
+  // 返回 ISO 8601 格式，带时区偏移
+  return date.toISOString();
+}
+
+/**
+ * 获取构建时间作为静态页面的 lastmod
+ * @returns ISO 8601 格式的构建时间
+ */
+function getBuildTime(): string {
+  // 使用当前时间作为构建时间
+  return new Date().toISOString();
+}
+
+/**
+ * 判断是否为静态页面（非动态内容页面）
+ * @param url - 页面 URL
+ * @returns 是否为静态页面
+ */
+function isStaticPage(url: string): boolean {
+  // 静态页面列表
+  const staticPages = [
+    '/',
+    '/about',
+    '/ask',
+    '/cookies',
+    '/copyright',
+    '/friend',
+    '/message',
+    '/moment',
+    '/privacy',
+    '/statistics',
+    '/categories',
+    '/tags',
+    '/archive',
+  ];
+  return staticPages.includes(url);
 }
 
 export default defineNitroPlugin(async nitroApp => {
@@ -44,6 +103,7 @@ export default defineNitroPlugin(async nitroApp => {
     try {
       const config = useRuntimeConfig();
       const apiUrl = config.public.apiUrl;
+      const buildTime = getBuildTime();
 
       // 从后端 API 获取文章列表
       const articlesRes = await $fetch<ArticlesResponse>(`${apiUrl}/articles`).catch(() => null);
@@ -51,12 +111,24 @@ export default defineNitroPlugin(async nitroApp => {
       // 添加文章路由到 sitemap
       const articles = articlesRes?.data?.list || [];
       articles.forEach((article: SitemapArticle) => {
-        ctx.urls.push({
+        const sitemapUrl: SitemapUrl = {
           loc: article.url,
-          lastmod: article.update_time || article.publish_time,
-          changefreq: 'weekly' as const,
+          lastmod: formatW3CDate(article.update_time || article.publish_time),
+          changefreq: 'weekly',
           priority: 0.8,
-        } as SitemapUrl);
+        };
+
+        // 如果有封面图，添加到图片 sitemap
+        if (article.cover) {
+          sitemapUrl.images = [
+            {
+              loc: article.cover,
+              caption: article.title,
+            },
+          ];
+        }
+
+        ctx.urls.push(sitemapUrl);
       });
 
       // 添加分类路由
@@ -67,7 +139,8 @@ export default defineNitroPlugin(async nitroApp => {
       categories.forEach((category: SitemapCategory) => {
         ctx.urls.push({
           loc: category.url,
-          changefreq: 'weekly' as const,
+          lastmod: buildTime,
+          changefreq: 'weekly',
           priority: 0.6,
         } as SitemapUrl);
       });
@@ -78,9 +151,17 @@ export default defineNitroPlugin(async nitroApp => {
       tags.forEach((tag: SitemapTag) => {
         ctx.urls.push({
           loc: tag.url,
-          changefreq: 'weekly' as const,
+          lastmod: buildTime,
+          changefreq: 'weekly',
           priority: 0.5,
         } as SitemapUrl);
+      });
+
+      // 为已存在的静态页面添加 lastmod（构建时间）
+      ctx.urls.forEach((url: SitemapUrl) => {
+        if (isStaticPage(url.loc) && !url.lastmod) {
+          url.lastmod = buildTime;
+        }
       });
     } catch {
       // sitemap 生成失败不影响应用运行，静默忽略
