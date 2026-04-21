@@ -4,13 +4,13 @@ import "flec_blog/pkg/utils"
 
 // ListRssArticleRequest RSS文章列表请求
 type ListRssArticleRequest struct {
-	Page       int    `form:"page" binding:"omitempty,min=1"`
-	PageSize   int    `form:"page_size" binding:"omitempty,min=1,max=100"`
-	Keyword    string `form:"keyword"`    // 搜索关键词
-	FriendID   uint   `form:"friend_id"`  // 友链ID筛选
-	IsRead     *bool  `form:"is_read"`    // 已读状态筛选
-	StartTime  string `form:"start_time"` // 发布开始时间（格式：2006-01-02）
-	EndTime    string `form:"end_time"`   // 发布结束时间（格式：2006-01-02）
+	Page      int    `form:"page" binding:"omitempty,min=1"`
+	PageSize  int    `form:"page_size" binding:"omitempty,min=1,max=100"`
+	Keyword   string `form:"keyword"`    // 搜索关键词
+	FriendID  uint   `form:"friend_id"`  // 友链ID筛选
+	IsRead    *bool  `form:"is_read"`    // 已读状态筛选
+	StartTime string `form:"start_time"` // 发布开始时间（格式：2006-01-02）
+	EndTime   string `form:"end_time"`   // 发布结束时间（格式：2006-01-02）
 }
 
 // RssArticleResponse RSS文章响应

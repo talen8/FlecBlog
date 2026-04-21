@@ -21,8 +21,13 @@ type FeedbackContent struct {
 
 // FeedbackQueryRequest 反馈查询请求
 type FeedbackQueryRequest struct {
-	Page     int `form:"page" binding:"required,min=1"`
-	PageSize int `form:"page_size" binding:"required,min=1,max=100"`
+	Page       int    `form:"page" binding:"required,min=1"`
+	PageSize   int    `form:"page_size" binding:"required,min=1,max=100"`
+	Keyword    string `form:"keyword"`     // 搜索关键词（工单号、投诉地址）
+	ReportType string `form:"report_type"` // 反馈类型筛选
+	Status     string `form:"status"`      // 状态筛选
+	StartTime  string `form:"start_time"`  // 反馈开始时间（格式：2006-01-02）
+	EndTime    string `form:"end_time"`    // 反馈结束时间（格式：2006-01-02）
 }
 
 // FeedbackResponse 反馈响应

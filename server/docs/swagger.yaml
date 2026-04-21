@@ -3711,6 +3711,26 @@ paths:
         in: query
         name: page_size
         type: integer
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        type: string
+      - description: 友链ID筛选
+        in: query
+        name: friend_id
+        type: integer
+      - description: 已读状态筛选
+        in: query
+        name: is_read
+        type: boolean
+      - description: 发布开始时间（格式：2006-01-02）
+        in: query
+        name: start_time
+        type: string
+      - description: 发布结束时间（格式：2006-01-02）
+        in: query
+        name: end_time
+        type: string
       produces:
       - application/json
       responses:
@@ -4553,6 +4573,26 @@ paths:
         name: page_size
         required: true
         type: integer
+      - description: 搜索关键词（工单号、投诉地址）
+        in: query
+        name: keyword
+        type: string
+      - description: 反馈类型筛选（copyright/inappropriate/summary/suggestion）
+        in: query
+        name: report_type
+        type: string
+      - description: 状态筛选（pending/resolved/closed）
+        in: query
+        name: status
+        type: string
+      - description: 反馈开始时间（格式：2006-01-02）
+        in: query
+        name: start_time
+        type: string
+      - description: 反馈结束时间（格式：2006-01-02）
+        in: query
+        name: end_time
+        type: string
       produces:
       - application/json
       responses:

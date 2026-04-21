@@ -3214,6 +3214,36 @@ const docTemplate = `{
                         "description": "每页数量",
                         "name": "page_size",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "友链ID筛选",
+                        "name": "friend_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "已读状态筛选",
+                        "name": "is_read",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "发布开始时间（格式：2006-01-02）",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "发布结束时间（格式：2006-01-02）",
+                        "name": "end_time",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4587,6 +4617,36 @@ const docTemplate = `{
                         "name": "page_size",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词（工单号、投诉地址）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "反馈类型筛选（copyright/inappropriate/summary/suggestion）",
+                        "name": "report_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "状态筛选（pending/resolved/closed）",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "反馈开始时间（格式：2006-01-02）",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "反馈结束时间（格式：2006-01-02）",
+                        "name": "end_time",
+                        "in": "query"
                     }
                 ],
                 "responses": {

@@ -88,8 +88,13 @@ func (h *FeedbackHandler) GetByTicketNo(c *gin.Context) {
 //	@Accept		json
 //	@Produce	json
 //	@Security	BearerAuth
-//	@Param		page		query		int	true	"页码"
-//	@Param		page_size	query		int	true	"每页数量"
+//	@Param		page		query		int		true	"页码"
+//	@Param		page_size	query		int		true	"每页数量"
+//	@Param		keyword		query		string	false	"搜索关键词（工单号、投诉地址）"
+//	@Param		report_type	query		string	false	"反馈类型筛选（copyright/inappropriate/summary/suggestion）"
+//	@Param		status		query		string	false	"状态筛选（pending/resolved/closed）"
+//	@Param		start_time	query		string	false	"反馈开始时间（格式：2006-01-02）"
+//	@Param		end_time	query		string	false	"反馈结束时间（格式：2006-01-02）"
 //	@Success	200			{object}	response.Response{data=response.PageResult{list=[]dto.FeedbackResponse}}
 //	@Router		/api/v1/admin/feedback [get]
 func (h *FeedbackHandler) List(c *gin.Context) {

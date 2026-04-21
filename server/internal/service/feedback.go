@@ -69,7 +69,11 @@ func (s *FeedbackService) Submit(ctx context.Context, req *dto.SubmitFeedbackReq
 // List 获取反馈列表
 func (s *FeedbackService) List(ctx context.Context, req *dto.FeedbackQueryRequest) ([]dto.FeedbackResponse, int64, error) {
 	offset := (req.Page - 1) * req.PageSize
-	feedbacks, total, err := s.repo.List(ctx, offset, req.PageSize)
+	feedbacks, total, err := s.repo.List(
+		ctx, offset, req.PageSize,
+		req.Keyword, req.ReportType, req.Status,
+		req.StartTime, req.EndTime,
+	)
 	if err != nil {
 		return nil, 0, err
 	}

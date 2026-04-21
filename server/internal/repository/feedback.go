@@ -29,12 +29,41 @@ func (r *FeedbackRepository) Get(ctx context.Context, id uint) (*model.Feedback,
 	return &feedback, err
 }
 
-// List 获取反馈列表（后台）
-func (r *FeedbackRepository) List(ctx context.Context, offset, limit int) ([]model.Feedback, int64, error) {
+// List 获取反馈列表
+func (r *FeedbackRepository) List(
+	ctx context.Context,
+	offset, limit int,
+	keyword, reportType, status string,
+	startTime, endTime string,
+) ([]model.Feedback, int64, error) {
 	var feedbacks []model.Feedback
 	var total int64
 
 	query := r.db.WithContext(ctx).Model(&model.Feedback{})
+
+	// 关键词搜索（工单号、投诉地址）
+	if keyword != "" {
+		searchKeyword := "%" + keyword + "%"
+		query = query.Where("ticket_no ILIKE ? OR report_url ILIKE ?", searchKeyword, searchKeyword)
+	}
+
+	// 反馈类型筛选
+	if reportType != "" {
+		query = query.Where("report_type = ?", reportType)
+	}
+
+	// 状态筛选
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	// 反馈时间范围筛选
+	if startTime != "" {
+		query = query.Where("feedback_time >= ?", startTime)
+	}
+	if endTime != "" {
+		query = query.Where("feedback_time <= ?", endTime+" 23:59:59")
+	}
 
 	// 获取总数
 	if err := query.Count(&total).Error; err != nil {
