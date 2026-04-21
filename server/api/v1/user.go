@@ -569,13 +569,22 @@ func (c *UserController) UnbindOAuth(ctx *gin.Context) {
 // List 获取用户列表
 //
 //	@Summary		用户列表
-//	@Description	获取所有用户
+//	@Description	获取所有用户，支持多种筛选条件
 //	@Tags			用户管理
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			page		query		int	false	"页码"	default(1)
-//	@Param			page_size	query		int	false	"每页数量"	default(10)
+//	@Param			page		query		int		false	"页码"	default(1)
+//	@Param			page_size	query		int		false	"每页数量"	default(10)
+//	@Param			keyword		query		string	false	"搜索关键词（邮箱、昵称）"
+//	@Param			role		query		string	false	"角色筛选（super_admin/admin/user/guest）"
+//	@Param			is_enabled	query		bool	false	"状态筛选（true:启用 false:禁用）"
+//	@Param			is_deleted	query		bool	false	"是否已删除（true:已删除 false:未删除）"
+//	@Param			login_method	query		string	false	"登录方式筛选（password/github/google/qq/microsoft）"
+//	@Param			last_login_start	query		string	false	"最后登录开始时间（格式：2006-01-02）"
+//	@Param			last_login_end	query		string	false	"最后登录结束时间（格式：2006-01-02）"
+//	@Param			start_time	query		string	false	"注册开始时间（格式：2006-01-02）"
+//	@Param			end_time	query		string	false	"注册结束时间（格式：2006-01-02）"
 //	@Success		200			{object}	response.Response{data=response.PageResult}
 //	@Failure		400			{object}	response.Response
 //	@Failure		401			{object}	response.Response

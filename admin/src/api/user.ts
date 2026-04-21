@@ -4,13 +4,13 @@ import type {
   LoginResponse,
   User,
   UserListData,
+  UserListQuery,
   ResetPasswordRequest,
   CreateUserRequest,
   UpdateUserRequest,
   RefreshTokenRequest,
   RefreshTokenResponse,
 } from '@/types/user';
-import type { PaginationQuery } from '@/types/request';
 
 /**
  * 用户登录
@@ -51,7 +51,7 @@ export function logout(): Promise<void> {
  * @param params 查询参数
  * @returns Promise<UserListData>
  */
-export function getUsers(params: PaginationQuery): Promise<UserListData> {
+export function getUsers(params: UserListQuery): Promise<UserListData> {
   return request.get('/admin/users', { params });
 }
 

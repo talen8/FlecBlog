@@ -4269,7 +4269,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取所有用户",
+                "description": "获取所有用户，支持多种筛选条件",
                 "consumes": [
                     "application/json"
                 ],
@@ -4293,6 +4293,60 @@
                         "default": 10,
                         "description": "每页数量",
                         "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词（邮箱、昵称）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色筛选（super_admin/admin/user/guest）",
+                        "name": "role",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "状态筛选（true:启用 false:禁用）",
+                        "name": "is_enabled",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否已删除（true:已删除 false:未删除）",
+                        "name": "is_deleted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "登录方式筛选（password/github/google/qq/microsoft）",
+                        "name": "login_method",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "最后登录开始时间（格式：2006-01-02）",
+                        "name": "last_login_start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "最后登录结束时间（格式：2006-01-02）",
+                        "name": "last_login_end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "注册开始时间（格式：2006-01-02）",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "注册结束时间（格式：2006-01-02）",
+                        "name": "end_time",
                         "in": "query"
                     }
                 ],

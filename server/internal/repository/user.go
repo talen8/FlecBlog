@@ -97,18 +97,85 @@ func (r *UserRepository) GetGuestByEmail(email string) (*model.User, error) {
 	return &user, nil
 }
 
-// List 获取用户列表（后台管理）
-func (r *UserRepository) List(offset, limit int) ([]model.User, int64, error) {
+// List 获取用户列表
+func (r *UserRepository) List(
+	offset, limit int,
+	keyword, role string,
+	isEnabled, isDeleted *bool,
+	loginMethod, lastLoginStart, lastLoginEnd string,
+	startTime, endTime string,
+) ([]model.User, int64, error) {
 	var users []model.User
 	var total int64
 
-	// 包含软删除的用户
-	err := r.db.Unscoped().Model(&model.User{}).Count(&total).Error
+	// 是否已删除
+	var query *gorm.DB
+	if isDeleted != nil {
+		if *isDeleted {
+			query = r.db.Unscoped().Model(&model.User{}).Where("deleted_at IS NOT NULL")
+		} else {
+			query = r.db.Model(&model.User{}).Where("deleted_at IS NULL")
+		}
+	} else {
+		query = r.db.Unscoped().Model(&model.User{})
+	}
+
+	// 关键词搜索（邮箱、昵称）
+	if keyword != "" {
+		searchKeyword := "%" + keyword + "%"
+		query = query.Where("email ILIKE ? OR nickname ILIKE ?", searchKeyword, searchKeyword)
+	}
+
+	// 角色筛选
+	if role != "" {
+		query = query.Where("role = ?", role)
+	}
+
+	// 状态筛选
+	if isEnabled != nil {
+		query = query.Where("is_enabled = ?", *isEnabled)
+	}
+
+	// 登录方式筛选
+	if loginMethod != "" {
+		switch loginMethod {
+		case "password":
+			query = query.Where("has_password = ?", true)
+		case "github":
+			query = query.Where("github_id IS NOT NULL AND github_id != ''")
+		case "google":
+			query = query.Where("google_id IS NOT NULL AND google_id != ''")
+		case "qq":
+			query = query.Where("qq_id IS NOT NULL AND qq_id != ''")
+		case "microsoft":
+			query = query.Where("microsoft_id IS NOT NULL AND microsoft_id != ''")
+		}
+	}
+
+	// 最后登录时间范围筛选
+	if lastLoginStart != "" {
+		query = query.Where("last_login >= ?", lastLoginStart)
+	}
+	if lastLoginEnd != "" {
+		query = query.Where("last_login <= ?", lastLoginEnd+" 23:59:59")
+	}
+
+	// 注册时间范围筛选
+	if startTime != "" {
+		query = query.Where("created_at >= ?", startTime)
+	}
+	if endTime != "" {
+		query = query.Where("created_at <= ?", endTime+" 23:59:59")
+	}
+
+	// 获取总数
+	err := query.Count(&total).Error
 	if err != nil {
 		return nil, 0, err
 	}
 
-	err = r.db.Unscoped().
+	// 获取列表
+	err = query.
 		Select("id, email, nickname, avatar, badge, website, is_enabled, role, last_login, created_at, updated_at, deleted_at, has_password, github_id, google_id, qq_id, feishu_open_id").
 		Order("created_at DESC").
 		Offset(offset).Limit(limit).Find(&users).Error

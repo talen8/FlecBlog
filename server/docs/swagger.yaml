@@ -4364,7 +4364,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取所有用户
+      description: 获取所有用户，支持多种筛选条件
       parameters:
       - default: 1
         description: 页码
@@ -4376,6 +4376,42 @@ paths:
         in: query
         name: page_size
         type: integer
+      - description: 搜索关键词（邮箱、昵称）
+        in: query
+        name: keyword
+        type: string
+      - description: 角色筛选（super_admin/admin/user/guest）
+        in: query
+        name: role
+        type: string
+      - description: 状态筛选（true:启用 false:禁用）
+        in: query
+        name: is_enabled
+        type: boolean
+      - description: 是否已删除（true:已删除 false:未删除）
+        in: query
+        name: is_deleted
+        type: boolean
+      - description: 登录方式筛选（password/github/google/qq/microsoft）
+        in: query
+        name: login_method
+        type: string
+      - description: 最后登录开始时间（格式：2006-01-02）
+        in: query
+        name: last_login_start
+        type: string
+      - description: 最后登录结束时间（格式：2006-01-02）
+        in: query
+        name: last_login_end
+        type: string
+      - description: 注册开始时间（格式：2006-01-02）
+        in: query
+        name: start_time
+        type: string
+      - description: 注册结束时间（格式：2006-01-02）
+        in: query
+        name: end_time
+        type: string
       produces:
       - application/json
       responses:

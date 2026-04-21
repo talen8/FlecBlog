@@ -121,8 +121,17 @@ type RefreshTokenRequest struct {
 
 // ListUsersRequest 用户列表请求
 type ListUsersRequest struct {
-	Page     int `form:"page,default=1" binding:"min=1"`
-	PageSize int `form:"page_size,default=10" binding:"min=1,max=100"`
+	Page           int    `form:"page,default=1" binding:"min=1"`
+	PageSize       int    `form:"page_size,default=10" binding:"min=1,max=100"`
+	Keyword        string `form:"keyword"`          // 搜索关键词（邮箱、昵称）
+	Role           string `form:"role"`             // 角色筛选
+	IsEnabled      *bool  `form:"is_enabled"`       // 状态筛选
+	IsDeleted      *bool  `form:"is_deleted"`       // 是否已删除
+	LoginMethod    string `form:"login_method"`     // 登录方式筛选（password/github/google/qq/microsoft）
+	LastLoginStart string `form:"last_login_start"` // 最后登录开始时间（格式：2006-01-02）
+	LastLoginEnd   string `form:"last_login_end"`   // 最后登录结束时间（格式：2006-01-02）
+	StartTime      string `form:"start_time"`       // 注册开始时间（格式：2006-01-02）
+	EndTime        string `form:"end_time"`         // 注册结束时间（格式：2006-01-02）
 }
 
 // AdminCreateUserRequest 管理员创建用户请求

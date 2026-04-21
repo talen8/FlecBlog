@@ -58,6 +58,21 @@ export interface UpdateUserRequest {
   is_enabled?: boolean;
 }
 
+// 用户列表查询参数
+export interface UserListQuery {
+  page: number;
+  page_size: number;
+  keyword?: string; // 搜索关键词（邮箱、昵称）
+  role?: string; // 角色筛选
+  is_enabled?: boolean; // 状态筛选
+  is_deleted?: boolean; // 是否已删除
+  login_method?: string; // 登录方式筛选
+  last_login_start?: string; // 最后登录开始时间
+  last_login_end?: string; // 最后登录结束时间
+  start_time?: string; // 注册开始时间
+  end_time?: string; // 注册结束时间
+}
+
 // 分页数据
 export interface UserListData {
   list: User[];

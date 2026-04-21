@@ -567,7 +567,12 @@ func (s *UserService) DeactivateAccount(userID uint, password string) error {
 // List 获取用户列表
 func (s *UserService) List(req *dto.ListUsersRequest) ([]dto.UserListResponse, int64, error) {
 	offset := (req.Page - 1) * req.PageSize
-	users, total, err := s.repo.List(offset, req.PageSize)
+	users, total, err := s.repo.List(
+		offset, req.PageSize,
+		req.Keyword, req.Role, req.IsEnabled, req.IsDeleted,
+		req.LoginMethod, req.LastLoginStart, req.LastLoginEnd,
+		req.StartTime, req.EndTime,
+	)
 	if err != nil {
 		return nil, 0, err
 	}
