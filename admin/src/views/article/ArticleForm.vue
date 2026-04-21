@@ -109,7 +109,7 @@
           <el-input
             v-model="formData.summary"
             type="textarea"
-            placeholder="请输入文章摘要，如不填写将自动截取内容前200字符"
+            placeholder="请输入文章摘要，如不填写将自动截取内容前150字符"
             :rows="3"
             maxlength="150"
             show-word-limit
@@ -635,7 +635,7 @@ const handleSave = async (autoRedirect: boolean = true) => {
         .replace(/[#*`>\-[\]]/g, '')
         .replace(/\s+/g, ' ')
         .trim()
-        .slice(0, 200);
+        .slice(0, 150);
     }
 
     // 提交数据
