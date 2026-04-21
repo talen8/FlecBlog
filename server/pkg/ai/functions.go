@@ -137,22 +137,18 @@ func (c *OpenAIClient) Test() error {
 
 // GenerateSummary 生成文章摘要（50-100字，创作者角度）
 func (c *OpenAIClient) GenerateSummary(content string) (string, error) {
-	content = truncateContent(content, 10000)
 	prompt := resolvePrompt(c.SummaryPrompt, defaultSummaryPrompt) + "\n\n文章内容：\n" + content
 	return c.callOpenAI(prompt)
 }
 
 // GenerateAISummary 生成AI摘要（150-200字，旁观者角度）
 func (c *OpenAIClient) GenerateAISummary(content string) (string, error) {
-	content = truncateContent(content, 10000)
 	prompt := resolvePrompt(c.AISummaryPrompt, defaultAISummaryPrompt) + "\n\n文章内容：\n" + content
 	return c.callOpenAI(prompt)
 }
 
 // GenerateTitle 生成标题
 func (c *OpenAIClient) GenerateTitle(content string) ([]string, error) {
-	content = truncateContent(content, 3000)
-
 	for i := 0; i < 3; i++ { // 最多重试3次
 		prompt := resolvePrompt(c.TitlePrompt, defaultTitlePrompt) + "\n\n文章核心内容：\n" + content + "\n\n标题："
 		result, err := c.callOpenAI(prompt)

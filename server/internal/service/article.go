@@ -1232,7 +1232,7 @@ func parseHexoArticle(content string) (*ParsedArticle, error) {
 	}
 
 	if parsed.Summary == "" {
-		parsed.Summary = generateSummary(parsed.Content, 200)
+		parsed.Summary = generateSummary(parsed.Content, 150)
 	}
 
 	return parsed, nil
@@ -1259,7 +1259,7 @@ func parseMarkdownArticle(filename, content string) (*ParsedArticle, error) {
 		parsed.Title = "未命名文章"
 	}
 
-	parsed.Summary = generateSummary(content, 200)
+	parsed.Summary = generateSummary(content, 150)
 	parsed.Content = content
 
 	return parsed, nil

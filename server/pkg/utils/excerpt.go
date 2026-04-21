@@ -9,7 +9,7 @@ import (
 // GenerateExcerpt 生成包含关键词的文章摘录
 func GenerateExcerpt(content, keyword string, maxLength int) string {
 	if maxLength == 0 {
-		maxLength = 200
+		maxLength = 150
 	}
 
 	// 移除 Markdown 标记
