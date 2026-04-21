@@ -55,6 +55,13 @@ export interface Friend {
 export interface FriendQuery {
   page?: number;
   page_size?: number;
+  keyword?: string; // 关键词搜索（名称、链接、描述）
+  type_id?: number; // 友链类型ID
+  is_invalid?: boolean; // 是否失效
+  is_pending?: boolean; // 是否待审核
+  accessible_status?: 'normal' | 'abnormal' | 'ignored'; // 可访问性状态
+  rss_status?: 'no_rss' | 'normal' | 'warning' | 'danger'; // RSS状态
+  has_screenshot?: boolean; // 是否包含截图
 }
 
 // 友链列表响应数据

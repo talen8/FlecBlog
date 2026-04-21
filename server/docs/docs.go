@@ -1907,6 +1907,48 @@ const docTemplate = `{
                         "description": "每页数量（不传则返回全部）",
                         "name": "page_size",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "关键词搜索（名称、链接、描述）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "友链类型ID",
+                        "name": "type_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否失效",
+                        "name": "is_invalid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否待审核",
+                        "name": "is_pending",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "可访问性状态: normal=正常, abnormal=异常, ignored=忽略检查",
+                        "name": "accessible_status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RSS状态: no_rss=无订阅, normal=正常订阅, warning=三个月未更新, danger=六个月未更新",
+                        "name": "rss_status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否包含截图",
+                        "name": "has_screenshot",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2717,7 +2759,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取所有动态",
+                "description": "获取所有动态，支持筛选",
                 "consumes": [
                     "application/json"
                 ],
@@ -2739,6 +2781,66 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "每页数量（不传则返回全部）",
                         "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词（文本内容）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "标签",
+                        "name": "tags",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "发布地点",
+                        "name": "location",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否发布",
+                        "name": "is_publish",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否有图片",
+                        "name": "has_images",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否有视频",
+                        "name": "has_video",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否有音乐",
+                        "name": "has_music",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否有链接",
+                        "name": "has_link",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "发布开始时间",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "发布结束时间",
+                        "name": "end_time",
                         "in": "query"
                     }
                 ],

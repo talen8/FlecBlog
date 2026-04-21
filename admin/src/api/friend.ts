@@ -14,7 +14,7 @@ import type {
 // ========== 友链类型相关API ==========
 
 /**
- * 获取友链类型列表（管理端，包括隐藏的）
+ * 获取友链类型列表
  * @returns Promise<FriendTypeListData>
  */
 export function getFriendTypes(): Promise<FriendTypeListData> {

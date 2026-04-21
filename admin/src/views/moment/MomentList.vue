@@ -35,7 +35,6 @@
             clearable
             style="width: 180px; margin-right: 8px"
             @keyup.enter="handleQuickFilterChange"
-            @clear="handleQuickFilterChange"
           >
             <template #prefix>
               <el-icon><Search /></el-icon>
@@ -155,7 +154,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, computed, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
@@ -179,6 +178,22 @@ const quickFilters = reactive({
   keyword: '',
   is_publish: undefined as boolean | undefined,
 });
+
+// 搜索防抖定时器
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+// 监听关键词变化，实时搜索
+watch(
+  () => quickFilters.keyword,
+  newVal => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      queryParams.value.keyword = newVal || undefined;
+      queryParams.value.page = 1;
+      fetchMoments();
+    }, 500);
+  }
+);
 
 const momentDialogVisible = ref(false);
 const editingMoment = ref<Moment | null>(null);

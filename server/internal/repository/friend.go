@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"flec_blog/internal/model"
 
@@ -20,7 +21,7 @@ func NewFriendRepository(db *gorm.DB) *FriendRepository {
 
 // ============ 友链类型 ============
 
-// ListTypes 获取所有友链类型（后台管理用）
+// ListTypes 获取所有友链类型
 func (r *FriendRepository) ListTypes(ctx context.Context, page, pageSize int) ([]model.FriendType, int64, error) {
 	var types []model.FriendType
 	var total int64
@@ -82,12 +83,76 @@ func (r *FriendRepository) DeleteType(ctx context.Context, id uint) error {
 
 // ============ 基础CRUD ============
 
-// List 获取友链列表（后台管理用，预加载类型信息）
-func (r *FriendRepository) List(ctx context.Context, page, pageSize int) ([]model.Friend, int64, error) {
+// List 获取友链列表
+func (r *FriendRepository) List(ctx context.Context, page, pageSize int, keyword string, typeID *uint, isInvalid, isPending *bool, accessibleStatus string, rssStatus string, hasScreenshot *bool) ([]model.Friend, int64, error) {
 	var friends []model.Friend
 	var total int64
 
 	query := r.db.WithContext(ctx).Model(&model.Friend{})
+
+	// 关键词搜索（名称、链接、描述）
+	if keyword != "" {
+		pattern := "%" + keyword + "%"
+		query = query.Where("friends.name ILIKE ? OR friends.url ILIKE ? OR friends.description ILIKE ?", pattern, pattern, pattern)
+	}
+
+	// 按类型筛选
+	if typeID != nil {
+		query = query.Where("friends.type = ?", *typeID)
+	}
+
+	// 按失效状态筛选
+	if isInvalid != nil {
+		query = query.Where("friends.is_invalid = ?", *isInvalid)
+	}
+
+	// 按待审核状态筛选
+	if isPending != nil {
+		query = query.Where("friends.is_pending = ?", *isPending)
+	}
+
+	// 按可访问性状态筛选
+	if accessibleStatus != "" {
+		switch accessibleStatus {
+		case "normal":
+			query = query.Where("friends.accessible = ?", 0)
+		case "abnormal":
+			query = query.Where("friends.accessible > ?", 0)
+		case "ignored":
+			query = query.Where("friends.accessible = ?", -1)
+		}
+	}
+
+	// 按RSS状态筛选
+	if rssStatus != "" {
+		switch rssStatus {
+		case "no_rss":
+			// 无RSS订阅
+			query = query.Where("friends.rss_url IS NULL OR friends.rss_url = ''")
+		case "normal":
+			// 正常订阅（3个月内更新）
+			threeMonthsAgo := time.Now().AddDate(0, -3, 0)
+			query = query.Where("friends.rss_url IS NOT NULL AND friends.rss_url != '' AND friends.rss_latime >= ?", threeMonthsAgo)
+		case "warning":
+			// 三个月未更新
+			threeMonthsAgo := time.Now().AddDate(0, -3, 0)
+			sixMonthsAgo := time.Now().AddDate(0, -6, 0)
+			query = query.Where("friends.rss_url IS NOT NULL AND friends.rss_url != '' AND friends.rss_latime < ? AND friends.rss_latime >= ?", threeMonthsAgo, sixMonthsAgo)
+		case "danger":
+			// 六个月未更新
+			sixMonthsAgo := time.Now().AddDate(0, -6, 0)
+			query = query.Where("friends.rss_url IS NOT NULL AND friends.rss_url != '' AND friends.rss_latime < ?", sixMonthsAgo)
+		}
+	}
+
+	// 按是否包含截图筛选
+	if hasScreenshot != nil {
+		if *hasScreenshot {
+			query = query.Where("friends.screenshot IS NOT NULL AND friends.screenshot != ''")
+		} else {
+			query = query.Where("friends.screenshot IS NULL OR friends.screenshot = ''")
+		}
+	}
 
 	err := query.Count(&total).Error
 	if err != nil {
@@ -144,8 +209,8 @@ func (r *FriendRepository) Delete(ctx context.Context, id uint) error {
 
 // ============ 前台友链查询 ============
 
-// GetFriendsForWeb 获取前台友链数据
-func (r *FriendRepository) GetFriendsForWeb(ctx context.Context) ([]model.FriendType, []model.Friend, error) {
+// ListForWeb 获取前台友链数据
+func (r *FriendRepository) ListForWeb(ctx context.Context) ([]model.FriendType, []model.Friend, error) {
 	var types []model.FriendType
 	var friends []model.Friend
 

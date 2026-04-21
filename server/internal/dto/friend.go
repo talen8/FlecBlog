@@ -69,15 +69,15 @@ type GroupedFriendsResponse struct {
 	TotalFriends int                   `json:"total_friends"` // 友链总数
 }
 
-// ============ 通用友链请求 ============
+// ============ 前台友链请求 ============
 
-// ListFriendRequest 友链列表请求
-type ListFriendRequest struct {
+// ListFriendForWebRequest 友链列表请求
+type ListFriendForWebRequest struct {
 	Page     int `form:"page" binding:"omitempty,min=1"`
 	PageSize int `form:"page_size" binding:"omitempty,min=1,max=1000"`
 }
 
-// ============ 通用友链响应 ============
+// ============ 前台友链响应 ============
 
 // FriendForWebResponse 前台友链响应
 type FriendForWebResponse struct {
@@ -93,6 +93,19 @@ type FriendForWebResponse struct {
 }
 
 // ============ 后台友链管理请求 ============
+
+// ListFriendRequest 友链列表请求
+type ListFriendRequest struct {
+	Page             int    `form:"page" binding:"omitempty,min=1"`
+	PageSize         int    `form:"page_size" binding:"omitempty,min=1,max=1000"`
+	Keyword          string `form:"keyword" binding:"omitempty,max=100"`                                 // 关键词搜索（名称、链接、描述）
+	TypeID           *uint  `form:"type_id" binding:"omitempty"`                                         // 友链类型ID
+	IsInvalid        *bool  `form:"is_invalid" binding:"omitempty"`                                      // 是否失效
+	IsPending        *bool  `form:"is_pending" binding:"omitempty"`                                      // 是否待审核
+	AccessibleStatus string `form:"accessible_status" binding:"omitempty,oneof=normal abnormal ignored"` // 可访问性状态: normal=正常, abnormal=异常, ignored=忽略检查
+	RSSStatus        string `form:"rss_status" binding:"omitempty,oneof=no_rss normal warning danger"`   // RSS状态: no_rss=无订阅, normal=正常订阅, warning=三个月未更新, danger=六个月未更新
+	HasScreenshot    *bool  `form:"has_screenshot" binding:"omitempty"`                                  // 是否包含截图
+}
 
 // CreateFriendRequest 创建友链请求
 type CreateFriendRequest struct {

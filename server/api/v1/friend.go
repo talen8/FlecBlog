@@ -241,11 +241,18 @@ func (c *FriendController) DeleteType(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			page		query		int	false	"页码"
-//	@Param			page_size	query		int	false	"每页数量（不传则返回全部）"
-//	@Success		200			{object}	response.Response
-//	@Failure		401			{object}	response.Response
-//	@Failure		403			{object}	response.Response
+//	@Param			page				query		int		false	"页码"
+//	@Param			page_size			query		int		false	"每页数量（不传则返回全部）"
+//	@Param			keyword				query		string	false	"关键词搜索（名称、链接、描述）"
+//	@Param			type_id				query		int		false	"友链类型ID"
+//	@Param			is_invalid			query		bool	false	"是否失效"
+//	@Param			is_pending			query		bool	false	"是否待审核"
+//	@Param			accessible_status	query		string	false	"可访问性状态: normal=正常, abnormal=异常, ignored=忽略检查"
+//	@Param			rss_status			query		string	false	"RSS状态: no_rss=无订阅, normal=正常订阅, warning=三个月未更新, danger=六个月未更新"
+//	@Param			has_screenshot		query		bool	false	"是否包含截图"
+//	@Success		200					{object}	response.Response
+//	@Failure		401					{object}	response.Response
+//	@Failure		403					{object}	response.Response
 //	@Router			/admin/friends [get]
 func (c *FriendController) List(ctx *gin.Context) {
 	var req dto.ListFriendRequest

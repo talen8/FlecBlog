@@ -112,7 +112,7 @@ func (s *FriendService) DeleteType(ctx context.Context, id uint) error {
 // ListForWeb 获取友链分组列表（包括失效友链，前端可根据 is_invalid 字段处理展示）
 func (s *FriendService) ListForWeb(ctx context.Context) (*dto.GroupedFriendsResponse, error) {
 	// 1. 获取所有数据
-	types, allFriends, err := s.repo.GetFriendsForWeb(ctx)
+	types, allFriends, err := s.repo.ListForWeb(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +185,7 @@ func convertToFriendInGroupResponse(friends []model.Friend) []dto.FriendInGroupR
 
 // List 获取友链列表
 func (s *FriendService) List(ctx context.Context, req *dto.ListFriendRequest) ([]dto.FriendListResponse, int64, error) {
-	friends, total, err := s.repo.List(ctx, req.Page, req.PageSize)
+	friends, total, err := s.repo.List(ctx, req.Page, req.PageSize, req.Keyword, req.TypeID, req.IsInvalid, req.IsPending, req.AccessibleStatus, req.RSSStatus, req.HasScreenshot)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -303,6 +303,10 @@ func (s *FriendService) Update(ctx context.Context, id uint, req *dto.UpdateFrie
 	// 如果请求中指定了失效状态
 	if req.IsInvalid != nil {
 		existingFriend.IsInvalid = *req.IsInvalid
+		// 如果标记为失效，同时清除异常状态
+		if *req.IsInvalid {
+			existingFriend.Accessible = 0
+		}
 	}
 
 	// 如果请求中指定了待审核状态
@@ -311,7 +315,7 @@ func (s *FriendService) Update(ctx context.Context, id uint, req *dto.UpdateFrie
 	}
 
 	// 如果请求中指定了可访问性状态
-	if req.Accessible != nil {
+	if req.Accessible != nil && !existingFriend.IsInvalid {
 		existingFriend.Accessible = *req.Accessible
 	}
 
