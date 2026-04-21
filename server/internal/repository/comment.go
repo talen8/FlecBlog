@@ -86,17 +86,56 @@ func (r *CommentRepository) GetForWeb(ctx context.Context, id uint) (*model.Comm
 	return &comment, nil
 }
 
-// List 获取评论列表（后台管理）
-func (r *CommentRepository) List(ctx context.Context, offset, limit int, status *int) ([]model.Comment, int64, error) {
+// List 获取评论列表
+func (r *CommentRepository) List(
+	ctx context.Context,
+	offset, limit int,
+	keyword string,
+	status *int,
+	isDeleted, isSub *bool,
+	startTime, endTime string,
+) ([]model.Comment, int64, error) {
 	var comments []model.Comment
 	var total int64
 
 	// 包含软删除的记录
 	query := r.db.WithContext(ctx).Unscoped().Model(&model.Comment{})
 
-	// 状态过滤
+	// 关键词搜索（评论内容）
+	if keyword != "" {
+		searchKeyword := "%" + keyword + "%"
+		query = query.Where("content ILIKE ?", searchKeyword)
+	}
+
+	// 状态筛选
 	if status != nil {
 		query = query.Where("status = ?", *status)
+	}
+
+	// 删除状态筛选
+	if isDeleted != nil {
+		if *isDeleted {
+			query = query.Where("deleted_at IS NOT NULL")
+		} else {
+			query = query.Where("deleted_at IS NULL")
+		}
+	}
+
+	// 评论类型筛选（子评论/父评论）
+	if isSub != nil {
+		if *isSub {
+			query = query.Where("parent_id IS NOT NULL")
+		} else {
+			query = query.Where("parent_id IS NULL")
+		}
+	}
+
+	// 时间范围筛选
+	if startTime != "" {
+		query = query.Where("created_at >= ?", startTime)
+	}
+	if endTime != "" {
+		query = query.Where("created_at <= ?", endTime+" 23:59:59")
 	}
 
 	if err := query.Count(&total).Error; err != nil {

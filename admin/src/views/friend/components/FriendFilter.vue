@@ -1,7 +1,7 @@
 <template>
   <filter-panel v-model="filterForm" title="筛选条件" @reset="handleReset" @close="$emit('close')">
-    <!-- 第一行：关键词、友链类型、失效状态、审核状态 -->
-    <el-col :span="6">
+    <!-- 第一行：关键词、友链类型、失效状态、审核状态、访问状态、RSS状态、包含截图 -->
+    <el-col :span="4">
       <el-form-item label="关键词">
         <el-input v-model="filterForm.keyword" placeholder="搜索名称、链接、描述" clearable>
           <template #prefix>
@@ -11,7 +11,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="6">
+    <el-col :span="4">
       <el-form-item label="友链类型">
         <el-select
           v-model="filterForm.type_id"
@@ -29,7 +29,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="6">
+    <el-col :span="3">
       <el-form-item label="失效状态">
         <el-select
           v-model="filterForm.is_invalid"
@@ -43,7 +43,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="6">
+    <el-col :span="3">
       <el-form-item label="审核状态">
         <el-select
           v-model="filterForm.is_pending"
@@ -57,8 +57,7 @@
       </el-form-item>
     </el-col>
 
-    <!-- 第二行：访问状态、RSS订阅 -->
-    <el-col :span="6">
+    <el-col :span="4">
       <el-form-item label="访问状态">
         <el-select
           v-model="filterForm.accessible_status"
@@ -73,7 +72,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="6">
+    <el-col :span="3">
       <el-form-item label="RSS状态">
         <el-select
           v-model="filterForm.rss_status"
@@ -89,7 +88,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="6">
+    <el-col :span="3">
       <el-form-item label="包含截图">
         <el-select
           v-model="filterForm.has_screenshot"

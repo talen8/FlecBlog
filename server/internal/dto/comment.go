@@ -73,9 +73,14 @@ type CommentQueryForWebRequest struct {
 
 // CommentQueryRequest 后台评论查询请求
 type CommentQueryRequest struct {
-	Page     int  `form:"page,default=1" binding:"min=1"`
-	PageSize int  `form:"page_size,default=10" binding:"min=1,max=100"`
-	Status   *int `form:"status"`
+	Page      int    `form:"page,default=1" binding:"min=1"`
+	PageSize  int    `form:"page_size,default=10" binding:"min=1,max=100"`
+	Keyword   string `form:"keyword"`    // 搜索关键词（评论内容）
+	Status    *int   `form:"status"`     // 状态筛选 0:隐藏 1:显示
+	IsDeleted *bool  `form:"is_deleted"` // 是否已删除
+	IsSub     *bool  `form:"is_sub"`     // 是否子评论（true:子评论, false:父评论）
+	StartTime string `form:"start_time"` // 评论开始时间（格式：2006-01-02）
+	EndTime   string `form:"end_time"`   // 评论结束时间（格式：2006-01-02）
 }
 
 // ============ 后台评论响应 ============

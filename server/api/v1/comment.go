@@ -172,14 +172,19 @@ func (c *CommentController) DeleteForWeb(ctx *gin.Context) {
 // List 获取评论列表
 //
 //	@Summary		评论列表
-//	@Description	获取所有评论，支持按状态筛选
+//	@Description	获取所有评论，支持多种筛选条件
 //	@Tags			评论管理
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			page		query		int	false	"页码"
-//	@Param			page_size	query		int	false	"每页数量（不传则返回全部）"
-//	@Param			status		query		int	false	"状态筛选 0:隐藏 1:显示"
+//	@Param			page		query		int		false	"页码"
+//	@Param			page_size	query		int		false	"每页数量（不传则返回全部）"
+//	@Param			keyword		query		string	false	"搜索关键词（评论内容）"
+//	@Param			status		query		int		false	"状态筛选 0:隐藏 1:显示"
+//	@Param			is_deleted	query		bool	false	"是否已删除"
+//	@Param			is_sub		query		bool	false	"是否子评论（true:子评论, false:父评论）"
+//	@Param			start_time	query		string	false	"评论开始时间（格式：2006-01-02）"
+//	@Param			end_time	query		string	false	"评论结束时间（格式：2006-01-02）"
 //	@Success		200			{object}	response.Response{data=response.PageResult}
 //	@Failure		400			{object}	response.Response
 //	@Failure		401			{object}	response.Response

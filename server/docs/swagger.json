@@ -1214,7 +1214,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取所有评论，支持按状态筛选",
+                "description": "获取所有评论，支持多种筛选条件",
                 "consumes": [
                     "application/json"
                 ],
@@ -1239,9 +1239,39 @@
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "搜索关键词（评论内容）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "状态筛选 0:隐藏 1:显示",
                         "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否已删除",
+                        "name": "is_deleted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否子评论（true:子评论, false:父评论）",
+                        "name": "is_sub",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "评论开始时间（格式：2006-01-02）",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "评论结束时间（格式：2006-01-02）",
+                        "name": "end_time",
                         "in": "query"
                     }
                 ],

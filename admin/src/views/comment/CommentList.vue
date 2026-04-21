@@ -1,169 +1,264 @@
 <template>
-  <common-list
-    title="评论管理"
-    :data="commentList"
-    :loading="loading"
-    :total="total"
-    :show-create="false"
-    v-model:page="queryParams.page"
-    v-model:page-size="queryParams.page_size"
-    @refresh="fetchComments"
-    @update:page="fetchComments"
-    @update:pageSize="fetchComments"
-  >
-    <!-- 表格列 -->
-    <el-table-column label="用户信息" width="180" align="center">
-      <template #default="{ row }">
-        <div style="display: flex; align-items: center; gap: 8px">
-          <el-avatar :size="40" :src="row.user.avatar" style="flex-shrink: 0">
-            <el-icon>
-              <User />
-            </el-icon>
-          </el-avatar>
-          <div style="flex: 1; min-width: 0; overflow: hidden; text-align: left">
-            <div
-              style="
-                font-weight: 500;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-              "
-            >
-              {{ row.user.nickname }}
-            </div>
-            <div
-              style="
-                font-size: 12px;
-                color: #999;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-              "
-            >
-              {{ row.user.email }}
+  <div class="comment-list-page">
+    <!-- 筛选面板 -->
+    <transition name="filter-slide">
+      <comment-filter
+        v-if="showFilter"
+        v-model="queryParams"
+        @search="fetchComments"
+        @close="showFilter = false"
+      />
+    </transition>
+
+    <common-list
+      title="评论管理"
+      :data="commentList"
+      :loading="loading"
+      :total="total"
+      :show-create="false"
+      :filter-active="showFilter"
+      :filter-count="filterCount"
+      v-model:page="queryParams.page"
+      v-model:page-size="queryParams.page_size"
+      @refresh="fetchComments"
+      @filter="toggleFilter"
+      @update:page="fetchComments"
+      @update:pageSize="fetchComments"
+    >
+      <!-- 快速筛选 -->
+      <template #toolbar-before>
+        <template v-if="!showFilter">
+          <el-select
+            v-model="quickFilters.status"
+            placeholder="显示状态"
+            clearable
+            style="width: 110px; margin-right: 8px"
+            @change="handleQuickFilterChange"
+          >
+            <el-option label="显示" :value="1" />
+            <el-option label="隐藏" :value="0" />
+          </el-select>
+          <el-select
+            v-model="quickFilters.is_deleted"
+            placeholder="删除状态"
+            clearable
+            style="width: 110px; margin-right: 12px"
+            @change="handleQuickFilterChange"
+          >
+            <el-option label="已删除" :value="true" />
+            <el-option label="未删除" :value="false" />
+          </el-select>
+        </template>
+      </template>
+
+      <!-- 表格列 -->
+      <el-table-column label="用户信息" width="180" align="center">
+        <template #default="{ row }">
+          <div style="display: flex; align-items: center; gap: 8px">
+            <el-avatar :size="40" :src="row.user.avatar" style="flex-shrink: 0">
+              <el-icon>
+                <User />
+              </el-icon>
+            </el-avatar>
+            <div style="flex: 1; min-width: 0; overflow: hidden; text-align: left">
+              <div
+                style="
+                  font-weight: 500;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+              >
+                {{ row.user.nickname }}
+              </div>
+              <div
+                style="
+                  font-size: 12px;
+                  color: #999;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+              >
+                {{ row.user.email }}
+              </div>
             </div>
           </div>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="评论内容" min-width="300">
+        <template #default="{ row }">
+          <div style="line-height: 1.6; display: flex; align-items: center; gap: 8px">
+            <span>{{ row.content }}</span>
+            <el-tag v-if="row.deleted_at" type="danger" size="small">已删除</el-tag>
+            <el-tag v-if="row.parent_id" type="info" size="small">子评论</el-tag>
+          </div>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="评论来源" width="220" align="center">
+        <template #default="{ row }">
+          <div style="display: flex; align-items: center; gap: 8px">
+            <el-tag v-if="row.target.type !== 'article'" type="success" size="small">
+              {{ getTargetTypeText(row.target.type) }}
+            </el-tag>
+            <el-tooltip :content="row.target.title" placement="top">
+              <div
+                style="
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  font-size: 12px;
+                  flex: 1;
+                "
+              >
+                {{ row.target.title }}
+              </div>
+            </el-tooltip>
+          </div>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="评论时间" width="180" align="center">
+        <template #default="{ row }">
+          {{ formatDateTime(row.created_at) }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="状态" width="100" align="center">
+        <template #default="{ row }">
+          <el-switch
+            v-model="row.status"
+            :active-value="1"
+            :inactive-value="0"
+            inline-prompt
+            active-text="显示"
+            inactive-text="隐藏"
+            @change="handleStatusChange(row)"
+          />
+        </template>
+      </el-table-column>
+
+      <el-table-column label="操作" width="220" align="center" fixed="right">
+        <template #default="{ row }">
+          <el-button type="primary" link size="small" @click="openReplyDialog(row)">
+            回复
+          </el-button>
+          <el-button type="danger" link size="small" @click="handleDelete(row.id)">
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </common-list>
+
+    <!-- 回复对话框 -->
+    <el-dialog v-model="replyDialogVisible" title="回复评论" width="500px" destroy-on-close>
+      <div v-if="replyingComment" class="reply-info">
+        <div class="info-row">
+          <span class="label">评论来源：</span>
+          <span class="value">
+            <el-tag v-if="replyingComment.target.type !== 'article'" type="success" size="small">
+              {{ getTargetTypeText(replyingComment.target.type) }}
+            </el-tag>
+            {{ replyingComment.target.title }}
+          </span>
         </div>
-      </template>
-    </el-table-column>
-
-    <el-table-column label="评论内容" min-width="300">
-      <template #default="{ row }">
-        <div style="line-height: 1.6; display: flex; align-items: center; gap: 8px">
-          <span>{{ row.content }}</span>
-          <el-tag v-if="row.deleted_at" type="danger" size="small">已删除</el-tag>
-          <el-tag v-if="row.parent_id" type="info" size="small">子评论</el-tag>
+        <div class="info-row">
+          <span class="label">评论时间：</span>
+          <span class="value">{{ formatDateTime(replyingComment.created_at) }}</span>
         </div>
-      </template>
-    </el-table-column>
-
-    <el-table-column label="评论来源" width="220" align="center">
-      <template #default="{ row }">
-        <div style="display: flex; align-items: center; gap: 8px">
-          <el-tag v-if="row.target.type !== 'article'" type="success" size="small">
-            {{ getTargetTypeText(row.target.type) }}
-          </el-tag>
-          <el-tooltip :content="row.target.title" placement="top">
-            <div
-              style="
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                font-size: 12px;
-                flex: 1;
-              "
-            >
-              {{ row.target.title }}
-            </div>
-          </el-tooltip>
+        <el-divider style="margin: 12px 0" />
+        <div class="reply-to">
+          回复 <span class="nickname">{{ replyingComment.user.nickname }}</span
+          >：
         </div>
-      </template>
-    </el-table-column>
-
-    <el-table-column label="评论时间" width="180" align="center">
-      <template #default="{ row }">
-        {{ formatDateTime(row.created_at) }}
-      </template>
-    </el-table-column>
-
-    <el-table-column label="状态" width="100" align="center">
-      <template #default="{ row }">
-        <el-switch
-          v-model="row.status"
-          :active-value="1"
-          :inactive-value="0"
-          inline-prompt
-          active-text="显示"
-          inactive-text="隐藏"
-          @change="handleStatusChange(row)"
-        />
-      </template>
-    </el-table-column>
-
-    <el-table-column label="操作" width="220" align="center" fixed="right">
-      <template #default="{ row }">
-        <el-button type="primary" link size="small" @click="openReplyDialog(row)"> 回复 </el-button>
-        <el-button type="danger" link size="small" @click="handleDelete(row.id)"> 删除 </el-button>
-      </template>
-    </el-table-column>
-  </common-list>
-
-  <!-- 回复对话框 -->
-  <el-dialog v-model="replyDialogVisible" title="回复评论" width="500px" destroy-on-close>
-    <div v-if="replyingComment" class="reply-info">
-      <div class="info-row">
-        <span class="label">评论来源：</span>
-        <span class="value">
-          <el-tag v-if="replyingComment.target.type !== 'article'" type="success" size="small">
-            {{ getTargetTypeText(replyingComment.target.type) }}
-          </el-tag>
-          {{ replyingComment.target.title }}
-        </span>
+        <div class="original-content">{{ replyingComment.content }}</div>
       </div>
-      <div class="info-row">
-        <span class="label">评论时间：</span>
-        <span class="value">{{ formatDateTime(replyingComment.created_at) }}</span>
-      </div>
-      <el-divider style="margin: 12px 0" />
-      <div class="reply-to">
-        回复 <span class="nickname">{{ replyingComment.user.nickname }}</span
-        >：
-      </div>
-      <div class="original-content">{{ replyingComment.content }}</div>
-    </div>
-    <el-form :model="replyForm" label-width="80px" style="margin-top: 16px">
-      <el-form-item label="回复内容">
-        <el-input
-          v-model="replyForm.content"
-          type="textarea"
-          :rows="4"
-          placeholder="请输入回复内容..."
-          show-word-limit
-          maxlength="500"
-        />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="replyDialogVisible = false">取消</el-button>
-      <el-button type="primary" :loading="replying" @click="handleReply">提交回复</el-button>
-    </template>
-  </el-dialog>
+      <el-form :model="replyForm" label-width="80px" style="margin-top: 16px">
+        <el-form-item label="回复内容">
+          <el-input
+            v-model="replyForm.content"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入回复内容..."
+            show-word-limit
+            maxlength="500"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="replyDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="replying" @click="handleReply">提交回复</el-button>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { User } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
-import type { Comment } from '@/types/comment';
-import type { PaginationQuery } from '@/types/request';
+import CommentFilter from './components/CommentFilter.vue';
+import type { Comment, CommentListQuery } from '@/types/comment';
 import { getComments, deleteComment, toggleCommentStatus, createComment } from '@/api/comment';
 import { formatDateTime } from '@/utils/date';
 
 const loading = ref(false);
 const commentList = ref<Comment[]>([]);
 const total = ref(0);
-const queryParams = ref<PaginationQuery>({ page: 1, page_size: 20 });
+const showFilter = ref(false);
+const queryParams = ref<CommentListQuery>({ page: 1, page_size: 20 });
+
+// 快速筛选相关
+const quickFilters = reactive({
+  status: undefined as number | undefined,
+  is_deleted: undefined as boolean | undefined,
+});
+
+/**
+ * 计算当前应用的筛选条件数量
+ */
+const filterCount = computed(() => {
+  let count = 0;
+  if (queryParams.value.keyword) count++;
+  if (queryParams.value.status !== undefined) count++;
+  if (queryParams.value.is_deleted !== undefined) count++;
+  if (queryParams.value.is_sub !== undefined) count++;
+  if (queryParams.value.start_time && queryParams.value.end_time) count++;
+  return count;
+});
+
+/**
+ * 切换筛选面板显示状态
+ */
+const toggleFilter = () => {
+  showFilter.value = !showFilter.value;
+  if (!showFilter.value) {
+    syncQuickFiltersFromQueryParams();
+  }
+};
+
+/**
+ * 从 queryParams 同步筛选条件到快速筛选
+ */
+const syncQuickFiltersFromQueryParams = () => {
+  quickFilters.status = queryParams.value.status;
+  quickFilters.is_deleted = queryParams.value.is_deleted;
+};
+
+/**
+ * 处理快速筛选变化
+ */
+const handleQuickFilterChange = () => {
+  // 将快速筛选条件同步到查询参数
+  queryParams.value.status = quickFilters.status;
+  queryParams.value.is_deleted = quickFilters.is_deleted;
+  // 重置到第一页并搜索
+  queryParams.value.page = 1;
+  fetchComments();
+};
 
 // 回复相关状态
 const replyDialogVisible = ref(false);
@@ -263,10 +358,48 @@ const getTargetTypeText = (type: string) => {
   return typeMap[type] || type;
 };
 
-onMounted(fetchComments);
+onMounted(() => {
+  // 初始化快速筛选值（从 queryParams）
+  syncQuickFiltersFromQueryParams();
+  fetchComments();
+});
 </script>
 
 <style scoped lang="scss">
+.comment-list-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 筛选面板滑入滑出动画 */
+.filter-slide-enter-active,
+.filter-slide-leave-active {
+  transition: all 0.1s linear;
+}
+
+.filter-slide-enter-from,
+.filter-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.filter-slide-enter-to,
+.filter-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.comment-list-page > :deep(.filter-panel) {
+  flex-shrink: 0;
+}
+
+.comment-list-page > :deep(.common-list) {
+  flex: 1;
+  min-height: 0;
+}
+
 .reply-info {
   padding: 12px;
   background-color: #f5f7fa;
