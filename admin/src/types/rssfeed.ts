@@ -16,6 +16,11 @@ export interface RssArticle {
 export interface RssArticleQuery {
   page?: number;
   page_size?: number;
+  keyword?: string; // 搜索关键词
+  friend_id?: number; // 友链ID筛选
+  is_read?: boolean; // 已读状态筛选
+  start_time?: string; // 发布开始时间
+  end_time?: string; // 发布结束时间
 }
 
 // RSS文章列表响应数据

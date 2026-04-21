@@ -141,14 +141,6 @@ defineEmits<{
         border-color: var(--el-color-success-light-5);
         background-color: var(--el-color-success-light-9);
       }
-
-      // 筛选按钮徽章样式
-      .filter-badge {
-        :deep(.el-badge__content) {
-          top: 2px;
-          right: 12px;
-        }
-      }
     }
 
     @media (max-width: 767px) {

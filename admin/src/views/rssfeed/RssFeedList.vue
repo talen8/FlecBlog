@@ -1,84 +1,124 @@
 <template>
-  <common-list
-    title="RSS订阅"
-    :data="articleList"
-    :loading="loading"
-    :total="total"
-    v-model:page="queryParams.page"
-    v-model:page-size="queryParams.page_size"
-    :show-create="false"
-    @refresh="fetchArticles"
-    @update:page="fetchArticles"
-    @update:pageSize="fetchArticles"
-  >
-    <!-- 额外按钮 -->
-    <template #toolbar-after>
-      <el-button type="primary" @click="openSubscriberDialog"> 本站订阅 </el-button>
-      <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="unread-badge">
-        <el-button
-          type="success"
-          :disabled="unreadCount === 0"
-          @click="handleMarkAllRead"
-          v-if="isSuperAdmin"
-        >
-          全部已读
-        </el-button>
-      </el-badge>
-    </template>
+  <div class="rss-feed-list-page">
+    <!-- 筛选面板 -->
+    <transition name="filter-slide">
+      <rss-feed-filter
+        v-if="showFilter"
+        v-model="queryParams"
+        @search="fetchArticles"
+        @close="showFilter = false"
+      />
+    </transition>
 
-    <!-- 表格列 -->
-    <el-table-column label="状态" width="80" align="center">
-      <template #default="{ row }">
-        <el-tag :type="row.is_read ? 'info' : 'danger'" size="small">
-          {{ row.is_read ? '已读' : '未读' }}
-        </el-tag>
+    <common-list
+      title="RSS订阅"
+      :data="articleList"
+      :loading="loading"
+      :total="total"
+      v-model:page="queryParams.page"
+      v-model:page-size="queryParams.page_size"
+      :show-create="false"
+      :filter-active="showFilter"
+      :filter-count="filterCount"
+      @refresh="fetchArticles"
+      @filter="toggleFilter"
+      @update:page="fetchArticles"
+      @update:pageSize="fetchArticles"
+    >
+      <!-- 快速筛选 -->
+      <template #toolbar-before>
+        <template v-if="!showFilter">
+          <el-select
+            v-model="quickFilters.friend_id"
+            placeholder="全部友链"
+            clearable
+            style="width: 150px; margin-right: 8px"
+            @change="handleQuickFilterChange"
+          >
+            <el-option
+              v-for="friend in friendList"
+              :key="friend.id"
+              :label="friend.name"
+              :value="friend.id"
+            />
+          </el-select>
+          <el-select
+            v-model="quickFilters.is_read"
+            placeholder="阅读状态"
+            clearable
+            style="width: 110px; margin-right: 12px"
+            @change="handleQuickFilterChange"
+          >
+            <el-option label="已读" :value="true" />
+            <el-option label="未读" :value="false" />
+          </el-select>
+        </template>
       </template>
-    </el-table-column>
 
-    <el-table-column label="文章标题" min-width="300">
-      <template #default="{ row }">
-        <a :href="row.link" target="_blank" class="article-link" :class="{ read: row.is_read }">
-          {{ row.title }}
-        </a>
+      <!-- 额外按钮 -->
+      <template #toolbar-after>
+        <el-button type="primary" @click="openSubscriberDialog"> 本站订阅 </el-button>
+        <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="unread-badge">
+          <el-button :disabled="unreadCount === 0" @click="handleMarkAllRead" v-if="isSuperAdmin">
+            全部已读
+          </el-button>
+        </el-badge>
       </template>
-    </el-table-column>
 
-    <el-table-column label="来源" width="180">
-      <template #default="{ row }">
-        <a :href="row.friend_url" target="_blank" class="friend-link">
-          {{ row.friend_name }}
-        </a>
-      </template>
-    </el-table-column>
+      <!-- 表格列 -->
+      <el-table-column label="状态" width="80" align="center">
+        <template #default="{ row }">
+          <el-tag :type="row.is_read ? 'info' : 'danger'" size="small">
+            {{ row.is_read ? '已读' : '未读' }}
+          </el-tag>
+        </template>
+      </el-table-column>
 
-    <el-table-column label="发布时间" width="180" align="center">
-      <template #default="{ row }">
-        <span v-if="row.published_at">{{ formatDateTime(row.published_at) }}</span>
-        <span v-else style="color: #999">-</span>
-      </template>
-    </el-table-column>
+      <el-table-column label="文章标题" min-width="300">
+        <template #default="{ row }">
+          <a :href="row.link" target="_blank" class="article-link" :class="{ read: row.is_read }">
+            {{ row.title }}
+          </a>
+        </template>
+      </el-table-column>
 
-    <el-table-column label="抓取时间" width="180" align="center">
-      <template #default="{ row }">
-        {{ formatDateTime(row.created_at) }}
-      </template>
-    </el-table-column>
+      <el-table-column label="来源" width="180">
+        <template #default="{ row }">
+          <a :href="row.friend_url" target="_blank" class="friend-link">
+            {{ row.friend_name }}
+          </a>
+        </template>
+      </el-table-column>
 
-    <el-table-column label="操作" width="120" align="center" fixed="right">
-      <template #default="{ row }">
-        <el-button
-          v-if="!row.is_read && isSuperAdmin"
-          type="primary"
-          link
-          size="small"
-          @click="handleMarkRead(row)"
-        >
-          标记已读
-        </el-button>
-        <span v-else style="color: #999">-</span>
-      </template>
-    </el-table-column>
-  </common-list>
+      <el-table-column label="发布时间" width="180" align="center">
+        <template #default="{ row }">
+          <span v-if="row.published_at">{{ formatDateTime(row.published_at) }}</span>
+          <span v-else style="color: #999">-</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="抓取时间" width="180" align="center">
+        <template #default="{ row }">
+          {{ formatDateTime(row.created_at) }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="操作" width="120" align="center" fixed="right">
+        <template #default="{ row }">
+          <el-button
+            v-if="!row.is_read && isSuperAdmin"
+            type="primary"
+            link
+            size="small"
+            @click="handleMarkRead(row)"
+          >
+            标记已读
+          </el-button>
+          <span v-else style="color: #999">-</span>
+        </template>
+      </el-table-column>
+    </common-list>
+  </div>
 
   <!-- 本站订阅弹窗 -->
   <el-dialog v-model="subscriberDialogVisible" title="本站订阅者" width="700px" destroy-on-close>
@@ -132,10 +172,13 @@ import { ref, onMounted, computed, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Message } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
+import RssFeedFilter from './components/RssFeedFilter.vue';
 import type { RssArticle, RssArticleQuery } from '@/types/rssfeed';
 import type { Subscriber } from '@/types/subscriber';
+import type { Friend } from '@/types/friend';
 import { getRssArticles, markRssArticleRead, markAllRssArticlesRead } from '@/api/rssfeed';
 import { getSubscribers, deleteSubscriber } from '@/api/subscriber';
+import { getFriends } from '@/api/friend';
 import { formatDateTime } from '@/utils/date';
 import { isSuperAdmin as checkSuperAdmin } from '@/utils/auth';
 
@@ -145,7 +188,69 @@ const loading = ref(false);
 const articleList = ref<RssArticle[]>([]);
 const total = ref(0);
 const unreadCount = ref(0);
+const showFilter = ref(false);
 const queryParams = ref<RssArticleQuery>({ page: 1, page_size: 20 });
+
+// 快速筛选相关
+const friendList = ref<Friend[]>([]);
+const quickFilters = reactive({
+  friend_id: undefined as number | undefined,
+  is_read: undefined as boolean | undefined,
+});
+
+/**
+ * 计算当前应用的筛选条件数量
+ */
+const filterCount = computed(() => {
+  let count = 0;
+  if (queryParams.value.keyword) count++;
+  if (queryParams.value.friend_id !== undefined) count++;
+  if (queryParams.value.is_read !== undefined) count++;
+  if (queryParams.value.start_time && queryParams.value.end_time) count++;
+  return count;
+});
+
+/**
+ * 切换筛选面板显示状态
+ */
+const toggleFilter = () => {
+  showFilter.value = !showFilter.value;
+  if (!showFilter.value) {
+    syncQuickFiltersFromQueryParams();
+  }
+};
+
+/**
+ * 从 queryParams 同步筛选条件到快速筛选
+ */
+const syncQuickFiltersFromQueryParams = () => {
+  quickFilters.friend_id = queryParams.value.friend_id;
+  quickFilters.is_read = queryParams.value.is_read;
+};
+
+/**
+ * 加载友链列表（用于快速筛选）
+ */
+const loadFriendList = async () => {
+  try {
+    const result = await getFriends({ page: 1, page_size: 1000 });
+    friendList.value = result.list || [];
+  } catch (error) {
+    console.error('加载友链列表失败:', error);
+  }
+};
+
+/**
+ * 处理快速筛选变化
+ */
+const handleQuickFilterChange = () => {
+  // 将快速筛选条件同步到查询参数
+  queryParams.value.friend_id = quickFilters.friend_id;
+  queryParams.value.is_read = quickFilters.is_read;
+  // 重置到第一页并搜索
+  queryParams.value.page = 1;
+  fetchArticles();
+};
 
 /**
  * 获取RSS文章列表
@@ -244,10 +349,49 @@ const handleDeleteSubscriber = async (id: number) => {
   }
 };
 
-onMounted(fetchArticles);
+onMounted(() => {
+  loadFriendList();
+  // 初始化快速筛选值（从 queryParams）
+  syncQuickFiltersFromQueryParams();
+  fetchArticles();
+});
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.rss-feed-list-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 筛选面板滑入滑出动画 */
+.filter-slide-enter-active,
+.filter-slide-leave-active {
+  transition: all 0.1s linear;
+}
+
+.filter-slide-enter-from,
+.filter-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.filter-slide-enter-to,
+.filter-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.rss-feed-list-page > :deep(.filter-panel) {
+  flex-shrink: 0;
+}
+
+.rss-feed-list-page > :deep(.common-list) {
+  flex: 1;
+  min-height: 0;
+}
+
 .article-link {
   color: var(--el-color-primary);
   text-decoration: none;

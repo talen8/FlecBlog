@@ -20,11 +20,42 @@ func NewRssFeedRepository(db *gorm.DB) *RssFeedRepository {
 }
 
 // List 获取RSS文章列表
-func (r *RssFeedRepository) List(ctx context.Context, page, pageSize int) ([]model.RssArticle, int64, error) {
+func (r *RssFeedRepository) List(
+	ctx context.Context,
+	page, pageSize int,
+	keyword string,
+	friendID uint,
+	isRead *bool,
+	startTime, endTime string,
+) ([]model.RssArticle, int64, error) {
 	var articles []model.RssArticle
 	var total int64
 
 	query := r.db.WithContext(ctx).Model(&model.RssArticle{}).Preload("Friend")
+
+	// 关键词搜索
+	if keyword != "" {
+		searchKeyword := "%" + keyword + "%"
+		query = query.Where("title ILIKE ?", searchKeyword)
+	}
+
+	// 友链ID筛选
+	if friendID > 0 {
+		query = query.Where("friend_id = ?", friendID)
+	}
+
+	// 已读状态筛选
+	if isRead != nil {
+		query = query.Where("is_read = ?", *isRead)
+	}
+
+	// 发布时间范围筛选
+	if startTime != "" {
+		query = query.Where("published_at >= ?", startTime)
+	}
+	if endTime != "" {
+		query = query.Where("published_at <= ?", endTime+" 23:59:59")
+	}
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
