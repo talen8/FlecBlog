@@ -69,6 +69,22 @@ export interface VideoInfo {
   video_id: string;
 }
 
+// 动态列表查询参数
+export interface MomentListQuery {
+  page: number;
+  page_size: number;
+  keyword?: string; // 搜索关键词（文本内容）
+  tags?: string; // 标签
+  location?: string; // 发布地点
+  is_publish?: boolean; // 是否发布
+  has_images?: boolean; // 是否有图片
+  has_video?: boolean; // 是否有视频
+  has_music?: boolean; // 是否有音乐
+  has_link?: boolean; // 是否有链接
+  start_time?: string; // 发布开始时间
+  end_time?: string; // 发布结束时间
+}
+
 // 分页数据
 export interface MomentListData {
   list: Moment[];

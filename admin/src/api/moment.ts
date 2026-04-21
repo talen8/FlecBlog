@@ -4,15 +4,15 @@ import type {
   MomentListData,
   CreateMomentRequest,
   UpdateMomentRequest,
+  MomentListQuery,
 } from '@/types/moment';
-import type { PaginationQuery } from '@/types/request';
 
 /**
  * 获取动态列表
  * @param params 查询参数
  * @returns Promise<MomentListData>
  */
-export function getMoments(params: PaginationQuery): Promise<MomentListData> {
+export function getMoments(params: MomentListQuery): Promise<MomentListData> {
   return request.get('/admin/moments', { params });
 }
 

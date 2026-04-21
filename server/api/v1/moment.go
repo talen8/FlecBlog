@@ -36,7 +36,7 @@ func NewMomentController(momentService *service.MomentService) *MomentController
 //	@Success		200			{object}	response.Response{data=response.PageResult}
 //	@Router			/moments [get]
 func (c *MomentController) ListForWeb(ctx *gin.Context) {
-	var req dto.ListMomentRequest
+	var req dto.ListMomentsForWebRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		response.ValidateFailed(ctx, err.Error())
 		return
@@ -56,25 +56,35 @@ func (c *MomentController) ListForWeb(ctx *gin.Context) {
 // List 获取动态列表
 //
 //	@Summary		动态列表
-//	@Description	获取所有动态
+//	@Description	获取所有动态，支持筛选
 //	@Tags			动态管理
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			page		query		int	false	"页码"
-//	@Param			page_size	query		int	false	"每页数量（不传则返回全部）"
-//	@Success		200			{object}	response.Response{data=response.PageResult}
-//	@Failure		401			{object}	response.Response
-//	@Failure		403			{object}	response.Response
+//	@Param			page			query		int		false	"页码"
+//	@Param			page_size		query		int		false	"每页数量（不传则返回全部）"
+//	@Param			keyword			query		string	false	"搜索关键词（文本内容）"
+//	@Param			tags			query		string	false	"标签"
+//	@Param			location		query		string	false	"发布地点"
+//	@Param			is_publish		query		bool	false	"是否发布"
+//	@Param			has_images		query		bool	false	"是否有图片"
+//	@Param			has_video		query		bool	false	"是否有视频"
+//	@Param			has_music		query		bool	false	"是否有音乐"
+//	@Param			has_link		query		bool	false	"是否有链接"
+//	@Param			start_time		query		string	false	"发布开始时间"
+//	@Param			end_time		query		string	false	"发布结束时间"
+//	@Success		200				{object}	response.Response{data=response.PageResult}
+//	@Failure		401				{object}	response.Response
+//	@Failure		403				{object}	response.Response
 //	@Router			/admin/moments [get]
 func (c *MomentController) List(ctx *gin.Context) {
-	var req dto.ListMomentRequest
+	var req dto.ListMomentsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		response.ValidateFailed(ctx, err.Error())
 		return
 	}
 
-	moments, total, err := c.momentService.List(ctx.Request.Context(), req.Page, req.PageSize)
+	moments, total, err := c.momentService.List(ctx.Request.Context(), req)
 	if err != nil {
 		response.Failed(ctx, err.Error())
 		return

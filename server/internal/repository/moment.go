@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"regexp"
 
 	"flec_blog/internal/model"
 
@@ -21,15 +22,87 @@ func NewMomentRepository(db *gorm.DB) *MomentRepository {
 // ============ 基础CRUD ============
 
 // List 获取动态列表
-func (r *MomentRepository) List(ctx context.Context, page, pageSize int, isPublish *bool) ([]model.Moment, int64, error) {
+func (r *MomentRepository) List(
+	ctx context.Context,
+	page, pageSize int,
+	keyword, tags, location string,
+	isPublish, hasImages, hasVideo, hasMusic, hasLink *bool,
+	startTime, endTime string,
+) ([]model.Moment, int64, error) {
 	var moments []model.Moment
 	var total int64
 
 	query := r.db.WithContext(ctx).Model(&model.Moment{})
 
-	// 根据发布状态过滤
+	// 关键词搜索
+	if keyword != "" {
+		pattern := `"text"\s*:\s*"[^"]*` + regexp.QuoteMeta(keyword) + `[^"]*"`
+		query = query.Where("content::text ~* ?", pattern)
+	}
+
+	// 按标签筛选
+	if tags != "" {
+		pattern := `"tags"\s*:\s*"[^"]*` + regexp.QuoteMeta(tags) + `[^"]*"`
+		query = query.Where("content::text ~* ?", pattern)
+	}
+
+	// 按发布地点筛选
+	if location != "" {
+		pattern := `"location"\s*:\s*"[^"]*` + regexp.QuoteMeta(location) + `[^"]*"`
+		query = query.Where("content::text ~* ?", pattern)
+	}
+
+	// 按发布状态筛选
 	if isPublish != nil {
 		query = query.Where("is_publish = ?", *isPublish)
+	}
+
+	// 按是否有图片筛选
+	if hasImages != nil {
+		if *hasImages {
+			query = query.Where("content::text ~* ?", `"images"\s*:\s*\[.+\]`)
+		} else {
+			query = query.Where(
+				"content::text IS NULL OR content::text !~* ? OR content::text ~* ?",
+				`"images"`,
+				`"images"\s*:\s*(null|\[\s*\])`,
+			)
+		}
+	}
+
+	// 按是否有视频筛选
+	if hasVideo != nil {
+		if *hasVideo {
+			query = query.Where("content::text ILIKE '%\"video\":%'")
+		} else {
+			query = query.Where("content::text NOT ILIKE '%\"video\":%' OR content::text ILIKE '%\"video\":{}%'")
+		}
+	}
+
+	// 按是否有音乐筛选
+	if hasMusic != nil {
+		if *hasMusic {
+			query = query.Where("content::text ILIKE '%\"music\":%'")
+		} else {
+			query = query.Where("content::text NOT ILIKE '%\"music\":%' OR content::text ILIKE '%\"music\":{}%'")
+		}
+	}
+
+	// 按是否有链接筛选
+	if hasLink != nil {
+		if *hasLink {
+			query = query.Where("content::text ILIKE '%\"link\":%'")
+		} else {
+			query = query.Where("content::text NOT ILIKE '%\"link\":%' OR content::text ILIKE '%\"link\":{}%'")
+		}
+	}
+
+	// 按发布时间范围筛选
+	if startTime != "" {
+		query = query.Where("publish_time >= ?", startTime)
+	}
+	if endTime != "" {
+		query = query.Where("publish_time <= ?", endTime)
 	}
 
 	err := query.Count(&total).Error

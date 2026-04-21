@@ -2,10 +2,10 @@ package dto
 
 import "flec_blog/pkg/utils"
 
-// ============ 通用动态请求 ============
+// ============ 前台动态请求 ============
 
-// ListMomentRequest 动态列表请求
-type ListMomentRequest struct {
+// ListMomentsForWebRequest 前台动态列表请求
+type ListMomentsForWebRequest struct {
 	Page     int `form:"page" binding:"omitempty,min=1"`
 	PageSize int `form:"page_size" binding:"omitempty,min=1,max=1000"`
 }
@@ -77,6 +77,22 @@ type MomentForWebResponse struct {
 }
 
 // ============ 后台动态管理请求 ============
+
+// ListMomentsRequest 后台动态列表请求（支持筛选）
+type ListMomentsRequest struct {
+	Page      int    `form:"page" binding:"omitempty,min=1"`
+	PageSize  int    `form:"page_size" binding:"omitempty,min=1,max=1000"`
+	Keyword   string `form:"keyword"`    // 搜索关键词（文本内容）
+	Tags      string `form:"tags"`       // 标签
+	Location  string `form:"location"`   // 发布地点
+	IsPublish *bool  `form:"is_publish"` // 是否发布
+	HasImages *bool  `form:"has_images"` // 是否有图片
+	HasVideo  *bool  `form:"has_video"`  // 是否有视频
+	HasMusic  *bool  `form:"has_music"`  // 是否有音乐
+	HasLink   *bool  `form:"has_link"`   // 是否有链接
+	StartTime string `form:"start_time"` // 发布开始时间
+	EndTime   string `form:"end_time"`   // 发布结束时间
+}
 
 // CreateMomentRequest 创建动态请求
 type CreateMomentRequest struct {

@@ -1,108 +1,150 @@
 <template>
-  <common-list
-    title="动态列表"
-    :data="momentList"
-    :loading="loading"
-    :total="total"
-    v-model:page="queryParams.page"
-    v-model:page-size="queryParams.page_size"
-    create-text="新增动态"
-    @create="handleCreate"
-    @refresh="fetchMoments"
-    @update:page="fetchMoments"
-    @update:pageSize="fetchMoments"
-  >
-    <!-- 表格列 -->
-    <el-table-column label="内容" min-width="400">
-      <template #default="{ row }">
-        <div class="moment-content">
-          <!-- 文本内容 -->
-          <div v-if="row.content.text" class="text-content">
-            {{ row.content.text }}
-          </div>
+  <div class="moment-list-page">
+    <!-- 筛选控制台 -->
+    <transition name="filter-slide">
+      <moment-filter
+        v-if="showFilter"
+        v-model="queryParams"
+        @close="showFilter = false"
+        @search="fetchMoments"
+      />
+    </transition>
 
-          <!-- 图片 -->
-          <div v-if="row.content.images?.length" class="images-content">
-            <el-image
-              v-for="(image, index) in row.content.images.slice(0, 3)"
-              :key="index"
-              :src="image"
-              fit="cover"
-              style="width: 60px; height: 60px; border-radius: 4px; margin-right: 8px"
-            />
-            <span v-if="row.content.images.length > 3" class="more-images">
-              +{{ row.content.images.length - 3 }}
-            </span>
-          </div>
-
-          <!-- 所有标签（标签、视频、音乐、链接、位置） -->
-          <div
-            v-if="
-              row.content.tags ||
-              row.content.video ||
-              row.content.music ||
-              row.content.link ||
-              row.content.location
-            "
-            class="tags-container"
+    <common-list
+      title="动态列表"
+      :data="momentList"
+      :loading="loading"
+      :total="total"
+      v-model:page="queryParams.page"
+      v-model:page-size="queryParams.page_size"
+      create-text="新增动态"
+      :filter-active="showFilter"
+      :filter-count="activeFilterCount"
+      @create="handleCreate"
+      @refresh="fetchMoments"
+      @filter="toggleFilter"
+      @update:page="fetchMoments"
+      @update:pageSize="fetchMoments"
+    >
+      <!-- 快速筛选 -->
+      <template #toolbar-before>
+        <template v-if="!showFilter">
+          <el-input
+            v-model="quickFilters.keyword"
+            placeholder="搜索关键词"
+            clearable
+            style="width: 180px; margin-right: 8px"
+            @keyup.enter="handleQuickFilterChange"
+            @clear="handleQuickFilterChange"
           >
-            <!-- 标签 -->
-            <el-tag v-if="row.content.tags" size="small" type="info">
-              {{ row.content.tags }}
-            </el-tag>
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+          <el-select
+            v-model="quickFilters.is_publish"
+            placeholder="发布状态"
+            clearable
+            style="width: 110px; margin-right: 12px"
+            @change="handleQuickFilterChange"
+          >
+            <el-option label="已发布" :value="true" />
+            <el-option label="草稿" :value="false" />
+          </el-select>
+        </template>
+      </template>
 
-            <!-- 视频 -->
-            <el-tag v-if="row.content.video" type="primary" size="small">
-              <i class="ri-video-line"></i>
-              {{ getVideoPlatformName(row.content.video.platform) }}
-            </el-tag>
+      <el-table-column label="内容" min-width="400">
+        <template #default="{ row }">
+          <div class="moment-content">
+            <!-- 文本内容 -->
+            <div v-if="row.content.text" class="text-content">
+              {{ row.content.text }}
+            </div>
 
-            <!-- 音乐 -->
-            <el-tag v-if="row.content.music" type="success" size="small">
-              <i class="ri-music-line"></i>
-              {{ getMusicLabel(row.content.music) }}
-            </el-tag>
+            <!-- 图片 -->
+            <div v-if="row.content.images?.length" class="images-content">
+              <el-image
+                v-for="(image, index) in row.content.images.slice(0, 3)"
+                :key="index"
+                :src="image"
+                fit="cover"
+                style="width: 60px; height: 60px; border-radius: 4px; margin-right: 8px"
+              />
+              <span v-if="row.content.images.length > 3" class="more-images">
+                +{{ row.content.images.length - 3 }}
+              </span>
+            </div>
 
-            <!-- 链接 -->
-            <el-tag v-if="row.content.link" size="small" type="warning">
-              <i class="ri-link"></i>
-              {{ row.content.link.title || row.content.link.url }}
-            </el-tag>
+            <!-- 所有标签（标签、视频、音乐、链接、位置） -->
+            <div
+              v-if="
+                row.content.tags ||
+                row.content.video ||
+                row.content.music ||
+                row.content.link ||
+                row.content.location
+              "
+              class="tags-container"
+            >
+              <!-- 标签 -->
+              <el-tag v-if="row.content.tags" size="small" type="info">
+                {{ row.content.tags }}
+              </el-tag>
 
-            <!-- 位置 -->
-            <el-tag v-if="row.content.location" type="danger" size="small">
-              <i class="ri-map-pin-line"></i>
-              {{ row.content.location }}
-            </el-tag>
+              <!-- 视频 -->
+              <el-tag v-if="row.content.video" type="primary" size="small">
+                <i class="ri-video-line"></i>
+                {{ getVideoPlatformName(row.content.video.platform) }}
+              </el-tag>
+
+              <!-- 音乐 -->
+              <el-tag v-if="row.content.music" type="success" size="small">
+                <i class="ri-music-line"></i>
+                {{ getMusicLabel(row.content.music) }}
+              </el-tag>
+
+              <!-- 链接 -->
+              <el-tag v-if="row.content.link" size="small" type="warning">
+                <i class="ri-link"></i>
+                {{ row.content.link.title || row.content.link.url }}
+              </el-tag>
+
+              <!-- 位置 -->
+              <el-tag v-if="row.content.location" type="danger" size="small">
+                <i class="ri-map-pin-line"></i>
+                {{ row.content.location }}
+              </el-tag>
+            </div>
           </div>
-        </div>
-      </template>
-    </el-table-column>
+        </template>
+      </el-table-column>
 
-    <el-table-column label="状态" width="100" align="center">
-      <template #default="{ row }">
-        <el-tag :type="row.is_publish ? 'success' : 'warning'" size="small">
-          {{ row.is_publish ? '已发布' : '草稿' }}
-        </el-tag>
-      </template>
-    </el-table-column>
+      <el-table-column label="状态" width="100" align="center">
+        <template #default="{ row }">
+          <el-tag :type="row.is_publish ? 'success' : 'warning'" size="small">
+            {{ row.is_publish ? '已发布' : '草稿' }}
+          </el-tag>
+        </template>
+      </el-table-column>
 
-    <el-table-column label="发布时间" width="180" align="center">
-      <template #default="{ row }">
-        <div v-if="row.publish_time">
-          {{ formatDateTime(row.publish_time) }}
-        </div>
-        <span v-else style="color: #999">-</span>
-      </template>
-    </el-table-column>
+      <el-table-column label="发布时间" width="180" align="center">
+        <template #default="{ row }">
+          <div v-if="row.publish_time">
+            {{ formatDateTime(row.publish_time) }}
+          </div>
+          <span v-else style="color: #999">-</span>
+        </template>
+      </el-table-column>
 
-    <el-table-column label="操作" width="180" align="center" fixed="right">
-      <template #default="{ row }">
-        <el-button type="primary" link size="small" @click="handleEdit(row.id)">编辑</el-button>
-        <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
-      </template>
-    </el-table-column>
-  </common-list>
+      <el-table-column label="操作" width="180" align="center" fixed="right">
+        <template #default="{ row }">
+          <el-button type="primary" link size="small" @click="handleEdit(row.id)">编辑</el-button>
+          <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
+        </template>
+      </el-table-column>
+    </common-list>
+  </div>
 
   <!-- 动态表单弹窗 -->
   <moment-form-dialog
@@ -113,19 +155,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { Search } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
+import MomentFilter from './components/MomentFilter.vue';
 import MomentFormDialog from './components/MomentFormDialog.vue';
-import type { Moment } from '@/types/moment';
-import type { PaginationQuery } from '@/types/request';
+import type { Moment, MomentListQuery } from '@/types/moment';
 import { getMoments, deleteMoment } from '@/api/moment';
 import { formatDateTime } from '@/utils/date';
 
 const loading = ref(false);
 const momentList = ref<Moment[]>([]);
 const total = ref(0);
-const queryParams = ref<PaginationQuery>({ page: 1, page_size: 20 });
+const showFilter = ref(false);
+const queryParams = ref<MomentListQuery>({
+  page: 1,
+  page_size: 20,
+});
+
+// 快速筛选相关
+const quickFilters = reactive({
+  keyword: '',
+  is_publish: undefined as boolean | undefined,
+});
+
 const momentDialogVisible = ref(false);
 const editingMoment = ref<Moment | null>(null);
 
@@ -148,6 +202,52 @@ const MUSIC_LABELS = {
   },
 };
 
+/**
+ * 计算当前激活的筛选项数量
+ */
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (queryParams.value.keyword) count++;
+  if (queryParams.value.tags) count++;
+  if (queryParams.value.location) count++;
+  if (queryParams.value.is_publish !== undefined) count++;
+  if (queryParams.value.has_images !== undefined) count++;
+  if (queryParams.value.has_video !== undefined) count++;
+  if (queryParams.value.has_music !== undefined) count++;
+  if (queryParams.value.has_link !== undefined) count++;
+  if (queryParams.value.start_time || queryParams.value.end_time) count++;
+  return count;
+});
+
+/**
+ * 切换筛选面板显示状态
+ */
+const toggleFilter = () => {
+  showFilter.value = !showFilter.value;
+  if (!showFilter.value) {
+    syncQuickFiltersFromQueryParams();
+  }
+};
+
+/**
+ * 从 queryParams 同步筛选条件到快速筛选
+ */
+const syncQuickFiltersFromQueryParams = () => {
+  quickFilters.keyword = queryParams.value.keyword || '';
+  quickFilters.is_publish = queryParams.value.is_publish;
+};
+
+/**
+ * 处理快速筛选变化
+ */
+const handleQuickFilterChange = () => {
+  // 将快速筛选条件同步到查询参数
+  queryParams.value.keyword = quickFilters.keyword || undefined;
+  queryParams.value.is_publish = quickFilters.is_publish;
+  queryParams.value.page = 1;
+  fetchMoments();
+};
+
 // 获取视频平台名称
 const getVideoPlatformName = (platform?: string) => {
   if (!platform) return '本地视频';
@@ -166,6 +266,11 @@ const getMusicLabel = (music: { server: string; type: string }) => {
   return `${serverName} - ${typeName}`;
 };
 
+let errorMessageShown = false;
+
+/**
+ * 获取动态列表
+ */
 const fetchMoments = async () => {
   loading.value = true;
   try {
@@ -176,7 +281,14 @@ const fetchMoments = async () => {
     momentList.value = result.list;
     total.value = result.total;
   } catch {
-    ElMessage.error('获取动态列表失败');
+    if (!errorMessageShown) {
+      errorMessageShown = true;
+      ElMessage.error('获取动态列表失败');
+      // 3秒后重置标记，允许再次提示
+      setTimeout(() => {
+        errorMessageShown = false;
+      }, 3000);
+    }
   } finally {
     loading.value = false;
   }
@@ -212,10 +324,48 @@ const handleDelete = async (id: number) => {
   }
 };
 
-onMounted(fetchMoments);
+onMounted(() => {
+  // 初始化快速筛选值（从 queryParams）
+  syncQuickFiltersFromQueryParams();
+  fetchMoments();
+});
 </script>
 
 <style scoped lang="scss">
+.moment-list-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 筛选控制台滑入滑出动画 */
+.filter-slide-enter-active,
+.filter-slide-leave-active {
+  transition: all 0.1s linear;
+}
+
+.filter-slide-enter-from,
+.filter-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.filter-slide-enter-to,
+.filter-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.moment-list-page > :deep(.filter-panel) {
+  flex-shrink: 0;
+}
+
+.moment-list-page > :deep(.common-list) {
+  flex: 1;
+  min-height: 0;
+}
+
 .moment-content {
   .text-content {
     margin-bottom: 8px;

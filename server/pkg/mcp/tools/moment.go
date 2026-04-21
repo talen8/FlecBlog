@@ -103,7 +103,11 @@ func (w *MomentWrapper) ManageMoment(
 func (w *MomentWrapper) listMoments(payload MomentManagePayload) (*sdkmcp.CallToolResult, MomentManageOutput, error) {
 	page, pageSize := NormalizePage(payload.Page, payload.PageSize)
 
-	moments, total, err := w.momentService.List(context.Background(), page, pageSize)
+	req := dto.ListMomentsRequest{
+		Page:     page,
+		PageSize: pageSize,
+	}
+	moments, total, err := w.momentService.List(context.Background(), req)
 	if err != nil {
 		return nil, MomentManageOutput{Error: fmt.Sprintf("获取动态列表失败: %v", err)}, nil
 	}
