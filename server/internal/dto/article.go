@@ -4,18 +4,6 @@ import (
 	"flec_blog/pkg/utils"
 )
 
-// ============ 通用文章请求 ============
-
-// ListArticlesRequest 文章列表请求
-type ListArticlesRequest struct {
-	Page     int    `form:"page,default=1" binding:"min=0"`
-	PageSize int    `form:"page_size,default=10" binding:"min=0"`
-	Year     string `form:"year"`
-	Month    string `form:"month"`
-	Category string `form:"category"`
-	Tag      string `form:"tag"`
-}
-
 // ============ 通用文章响应 ============
 
 // ArticleDetailResponse 文章详情响应（前台专用）
@@ -58,6 +46,16 @@ type ArticleDetailResponse struct {
 
 // ============ 前台文章请求 ============
 
+// ListArticlesForWebRequest 前台文章列表请求
+type ListArticlesForWebRequest struct {
+	Page     int    `form:"page,default=1" binding:"min=0"`
+	PageSize int    `form:"page_size,default:10" binding:"min=0"`
+	Year     string `form:"year"`
+	Month    string `form:"month"`
+	Category string `form:"category"`
+	Tag      string `form:"tag"`
+}
+
 // SearchArticlesRequest 文章搜索请求
 type SearchArticlesRequest struct {
 	Keyword  string `form:"keyword" binding:"required"`
@@ -95,6 +93,22 @@ type ArticleWebResponse struct {
 }
 
 // ============ 后台文章管理请求 ============
+
+// ListArticlesRequest 后台文章列表请求（支持筛选）
+type ListArticlesRequest struct {
+	Page       int    `form:"page,default=1" binding:"min=0"`
+	PageSize   int    `form:"page_size,default=10" binding:"min=0"`
+	Keyword    string `form:"keyword"`     // 搜索关键词（标题/内容）
+	CategoryID uint   `form:"category_id"` // 分类ID
+	TagIDs     []uint `form:"tag_ids"`     // 标签ID列表
+	Location   string `form:"location"`    // 发布地点
+	IsPublish  *bool  `form:"is_publish"`  // 是否发布
+	IsTop      *bool  `form:"is_top"`      // 是否置顶
+	IsEssence  *bool  `form:"is_essence"`  // 是否精选
+	IsOutdated *bool  `form:"is_outdated"` // 是否过时
+	StartTime  string `form:"start_time"`  // 发布开始时间
+	EndTime    string `form:"end_time"`    // 发布结束时间
+}
 
 // CreateArticleRequest 创建文章请求
 type CreateArticleRequest struct {

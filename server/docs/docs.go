@@ -287,7 +287,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取包含草稿的所有文章",
+                "description": "获取包含草稿的所有文章，支持多种筛选条件",
                 "consumes": [
                     "application/json"
                 ],
@@ -309,6 +309,64 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "每页数量（不传则返回全部）",
                         "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词（标题/内容）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分类ID",
+                        "name": "category_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "标签ID列表",
+                        "name": "tag_ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否发布",
+                        "name": "is_publish",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否置顶",
+                        "name": "is_top",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否精选",
+                        "name": "is_essence",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否过时",
+                        "name": "is_outdated",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "发布开始时间（格式：2006-01-02）",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "发布结束时间（格式：2006-01-02）",
+                        "name": "end_time",
                         "in": "query"
                     }
                 ],

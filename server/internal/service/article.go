@@ -88,7 +88,7 @@ func (s *ArticleService) SetSubscriberService(subscriberService *SubscriberServi
 // ============ 前台服务 ============
 
 // ListForWeb 获取前台文章列表
-func (s *ArticleService) ListForWeb(ctx context.Context, req *dto.ListArticlesRequest) ([]dto.ArticleWebResponse, int64, error) {
+func (s *ArticleService) ListForWeb(ctx context.Context, req *dto.ListArticlesForWebRequest) ([]dto.ArticleWebResponse, int64, error) {
 	articles, total, err := s.articleRepo.ListForWeb(req.Page, req.PageSize, req.Year, req.Month, req.Category, req.Tag)
 	if err != nil {
 		return nil, 0, err
@@ -307,7 +307,13 @@ func (s *ArticleService) GetBySlug(ctx context.Context, slug string) (*dto.Artic
 // List 获取文章列表
 func (s *ArticleService) List(ctx context.Context, req *dto.ListArticlesRequest) ([]dto.ArticleListResponse, int64, error) {
 	offset := (req.Page - 1) * req.PageSize
-	articles, total, err := s.articleRepo.List(offset, req.PageSize)
+	articles, total, err := s.articleRepo.List(
+		offset, req.PageSize,
+		req.Keyword, req.Location,
+		req.CategoryID, req.TagIDs,
+		req.IsPublish, req.IsTop, req.IsEssence, req.IsOutdated,
+		req.StartTime, req.EndTime,
+	)
 	if err != nil {
 		return nil, 0, err
 	}

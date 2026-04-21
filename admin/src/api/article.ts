@@ -2,19 +2,19 @@ import request from '@/utils/request';
 import type {
   Article,
   ArticleListData,
+  ArticleListQuery,
   CreateArticleRequest,
   UpdateArticleRequest,
   ImportArticlesResult,
   WeChatExportResult,
 } from '@/types/article';
-import type { PaginationQuery } from '@/types/request';
 
 /**
  * 获取文章列表
  * @param params 查询参数
  * @returns Promise<ArticleListData>
  */
-export function getArticles(params: PaginationQuery): Promise<ArticleListData> {
+export function getArticles(params: ArticleListQuery): Promise<ArticleListData> {
   return request.get('/admin/articles', { params });
 }
 

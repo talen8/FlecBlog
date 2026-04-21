@@ -43,7 +43,7 @@ func NewArticleController(articleService *service.ArticleService) *ArticleContro
 //	@Failure		400			{object}	response.Response
 //	@Router			/articles [get]
 func (c *ArticleController) ListForWeb(ctx *gin.Context) {
-	var req dto.ListArticlesRequest
+	var req dto.ListArticlesForWebRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		response.ValidateFailed(ctx, err.Error())
 		return
@@ -119,16 +119,25 @@ func (c *ArticleController) GetBySlug(ctx *gin.Context) {
 // List 获取文章列表
 //
 //	@Summary		文章列表
-//	@Description	获取包含草稿的所有文章
+//	@Description	获取包含草稿的所有文章，支持多种筛选条件
 //	@Tags			文章管理
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			page		query		int	false	"页码"
-//	@Param			page_size	query		int	false	"每页数量（不传则返回全部）"
-//	@Success		200			{object}	response.Response{data=response.PageResult}
-//	@Failure		401			{object}	response.Response
-//	@Failure		403			{object}	response.Response
+//	@Param			page			query		int		false	"页码"
+//	@Param			page_size		query		int		false	"每页数量（不传则返回全部）"
+//	@Param			keyword			query		string	false	"搜索关键词（标题/内容）"
+//	@Param			category_id		query		uint	false	"分类ID"
+//	@Param			tag_ids			query		[]uint	false	"标签ID列表"
+//	@Param			is_publish		query		bool	false	"是否发布"
+//	@Param			is_top			query		bool	false	"是否置顶"
+//	@Param			is_essence		query		bool	false	"是否精选"
+//	@Param			is_outdated		query		bool	false	"是否过时"
+//	@Param			start_time		query		string	false	"发布开始时间（格式：2006-01-02）"
+//	@Param			end_time		query		string	false	"发布结束时间（格式：2006-01-02）"
+//	@Success		200				{object}	response.Response{data=response.PageResult}
+//	@Failure		401				{object}	response.Response
+//	@Failure		403				{object}	response.Response
 //	@Router			/admin/articles [get]
 func (c *ArticleController) List(ctx *gin.Context) {
 	var req dto.ListArticlesRequest

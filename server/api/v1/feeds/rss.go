@@ -38,7 +38,7 @@ func NewRSSController(articleService *service.ArticleService, config *config.Con
 //	@Success		200	{string}	string	"RSS XML 订阅内容"
 //	@Router			/rss.xml [get]
 func (c *RSSController) GetRSSFeed(ctx *gin.Context) {
-	req := &dto.ListArticlesRequest{
+	req := &dto.ListArticlesForWebRequest{
 		Page:     1,
 		PageSize: 0,
 	}

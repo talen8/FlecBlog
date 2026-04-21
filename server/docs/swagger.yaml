@@ -1895,7 +1895,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取包含草稿的所有文章
+      description: 获取包含草稿的所有文章，支持多种筛选条件
       parameters:
       - description: 页码
         in: query
@@ -1905,6 +1905,45 @@ paths:
         in: query
         name: page_size
         type: integer
+      - description: 搜索关键词（标题/内容）
+        in: query
+        name: keyword
+        type: string
+      - description: 分类ID
+        in: query
+        name: category_id
+        type: integer
+      - collectionFormat: csv
+        description: 标签ID列表
+        in: query
+        items:
+          type: integer
+        name: tag_ids
+        type: array
+      - description: 是否发布
+        in: query
+        name: is_publish
+        type: boolean
+      - description: 是否置顶
+        in: query
+        name: is_top
+        type: boolean
+      - description: 是否精选
+        in: query
+        name: is_essence
+        type: boolean
+      - description: 是否过时
+        in: query
+        name: is_outdated
+        type: boolean
+      - description: 发布开始时间（格式：2006-01-02）
+        in: query
+        name: start_time
+        type: string
+      - description: 发布结束时间（格式：2006-01-02）
+        in: query
+        name: end_time
+        type: string
       produces:
       - application/json
       responses:

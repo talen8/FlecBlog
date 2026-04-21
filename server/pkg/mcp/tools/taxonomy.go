@@ -261,7 +261,7 @@ func (w *TaxonomyWrapper) listCategoryArticles(payload TaxonomyManagePayload) (*
 	}
 
 	page, pageSize := NormalizePage(payload.Page, payload.PageSize)
-	req := &dto.ListArticlesRequest{Page: page, PageSize: pageSize, Category: category.Slug}
+	req := &dto.ListArticlesForWebRequest{Page: page, PageSize: pageSize, Category: category.Slug}
 	articles, total, err := w.articleService.ListForWeb(context.Background(), req)
 	if err != nil {
 		return nil, TaxonomyManageOutput{Error: fmt.Sprintf("获取分类文章列表失败: %v", err)}, nil
@@ -373,7 +373,7 @@ func (w *TaxonomyWrapper) listTagArticles(payload TaxonomyManagePayload) (*sdkmc
 	}
 
 	page, pageSize := NormalizePage(payload.Page, payload.PageSize)
-	req := &dto.ListArticlesRequest{Page: page, PageSize: pageSize, Tag: tag.Slug}
+	req := &dto.ListArticlesForWebRequest{Page: page, PageSize: pageSize, Tag: tag.Slug}
 	articles, total, err := w.articleService.ListForWeb(context.Background(), req)
 	if err != nil {
 		return nil, TaxonomyManageOutput{Error: fmt.Sprintf("获取标签文章列表失败: %v", err)}, nil

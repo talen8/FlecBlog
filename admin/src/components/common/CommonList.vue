@@ -1,6 +1,6 @@
 <template>
   <div class="common-list">
-    <el-card>
+    <el-card shadow="never">
       <!-- 工具栏 -->
       <div class="toolbar">
         <h2>{{ title }}</h2>
@@ -12,6 +12,13 @@
           </el-button>
           <!-- 后工具栏 -->
           <slot name="toolbar-after" />
+          <el-badge :value="filterCount" :hidden="filterCount === 0" class="filter-badge">
+            <el-button :type="filterActive ? 'success' : 'default'" @click="$emit('filter')">
+              <el-icon>
+                <Filter />
+              </el-icon>
+            </el-button>
+          </el-badge>
           <el-button class="refresh-btn" @click="$emit('refresh')">
             <el-icon>
               <Refresh />
@@ -53,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { Refresh } from '@element-plus/icons-vue';
+import { Refresh, Filter } from '@element-plus/icons-vue';
 
 withDefaults(
   defineProps<{
@@ -66,6 +73,8 @@ withDefaults(
     showPagination?: boolean;
     showCreate?: boolean;
     createText?: string;
+    filterActive?: boolean;
+    filterCount?: number;
   }>(),
   {
     loading: false,
@@ -75,12 +84,15 @@ withDefaults(
     showPagination: true,
     showCreate: true,
     createText: '新增',
+    filterActive: false,
+    filterCount: 0,
   }
 );
 
 defineEmits<{
   create: [];
   refresh: [];
+  filter: [];
   'update:page': [page: number];
   'update:pageSize': [size: number];
 }>();
@@ -121,6 +133,21 @@ defineEmits<{
 
       :deep(.el-button + .el-button) {
         margin-left: 0;
+      }
+
+      // 筛选按钮hover时显示绿色，与active状态保持一致
+      :deep(.el-button--default:hover) {
+        color: var(--el-color-success);
+        border-color: var(--el-color-success-light-5);
+        background-color: var(--el-color-success-light-9);
+      }
+
+      // 筛选按钮徽章样式
+      .filter-badge {
+        :deep(.el-badge__content) {
+          top: 2px;
+          right: 12px;
+        }
       }
     }
 

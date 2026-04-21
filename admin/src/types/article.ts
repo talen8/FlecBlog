@@ -86,3 +86,19 @@ export interface ImportArticlesResult {
 export interface WeChatExportResult {
   html: string; // 公众号 HTML，用于复制粘贴到微信公众平台
 }
+
+// 文章列表查询参数
+export interface ArticleListQuery {
+  page: number;
+  page_size: number;
+  keyword?: string;
+  category_id?: number;
+  tag_ids?: number[];
+  location?: string;
+  is_publish?: boolean;
+  is_top?: boolean;
+  is_essence?: boolean;
+  is_outdated?: boolean;
+  start_time?: string;
+  end_time?: string;
+}

@@ -38,7 +38,7 @@ func NewAtomController(articleService *service.ArticleService, config *config.Co
 //	@Success		200	{string}	string	"Atom XML 订阅内容"
 //	@Router			/atom.xml [get]
 func (c *AtomController) GetAtomFeed(ctx *gin.Context) {
-	req := &dto.ListArticlesRequest{
+	req := &dto.ListArticlesForWebRequest{
 		Page:     1,
 		PageSize: 0,
 	}

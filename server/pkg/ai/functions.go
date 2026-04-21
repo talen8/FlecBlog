@@ -16,14 +16,6 @@ const (
 	defaultTitlePrompt     = "你是一位资深技术作者，请根据文章内容生成1个中文标题。要求：1. 突出主题亮点和核心价值；2. 控制在15到25字之间；3. 尽量不用标点符号；4. 只返回标题本身，不要解释。"
 )
 
-// truncateContent 截断内容到指定长度
-func truncateContent(content string, maxLength int) string {
-	if len(content) > maxLength {
-		return content[:maxLength] + "\n\n... (内容已截断)"
-	}
-	return content
-}
-
 func resolvePrompt(customPrompt, defaultPrompt string) string {
 	if strings.TrimSpace(customPrompt) != "" {
 		return strings.TrimSpace(customPrompt)

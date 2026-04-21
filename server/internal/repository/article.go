@@ -212,15 +212,75 @@ func (r *ArticleRepository) CountByTag(tagID uint, onlyPublished bool) (int64, e
 // ============ 基础CRUD ============
 
 // List 获取文章列表
-func (r *ArticleRepository) List(offset, limit int) ([]model.Article, int64, error) {
+func (r *ArticleRepository) List(
+	offset, limit int,
+	keyword, location string,
+	categoryID uint,
+	tagIDs []uint,
+	isPublish, isTop, isEssence, isOutdated *bool,
+	startTime, endTime string,
+) ([]model.Article, int64, error) {
 	var articles []model.Article
 	var total int64
 
-	if err := r.db.Model(&model.Article{}).Count(&total).Error; err != nil {
+	query := r.db.Model(&model.Article{})
+
+	// 关键词搜索（标题或内容）
+	if keyword != "" {
+		searchKeyword := "%" + keyword + "%"
+		query = query.Where("title ILIKE ? OR content ILIKE ?", searchKeyword, searchKeyword)
+	}
+
+	// 按发布地点筛选
+	if location != "" {
+		query = query.Where("location ILIKE ?", "%"+location+"%")
+	}
+
+	// 按分类筛选
+	if categoryID > 0 {
+		query = query.Where("category_id = ?", categoryID)
+	}
+
+	// 按标签筛选
+	if len(tagIDs) > 0 {
+		query = query.Joins("JOIN article_tags ON article_tags.article_id = articles.id").
+			Where("article_tags.tag_id IN ?", tagIDs).
+			Distinct()
+	}
+
+	// 按发布状态筛选
+	if isPublish != nil {
+		query = query.Where("is_publish = ?", *isPublish)
+	}
+
+	// 按置顶状态筛选
+	if isTop != nil {
+		query = query.Where("is_top = ?", *isTop)
+	}
+
+	// 按精选状态筛选
+	if isEssence != nil {
+		query = query.Where("is_essence = ?", *isEssence)
+	}
+
+	// 按过时状态筛选
+	if isOutdated != nil {
+		query = query.Where("is_outdated = ?", *isOutdated)
+	}
+
+	// 按发布时间范围筛选
+	if startTime != "" {
+		query = query.Where("publish_time >= ?", startTime)
+	}
+	if endTime != "" {
+		query = query.Where("publish_time <= ?", endTime)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := r.db.Order("is_publish ASC, publish_time DESC NULLS LAST, created_at DESC").
+	if err := query.Order("is_publish ASC, publish_time DESC NULLS LAST, created_at DESC").
 		Preload("Category").
 		Preload("Tags").
 		Offset(offset).
