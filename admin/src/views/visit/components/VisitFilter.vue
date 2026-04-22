@@ -1,6 +1,6 @@
 <template>
   <filter-panel v-model="filterForm" title="筛选条件" @reset="handleReset" @close="$emit('close')">
-    <el-col :span="3">
+    <el-col :span="5">
       <el-form-item label="页面URL">
         <el-input v-model="filterForm.keyword" placeholder="搜索页面URL" clearable>
           <template #prefix>
@@ -10,7 +10,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="3">
+    <el-col :span="5">
       <el-form-item label="访客ID">
         <el-input v-model="filterForm.visitor_id" placeholder="输入访客ID" clearable>
           <template #prefix>
@@ -20,7 +20,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="3">
+    <el-col :span="5">
       <el-form-item label="IP地址">
         <el-input v-model="filterForm.ip" placeholder="输入IP地址" clearable>
           <template #prefix>
@@ -30,7 +30,17 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="3">
+    <el-col :span="9">
+      <el-form-item label="排除IP">
+        <el-input v-model="filterForm.exclude_ips" placeholder="多个IP用逗号分隔" clearable>
+          <template #prefix>
+            <el-icon><CircleClose /></el-icon>
+          </template>
+        </el-input>
+      </el-form-item>
+    </el-col>
+
+    <el-col :span="5">
       <el-form-item label="地理位置">
         <el-input v-model="filterForm.location" placeholder="搜索地理位置" clearable>
           <template #prefix>
@@ -40,7 +50,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="3">
+    <el-col :span="5">
       <el-form-item label="浏览器">
         <el-input v-model="filterForm.browser" placeholder="搜索浏览器" clearable>
           <template #prefix>
@@ -50,7 +60,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="3">
+    <el-col :span="5">
       <el-form-item label="操作系统">
         <el-input v-model="filterForm.os" placeholder="搜索操作系统" clearable>
           <template #prefix>
@@ -60,7 +70,7 @@
       </el-form-item>
     </el-col>
 
-    <el-col :span="6">
+    <el-col :span="9">
       <el-form-item label="访问时间">
         <el-date-picker
           v-model="dateRange"
@@ -79,7 +89,15 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import { Search, User, Connection, Location, Monitor, Platform } from '@element-plus/icons-vue';
+import {
+  Search,
+  User,
+  Connection,
+  Location,
+  Monitor,
+  Platform,
+  CircleClose,
+} from '@element-plus/icons-vue';
 import FilterPanel from '@/components/common/FilterPanel.vue';
 import type { VisitListQuery } from '@/types/stats';
 

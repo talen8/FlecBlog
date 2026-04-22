@@ -141,6 +141,7 @@ const activeFilterCount = computed(() => {
   if (queryParams.value.keyword) count++;
   if (queryParams.value.visitor_id) count++;
   if (queryParams.value.ip) count++;
+  if (queryParams.value.exclude_ips) count++;
   if (queryParams.value.location) count++;
   if (queryParams.value.browser) count++;
   if (queryParams.value.os) count++;

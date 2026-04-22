@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"strings"
 	"time"
 
 	"flec_blog/internal/dto"
@@ -425,6 +426,18 @@ func (r *StatsRepository) GetVisitLogs(req *dto.GetVisitLogsRequest) ([]model.Vi
 	// IP地址筛选
 	if req.IP != "" {
 		query = query.Where("ip ILIKE ?", "%"+req.IP+"%")
+	}
+
+	// 排除IP地址筛选（支持多个IP，用逗号分隔）
+	if req.ExcludeIPs != "" {
+		// 解析逗号分隔的IP列表
+		ips := strings.Split(req.ExcludeIPs, ",")
+		for _, ip := range ips {
+			ip = strings.TrimSpace(ip)
+			if ip != "" {
+				query = query.Where("ip NOT ILIKE ?", "%"+ip+"%")
+			}
+		}
 	}
 
 	// 地理位置筛选

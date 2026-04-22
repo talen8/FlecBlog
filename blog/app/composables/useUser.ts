@@ -14,34 +14,32 @@ export const useUser = () => {
   const fetchUserInfo = async () => {
     if (!isLoggedIn.value) {
       userInfo.value = null;
+      localStorage.removeItem('user_role');
       return;
     }
 
     try {
       const data = await getUserProfile();
       userInfo.value = data;
+      localStorage.setItem('user_role', data.role);
     } catch (error) {
       console.error('获取用户信息失败:', error);
       userInfo.value = null;
+      localStorage.removeItem('user_role');
     }
   };
 
   // 清除用户信息
   const clearUserInfo = () => {
     userInfo.value = null;
+    localStorage.removeItem('user_role');
   };
-
-  // 计算属性
-  const userAvatar = computed(() => getAvatarUrl(userInfo.value || {}));
-
-  const userNickname = computed(() => userInfo.value?.nickname || '用户');
-  const userEmail = computed(() => userInfo.value?.email || '');
 
   return {
     userInfo,
-    userAvatar,
-    userNickname,
-    userEmail,
+    userAvatar: computed(() => getAvatarUrl(userInfo.value || {})),
+    userNickname: computed(() => userInfo.value?.nickname || '用户'),
+    userEmail: computed(() => userInfo.value?.email || ''),
     fetchUserInfo,
     clearUserInfo,
   };

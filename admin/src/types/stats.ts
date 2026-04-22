@@ -76,6 +76,7 @@ export interface VisitListQuery {
   keyword?: string;
   visitor_id?: string;
   ip?: string;
+  exclude_ips?: string;
   location?: string;
   browser?: string;
   os?: string;

@@ -20,14 +20,32 @@ declare module '#app' {
 }
 
 export default defineNuxtPlugin({
-  parallel: true, // 并行加载，不阻塞其他插件
+  parallel: true,
   setup() {
     const router = useRouter();
     const endpoint = `${useRuntimeConfig().public.apiUrl}/collect`;
+    const { userInfo } = useUser();
 
     let pageStartTime = Date.now();
     let lastPageUrl = location.pathname + location.search;
     let currentArticleId: number | undefined;
+
+    // 检查是否为超级管理员
+    const isSuperAdmin = () => {
+      // 优先从响应式状态读取
+      if (userInfo.value?.role) {
+        return userInfo.value.role === 'super_admin';
+      }
+      // 页面刷新时从 localStorage 读取
+      try {
+        return (
+          localStorage.getItem('user_role') === 'super_admin' &&
+          !!localStorage.getItem('access_token')
+        );
+      } catch {
+        return false;
+      }
+    };
 
     const getBaseData = (url?: string, articleId?: number) => ({
       url: url || location.pathname + location.search,
@@ -46,14 +64,10 @@ export default defineNuxtPlugin({
       url?: string,
       articleId?: number
     ) => {
-      const payload = {
-        ...getBaseData(url, articleId),
-        type,
-        ...extra,
-      };
-      const blob = new Blob([JSON.stringify(payload)], {
-        type: 'application/json',
-      });
+      if (isSuperAdmin()) return;
+
+      const payload = { ...getBaseData(url, articleId), type, ...extra };
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
       if (navigator.sendBeacon) {
         navigator.sendBeacon(endpoint, blob);
       } else {
