@@ -15,7 +15,14 @@ export interface FileInfo {
 export interface FileListQuery {
   page?: number;
   page_size?: number;
-  type?: string;
+  keyword?: string;
+  file_type?: string;
+  status?: number;
+  upload_type?: string;
+  min_size?: number;
+  max_size?: number;
+  start_time?: string;
+  end_time?: string;
 }
 
 // 文件列表响应

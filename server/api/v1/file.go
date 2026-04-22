@@ -138,9 +138,16 @@ func (ctrl *FileController) Upload(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
+//	@Param			keyword		query		string	false	"关键词搜索（文件名）"
+//	@Param			file_type	query		string	false	"文件类型（image/video/audio/document等）"
+//	@Param			status		query		int		false	"状态（0=未使用 1=使用中）"
+//	@Param			upload_type	query		string	false	"上传类型/用途"
+//	@Param			min_size	query		int		false	"最小文件大小（字节）"
+//	@Param			max_size	query		int		false	"最大文件大小（字节）"
+//	@Param			start_time	query		string	false	"开始时间"
+//	@Param			end_time	query		string	false	"结束时间"
 //	@Param			page		query		int		false	"页码"	default(1)
 //	@Param			page_size	query		int		false	"每页数量"	default(20)
-//	@Param			type		query		string	false	"文件类型筛选"
 //	@Success		200			{object}	response.Response
 //	@Failure		401			{object}	response.Response
 //	@Failure		403			{object}	response.Response

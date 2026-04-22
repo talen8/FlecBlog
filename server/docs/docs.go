@@ -1679,6 +1679,54 @@ const docTemplate = `{
                 "summary": "文件列表",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "关键词搜索（文件名）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "文件类型（image/video/audio/document等）",
+                        "name": "file_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态（0=未使用 1=使用中）",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "上传类型/用途",
+                        "name": "upload_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "最小文件大小（字节）",
+                        "name": "min_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "最大文件大小（字节）",
+                        "name": "max_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间",
+                        "name": "end_time",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "default": 1,
                         "description": "页码",
@@ -1690,12 +1738,6 @@ const docTemplate = `{
                         "default": 20,
                         "description": "每页数量",
                         "name": "page_size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "文件类型筛选",
-                        "name": "type",
                         "in": "query"
                     }
                 ],
@@ -3551,6 +3593,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/stats/browsers": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取访问日志中所有不同的浏览器列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计管理"
+                ],
+                "summary": "浏览器列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/admin/stats/category": {
             "get": {
                 "security": [
@@ -3693,6 +3778,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/stats/os": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取访问日志中所有不同的操作系统列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计管理"
+                ],
+                "summary": "操作系统列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/admin/stats/tag": {
             "get": {
                 "security": [
@@ -3816,7 +3944,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取访问日志列表，支持分页查询",
+                "description": "获取访问日志列表，支持分页和多种筛选条件",
                 "consumes": [
                     "application/json"
                 ],
@@ -3843,6 +3971,54 @@ const docTemplate = `{
                         "default": 20,
                         "description": "每页数量",
                         "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜索关键词（页面URL）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "访客ID",
+                        "name": "visitor_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "IP地址",
+                        "name": "ip",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "地理位置",
+                        "name": "location",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "浏览器",
+                        "name": "browser",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "操作系统",
+                        "name": "os",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间（格式：2006-01-02）",
+                        "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间（格式：2006-01-02）",
+                        "name": "end_time",
                         "in": "query"
                     }
                 ],

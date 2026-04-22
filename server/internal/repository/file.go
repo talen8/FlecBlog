@@ -62,12 +62,49 @@ func (r *FileRepository) List(offset, limit int) ([]model.File, int64, error) {
 	return files, total, nil
 }
 
-// GetByUploadType 根据上传类型获取文件列表
-func (r *FileRepository) GetByUploadType(uploadType string, offset, limit int) ([]model.File, int64, error) {
+// FileListFilter 文件列表筛选条件
+type FileListFilter struct {
+	Keyword    string
+	FileType   string
+	Status     *int
+	UploadType string
+	MinSize    int64
+	MaxSize    int64
+	StartTime  string
+	EndTime    string
+}
+
+// GetByFilter 根据筛选条件获取文件列表
+func (r *FileRepository) GetByFilter(filter *FileListFilter, offset, limit int) ([]model.File, int64, error) {
 	var files []model.File
 	var total int64
 
-	query := r.db.Model(&model.File{}).Where("upload_type = ?", uploadType)
+	query := r.db.Model(&model.File{})
+
+	if filter.Keyword != "" {
+		query = query.Where("file_name LIKE ? OR original_name LIKE ?", "%"+filter.Keyword+"%", "%"+filter.Keyword+"%")
+	}
+	if filter.FileType != "" {
+		query = query.Where("file_type LIKE ?", filter.FileType+"%")
+	}
+	if filter.Status != nil {
+		query = query.Where("status = ?", *filter.Status)
+	}
+	if filter.UploadType != "" {
+		query = query.Where("upload_type = ?", filter.UploadType)
+	}
+	if filter.MinSize > 0 {
+		query = query.Where("file_size >= ?", filter.MinSize)
+	}
+	if filter.MaxSize > 0 {
+		query = query.Where("file_size <= ?", filter.MaxSize)
+	}
+	if filter.StartTime != "" {
+		query = query.Where("created_at >= ?", filter.StartTime)
+	}
+	if filter.EndTime != "" {
+		query = query.Where("created_at <= ?", filter.EndTime+" 23:59:59")
+	}
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err

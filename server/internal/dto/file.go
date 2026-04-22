@@ -24,9 +24,16 @@ type FileUploadForWebResponse struct {
 
 // ListFilesRequest 文件列表请求
 type ListFilesRequest struct {
-	Type     string `form:"type"`
-	Page     int    `form:"page,default=1" binding:"min=1"`
-	PageSize int    `form:"page_size,default=20" binding:"min=1,max=100"`
+	Page       int    `form:"page,default=1" binding:"min=1"`
+	PageSize   int    `form:"page_size,default=20" binding:"min=1,max=100"`
+	Keyword    string `form:"keyword"`
+	FileType   string `form:"file_type"`
+	Status     *int   `form:"status"`
+	UploadType string `form:"upload_type"`
+	MinSize    int64  `form:"min_size"`
+	MaxSize    int64  `form:"max_size"`
+	StartTime  string `form:"start_time"`
+	EndTime    string `form:"end_time"`
 }
 
 // ============ 后台文件管理响应 ============
