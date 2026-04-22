@@ -89,8 +89,8 @@ export interface WeChatExportResult {
 
 // 文章列表查询参数
 export interface ArticleListQuery {
-  page: number;
-  page_size: number;
+  page?: number;
+  page_size?: number;
   keyword?: string;
   category_id?: number;
   tag_ids?: number[];

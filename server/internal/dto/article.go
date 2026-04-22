@@ -49,7 +49,7 @@ type ArticleDetailResponse struct {
 // ListArticlesForWebRequest 前台文章列表请求
 type ListArticlesForWebRequest struct {
 	Page     int    `form:"page,default=1" binding:"min=0"`
-	PageSize int    `form:"page_size,default:10" binding:"min=0"`
+	PageSize int    `form:"page_size,default=10" binding:"min=0"`
 	Year     string `form:"year"`
 	Month    string `form:"month"`
 	Category string `form:"category"`
