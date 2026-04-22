@@ -2,7 +2,8 @@
   <el-dialog
     v-model="visible"
     :title="isEdit ? '编辑菜单' : '新增菜单'"
-    width="600px"
+    width="90%"
+    style="max-width: 600px"
     :close-on-click-modal="false"
     @close="handleClose"
   >

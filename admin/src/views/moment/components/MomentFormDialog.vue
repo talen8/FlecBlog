@@ -2,7 +2,8 @@
   <el-dialog
     v-model="visible"
     :title="dialogTitle"
-    width="800px"
+    width="90%"
+    style="max-width: 800px"
     :close-on-click-modal="false"
     top="8vh"
   >
@@ -213,7 +214,7 @@
   </el-dialog>
 
   <!-- 链接Dialog -->
-  <el-dialog v-model="linkDialogVisible" title="网站分享" width="400px">
+  <el-dialog v-model="linkDialogVisible" title="网站分享" width="90%" style="max-width: 400px">
     <div class="link-form">
       <div style="display: flex; gap: 8px; margin-bottom: 12px">
         <el-input
@@ -245,7 +246,7 @@
   </el-dialog>
 
   <!-- 图片Dialog -->
-  <el-dialog v-model="imageDialogVisible" title="动态配图" width="400px">
+  <el-dialog v-model="imageDialogVisible" title="动态配图" width="90%" style="max-width: 400px">
     <div class="image-form">
       <div style="display: flex; gap: 8px; margin-bottom: 16px">
         <el-input
@@ -270,7 +271,7 @@
   </el-dialog>
 
   <!-- 音乐Dialog -->
-  <el-dialog v-model="musicDialogVisible" title="动态音乐" width="400px">
+  <el-dialog v-model="musicDialogVisible" title="动态音乐" width="90%" style="max-width: 400px">
     <div class="music-form">
       <el-select
         v-model="formData.content.music!.server"
@@ -343,7 +344,7 @@
   </el-dialog>
 
   <!-- 视频Dialog -->
-  <el-dialog v-model="videoDialogVisible" title="动态视频" width="400px">
+  <el-dialog v-model="videoDialogVisible" title="动态视频" width="90%" style="max-width: 400px">
     <div class="video-form">
       <div style="display: flex; gap: 8px">
         <!-- 未添加视频时：显示输入框和解析/上传按钮 -->
@@ -383,7 +384,7 @@
   </el-dialog>
 
   <!-- 标签Dialog -->
-  <el-dialog v-model="tagDialogVisible" title="分类标签" width="400px">
+  <el-dialog v-model="tagDialogVisible" title="分类标签" width="90%" style="max-width: 400px">
     <div class="tags-form">
       <el-input
         v-model="formData.content.tags"
@@ -398,7 +399,7 @@
   </el-dialog>
 
   <!-- 位置Dialog -->
-  <el-dialog v-model="locationDialogVisible" title="发布位置" width="400px">
+  <el-dialog v-model="locationDialogVisible" title="发布位置" width="90%" style="max-width: 400px">
     <div class="location-form">
       <el-input
         v-model="formData.content.location"
@@ -413,7 +414,7 @@
   </el-dialog>
 
   <!-- 时间Dialog -->
-  <el-dialog v-model="timeDialogVisible" title="发布时间" width="400px">
+  <el-dialog v-model="timeDialogVisible" title="发布时间" width="90%" style="max-width: 400px">
     <div class="time-form">
       <el-date-picker
         v-model="publishTime"
@@ -1155,6 +1156,11 @@ const handleSubmit = async () => {
     padding-top: 16px;
     border-top: 1px solid #f0f0f0;
 
+    .el-button {
+      justify-content: center;
+      margin-left: 0;
+    }
+
     .el-button.active {
       color: var(--el-color-primary);
     }
@@ -1162,6 +1168,17 @@ const handleSubmit = async () => {
     .publish-status {
       display: flex;
       align-items: center;
+    }
+
+    // 移动端适配：两行两列布局
+    @media screen and (max-width: 600px) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+
+      .publish-status {
+        justify-content: center;
+      }
     }
   }
 }
@@ -1203,6 +1220,10 @@ const handleSubmit = async () => {
       color: #c0c4cc;
       text-align: center;
     }
+  }
+
+  .el-button {
+    margin-left: 0;
   }
 }
 

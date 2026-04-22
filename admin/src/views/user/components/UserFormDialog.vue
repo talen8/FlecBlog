@@ -1,5 +1,11 @@
 <template>
-  <el-dialog v-model="visible" :title="dialogTitle" width="600px" :close-on-click-modal="false">
+  <el-dialog
+    v-model="visible"
+    :title="dialogTitle"
+    width="90%"
+    style="max-width: 600px"
+    :close-on-click-modal="false"
+  >
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
       <el-form-item label="邮箱" prop="email">
         <el-input v-model="formData.email" placeholder="请输入用户邮箱" clearable />

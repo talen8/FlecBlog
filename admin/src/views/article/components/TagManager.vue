@@ -1,16 +1,22 @@
 <template>
-  <el-dialog v-model="visible" title="标签管理" width="800px" :align-center="true">
+  <el-dialog
+    v-model="visible"
+    title="标签管理"
+    width="90%"
+    style="max-width: 600px"
+    :align-center="true"
+  >
     <el-table v-loading="loading" :data="list" style="margin: 20px 0" max-height="350">
-      <el-table-column prop="name" label="标签名称" />
-      <el-table-column prop="description" label="描述" show-overflow-tooltip />
-      <el-table-column prop="count" label="文章数" width="100" align="center" />
-      <el-table-column label="操作" width="120" align="center">
+      <el-table-column prop="name" label="标签名称" min-width="100" show-overflow-tooltip />
+      <el-table-column prop="description" label="描述" min-width="120" show-overflow-tooltip />
+      <el-table-column prop="count" label="文章数" width="80" align="center" />
+      <el-table-column label="操作" width="100" align="center" fixed="right">
         <template #header>
           <el-button type="primary" plain size="small" @click="openForm()">新增</el-button>
         </template>
         <template #default="{ row }">
-          <el-button type="primary" link @click="openForm(row)">编辑</el-button>
-          <el-button type="danger" link @click="remove(row)">删除</el-button>
+          <el-button type="primary" link size="small" @click="openForm(row)">编辑</el-button>
+          <el-button type="danger" link size="small" @click="remove(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -18,7 +24,8 @@
     <el-dialog
       v-model="formVisible"
       :title="current.id ? '编辑' : '新增'"
-      width="400px"
+      width="90%"
+      style="max-width: 400px"
       append-to-body
     >
       <el-form :model="current" label-width="80px">

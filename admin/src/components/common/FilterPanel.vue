@@ -1,6 +1,7 @@
 <template>
   <div class="filter-panel">
-    <el-card class="filter-card" shadow="never">
+    <!-- 桌面端：使用卡片形式 -->
+    <el-card v-if="!isMobile" class="filter-card" shadow="never">
       <div class="filter-header">
         <span class="filter-title">
           <el-icon><Filter /></el-icon>
@@ -24,11 +25,41 @@
         </el-row>
       </el-form>
     </el-card>
+
+    <!-- 移动端：使用 Dialog 形式 -->
+    <el-dialog
+      v-else
+      :model-value="true"
+      :title="title"
+      width="90%"
+      style="max-width: 350px"
+      :close-on-click-modal="true"
+      :show-close="false"
+      class="filter-dialog"
+      append-to-body
+      destroy-on-close
+      align-center
+      @close="handleClose"
+    >
+      <div class="dialog-content" @click.stop>
+        <el-form :model="formData" label-position="top" size="small">
+          <div class="mobile-form-items">
+            <slot />
+          </div>
+        </el-form>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="handleReset">重置</el-button>
+          <el-button type="primary" size="small" @click="handleClose">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { Filter, Refresh, Close } from '@element-plus/icons-vue';
 
 /**
@@ -56,6 +87,20 @@ const emit = defineEmits<{
 }>();
 
 const formData = ref<Record<string, unknown>>({ ...props.modelValue });
+const isMobile = ref(false);
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 600;
+};
+
+onMounted(() => {
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile);
+});
 
 watch(
   () => props.modelValue,
@@ -120,9 +165,72 @@ const handleClose = () => {
   }
 }
 
+.filter-dialog {
+  :deep(.el-dialog) {
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 12px 16px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .dialog-content {
+    max-height: calc(80vh - 140px);
+    overflow-y: auto;
+
+    :deep(.el-form-item) {
+      margin-bottom: 12px;
+    }
+
+    :deep(.el-form-item__label) {
+      font-size: 12px;
+      padding-bottom: 4px;
+    }
+
+    :deep(.el-col) {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 0 0 100% !important;
+    }
+  }
+
+  .mobile-form-items {
+    :deep(.el-col) {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 0 0 100% !important;
+    }
+
+    :deep(.el-select) {
+      width: 100% !important;
+    }
+
+    :deep(.el-date-editor) {
+      width: 100% !important;
+    }
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+
+    .el-button {
+      margin-left: 0;
+    }
+  }
+}
+
 // 移动端适配
 @media (max-width: 767px) {
   .filter-panel {
+    margin-bottom: 0;
+
     .filter-card {
       :deep(.el-card__body) {
         padding: 12px;

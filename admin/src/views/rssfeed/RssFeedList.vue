@@ -125,9 +125,16 @@
   </div>
 
   <!-- 本站订阅弹窗 -->
-  <el-dialog v-model="subscriberDialogVisible" title="本站订阅者" width="700px" destroy-on-close>
-    <el-table :data="subscriberList" v-loading="subscriberLoading" border style="width: 100%">
-      <el-table-column label="邮箱地址" min-width="240">
+  <el-dialog
+    v-model="subscriberDialogVisible"
+    title="本站订阅者"
+    width="90%"
+    style="max-width: 700px"
+    :align-center="true"
+    destroy-on-close
+  >
+    <el-table :data="subscriberList" v-loading="subscriberLoading" style="width: 100%">
+      <el-table-column label="邮箱地址" min-width="160">
         <template #default="{ row }">
           <div style="display: flex; align-items: center; gap: 8px">
             <el-icon size="16" color="#409eff">
@@ -137,19 +144,19 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="100" align="center">
+      <el-table-column label="状态" width="80" align="center">
         <template #default="{ row }">
           <el-tag :type="row.active ? 'success' : 'info'" size="small">
             {{ row.active ? '活跃' : '已退订' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="订阅时间" width="170" align="center">
+      <el-table-column label="订阅时间" width="100" align="center">
         <template #default="{ row }">
           {{ formatDateTime(row.created_at) }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="80" align="center">
+      <el-table-column label="操作" width="80" align="center" fixed="right">
         <template #default="{ row }">
           <el-button type="danger" link size="small" @click="handleDeleteSubscriber(row.id)">
             删除

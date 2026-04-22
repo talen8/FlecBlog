@@ -1,23 +1,29 @@
 <template>
-  <el-dialog v-model="visible" title="友链类型管理" width="550px" :align-center="true">
+  <el-dialog
+    v-model="visible"
+    title="友链类型管理"
+    width="90%"
+    style="max-width: 600px"
+    :align-center="true"
+  >
     <el-table v-loading="loading" :data="list" style="margin: 20px 0" max-height="350">
-      <el-table-column prop="name" label="类型名称" min-width="60" />
+      <el-table-column prop="name" label="类型名称" min-width="80" show-overflow-tooltip />
       <el-table-column prop="sort" label="排序" width="60" align="center" />
-      <el-table-column prop="is_visible" label="展示" width="100" align="center">
+      <el-table-column prop="is_visible" label="展示" width="80" align="center">
         <template #default="{ row }">
           <el-tag :type="row.is_visible ? 'success' : 'info'" size="small">
             {{ row.is_visible ? '展示' : '隐藏' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="count" label="友链数" width="100" align="center" />
-      <el-table-column label="操作" width="150" align="center">
+      <el-table-column prop="count" label="友链数" width="80" align="center" />
+      <el-table-column label="操作" width="100" align="center" fixed="right">
         <template #header>
           <el-button type="primary" plain size="small" @click="openForm()">新增</el-button>
         </template>
         <template #default="{ row }">
-          <el-button type="primary" link @click="openForm(row)">编辑</el-button>
-          <el-button type="danger" link @click="remove(row)">删除</el-button>
+          <el-button type="primary" link size="small" @click="openForm(row)">编辑</el-button>
+          <el-button type="danger" link size="small" @click="remove(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -25,7 +31,8 @@
     <el-dialog
       v-model="formVisible"
       :title="current.id ? '编辑类型' : '新增类型'"
-      width="450px"
+      width="90%"
+      style="max-width: 400px"
       append-to-body
     >
       <el-form :model="current" label-width="80px">
@@ -38,12 +45,12 @@
           />
         </el-form-item>
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="排序">
               <el-input-number v-model="current.sort" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="展示">
               <el-switch v-model="current.is_visible" active-text="展示" inactive-text="隐藏" />
             </el-form-item>

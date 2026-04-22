@@ -1,123 +1,137 @@
 <template>
-  <el-dialog v-model="visible" :title="dialogTitle" width="600px" :close-on-click-modal="false">
-    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
-      <el-form-item label="友链名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入友链名称" clearable />
-      </el-form-item>
+  <el-dialog
+    v-model="visible"
+    :title="dialogTitle"
+    width="90%"
+    style="max-width: 600px"
+    :close-on-click-modal="false"
+    align-center
+    class="friend-form-dialog"
+  >
+    <div class="dialog-scroll-content">
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
+        <el-form-item label="友链名称" prop="name">
+          <el-input v-model="formData.name" placeholder="请输入友链名称" clearable />
+        </el-form-item>
 
-      <el-form-item label="链接地址" prop="url">
-        <el-input
-          v-model="formData.url"
-          placeholder="请输入链接地址，如：https://example.com"
-          clearable
-        >
-          <template #append>
-            <el-button
-              type="primary"
-              @click="handleParseLink"
-              :disabled="!formData.url || parseLoading"
-            >
-              {{ parseLoading ? '解析中...' : '解析' }}
-            </el-button>
-          </template>
-        </el-input>
-      </el-form-item>
-
-      <el-form-item label="友链描述" prop="description">
-        <el-input
-          v-model="formData.description"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入友链描述"
-          clearable
-        />
-      </el-form-item>
-
-      <el-form-item label="RSS地址" prop="rss_url">
-        <el-input
-          v-model="formData.rss_url"
-          placeholder="请输入RSS订阅地址，如：https://example.com/feed"
-          clearable
-        />
-      </el-form-item>
-
-      <el-row :gutter="20">
-        <el-col :span="9">
-          <el-form-item label="友链头像" prop="avatar">
-            <ImageUploader
-              ref="avatarUploaderRef"
-              v-model="formData.avatar"
-              upload-type="友情链接A"
-              width="120px"
-              height="120px"
-            />
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="15">
-          <el-form-item label="网站截图" prop="screenshot">
-            <ImageUploader
-              ref="screenshotUploaderRef"
-              v-model="formData.screenshot"
-              upload-type="友情链接S"
-              width="213px"
-              height="120px"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="友链类型" prop="type_id">
-            <el-select v-model="formData.type_id" placeholder="请选择友链类型" style="width: 100%">
-              <el-option
-                v-for="type in friendTypeOptions"
-                :key="type.id"
-                :label="type.name"
-                :value="type.id"
+        <el-form-item label="链接地址" prop="url">
+          <el-input
+            v-model="formData.url"
+            placeholder="请输入链接地址，如：https://example.com"
+            clearable
+          >
+            <template #append>
+              <el-button
+                type="primary"
+                @click="handleParseLink"
+                :disabled="!formData.url || parseLoading"
               >
-                <span>{{ type.name }}</span>
-                <el-tag v-if="!type.is_visible" size="small" type="info" style="margin-left: 8px"
-                  >已隐藏</el-tag
+                {{ parseLoading ? '解析中...' : '解析' }}
+              </el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item label="友链描述" prop="description">
+          <el-input
+            v-model="formData.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入友链描述"
+            clearable
+          />
+        </el-form-item>
+
+        <el-form-item label="RSS地址" prop="rss_url">
+          <el-input
+            v-model="formData.rss_url"
+            placeholder="请输入RSS订阅地址，如：https://example.com/feed"
+            clearable
+          />
+        </el-form-item>
+
+        <el-row :gutter="20">
+          <el-col :span="9">
+            <el-form-item label="友链头像" prop="avatar">
+              <ImageUploader
+                ref="avatarUploaderRef"
+                v-model="formData.avatar"
+                upload-type="友情链接A"
+                width="120px"
+                height="120px"
+              />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="15">
+            <el-form-item label="网站截图" prop="screenshot">
+              <ImageUploader
+                ref="screenshotUploaderRef"
+                v-model="formData.screenshot"
+                upload-type="友情链接S"
+                width="213px"
+                height="120px"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="友链类型" prop="type_id">
+              <el-select
+                v-model="formData.type_id"
+                placeholder="请选择友链类型"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="type in friendTypeOptions"
+                  :key="type.id"
+                  :label="type.name"
+                  :value="type.id"
                 >
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-col>
+                  <span>{{ type.name }}</span>
+                  <el-tag v-if="!type.is_visible" size="small" type="info" style="margin-left: 8px"
+                    >已隐藏</el-tag
+                  >
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
 
-        <el-col :span="12">
-          <el-form-item label="排序值" prop="sort">
-            <el-input-number
-              v-model="formData.sort"
-              :min="1"
-              :max="10"
-              placeholder="排序值，范围1-10，数值越大排序越靠前"
-              style="width: 100%"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
+          <el-col :span="12">
+            <el-form-item label="排序值" prop="sort">
+              <el-input-number
+                v-model="formData.sort"
+                :min="1"
+                :max="10"
+                placeholder="排序值，范围1-10，数值越大排序越靠前"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-      <!-- 只有编辑时才显示状态控制 -->
-      <el-row v-if="isEdit" :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="已失效">
-            <el-switch v-model="formData.is_invalid" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="待审核">
-            <el-switch v-model="formData.is_pending" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="忽略检查">
-            <el-switch v-model="formData.ignoreCheck" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-    </el-form>
+        <!-- 只有编辑时才显示状态控制 -->
+        <el-row v-if="isEdit" :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="已失效">
+              <el-switch v-model="formData.is_invalid" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="待审核">
+              <el-switch v-model="formData.is_pending" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="忽略检查">
+              <el-switch v-model="formData.ignoreCheck" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+    </div>
 
     <template #footer>
       <span class="dialog-footer">
@@ -456,3 +470,31 @@ const handleSubmit = async () => {
   }
 };
 </script>
+
+<style scoped lang="scss">
+.friend-form-dialog {
+  :deep(.el-dialog) {
+    max-height: 80vh;
+  }
+
+  .dialog-scroll-content {
+    max-height: calc(80vh - 140px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  :deep(.el-row) {
+    display: flex;
+    flex-direction: column;
+
+    .el-col {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 0 0 100% !important;
+    }
+  }
+}
+</style>
