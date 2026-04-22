@@ -33,7 +33,8 @@
             v-model="quickFilters.keyword"
             placeholder="搜索关键词"
             clearable
-            style="width: 180px; margin-right: 8px"
+            class="quick-filter-900"
+            style="width: 180px"
             @keyup.enter="handleQuickFilterChange"
           >
             <template #prefix>
@@ -44,7 +45,8 @@
             v-model="quickFilters.is_publish"
             placeholder="发布状态"
             clearable
-            style="width: 110px; margin-right: 12px"
+            class="quick-filter-769"
+            style="width: 110px"
             @change="handleQuickFilterChange"
           >
             <el-option label="已发布" :value="true" />

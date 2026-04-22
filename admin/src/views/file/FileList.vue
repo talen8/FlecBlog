@@ -30,7 +30,8 @@
             v-model="quickFilters.file_type"
             placeholder="全部类型"
             clearable
-            style="width: 120px; margin-right: 8px"
+            class="quick-filter-769"
+            style="width: 120px"
             @change="handleQuickFilterChange"
           >
             <el-option label="图片" value="image" />
@@ -42,7 +43,8 @@
             v-model="quickFilters.status"
             placeholder="使用状态"
             clearable
-            style="width: 100px; margin-right: 12px"
+            class="quick-filter-769"
+            style="width: 100px"
             @change="handleQuickFilterChange"
           >
             <el-option label="使用中" :value="1" />

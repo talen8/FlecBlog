@@ -33,7 +33,8 @@
             v-model="quickFilters.role"
             placeholder="全部角色"
             clearable
-            style="width: 130px; margin-right: 8px"
+            class="quick-filter-769"
+            style="width: 130px"
             @change="handleQuickFilterChange"
           >
             <el-option label="超级管理员" value="super_admin" />
@@ -45,7 +46,8 @@
             v-model="quickFilters.is_enabled"
             placeholder="启用状态"
             clearable
-            style="width: 110px; margin-right: 12px"
+            class="quick-filter-840"
+            style="width: 110px"
             @change="handleQuickFilterChange"
           >
             <el-option label="启用" :value="true" />

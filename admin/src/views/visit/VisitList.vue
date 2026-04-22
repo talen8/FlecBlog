@@ -1,5 +1,6 @@
 <template>
   <div class="visit-list-page">
+    <!-- 筛选控制台 -->
     <transition name="filter-slide">
       <visit-filter
         v-if="showFilter"
@@ -24,6 +25,24 @@
       @update:page="fetchVisits"
       @update:pageSize="fetchVisits"
     >
+      <!-- 快速筛选 -->
+      <template #toolbar-before>
+        <template v-if="!showFilter">
+          <el-input
+            v-model="quickFilters.ip"
+            placeholder="筛选 IP 地址"
+            clearable
+            class="quick-filter-769"
+            style="width: 180px; margin-right: 12px"
+            @keyup.enter="handleQuickFilterChange"
+          >
+            <template #prefix>
+              <el-icon><Connection /></el-icon>
+            </template>
+          </el-input>
+        </template>
+      </template>
+
       <el-table-column label="访客ID" width="150" align="center">
         <template #default="{ row }">
           <el-tooltip :content="row.visitor_id" placement="top">
@@ -75,8 +94,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import { Connection } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
 import VisitFilter from './components/VisitFilter.vue';
 import type { Visit, VisitListQuery } from '@/types/stats';
@@ -87,7 +107,31 @@ const loading = ref(false);
 const visitList = ref<Visit[]>([]);
 const total = ref(0);
 const showFilter = ref(false);
-const queryParams = ref<VisitListQuery>({ page: 1, page_size: 20 });
+const queryParams = ref<VisitListQuery>({
+  page: 1,
+  page_size: 20,
+});
+
+// 快速筛选相关
+const quickFilters = reactive({
+  ip: '',
+});
+
+// 搜索防抖定时器
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+// 监听 IP 变化，实时搜索
+watch(
+  () => quickFilters.ip,
+  newVal => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      queryParams.value.ip = newVal || undefined;
+      queryParams.value.page = 1;
+      fetchVisits();
+    }, 500);
+  }
+);
 
 /**
  * 计算当前激活的筛选项数量
@@ -109,7 +153,29 @@ const activeFilterCount = computed(() => {
  */
 const toggleFilter = () => {
   showFilter.value = !showFilter.value;
+  if (!showFilter.value) {
+    syncQuickFiltersFromQueryParams();
+  }
 };
+
+/**
+ * 从 queryParams 同步筛选条件到快速筛选
+ */
+const syncQuickFiltersFromQueryParams = () => {
+  quickFilters.ip = queryParams.value.ip || '';
+};
+
+/**
+ * 处理快速筛选变化
+ */
+const handleQuickFilterChange = () => {
+  // 将快速筛选条件同步到查询参数
+  queryParams.value.ip = quickFilters.ip || undefined;
+  queryParams.value.page = 1;
+  fetchVisits();
+};
+
+let errorMessageShown = false;
 
 /**
  * 获取访问日志列表
@@ -124,16 +190,27 @@ const fetchVisits = async () => {
     visitList.value = result.list;
     total.value = result.total;
   } catch {
-    ElMessage.error('获取访问日志失败');
+    if (!errorMessageShown) {
+      errorMessageShown = true;
+      ElMessage.error('获取访问日志失败');
+      // 3秒后重置标记，允许再次提示
+      setTimeout(() => {
+        errorMessageShown = false;
+      }, 3000);
+    }
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(fetchVisits);
+onMounted(() => {
+  // 初始化快速筛选值（从 queryParams）
+  syncQuickFiltersFromQueryParams();
+  fetchVisits();
+});
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .visit-list-page {
   height: 100%;
   display: flex;
@@ -141,6 +218,7 @@ onMounted(fetchVisits);
   overflow: hidden;
 }
 
+/* 筛选控制台滑入滑出动画 */
 .filter-slide-enter-active,
 .filter-slide-leave-active {
   transition: all 0.1s linear;

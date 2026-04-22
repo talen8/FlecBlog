@@ -7,8 +7,9 @@
         <div class="actions">
           <!-- 前工具栏 -->
           <slot name="toolbar-before" />
-          <el-button v-if="showCreate" type="primary" @click="$emit('create')">
-            {{ createText }}
+          <el-button v-if="showCreate" type="primary" class="create-btn" @click="$emit('create')">
+            <el-icon class="create-icon"><Plus /></el-icon
+            ><span class="create-text">{{ createText }}</span>
           </el-button>
           <!-- 后工具栏 -->
           <slot name="toolbar-after" />
@@ -65,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { Refresh, Filter } from '@element-plus/icons-vue';
+import { Refresh, Filter, Plus } from '@element-plus/icons-vue';
 
 withDefaults(
   defineProps<{
@@ -150,21 +151,40 @@ defineEmits<{
       }
     }
 
-    @media (max-width: 767px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-
+    @media (max-width: 769px) {
       h2 {
-        font-size: 18px;
+        font-size: 16px;
       }
 
       .actions {
-        width: 100%;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        gap: 8px;
 
         .refresh-btn {
           display: none;
+        }
+      }
+    }
+
+    // 默认显示文字
+    .create-btn {
+      .create-icon {
+        display: none;
+      }
+      // 覆盖 Element Plus 默认样式，消除图标隐藏后的左边距
+      .create-text {
+        margin-left: 0;
+      }
+    }
+
+    // 移动端（≤500px）显示图标，隐藏文字
+    @media (max-width: 500px) {
+      .create-btn {
+        .create-text {
+          display: none;
+        }
+        .create-icon {
+          display: inline-flex;
         }
       }
     }
@@ -184,8 +204,52 @@ defineEmits<{
     justify-content: flex-end;
     padding-top: 12px;
 
-    @media (max-width: 767px) {
-      justify-content: center;
+    @media (max-width: 769px) {
+      :deep(.el-pagination .el-select) {
+        width: 110px;
+      }
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .actions :deep(.quick-filter-1200) {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 1080px) {
+    .actions :deep(.quick-filter-1080) {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .actions :deep(.quick-filter-960) {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .actions :deep(.quick-filter-900) {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 840px) {
+    .actions :deep(.quick-filter-840) {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .actions :deep(.quick-filter-800) {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 769px) {
+    .actions :deep(.quick-filter-769) {
+      display: none !important;
     }
   }
 }

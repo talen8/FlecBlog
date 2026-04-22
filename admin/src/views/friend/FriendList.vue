@@ -33,7 +33,8 @@
             v-model="quickFilters.keyword"
             placeholder="搜索关键词"
             clearable
-            style="width: 160px; margin-right: 8px"
+            class="quick-filter-1080"
+            style="width: 160px"
             @keyup.enter="handleQuickFilterChange"
           >
             <template #prefix>
@@ -44,7 +45,8 @@
             v-model="quickFilters.type_id"
             placeholder="友链类型"
             clearable
-            style="width: 130px; margin-right: 8px"
+            class="quick-filter-1200"
+            style="width: 130px"
             @change="handleQuickFilterChange"
           >
             <el-option
@@ -58,7 +60,8 @@
             v-model="quickFilters.accessible_status"
             placeholder="访问状态"
             clearable
-            style="width: 120px; margin-right: 12px"
+            class="quick-filter-800"
+            style="width: 120px"
             @change="handleQuickFilterChange"
           >
             <el-option label="正常" value="normal" />
@@ -66,7 +69,9 @@
             <el-option label="忽略检查" value="ignored" />
           </el-select>
         </template>
-        <el-button @click="handleTypeManage"> 类型管理 </el-button>
+        <el-button class="icon-btn" @click="handleTypeManage">
+          <el-icon><Folder /></el-icon><span class="btn-text">类型管理</span>
+        </el-button>
       </template>
 
       <!-- 表格列 -->
@@ -154,7 +159,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, computed, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Link, Search } from '@element-plus/icons-vue';
+import { Link, Search, Folder } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
 import FriendFilter from './components/FriendFilter.vue';
 import type { Friend, FriendQuery, FriendType } from '@/types/friend';
@@ -376,5 +381,27 @@ onMounted(() => {
 
 .rss-danger {
   color: #f56c6c;
+}
+
+// 默认显示文字，移动端显示图标
+.icon-btn {
+  .el-icon {
+    display: none;
+  }
+  // 覆盖 Element Plus 默认样式，消除图标隐藏后的左边距
+  .btn-text {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 500px) {
+  .icon-btn {
+    .btn-text {
+      display: none;
+    }
+    .el-icon {
+      display: inline-flex;
+    }
+  }
 }
 </style>

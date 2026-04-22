@@ -32,7 +32,8 @@
             v-model="quickFilters.status"
             placeholder="显示状态"
             clearable
-            style="width: 110px; margin-right: 8px"
+            class="quick-filter-769"
+            style="width: 110px"
             @change="handleQuickFilterChange"
           >
             <el-option label="显示" :value="1" />
@@ -42,7 +43,8 @@
             v-model="quickFilters.is_deleted"
             placeholder="删除状态"
             clearable
-            style="width: 110px; margin-right: 12px"
+            class="quick-filter-769"
+            style="width: 110px"
             @change="handleQuickFilterChange"
           >
             <el-option label="已删除" :value="true" />

@@ -34,7 +34,8 @@
             v-model="quickFilters.category_id"
             placeholder="全部分类"
             clearable
-            style="width: 130px; margin-right: 8px"
+            class="quick-filter-960"
+            style="width: 130px"
             @change="handleQuickFilterChange"
           >
             <el-option
@@ -48,7 +49,8 @@
             v-model="quickFilters.is_top"
             placeholder="置顶状态"
             clearable
-            style="width: 100px; margin-right: 8px"
+            class="quick-filter-1080"
+            style="width: 100px"
             @change="handleQuickFilterChange"
           >
             <el-option label="已置顶" :value="true" />
@@ -58,15 +60,20 @@
             v-model="quickFilters.is_essence"
             placeholder="精选状态"
             clearable
-            style="width: 100px; margin-right: 12px"
+            class="quick-filter-1200"
+            style="width: 100px"
             @change="handleQuickFilterChange"
           >
             <el-option label="已精选" :value="true" />
             <el-option label="未精选" :value="false" />
           </el-select>
         </template>
-        <el-button @click="openCategoryManager"> 分类管理 </el-button>
-        <el-button @click="openTagManager"> 标签管理 </el-button>
+        <el-button class="icon-btn" @click="openCategoryManager">
+          <el-icon><Folder /></el-icon><span class="btn-text">分类管理</span>
+        </el-button>
+        <el-button class="icon-btn" @click="openTagManager">
+          <el-icon><CollectionTag /></el-icon><span class="btn-text">标签管理</span>
+        </el-button>
       </template>
 
       <el-table-column label="封面" width="120" align="center">
@@ -318,13 +325,41 @@
   font-size: 12px;
   color: #909399;
 }
+
+.icon-btn {
+  .el-icon {
+    display: none;
+  }
+  .btn-text {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 500px) {
+  .icon-btn {
+    .btn-text {
+      display: none;
+    }
+    .el-icon {
+      display: inline-flex;
+    }
+  }
+}
 </style>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { View, ChatDotRound, Upload, EditPen, Loading } from '@element-plus/icons-vue';
+import {
+  View,
+  ChatDotRound,
+  Upload,
+  EditPen,
+  Loading,
+  Folder,
+  CollectionTag,
+} from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
 import ArticleFilter from './components/ArticleFilter.vue';
 import type { Article, ArticleListQuery } from '@/types/article';

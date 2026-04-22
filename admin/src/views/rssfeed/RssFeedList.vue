@@ -25,14 +25,14 @@
       @update:page="fetchArticles"
       @update:pageSize="fetchArticles"
     >
-      <!-- 快速筛选 -->
       <template #toolbar-before>
         <template v-if="!showFilter">
           <el-select
             v-model="quickFilters.friend_id"
             placeholder="全部友链"
             clearable
-            style="width: 150px; margin-right: 8px"
+            class="quick-filter-960"
+            style="width: 150px"
             @change="handleQuickFilterChange"
           >
             <el-option
@@ -46,21 +46,25 @@
             v-model="quickFilters.is_read"
             placeholder="阅读状态"
             clearable
-            style="width: 110px; margin-right: 12px"
+            class="quick-filter-800"
+            style="width: 110px"
             @change="handleQuickFilterChange"
           >
             <el-option label="已读" :value="true" />
             <el-option label="未读" :value="false" />
           </el-select>
         </template>
-      </template>
-
-      <!-- 额外按钮 -->
-      <template #toolbar-after>
-        <el-button type="primary" @click="openSubscriberDialog"> 本站订阅 </el-button>
+        <el-button type="primary" class="icon-btn" @click="openSubscriberDialog">
+          <el-icon><Bell /></el-icon><span class="btn-text">本站订阅</span>
+        </el-button>
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="unread-badge">
-          <el-button :disabled="unreadCount === 0" @click="handleMarkAllRead" v-if="isSuperAdmin">
-            全部已读
+          <el-button
+            class="icon-btn"
+            :disabled="unreadCount === 0"
+            @click="handleMarkAllRead"
+            v-if="isSuperAdmin"
+          >
+            <el-icon><Check /></el-icon><span class="btn-text">全部已读</span>
           </el-button>
         </el-badge>
       </template>
@@ -170,7 +174,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, reactive } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Message } from '@element-plus/icons-vue';
+import { Message, Bell, Check } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
 import RssFeedFilter from './components/RssFeedFilter.vue';
 import type { RssArticle, RssArticleQuery } from '@/types/rssfeed';
@@ -414,5 +418,27 @@ onMounted(() => {
 .friend-link:hover {
   color: var(--el-color-primary);
   text-decoration: underline;
+}
+
+// 默认显示文字，移动端显示图标
+.icon-btn {
+  .el-icon {
+    display: none;
+  }
+  // 覆盖 Element Plus 默认样式，消除图标隐藏后的左边距
+  .btn-text {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 500px) {
+  .icon-btn {
+    .btn-text {
+      display: none;
+    }
+    .el-icon {
+      display: inline-flex;
+    }
+  }
 }
 </style>

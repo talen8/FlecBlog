@@ -32,7 +32,8 @@
             v-model="quickFilters.report_type"
             placeholder="反馈类型"
             clearable
-            style="width: 150px; margin-right: 8px"
+            class="quick-filter-769"
+            style="width: 150px"
             @change="handleQuickFilterChange"
           >
             <el-option label="版权侵权" value="copyright" />
@@ -44,7 +45,8 @@
             v-model="quickFilters.status"
             placeholder="状态"
             clearable
-            style="width: 110px; margin-right: 12px"
+            class="quick-filter-769"
+            style="width: 110px"
             @change="handleQuickFilterChange"
           >
             <el-option label="待处理" value="pending" />
