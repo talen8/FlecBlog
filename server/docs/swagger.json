@@ -2,9 +2,9 @@
     "swagger": "2.0",
     "info": {
         "description": "一个基于 Go 语言的现代化博客后端服务",
-        "title": "Flec-Server",
+        "title": "FlecBlog",
         "contact": {
-            "name": "M.Talen",
+            "name": "Talen",
             "email": "talen2004@163.com"
         },
         "license": {
@@ -3586,49 +3586,6 @@
                 }
             }
         },
-        "/admin/stats/browsers": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "获取访问日志中所有不同的浏览器列表",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "统计管理"
-                ],
-                "summary": "浏览器列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/admin/stats/category": {
             "get": {
                 "security": [
@@ -3762,49 +3719,6 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/dto.DashboardStats"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/stats/os": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "获取访问日志中所有不同的操作系统列表",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "统计管理"
-                ],
-                "summary": "操作系统列表",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
                                         }
                                     }
                                 }

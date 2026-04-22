@@ -7,9 +7,9 @@ import type {
   TagStats,
   ArticleContribution,
   VisitListData,
+  VisitListQuery,
   ContributionQuery,
 } from '@/types/stats';
-import type { PaginationQuery } from '@/types/request';
 
 /**
  * 获取仪表板统计数据
@@ -58,6 +58,6 @@ export function getArticleContribution(params?: ContributionQuery): Promise<Arti
  * @param params 查询参数
  * @returns Promise<VisitListData>
  */
-export function getVisits(params: PaginationQuery): Promise<VisitListData> {
+export function getVisits(params: VisitListQuery): Promise<VisitListData> {
   return request.get('/admin/stats/visits', { params });
 }

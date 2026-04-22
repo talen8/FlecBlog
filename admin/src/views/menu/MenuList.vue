@@ -4,6 +4,7 @@
     :data="menuTree"
     :loading="loading"
     :show-pagination="false"
+    :show-filter="false"
     create-text="新增菜单"
     @create="handleCreate"
     @refresh="fetchMenuTree"

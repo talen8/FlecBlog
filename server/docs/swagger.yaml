@@ -1728,12 +1728,12 @@ definitions:
 info:
   contact:
     email: talen2004@163.com
-    name: M.Talen
+    name: Talen
   description: 一个基于 Go 语言的现代化博客后端服务
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  title: Flec-Server
+  title: FlecBlog
   version: v1
 paths:
   /admin/ai/ai-summary:
@@ -3957,30 +3957,6 @@ paths:
       summary: 重置 MCP Secret
       tags:
       - 配置管理
-  /admin/stats/browsers:
-    get:
-      consumes:
-      - application/json
-      description: 获取访问日志中所有不同的浏览器列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    type: string
-                  type: array
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 浏览器列表
-      tags:
-      - 统计管理
   /admin/stats/category:
     get:
       consumes:
@@ -4060,30 +4036,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 仪表盘统计
-      tags:
-      - 统计管理
-  /admin/stats/os:
-    get:
-      consumes:
-      - application/json
-      description: 获取访问日志中所有不同的操作系统列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    type: string
-                  type: array
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 操作系统列表
       tags:
       - 统计管理
   /admin/stats/tag:

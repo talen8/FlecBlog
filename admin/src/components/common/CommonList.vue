@@ -12,7 +12,12 @@
           </el-button>
           <!-- 后工具栏 -->
           <slot name="toolbar-after" />
-          <el-badge :value="filterCount" :hidden="filterCount === 0" class="filter-badge">
+          <el-badge
+            v-if="showFilter"
+            :value="filterCount"
+            :hidden="filterCount === 0"
+            class="filter-badge"
+          >
             <el-button :type="filterActive ? 'success' : 'default'" @click="$emit('filter')">
               <el-icon>
                 <Filter />
@@ -73,6 +78,7 @@ withDefaults(
     showPagination?: boolean;
     showCreate?: boolean;
     createText?: string;
+    showFilter?: boolean;
     filterActive?: boolean;
     filterCount?: number;
   }>(),
@@ -84,6 +90,7 @@ withDefaults(
     showPagination: true,
     showCreate: true,
     createText: '新增',
+    showFilter: true,
     filterActive: false,
     filterCount: 0,
   }

@@ -405,19 +405,59 @@ func (r *StatsRepository) GetArchives() ([]dto.ArchiveItem, error) {
 // 访问日志查询
 // ============================
 
-// GetVisitLogs 获取访问日志列表（分页）
+// GetVisitLogs 获取访问日志列表
 func (r *StatsRepository) GetVisitLogs(req *dto.GetVisitLogsRequest) ([]model.Visit, int64, error) {
 	var visits []model.Visit
 	var total int64
 
+	query := r.db.Model(&model.Visit{})
+
+	// 关键词搜索（页面URL）
+	if req.Keyword != "" {
+		query = query.Where("page_url ILIKE ?", "%"+req.Keyword+"%")
+	}
+
+	// 访客ID筛选
+	if req.VisitorID != "" {
+		query = query.Where("visitor_id = ?", req.VisitorID)
+	}
+
+	// IP地址筛选
+	if req.IP != "" {
+		query = query.Where("ip ILIKE ?", "%"+req.IP+"%")
+	}
+
+	// 地理位置筛选
+	if req.Location != "" {
+		query = query.Where("location ILIKE ?", "%"+req.Location+"%")
+	}
+
+	// 浏览器筛选（模糊匹配）
+	if req.Browser != "" {
+		query = query.Where("browser ILIKE ?", "%"+req.Browser+"%")
+	}
+
+	// 操作系统筛选（模糊匹配）
+	if req.OS != "" {
+		query = query.Where("os ILIKE ?", "%"+req.OS+"%")
+	}
+
+	// 时间范围筛选
+	if req.StartTime != "" {
+		query = query.Where("created_at >= ?", req.StartTime)
+	}
+	if req.EndTime != "" {
+		query = query.Where("created_at <= ?", req.EndTime+" 23:59:59")
+	}
+
 	// 获取总数
-	if err := r.db.Model(&model.Visit{}).Count(&total).Error; err != nil {
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	// 分页查询
 	offset := (req.Page - 1) * req.PageSize
-	err := r.db.Model(&model.Visit{}).
+	err := query.
 		Order("created_at DESC").
 		Limit(req.PageSize).
 		Offset(offset).

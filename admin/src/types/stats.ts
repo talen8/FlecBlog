@@ -69,6 +69,20 @@ export interface Visit {
   created_at: string;
 }
 
+// 访问日志查询参数
+export interface VisitListQuery {
+  page?: number;
+  page_size?: number;
+  keyword?: string;
+  visitor_id?: string;
+  ip?: string;
+  location?: string;
+  browser?: string;
+  os?: string;
+  start_time?: string;
+  end_time?: string;
+}
+
 // 访问日志列表数据
 export interface VisitListData {
   list: Visit[];

@@ -17,11 +17,11 @@ import (
 	_ "flec_blog/docs" // swagger docs
 )
 
-// @title           Flec-Server
+// @title           FlecBlog
 // @version         v1
 // @description     一个基于 Go 语言的现代化博客后端服务
 
-// @contact.name   M.Talen
+// @contact.name   Talen
 // @contact.email  talen2004@163.com
 
 // @license.name  MIT
