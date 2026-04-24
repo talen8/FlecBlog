@@ -11,7 +11,7 @@
     </transition>
 
     <common-list
-      title="文章列表"
+      title="文章管理"
       :data="articleList"
       :loading="loading"
       :total="total"

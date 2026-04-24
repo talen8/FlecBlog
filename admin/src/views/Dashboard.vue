@@ -33,7 +33,7 @@
     </el-card>
 
     <!-- 中间：四个概况卡片 -->
-    <el-row :gutter="20" class="overview-cards">
+    <el-row :gutter="14" class="overview-cards">
       <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
         <el-card class="overview-card" shadow="hover">
           <div class="card-left">
@@ -156,7 +156,7 @@
     </el-row>
 
     <!-- 图表区域1 -->
-    <el-row :gutter="20" class="charts-section">
+    <el-row :gutter="14" class="charts-section">
       <el-col :xs="24" :sm="24" :md="16" :lg="15" :xl="15">
         <el-card shadow="hover">
           <template #header>
@@ -184,7 +184,7 @@
     </el-row>
 
     <!-- 图表区域2 -->
-    <el-row :gutter="20" class="charts-section">
+    <el-row :gutter="14" class="charts-section">
       <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl="9">
         <el-card shadow="hover">
           <template #header>
@@ -748,7 +748,7 @@ onUnmounted(() => {
 .dashboard {
   // 顶部区域
   .top-card {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 
     :deep(.el-card__body) {
       padding: 24px;
@@ -822,7 +822,7 @@ onUnmounted(() => {
   // 概况卡片
   .overview-cards {
     .el-col {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .overview-card {
@@ -926,7 +926,7 @@ onUnmounted(() => {
   // 图表区域
   .charts-section {
     .el-col {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .chart-header {

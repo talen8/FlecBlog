@@ -1,6 +1,6 @@
 <template>
   <div class="system-info">
-    <el-card>
+    <el-card shadow="never">
       <!-- 工具栏 -->
       <div class="toolbar">
         <h2>系统信息</h2>
