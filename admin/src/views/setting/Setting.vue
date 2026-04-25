@@ -713,6 +713,10 @@ onMounted(() => {
   .actions {
     display: flex;
     gap: 12px;
+
+    .el-button {
+      margin: 0;
+    }
   }
 }
 
