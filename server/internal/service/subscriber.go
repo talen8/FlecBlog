@@ -47,7 +47,9 @@ func (s *SubscriberService) Subscribe(ctx context.Context, email string) error {
 		if err := s.repo.Update(ctx, sub); err != nil {
 			return err
 		}
-		return s.sendWelcomeEmail(sub)
+		// 异步发送欢迎邮件，邮件失败不影响订阅成功
+		go s.sendWelcomeEmail(sub)
+		return nil
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -65,7 +67,9 @@ func (s *SubscriberService) Subscribe(ctx context.Context, email string) error {
 		return err
 	}
 
-	return s.sendWelcomeEmail(newSub)
+	// 异步发送欢迎邮件，邮件失败不影响订阅成功
+	go s.sendWelcomeEmail(newSub)
+	return nil
 }
 
 // Unsubscribe 退订
