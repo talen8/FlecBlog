@@ -33,7 +33,7 @@
     </el-card>
 
     <!-- 中间：四个概况卡片 -->
-    <el-row :gutter="20" class="overview-cards">
+    <el-row :gutter="14" class="overview-cards">
       <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
         <el-card class="overview-card" shadow="hover">
           <div class="card-left">
@@ -156,7 +156,7 @@
     </el-row>
 
     <!-- 图表区域1 -->
-    <el-row :gutter="20" class="charts-section">
+    <el-row :gutter="14" class="charts-section">
       <el-col :xs="24" :sm="24" :md="16" :lg="15" :xl="15">
         <el-card shadow="hover">
           <template #header>
@@ -184,7 +184,7 @@
     </el-row>
 
     <!-- 图表区域2 -->
-    <el-row :gutter="20" class="charts-section">
+    <el-row :gutter="14" class="charts-section">
       <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl="9">
         <el-card shadow="hover">
           <template #header>
@@ -676,6 +676,10 @@ const renderCalendarChart = () => {
   // 计算最大值，如果没有数据则设为1（避免visualMap显示异常）
   const maxCount = chartData.length > 0 ? Math.max(...chartData.map(item => item.count), 1) : 1;
 
+  // 获取今天的日期字符串
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+
   const option = {
     tooltip: {
       position: 'top',
@@ -707,11 +711,25 @@ const renderCalendarChart = () => {
         nameMap: 'cn',
       },
     },
-    series: {
-      type: 'heatmap',
-      coordinateSystem: 'calendar',
-      data: chartData.map(item => [item.date, item.count]),
-    },
+    series: [
+      {
+        type: 'heatmap',
+        coordinateSystem: 'calendar',
+        data: chartData.map(item => [item.date, item.count]),
+      },
+      // 添加今天的标记
+      {
+        type: 'scatter',
+        coordinateSystem: 'calendar',
+        data: [[todayStr, 0]],
+        symbol: 'rect',
+        symbolSize: 14,
+        itemStyle: {
+          color: 'rgba(245, 108, 108, 0.3)',
+        },
+        zlevel: 1,
+      },
+    ],
   };
 
   // 使用 notMerge: true 确保完全替换配置
@@ -748,7 +766,7 @@ onUnmounted(() => {
 .dashboard {
   // 顶部区域
   .top-card {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 
     :deep(.el-card__body) {
       padding: 24px;
@@ -822,7 +840,7 @@ onUnmounted(() => {
   // 概况卡片
   .overview-cards {
     .el-col {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .overview-card {
@@ -926,7 +944,7 @@ onUnmounted(() => {
   // 图表区域
   .charts-section {
     .el-col {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .chart-header {

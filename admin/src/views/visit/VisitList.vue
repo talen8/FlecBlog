@@ -33,7 +33,7 @@
             placeholder="筛选 IP 地址"
             clearable
             class="quick-filter-769"
-            style="width: 180px; margin-right: 12px"
+            style="width: 180px"
             @keyup.enter="handleQuickFilterChange"
           >
             <template #prefix>

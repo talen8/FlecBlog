@@ -105,7 +105,6 @@ const handleLogout = async () => {
 
     .toggle-sidebar {
       margin-right: 20px;
-      font-size: 20px;
       cursor: pointer;
       padding: 8px;
       border-radius: 4px;

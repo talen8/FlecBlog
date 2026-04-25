@@ -4,6 +4,7 @@
       <span v-show="!isCollapse">Flec 管理系统</span>
     </div>
     <el-menu
+      ref="menuRef"
       :default-active="route.path"
       :collapse="isCollapse"
       background-color="#304156"
@@ -91,17 +92,43 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
+import { ref, nextTick } from 'vue';
 
 const route = useRoute();
+const menuRef = ref();
 
-defineProps<{
-  isCollapse: boolean;
-}>();
+// 子菜单索引列表
+const subMenus = ['content', 'interaction', 'management'];
 
+// 路由到父菜单的映射
+const routeToParent: Record<string, string> = {
+  '/articles': 'content',
+  '/moments': 'content',
+  '/friends': 'interaction',
+  '/comments': 'interaction',
+  '/rssfeed': 'interaction',
+  '/feedback': 'interaction',
+  '/users': 'management',
+  '/files': 'management',
+  '/menus': 'management',
+  '/visits': 'management',
+  '/systems': 'management',
+  '/settings': 'management',
+};
+
+defineProps<{ isCollapse: boolean }>();
 const emit = defineEmits(['menu-click']);
 
-// 菜单选择事件处理
-const handleMenuSelect = () => {
+// 选择菜单项时关闭其他子菜单
+const handleMenuSelect = (index: string) => {
+  const parent = routeToParent[index];
+  if (parent) {
+    nextTick(() => {
+      subMenus.forEach(key => {
+        if (key !== parent) menuRef.value?.close(key);
+      });
+    });
+  }
   emit('menu-click');
 };
 </script>
@@ -109,6 +136,8 @@ const handleMenuSelect = () => {
 <style scoped lang="scss">
 .sidebar {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 
   .logo {
     height: 60px;
@@ -117,6 +146,7 @@ const handleMenuSelect = () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 
     span {
       color: #fff;
@@ -137,6 +167,21 @@ const handleMenuSelect = () => {
 
   :deep(.el-menu) {
     border-right: none;
+    flex: 1;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
 
     .el-menu-item,
     .el-sub-menu__title {

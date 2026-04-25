@@ -54,7 +54,7 @@
             <el-option label="未读" :value="false" />
           </el-select>
         </template>
-        <el-button type="primary" class="icon-btn" @click="openSubscriberDialog">
+        <el-button class="icon-btn" @click="openSubscriberDialog">
           <el-icon><Bell /></el-icon><span class="btn-text">本站订阅</span>
         </el-button>
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="unread-badge">
@@ -63,6 +63,7 @@
             :disabled="unreadCount === 0"
             @click="handleMarkAllRead"
             v-if="isSuperAdmin"
+            type="primary"
           >
             <el-icon><Check /></el-icon><span class="btn-text">全部已读</span>
           </el-button>

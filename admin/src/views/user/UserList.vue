@@ -11,7 +11,7 @@
     </transition>
 
     <common-list
-      title="用户列表"
+      title="用户管理"
       :data="userList"
       :loading="loading"
       :total="total"

@@ -11,7 +11,7 @@
     </transition>
 
     <common-list
-      title="动态列表"
+      title="动态管理"
       :data="momentList"
       :loading="loading"
       :total="total"
