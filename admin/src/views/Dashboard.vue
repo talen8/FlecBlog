@@ -676,6 +676,10 @@ const renderCalendarChart = () => {
   // 计算最大值，如果没有数据则设为1（避免visualMap显示异常）
   const maxCount = chartData.length > 0 ? Math.max(...chartData.map(item => item.count), 1) : 1;
 
+  // 获取今天的日期字符串
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+
   const option = {
     tooltip: {
       position: 'top',
@@ -707,11 +711,25 @@ const renderCalendarChart = () => {
         nameMap: 'cn',
       },
     },
-    series: {
-      type: 'heatmap',
-      coordinateSystem: 'calendar',
-      data: chartData.map(item => [item.date, item.count]),
-    },
+    series: [
+      {
+        type: 'heatmap',
+        coordinateSystem: 'calendar',
+        data: chartData.map(item => [item.date, item.count]),
+      },
+      // 添加今天的标记
+      {
+        type: 'scatter',
+        coordinateSystem: 'calendar',
+        data: [[todayStr, 0]],
+        symbol: 'rect',
+        symbolSize: 14,
+        itemStyle: {
+          color: 'rgba(245, 108, 108, 0.3)',
+        },
+        zlevel: 1,
+      },
+    ],
   };
 
   // 使用 notMerge: true 确保完全替换配置
