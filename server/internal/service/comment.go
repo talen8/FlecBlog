@@ -553,21 +553,24 @@ func (s *CommentService) getTargetTitle(targetType, targetKey string) string {
 }
 
 // sendNotifications 发送评论通知
-func (s *CommentService) sendNotifications(ctx context.Context, comment *model.Comment, senderID uint) {
+func (s *CommentService) sendNotifications(_ context.Context, comment *model.Comment, senderID uint) {
 	if s.notificationService == nil {
 		return
 	}
+
+	// 使用独立的 background context，避免原请求上下文取消影响通知发送
+	notifyCtx := context.Background()
 
 	// 获取目标标题
 	targetTitle := s.getTargetTitle(comment.TargetType, comment.TargetKey)
 
 	// 1. 如果是回复评论，通知被回复者
 	if comment.ReplyTo != nil {
-		_ = s.notificationService.NotifyCommentReply(ctx, senderID, *comment.ReplyTo, comment, targetTitle)
+		_ = s.notificationService.NotifyCommentReply(notifyCtx, senderID, *comment.ReplyTo, comment, targetTitle)
 	}
 
 	// 2. 通知所有管理员（有新评论），排除发送者自己避免自通知
-	_ = s.notificationService.NotifyCommentToAdmins(ctx, senderID, comment, targetTitle, &senderID)
+	_ = s.notificationService.NotifyCommentToAdmins(notifyCtx, senderID, comment, targetTitle, &senderID)
 }
 
 // markImagesAsUsed 标记评论内容中的图片为已使用

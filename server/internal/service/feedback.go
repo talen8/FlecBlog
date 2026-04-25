@@ -150,12 +150,14 @@ func (s *FeedbackService) Delete(ctx context.Context, id uint) error {
 }
 
 // notifyAdmins 通知管理员
-func (s *FeedbackService) notifyAdmins(ctx context.Context, feedback *model.Feedback) {
+func (s *FeedbackService) notifyAdmins(_ context.Context, feedback *model.Feedback) {
 	if s.notificationService == nil {
 		return
 	}
 
-	_ = s.notificationService.NotifyFeedback(ctx, feedback)
+	// 使用独立的 background context，避免原请求上下文取消影响通知发送
+	notifyCtx := context.Background()
+	_ = s.notificationService.NotifyFeedback(notifyCtx, feedback)
 }
 
 // markFilesAsUsed 标记文件为使用中
