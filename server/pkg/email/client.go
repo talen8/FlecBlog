@@ -16,6 +16,13 @@ var (
 	globalMu     sync.RWMutex
 )
 
+// GetClient 获取全局邮件客户端实例
+func GetClient() *Client {
+	globalMu.RLock()
+	defer globalMu.RUnlock()
+	return globalClient
+}
+
 // Client 邮件客户端
 type Client struct {
 	config      *config.Config // 全局配置对象引用（支持热重载）

@@ -48,7 +48,11 @@ func (s *SubscriberService) Subscribe(ctx context.Context, email string) error {
 			return err
 		}
 		// 异步发送欢迎邮件，邮件失败不影响订阅成功
-		go s.sendWelcomeEmail(sub)
+		go func() {
+			if err := s.sendWelcomeEmail(sub); err != nil {
+				logger.Warn("发送欢迎邮件失败 (邮箱: %s): %v", sub.Email, err)
+			}
+		}()
 		return nil
 	}
 
@@ -68,7 +72,11 @@ func (s *SubscriberService) Subscribe(ctx context.Context, email string) error {
 	}
 
 	// 异步发送欢迎邮件，邮件失败不影响订阅成功
-	go s.sendWelcomeEmail(newSub)
+	go func() {
+		if err := s.sendWelcomeEmail(newSub); err != nil {
+			logger.Warn("发送欢迎邮件失败 (邮箱: %s): %v", newSub.Email, err)
+		}
+	}()
 	return nil
 }
 

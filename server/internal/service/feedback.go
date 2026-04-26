@@ -60,8 +60,9 @@ func (s *FeedbackService) Submit(ctx context.Context, req *dto.SubmitFeedbackReq
 		return nil, err
 	}
 
-	go s.markFilesAsUsed(ctx, req)
-	go s.notifyAdmins(ctx, feedback)
+	go s.markFilesAsUsed(req)
+	//nolint:gosec // 异步通知使用独立 context，避免请求取消影响通知发送
+	go s.notifyAdmins(feedback)
 
 	return s.toDTO(feedback), nil
 }
@@ -150,7 +151,7 @@ func (s *FeedbackService) Delete(ctx context.Context, id uint) error {
 }
 
 // notifyAdmins 通知管理员
-func (s *FeedbackService) notifyAdmins(_ context.Context, feedback *model.Feedback) {
+func (s *FeedbackService) notifyAdmins(feedback *model.Feedback) {
 	if s.notificationService == nil {
 		return
 	}
@@ -161,7 +162,7 @@ func (s *FeedbackService) notifyAdmins(_ context.Context, feedback *model.Feedba
 }
 
 // markFilesAsUsed 标记文件为使用中
-func (s *FeedbackService) markFilesAsUsed(_ context.Context, req *dto.SubmitFeedbackRequest) {
+func (s *FeedbackService) markFilesAsUsed(req *dto.SubmitFeedbackRequest) {
 	if s.fileService == nil || len(req.AttachmentFiles) == 0 {
 		return
 	}

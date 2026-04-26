@@ -365,7 +365,8 @@ func (s *CommentService) createComment(ctx context.Context, req *dto.CreateComme
 	s.markImagesAsUsed(comment.Content)
 
 	// 异步发送通知
-	go s.sendNotifications(ctx, comment, userID)
+	//nolint:gosec // 异步通知使用独立 context，避免请求取消影响通知发送
+	go s.sendNotifications(comment, userID)
 
 	return s.GetForWeb(ctx, comment.ID)
 }
@@ -553,7 +554,7 @@ func (s *CommentService) getTargetTitle(targetType, targetKey string) string {
 }
 
 // sendNotifications 发送评论通知
-func (s *CommentService) sendNotifications(_ context.Context, comment *model.Comment, senderID uint) {
+func (s *CommentService) sendNotifications(comment *model.Comment, senderID uint) {
 	if s.notificationService == nil {
 		return
 	}
