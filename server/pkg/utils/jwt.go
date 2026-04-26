@@ -20,7 +20,7 @@ const (
 
 // Token过期时间常量（小时）
 const (
-	AccessTokenExpireHours  = 24 * 7  // Access Token 过期时间: 7天
+	AccessTokenExpireHours  = 1       // Access Token 过期时间: 1小时
 	RefreshTokenExpireHours = 24 * 30 // Refresh Token 过期时间: 30天
 )
 
