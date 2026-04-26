@@ -790,7 +790,7 @@ const addVideoUrl = async () => {
     videoUrlInput.value = '';
     ElMessage.success(`已识别：${getPlatformName(result.platform)} - ${result.video_id}`);
   } catch (_error) {
-    ElMessage.error('无法识别的视频链接，请检查URL格式（支持B站、YouTube）');
+    ElMessage.error('无法识别的视频链接，请检查URL格式');
   } finally {
     fetchingVideo.value = false;
   }

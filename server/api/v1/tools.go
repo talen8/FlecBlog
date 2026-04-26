@@ -47,7 +47,7 @@ func (c *ToolsController) ParseVideo(ctx *gin.Context) {
 		return
 	}
 
-	if videoInfo.Platform == "" && videoInfo.VideoID == "" {
+	if videoInfo.Platform == "" && videoInfo.VideoID == "" && !strings.HasPrefix(req.URL, "http") {
 		response.Failed(ctx, "不支持的视频平台")
 		return
 	}
