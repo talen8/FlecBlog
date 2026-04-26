@@ -14,25 +14,21 @@ export const useUser = () => {
   const fetchUserInfo = async () => {
     if (!isLoggedIn.value) {
       userInfo.value = null;
-      localStorage.removeItem('user_role');
       return;
     }
 
     try {
       const data = await getUserProfile();
       userInfo.value = data;
-      localStorage.setItem('user_role', data.role);
     } catch (error) {
       console.error('获取用户信息失败:', error);
       userInfo.value = null;
-      localStorage.removeItem('user_role');
     }
   };
 
   // 清除用户信息
   const clearUserInfo = () => {
     userInfo.value = null;
-    localStorage.removeItem('user_role');
   };
 
   return {

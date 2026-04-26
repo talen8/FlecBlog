@@ -1,6 +1,6 @@
 import { $fetch } from 'ofetch';
 import type { FetchOptions } from 'ofetch';
-import { accessToken, refreshToken as refreshTokenRef, setTokens, logout } from './auth';
+import { accessToken, setAccessToken, logout } from './auth';
 import type { ApiResponse } from '@@/types/request';
 
 type HttpMethod =
@@ -23,15 +23,14 @@ let refreshPromise: Promise<boolean> | null = null;
 
 // 刷新 Token
 const doRefreshToken = async (): Promise<boolean> => {
-  if (!refreshTokenRef.value) return false;
-
   try {
-    const res = await $fetch<ApiResponse<{ access_token: string; refresh_token: string }>>(
-      '/auth/refresh',
-      { method: 'POST', baseURL: getBaseURL(), body: { refresh_token: refreshTokenRef.value } }
-    );
+    const res = await $fetch<ApiResponse<{ access_token: string }>>('/auth/refresh', {
+      method: 'POST',
+      baseURL: getBaseURL(),
+      credentials: 'include', // 发送 Cookie
+    });
     if (res.code === 0 && res.data) {
-      setTokens(res.data.access_token, res.data.refresh_token);
+      setAccessToken(res.data.access_token);
       return true;
     }
     return false;
@@ -56,10 +55,15 @@ export async function apiRequest<T = any>(
   }
 
   try {
-    return await $fetch<T>(url, { ...options, baseURL: config.public.apiUrl, headers } as any);
+    return await $fetch<T>(url, {
+      ...options,
+      baseURL: config.public.apiUrl,
+      headers,
+      credentials: 'include', // 发送 Cookie
+    } as any);
   } catch (error: any) {
     // 401 自动刷新 token
-    if (error?.response?.status === 401 && !options._retry && refreshTokenRef.value) {
+    if (error?.response?.status === 401 && !options._retry) {
       // 避免并发刷新
       if (!isRefreshing) {
         isRefreshing = true;

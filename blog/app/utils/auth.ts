@@ -1,53 +1,69 @@
 import { ref, computed } from 'vue';
+import type { ApiResponse } from '@@/types/request';
 
-// Token 状态
-export const accessToken = ref<string | null>(null);
-export const refreshToken = ref<string | null>(null);
+const ACCESS_TOKEN_KEY = 'access_token';
+
+/**
+ * 获取存储的 access token
+ * @returns {string | null} access token字符串或null
+ */
+const getStoredToken = (): string | null => {
+  if (import.meta.server) return null;
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+};
+
+export const accessToken = ref<string | null>(getStoredToken());
 
 // 响应式登录状态
 export const isLoggedIn = computed(() => !!accessToken.value && accessToken.value !== '');
 
-// 从 localStorage 初始化 token（仅客户端）
-if (import.meta.client) {
-  accessToken.value = localStorage.getItem('access_token');
-  refreshToken.value = localStorage.getItem('refresh_token');
-}
-
 /**
- * 设置双token
- */
-export const setTokens = (access: string, refresh: string): void => {
-  accessToken.value = access;
-  refreshToken.value = refresh;
-
-  // 同步到 localStorage（仅客户端）
-  if (import.meta.client) {
-    localStorage.setItem('access_token', access);
-    localStorage.setItem('refresh_token', refresh);
-  }
-};
-
-/**
- * 设置access token（用于token刷新）
+ * 设置 access token
  */
 export const setAccessToken = (access: string): void => {
-  accessToken.value = access;
-
-  // 同步到 localStorage（仅客户端）
   if (import.meta.client) {
-    localStorage.setItem('access_token', access);
+    localStorage.setItem(ACCESS_TOKEN_KEY, access);
   }
+  accessToken.value = access;
 };
 
 /**
- * 登出操作（清除双token）
+ * 获取 access token
+ */
+export const getAccessToken = (): string | null => {
+  if (import.meta.client) {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
+  }
+  return accessToken.value;
+};
+
+/**
+ * 清除 access token
+ */
+export const clearAccessToken = (): void => {
+  if (import.meta.client) {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+  }
+  accessToken.value = null;
+};
+
+/**
+ * 登出操作
  */
 export const logout = (): void => {
-  accessToken.value = null;
-  refreshToken.value = null;
-  if (import.meta.client) {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+  const token = accessToken.value;
+  clearAccessToken();
+
+  if (token) {
+    const config = useRuntimeConfig();
+    $fetch<ApiResponse<void>>('/auth/logout', {
+      method: 'POST',
+      baseURL: config.public.apiUrl as string,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+    }).catch(() => {});
   }
 };
 

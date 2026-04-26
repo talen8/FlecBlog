@@ -26,29 +26,30 @@ const (
 
 // Claims JWT 声明结构
 type Claims struct {
-	UserID    uint           `json:"user_id"`
-	Role      model.UserRole `json:"role"`
-	TokenType TokenType      `json:"token_type"` // token类型
+	UserID       uint           `json:"user_id"`
+	Role         model.UserRole `json:"role"`
+	TokenType    TokenType      `json:"token_type"`    // token类型
+	TokenVersion uint           `json:"token_version"` // token版本号
 	jwt.RegisteredClaims
 }
 
 // GenerateAccessToken 生成访问令牌
-func GenerateAccessToken(userID uint, role model.UserRole, cfg *config.JWTConfig) (string, error) {
-	return generateToken(userID, role, AccessToken, AccessTokenExpireHours, cfg)
+func GenerateAccessToken(userID uint, role model.UserRole, tokenVersion uint, cfg *config.JWTConfig) (string, error) {
+	return generateToken(userID, role, tokenVersion, AccessToken, AccessTokenExpireHours, cfg)
 }
 
 // GenerateRefreshToken 生成刷新令牌
-func GenerateRefreshToken(userID uint, role model.UserRole, cfg *config.JWTConfig) (string, error) {
-	return generateToken(userID, role, RefreshToken, RefreshTokenExpireHours, cfg)
+func GenerateRefreshToken(userID uint, role model.UserRole, tokenVersion uint, cfg *config.JWTConfig) (string, error) {
+	return generateToken(userID, role, tokenVersion, RefreshToken, RefreshTokenExpireHours, cfg)
 }
 
 // generateToken 生成指定类型的token
-func generateToken(userID uint, role model.UserRole, tokenType TokenType, expireHours int, cfg *config.JWTConfig) (string, error) {
-	// 设置claims
+func generateToken(userID uint, role model.UserRole, tokenVersion uint, tokenType TokenType, expireHours int, cfg *config.JWTConfig) (string, error) {
 	claims := &Claims{
-		UserID:    userID,
-		Role:      role,
-		TokenType: tokenType,
+		UserID:       userID,
+		Role:         role,
+		TokenType:    tokenType,
+		TokenVersion: tokenVersion,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(expireHours))),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

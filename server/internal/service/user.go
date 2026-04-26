@@ -68,34 +68,46 @@ func (s *UserService) ValidateToken(token string) (*model.User, error) {
 		return nil, errors.New("token已失效，请重新登录")
 	}
 
-	return s.repo.Get(claims.UserID)
+	user, err := s.repo.Get(claims.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 检查用户是否被禁用或删除
+	if !user.IsEnabled {
+		return nil, errors.New("该账号已被禁用")
+	}
+
+	// 检查 token 版本号是否匹配
+	if claims.TokenVersion != user.TokenVersion {
+		return nil, errors.New("token已失效，请重新登录")
+	}
+
+	return user, nil
 }
 
 // buildLoginResponse 构建登录响应（含token和用户信息）
-func (s *UserService) buildLoginResponse(user *model.User) (*dto.LoginResponse, error) {
-	// 生成access token
-	accessToken, err := utils.GenerateAccessToken(user.ID, user.Role, &s.config.JWT)
+func (s *UserService) buildLoginResponse(user *model.User) (*dto.LoginResponse, string, error) {
+	accessToken, err := utils.GenerateAccessToken(user.ID, user.Role, user.TokenVersion, &s.config.JWT)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	// 生成refresh token
-	refreshToken, err := utils.GenerateRefreshToken(user.ID, user.Role, &s.config.JWT)
+	refreshToken, err := utils.GenerateRefreshToken(user.ID, user.Role, user.TokenVersion, &s.config.JWT)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	return &dto.LoginResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		User:         dto.NewUserResponse(user),
-	}, nil
+		AccessToken: accessToken,
+		User:        dto.NewUserResponse(user),
+	}, refreshToken, nil
 }
 
 // ============ 前台服务 ============
 
 // Register 用户注册
-func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.LoginResponse, error) {
+func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.LoginResponse, string, error) {
 	// 检查邮箱是否存在
 	existingUser, err := s.repo.GetByEmail(req.Email)
 	if err == nil {
@@ -105,18 +117,18 @@ func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.Logi
 			return s.upgradeGuest(existingUser, req, host)
 		}
 		// 已是正式用户，不能重复注册
-		return nil, errors.New("邮箱已被注册")
+		return nil, "", errors.New("邮箱已被注册")
 	}
 
 	// 邮箱不存在（或查询出错），继续检查
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
+		return nil, "", err
 	}
 
 	// 密码加密
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// 创建用户
@@ -132,7 +144,7 @@ func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.Logi
 	}
 
 	if err := s.repo.Create(user); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// 异步下载Cravatar头像
@@ -149,11 +161,11 @@ func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.Logi
 }
 
 // upgradeGuest 将游客账户升级为正式用户
-func (s *UserService) upgradeGuest(guestUser *model.User, req *dto.RegisterRequest, host string) (*dto.LoginResponse, error) {
+func (s *UserService) upgradeGuest(guestUser *model.User, req *dto.RegisterRequest, host string) (*dto.LoginResponse, string, error) {
 	// 密码加密
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// 更新用户信息：从游客升级为正式用户
@@ -170,7 +182,7 @@ func (s *UserService) upgradeGuest(guestUser *model.User, req *dto.RegisterReque
 	guestUser.LastLogin = &now
 
 	if err := s.repo.Update(guestUser); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// 如果游客没有头像，异步下载Cravatar头像
@@ -189,7 +201,7 @@ func (s *UserService) upgradeGuest(guestUser *model.User, req *dto.RegisterReque
 }
 
 // LoginBySocial 第三方登录逻辑
-func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avatarURL, host string) (*dto.LoginResponse, error) {
+func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avatarURL, host string) (*dto.LoginResponse, string, error) {
 	// 1. 先通过 OAuth ID 查找用户
 	user, err := s.repo.GetByOAuthID(provider, providerID)
 	if err == nil {
@@ -205,7 +217,7 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, "", err
 		}
 
 		// 3. 邮箱也不存在 -> 自动注册新用户
@@ -232,7 +244,7 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 		}
 
 		if err := s.repo.Create(user); err != nil {
-			return nil, err
+			return nil, "", err
 		}
 
 		// 异步下载头像：优先使用第三方头像，否则使用 Cravatar
@@ -316,35 +328,35 @@ func (s *UserService) downloadAndSaveRemoteAvatar(avatarURL string, userID uint,
 }
 
 // Login 用户登录
-func (s *UserService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
+func (s *UserService) Login(req *dto.LoginRequest) (*dto.LoginResponse, string, error) {
 	user, err := s.repo.GetByEmail(req.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("邮箱未注册")
+			return nil, "", errors.New("邮箱未注册")
 		}
-		return nil, err
+		return nil, "", err
 	}
 
 	// 禁止游客用户登录（游客没有密码）
 	if user.Role == model.RoleGuest {
-		return nil, errors.New("游客账户无法登录，请先注册成为正式用户")
+		return nil, "", errors.New("游客账户无法登录，请先注册成为正式用户")
 	}
 
 	// 检查用户状态
 	if !user.IsEnabled {
-		return nil, errors.New("该账号已被禁用，请联系管理员")
+		return nil, "", errors.New("该账号已被禁用，请联系管理员")
 	}
 
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return nil, errors.New("密码错误")
+		return nil, "", errors.New("密码错误")
 	}
 
 	// 更新最后登录时间
 	now := utils.Now().Time
 	user.LastLogin = &now
 	if err := s.repo.Update(user); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	return s.buildLoginResponse(user)
@@ -357,68 +369,77 @@ func hashToken(token string) string {
 }
 
 // RefreshToken 刷新token
-func (s *UserService) RefreshToken(req *dto.RefreshTokenRequest) (*dto.LoginResponse, error) {
+func (s *UserService) RefreshToken(refreshToken string) (*dto.LoginResponse, string, error) {
 	// 解析并验证refresh token
-	claims, err := utils.ParseRefreshToken(req.RefreshToken, &s.config.JWT)
+	claims, err := utils.ParseRefreshToken(refreshToken, &s.config.JWT)
 	if err != nil {
-		return nil, errors.New("无效的refresh token")
+		return nil, "", errors.New("无效的refresh token")
 	}
 
 	// 检查token是否在黑名单中
-	tokenHash := hashToken(req.RefreshToken)
+	tokenHash := hashToken(refreshToken)
 	if s.repo.IsTokenBlacklisted(tokenHash) {
-		return nil, errors.New("token已失效，请重新登录")
+		return nil, "", errors.New("token已失效，请重新登录")
 	}
 
 	// 获取用户信息（验证用户是否存在且未被禁用）
 	user, err := s.repo.Get(claims.UserID)
 	if err != nil {
-		return nil, errors.New("用户不存在")
+		return nil, "", errors.New("用户不存在")
 	}
 
 	if !user.IsEnabled {
-		return nil, errors.New("该账号已被禁用")
+		return nil, "", errors.New("该账号已被禁用")
+	}
+
+	// 检查 token 版本号是否匹配
+	if claims.TokenVersion != user.TokenVersion {
+		return nil, "", errors.New("token已失效，请重新登录")
 	}
 
 	// 生成新的access token
-	accessToken, err := utils.GenerateAccessToken(user.ID, user.Role, &s.config.JWT)
+	accessToken, err := utils.GenerateAccessToken(user.ID, user.Role, user.TokenVersion, &s.config.JWT)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// 生成新的refresh token
-	refreshToken, err := utils.GenerateRefreshToken(user.ID, user.Role, &s.config.JWT)
+	newRefreshToken, err := utils.GenerateRefreshToken(user.ID, user.Role, user.TokenVersion, &s.config.JWT)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// 将旧的refresh token加入黑名单（Refresh Token轮换）
 	expiresAt := claims.ExpiresAt.Time
-	if err = s.repo.AddTokenToBlacklist(tokenHash, user.ID, expiresAt); err != nil {
-		// 记录错误但不中断流程（降级处理）
-		_ = err
-	}
+	_ = s.repo.AddTokenToBlacklist(tokenHash, user.ID, expiresAt)
 
 	return &dto.LoginResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+		AccessToken: accessToken,
+	}, newRefreshToken, nil
 }
 
 // Logout 用户登出
-func (s *UserService) Logout(token string) error {
+func (s *UserService) Logout(accessToken, refreshToken string) error {
 	// 解析并验证 access token
-	claims, err := utils.ParseToken(token, &s.config.JWT)
+	claims, err := utils.ParseToken(accessToken, &s.config.JWT)
 	if err != nil {
 		return errors.New("无效的token")
 	}
 
-	// 将 token 加入黑名单
-	tokenHash := hashToken(token)
+	// 将 access token 加入黑名单
+	tokenHash := hashToken(accessToken)
 	expiresAt := claims.ExpiresAt.Time
-	err = s.repo.AddTokenToBlacklist(tokenHash, claims.UserID, expiresAt)
-	if err != nil {
+	if err = s.repo.AddTokenToBlacklist(tokenHash, claims.UserID, expiresAt); err != nil {
 		return errors.New("登出失败")
+	}
+
+	// 将 refresh token 加入黑名单（忽略错误，降级处理）
+	if refreshToken != "" {
+		if refreshClaims, err := utils.ParseRefreshToken(refreshToken, &s.config.JWT); err == nil {
+			refreshTokenHash := hashToken(refreshToken)
+			refreshExpiresAt := refreshClaims.ExpiresAt.Time
+			_ = s.repo.AddTokenToBlacklist(refreshTokenHash, claims.UserID, refreshExpiresAt)
+		}
 	}
 
 	return nil
@@ -429,9 +450,9 @@ func (s *UserService) CleanupExpiredTokens() error {
 	return s.repo.CleanupExpiredTokens()
 }
 
-// RevokeAllUserTokens 撤销某用户的所有token（用于强制下线，如账号被盗、密码修改等场景）
+// RevokeAllUserTokens 撤销用户所有token（强制所有设备重新登录）
 func (s *UserService) RevokeAllUserTokens(userID uint) error {
-	return s.repo.RevokeAllUserTokens(userID)
+	return s.repo.IncrementTokenVersion(userID)
 }
 
 // UpdateForWeb 更新用户信息
@@ -502,14 +523,7 @@ func (s *UserService) ChangePassword(userID uint, oldPassword, newPassword strin
 	}
 
 	user.Password = string(hashedNewPassword)
-	if err := s.repo.Update(user); err != nil {
-		return err
-	}
-
-	// 修改密码后撤销所有现有token，强制用户重新登录
-	_ = s.repo.RevokeAllUserTokens(userID)
-
-	return nil
+	return s.repo.UpdatePasswordAndIncrementVersion(userID, user.Password)
 }
 
 // SetPassword 设置密码（针对 OAuth 注册用户首次设置密码）
@@ -538,7 +552,7 @@ func (s *UserService) SetPassword(userID uint, password, confirmPassword string)
 	user.Password = string(hashedPassword)
 	user.HasPassword = true
 
-	return s.repo.Update(user)
+	return s.repo.UpdatePasswordAndIncrementVersion(userID, user.Password, true)
 }
 
 // DeactivateAccount 用户注销账号
@@ -727,6 +741,10 @@ func (s *UserService) Update(operator *model.User, id uint, req *dto.AdminUpdate
 			return err
 		}
 		user.Password = string(hashedPassword)
+		if err := s.repo.Update(user); err != nil {
+			return err
+		}
+		return s.repo.IncrementTokenVersion(id)
 	}
 
 	// 处理头像变化

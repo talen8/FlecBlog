@@ -874,12 +874,8 @@ definitions:
     properties:
       access_token:
         type: string
-      refresh_token:
-        type: string
       user:
-        allOf:
-        - $ref: '#/definitions/dto.UserResponse'
-        description: 刷新token时为空
+        $ref: '#/definitions/dto.UserResponse'
     type: object
   dto.MenuCreateRequest:
     properties:
@@ -1138,13 +1134,6 @@ definitions:
       type_text:
         description: 类型中文文本（前端直接显示）
         type: string
-    type: object
-  dto.RefreshTokenRequest:
-    properties:
-      refresh_token:
-        type: string
-    required:
-    - refresh_token
     type: object
   dto.RegisterRequest:
     properties:
@@ -5443,7 +5432,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 将当前 token 加入黑名单使其失效
+      description: 将当前 token 加入黑名单并清除 Refresh Token Cookie
       produces:
       - application/json
       responses:
@@ -5464,14 +5453,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 使用refresh token获取新的access token
-      parameters:
-      - description: Refresh Token
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RefreshTokenRequest'
+      description: 刷新访问令牌
       produces:
       - application/json
       responses:

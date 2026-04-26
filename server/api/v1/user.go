@@ -10,6 +10,7 @@ import (
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/service"
+	"flec_blog/pkg/auth"
 	"flec_blog/pkg/response"
 	"flec_blog/pkg/upload"
 
@@ -168,13 +169,15 @@ func (c *UserController) AuthCallback(ctx *gin.Context) {
 		ctx.Redirect(http.StatusFound, frontendBaseURL+targetPath+"?bind=success&provider="+provider)
 	} else {
 		// 处理登录
-		loginResp, err := c.userService.LoginBySocial(provider, oauthUser.UserID, email, nickname, oauthUser.AvatarURL, host)
+		loginResp, refreshToken, err := c.userService.LoginBySocial(provider, oauthUser.UserID, email, nickname, oauthUser.AvatarURL, host)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "登录失败: " + err.Error()})
 			return
 		}
-		// 跳转到前端回调页
-		frontendURL := frontendBaseURL + "/oauth/callback?token=" + loginResp.AccessToken + "&refresh_token=" + loginResp.RefreshToken
+		// 设置 refresh token 到 HttpOnly Cookie
+		auth.SetRefreshTokenCookie(ctx, refreshToken)
+		// 跳转到前端回调页（只传递 access_token）
+		frontendURL := frontendBaseURL + "/oauth/callback?token=" + loginResp.AccessToken
 		if redirect != "" {
 			frontendURL += "&redirect=" + url.QueryEscape(redirect)
 		}
@@ -203,11 +206,14 @@ func (c *UserController) Register(ctx *gin.Context) {
 	}
 
 	host := upload.ExtractHostFromContext(ctx)
-	loginResp, err := c.userService.Register(&req, host)
+	loginResp, refreshToken, err := c.userService.Register(&req, host)
 	if err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}
+
+	// 设置 refresh token 到 HttpOnly Cookie
+	auth.SetRefreshTokenCookie(ctx, refreshToken)
 
 	response.Success(ctx, loginResp)
 }
@@ -232,11 +238,14 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	loginResp, err := c.userService.Login(&req)
+	loginResp, refreshToken, err := c.userService.Login(&req)
 	if err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}
+
+	// 设置 refresh token 到 HttpOnly Cookie
+	auth.SetRefreshTokenCookie(ctx, refreshToken)
 
 	response.Success(ctx, loginResp)
 }
@@ -244,28 +253,29 @@ func (c *UserController) Login(ctx *gin.Context) {
 // RefreshToken 刷新token
 //
 //	@Summary		刷新token
-//	@Description	使用refresh token获取新的access token
+//	@Description	刷新访问令牌
 //	@Tags			认证
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body		dto.RefreshTokenRequest	true	"Refresh Token"
 //	@Success		200		{object}	response.Response{data=dto.LoginResponse}
 //	@Failure		400		{object}	response.Response
 //	@Failure		401		{object}	response.Response
 //	@Router			/auth/refresh [post]
 func (c *UserController) RefreshToken(ctx *gin.Context) {
-	var req dto.RefreshTokenRequest
-
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.ValidateFailed(ctx, err.Error())
+	refreshToken := auth.GetRefreshTokenFromCookie(ctx)
+	if refreshToken == "" {
+		response.Failed(ctx, "未提供 refresh token")
 		return
 	}
 
-	refreshResp, err := c.userService.RefreshToken(&req)
+	refreshResp, newRefreshToken, err := c.userService.RefreshToken(refreshToken)
 	if err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}
+
+	// 设置新的 refresh token 到 Cookie（Refresh Token 轮换）
+	auth.SetRefreshTokenCookie(ctx, newRefreshToken)
 
 	response.Success(ctx, refreshResp)
 }
@@ -329,7 +339,7 @@ func (c *UserController) ResetPassword(ctx *gin.Context) {
 // Logout 用户登出
 //
 //	@Summary		用户登出
-//	@Description	将当前 token 加入黑名单使其失效
+//	@Description	将当前 token 加入黑名单并清除 Refresh Token Cookie
 //	@Tags			认证
 //	@Accept			json
 //	@Produce		json
@@ -348,10 +358,16 @@ func (c *UserController) Logout(ctx *gin.Context) {
 		token = token[7:]
 	}
 
-	if err := c.userService.Logout(token); err != nil {
+	// 从 Cookie 获取 refresh token
+	refreshToken := auth.GetRefreshTokenFromCookie(ctx)
+
+	if err := c.userService.Logout(token, refreshToken); err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}
+
+	// 清除 Refresh Token Cookie
+	auth.ClearRefreshTokenCookie(ctx)
 
 	response.Success(ctx, nil)
 }
@@ -456,6 +472,8 @@ func (c *UserController) ChangePassword(ctx *gin.Context) {
 		return
 	}
 
+	auth.ClearRefreshTokenCookie(ctx)
+
 	response.Success(ctx, nil)
 }
 
@@ -523,6 +541,8 @@ func (c *UserController) DeactivateAccount(ctx *gin.Context) {
 		response.Failed(ctx, err.Error())
 		return
 	}
+
+	auth.ClearRefreshTokenCookie(ctx)
 
 	response.Success(ctx, nil)
 }

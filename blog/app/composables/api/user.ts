@@ -9,7 +9,6 @@ import type {
   ResetPasswordParams,
   ChangePasswordParams,
   DeactivateAccountParams,
-  RefreshTokenParams,
   RefreshTokenResponse,
 } from '@@/types/user';
 import { createApi } from './createApi';
@@ -28,8 +27,8 @@ export const register = async (data: RegisterParams) => {
 };
 
 /** 刷新Token */
-export const refreshToken = async (data: RefreshTokenParams) => {
-  return authApi.post<RefreshTokenResponse>('/refresh', data);
+export const refreshToken = async () => {
+  return authApi.post<RefreshTokenResponse>('/refresh');
 };
 
 /** 获取当前用户信息 */

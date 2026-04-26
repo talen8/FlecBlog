@@ -5973,7 +5973,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "将当前 token 加入黑名单使其失效",
+                "description": "将当前 token 加入黑名单并清除 Refresh Token Cookie",
                 "consumes": [
                     "application/json"
                 ],
@@ -6002,7 +6002,7 @@ const docTemplate = `{
         },
         "/auth/refresh": {
             "post": {
-                "description": "使用refresh token获取新的access token",
+                "description": "刷新访问令牌",
                 "consumes": [
                     "application/json"
                 ],
@@ -6013,17 +6013,6 @@ const docTemplate = `{
                     "认证"
                 ],
                 "summary": "刷新token",
-                "parameters": [
-                    {
-                        "description": "Refresh Token",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.RefreshTokenRequest"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -8662,16 +8651,8 @@ const docTemplate = `{
                 "access_token": {
                     "type": "string"
                 },
-                "refresh_token": {
-                    "type": "string"
-                },
                 "user": {
-                    "description": "刷新token时为空",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.UserResponse"
-                        }
-                    ]
+                    "$ref": "#/definitions/dto.UserResponse"
                 }
             }
         },
@@ -9041,17 +9022,6 @@ const docTemplate = `{
                 },
                 "type_text": {
                     "description": "类型中文文本（前端直接显示）",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.RefreshTokenRequest": {
-            "type": "object",
-            "required": [
-                "refresh_token"
-            ],
-            "properties": {
-                "refresh_token": {
                     "type": "string"
                 }
             }

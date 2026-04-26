@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { login, register, forgotPassword, resetPassword } from '@/composables/api/user';
+import { setAccessToken } from '@/utils/auth';
 
 defineProps<{
   modelValue: boolean;
@@ -194,12 +195,12 @@ const handleSubmit = async () => {
     let response;
     if (mode.value === 'login') {
       response = await login({ email, password });
-      setTokens(response.access_token, response.refresh_token);
+      setAccessToken(response.access_token);
       emit('loginSuccess');
       closeModal();
     } else if (mode.value === 'register') {
       response = await register({ email, nickname, password, website });
-      setTokens(response.access_token, response.refresh_token);
+      setAccessToken(response.access_token);
       emit('loginSuccess');
       closeModal();
     } else {

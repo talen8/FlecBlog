@@ -32,19 +32,8 @@ export default defineNuxtPlugin({
 
     // 检查是否为超级管理员
     const isSuperAdmin = () => {
-      // 优先从响应式状态读取
-      if (userInfo.value?.role) {
-        return userInfo.value.role === 'super_admin';
-      }
-      // 页面刷新时从 localStorage 读取
-      try {
-        return (
-          localStorage.getItem('user_role') === 'super_admin' &&
-          !!localStorage.getItem('access_token')
-        );
-      } catch {
-        return false;
-      }
+      // 从响应式状态读取
+      return userInfo.value?.role === 'super_admin';
     };
 
     const getBaseData = (url?: string, articleId?: number) => ({
