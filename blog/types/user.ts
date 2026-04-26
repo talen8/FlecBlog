@@ -46,7 +46,6 @@ export interface LoginParams {
  */
 export interface LoginResponse {
   access_token: string;
-  refresh_token: string;
   user: UserInfo;
 }
 
@@ -65,7 +64,6 @@ export interface RegisterParams {
  */
 export interface RegisterResponse {
   access_token: string;
-  refresh_token: string;
   user: UserInfo;
 }
 
@@ -101,16 +99,8 @@ export interface DeactivateAccountParams {
 }
 
 /**
- * 刷新Token请求参数
- */
-export interface RefreshTokenParams {
-  refresh_token: string;
-}
-
-/**
  * 刷新Token响应数据
  */
 export interface RefreshTokenResponse {
   access_token: string;
-  refresh_token: string;
 }

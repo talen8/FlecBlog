@@ -105,16 +105,10 @@ type DeactivateAccountRequest struct {
 
 // ============ 前台用户响应 ============
 
-// LoginResponse 用户登录/注册/刷新token响应
+// LoginResponse 用户登录/注册响应
 type LoginResponse struct {
-	AccessToken  string        `json:"access_token"`
-	RefreshToken string        `json:"refresh_token"`
-	User         *UserResponse `json:"user,omitempty"` // 刷新token时为空
-}
-
-// RefreshTokenRequest 刷新token请求
-type RefreshTokenRequest struct {
-	RefreshToken string `json:"refresh_token" binding:"required"`
+	AccessToken string        `json:"access_token"`
+	User        *UserResponse `json:"user,omitempty"`
 }
 
 // ============ 后台用户管理请求 ============

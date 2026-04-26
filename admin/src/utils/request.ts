@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { getAccessToken, getRefreshToken, setTokens, redirectToLogin } from '@/utils/auth';
+import { getAccessToken, setAccessToken, redirectToLogin } from '@/utils/auth';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ApiResponse<T = any> {
@@ -21,6 +21,8 @@ const request = axios.create({
   baseURL: getApiUrl(),
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
+  // 允许发送 Cookie
+  withCredentials: true,
 });
 
 // 是否正在刷新token的标志
@@ -48,12 +50,12 @@ const processQueue = (error: any = null) => {
 
 // 请求拦截器
 request.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  // refresh接口不需要带Authorization header（在body中发送refresh_token）
+  // refresh 接口不需要带 Authorization header
   if (config.url === '/auth/refresh') {
     return config;
   }
 
-  // 其他接口带上access token
+  // 其他接口带上 access token（从内存中获取）
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -105,24 +107,10 @@ request.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refresh = getRefreshToken();
-      if (!refresh) {
-        // 没有refresh token，直接跳转登录页
-        redirectToLogin();
-        return Promise.reject(error);
-      }
-
       try {
-        // 调用refresh接口（返回的已经是data，不是整个response）
-        const data: { access_token: string; refresh_token: string } = await request.post(
-          '/auth/refresh',
-          {
-            refresh_token: refresh,
-          }
-        );
+        const data: { access_token: string } = await request.post('/auth/refresh');
 
-        // 更新token
-        setTokens(data.access_token, data.refresh_token);
+        setAccessToken(data.access_token);
 
         // 处理队列中的请求
         processQueue();

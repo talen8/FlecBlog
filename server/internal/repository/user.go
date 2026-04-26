@@ -205,11 +205,19 @@ func (r *UserRepository) UpdateAvatar(userID uint, avatarURL string) error {
 	return r.db.Model(&model.User{}).Where("id = ?", userID).Update("avatar", avatarURL).Error
 }
 
-// UpdatePassword 更新用户密码
-func (r *UserRepository) UpdatePassword(id uint, hashedPassword string) error {
+// UpdatePasswordAndIncrementVersion 更新密码并递增TokenVersion（一次数据库操作）
+// hasPassword > 0 时同时设置 HasPassword=true（用于 OAuth 用户首次设置密码）
+func (r *UserRepository) UpdatePasswordAndIncrementVersion(id uint, hashedPassword string, hasPassword ...bool) error {
+	updates := map[string]interface{}{
+		"password":      hashedPassword,
+		"token_version": gorm.Expr("token_version + 1"),
+	}
+	if len(hasPassword) > 0 && hasPassword[0] {
+		updates["has_password"] = true
+	}
 	return r.db.Model(&model.User{}).
 		Where("id = ?", id).
-		Update("password", hashedPassword).Error
+		Updates(updates).Error
 }
 
 // ============ Token黑名单 ============
@@ -238,9 +246,10 @@ func (r *UserRepository) CleanupExpiredTokens() error {
 	return r.db.Where("expires_at < ?", time.Now()).Delete(&model.TokenBlacklist{}).Error
 }
 
-// RevokeAllUserTokens 撤销某用户的所有token
-func (r *UserRepository) RevokeAllUserTokens(userID uint) error {
-	return r.db.Where("user_id = ? AND expires_at > ?", userID, time.Now()).Delete(&model.TokenBlacklist{}).Error
+// IncrementTokenVersion 递增用户Token版本号（用于撤销所有token）
+func (r *UserRepository) IncrementTokenVersion(userID uint) error {
+	return r.db.Model(&model.User{}).Where("id = ?", userID).
+		Update("token_version", gorm.Expr("token_version + 1")).Error
 }
 
 // ============ OAuth 相关 ============

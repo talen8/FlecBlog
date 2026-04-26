@@ -1,17 +1,15 @@
 import { ref } from 'vue';
 import type { User } from '@/types/user';
 
-const ACCESS_TOKEN_KEY = 'access_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
-const LEGACY_USER_INFO_KEY = 'userInfo';
-
 const currentUser = ref<User | null>(null);
 let userInfoPromise: Promise<User | null> | null = null;
 let userInfoRequestId = 0;
 let redirectingToLogin = false;
 
+const ACCESS_TOKEN_KEY = 'access_token';
+
 /**
- * 获取本地存储中的access token
+ * 获取内存中的 access token
  * @returns {string | null} access token字符串或null
  */
 export const getAccessToken = (): string | null => {
@@ -19,42 +17,35 @@ export const getAccessToken = (): string | null => {
 };
 
 /**
- * 获取本地存储中的refresh token
- * @returns {string | null} refresh token字符串或null
+ * 设置 access token
+ * @param {string} token access token字符串
  */
-export const getRefreshToken = (): string | null => {
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
+export const setAccessToken = (token: string): void => {
+  localStorage.setItem(ACCESS_TOKEN_KEY, token);
 };
 
 /**
- * 将双token保存到本地存储
- * @param {string} accessToken access token字符串
- * @param {string} refreshToken refresh token字符串
+ * 清除 access token
  */
-export const setTokens = (accessToken: string, refreshToken: string): void => {
-  redirectingToLogin = false;
-  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-};
-
-/**
- * 设置access token（用于token刷新）
- * @param {string} accessToken access token字符串
- */
-export const setAccessToken = (accessToken: string): void => {
-  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-};
-
-/**
- * 从本地存储中移除双token
- */
-export const removeTokens = (): void => {
+export const clearAccessToken = (): void => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
 };
 
-const clearLegacyUserInfo = (): void => {
-  localStorage.removeItem(LEGACY_USER_INFO_KEY);
+/**
+ * 检查用户是否已经登录
+ * @returns {boolean} true表示已登录，false表示未登录
+ */
+export const checkAuth = (): boolean => {
+  const token = getAccessToken();
+  return token !== null && token !== '';
+};
+
+/**
+ * 清除本地认证状态
+ */
+export const clearAuthState = (): void => {
+  clearAccessToken();
+  clearUserInfo();
 };
 
 /**
@@ -62,7 +53,6 @@ const clearLegacyUserInfo = (): void => {
  */
 export const setUserInfo = (user: User | null): void => {
   currentUser.value = user;
-  clearLegacyUserInfo();
 };
 
 /**
@@ -72,7 +62,6 @@ export const clearUserInfo = (): void => {
   currentUser.value = null;
   userInfoRequestId += 1;
   userInfoPromise = null;
-  clearLegacyUserInfo();
 };
 
 /**
@@ -140,23 +129,6 @@ export const getCurrentUserRole = (): string => {
  */
 export const isSuperAdmin = (): boolean => {
   return currentUser.value?.role === 'super_admin';
-};
-
-/**
- * 检查用户是否已经登录（是否有access token）
- * @returns {boolean} true表示已登录，false表示未登录
- */
-export const checkAuth = (): boolean => {
-  const token = getAccessToken();
-  return token !== null && token !== '';
-};
-
-/**
- * 清除本地认证状态
- */
-export const clearAuthState = (): void => {
-  removeTokens();
-  clearUserInfo();
 };
 
 /**

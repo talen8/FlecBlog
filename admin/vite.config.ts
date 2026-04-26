@@ -59,6 +59,10 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5174,
       proxy: {
+        '/api': {
+          target: backendBaseUrl,
+          changeOrigin: true
+        },
         '/uploads': {
           target: backendBaseUrl,
           changeOrigin: true

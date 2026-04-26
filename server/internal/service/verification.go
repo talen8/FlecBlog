@@ -122,8 +122,8 @@ func (s *VerificationService) ResetPassword(req *dto.ResetPasswordRequest) error
 		return err
 	}
 
-	// 更新密码
-	if err := s.userRepo.UpdatePassword(user.ID, string(hashedPassword)); err != nil {
+	// 更新密码并递增 TokenVersion 使旧 token 失效
+	if err := s.userRepo.UpdatePasswordAndIncrementVersion(user.ID, string(hashedPassword)); err != nil {
 		return err
 	}
 

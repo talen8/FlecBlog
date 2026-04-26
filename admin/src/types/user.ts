@@ -27,7 +27,7 @@ export interface LoginParams {
 // 登录响应
 export interface LoginResponse {
   access_token: string;
-  refresh_token: string;
+  user?: User;
 }
 
 // 重置密码请求
@@ -81,13 +81,7 @@ export interface UserListData {
   page_size: number;
 }
 
-// 刷新Token请求
-export interface RefreshTokenRequest {
-  refresh_token: string;
-}
-
 // 刷新Token响应
 export interface RefreshTokenResponse {
   access_token: string;
-  refresh_token: string;
 }

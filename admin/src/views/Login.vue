@@ -43,7 +43,7 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { login } from '@/api/user';
-import { fetchUserInfo, setTokens, clearAuthState } from '@/utils/auth';
+import { fetchUserInfo, setAccessToken, clearAuthState } from '@/utils/auth';
 import type { LoginParams } from '@/types/user';
 
 const router = useRouter();
@@ -61,8 +61,8 @@ const handleLogin = async () => {
 
   loading.value = true;
   try {
-    const { access_token, refresh_token } = await login(formState);
-    setTokens(access_token, refresh_token);
+    const { access_token } = await login(formState);
+    setAccessToken(access_token);
     await fetchUserInfo();
     ElMessage.success('登录成功');
     router.push('/');

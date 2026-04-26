@@ -8,12 +8,12 @@ onMounted(async () => {
   if (!import.meta.client) return;
 
   const token = route.query.token as string;
-  const refreshToken = route.query.refresh_token as string;
   const redirect = route.query.redirect as string;
 
-  if (token && refreshToken) {
-    // 保存 Token
-    setTokens(token, refreshToken);
+  if (token) {
+    // 保存 Access Token
+    const { setAccessToken } = await import('@/utils/auth');
+    setAccessToken(token);
 
     // 获取用户信息
     await fetchUserInfo();
