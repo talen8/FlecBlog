@@ -1903,7 +1903,7 @@ const handleParseMusic = async () => {
   }
   audioDialog.loading = true;
   try {
-    const apiUrl = `https://api.injahow.cn/meting/?server=${audioDialog.musicServer}&type=song&id=${audioDialog.musicId.trim()}`;
+    const apiUrl = `https://meting.flec.top/api?server=${audioDialog.musicServer}&type=song&id=${audioDialog.musicId.trim()}`;
     const response = await fetch(apiUrl);
     const data = await response.json();
     if (data && data.length > 0) {

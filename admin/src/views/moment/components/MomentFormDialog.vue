@@ -273,18 +273,19 @@
   <!-- 音乐Dialog -->
   <el-dialog v-model="musicDialogVisible" title="动态音乐" width="90%" style="max-width: 400px">
     <div class="music-form">
-      <el-select
-        v-model="formData.content.music!.server"
-        placeholder="音乐平台"
-        style="width: 100%; margin-bottom: 12px"
-      >
-        <el-option label="网易云音乐" value="netease" />
-        <el-option label="QQ音乐" value="tencent" />
-        <el-option label="酷狗音乐" value="kugou" />
-        <el-option label="虾米音乐" value="xiami" />
-        <el-option label="百度音乐" value="baidu" />
-        <el-option label="酷我音乐" value="kuwo" />
-      </el-select>
+      <div style="display: flex; gap: 8px; margin-bottom: 12px">
+        <el-select v-model="formData.content.music!.server" placeholder="音乐平台" style="flex: 1">
+          <el-option label="网易云音乐" value="netease" />
+          <el-option label="QQ音乐" value="tencent" />
+        </el-select>
+        <el-button
+          v-if="formData.content.music!.server === 'netease'"
+          type="primary"
+          @click="musicSearchDialogVisible = true"
+        >
+          搜索
+        </el-button>
+      </div>
       <el-select
         v-model="formData.content.music!.type"
         placeholder="类型"
@@ -294,7 +295,6 @@
         <el-option label="歌单" value="playlist" />
         <el-option label="艺术家" value="artist" />
         <el-option label="专辑" value="album" />
-        <el-option label="搜索" value="search" />
       </el-select>
       <div style="display: flex; gap: 8px; margin-bottom: 12px">
         <el-input v-model="formData.content.music!.id" placeholder="音乐ID" style="flex: 1" />
@@ -314,16 +314,11 @@
                 {
                   netease: '网易云',
                   tencent: 'QQ音乐',
-                  kugou: '酷狗',
-                  xiami: '虾米',
-                  baidu: '百度',
-                  kuwo: '酷我',
                 }[musicInfo.server]
               }}
               ·
               {{
                 {
-                  search: '搜索',
                   song: '单曲',
                   album: '专辑',
                   artist: '艺术家',
@@ -339,6 +334,50 @@
             <Close />
           </el-icon>
         </el-button>
+      </div>
+    </div>
+  </el-dialog>
+
+  <!-- 音乐搜索Dialog -->
+  <el-dialog
+    v-model="musicSearchDialogVisible"
+    title="搜索网易云音乐"
+    width="90%"
+    style="max-width: 500px"
+  >
+    <div class="music-search-form">
+      <div style="display: flex; gap: 8px; margin-bottom: 16px">
+        <el-input
+          v-model="musicSearchKeyword"
+          placeholder="输入歌曲名、歌手名搜索"
+          @keyup.enter="handleSearchMusic"
+          style="flex: 1"
+        />
+        <el-button type="primary" :loading="searchingMusic" @click="handleSearchMusic">
+          {{ searchingMusic ? '搜索中...' : '搜索' }}
+        </el-button>
+      </div>
+
+      <!-- 搜索结果列表 -->
+      <div v-if="musicSearchResults.length" class="music-search-results">
+        <div
+          v-for="(item, index) in musicSearchResults"
+          :key="index"
+          class="music-search-item"
+          @click="selectMusic(item)"
+        >
+          <img v-if="item.pic" :src="item.pic" alt="封面" class="search-item-cover" />
+          <div class="search-item-info">
+            <div class="search-item-title">{{ item.title }}</div>
+            <div class="search-item-artist">{{ item.author }}</div>
+          </div>
+          <el-button size="small" type="primary" text>选择</el-button>
+        </div>
+      </div>
+
+      <!-- 无结果提示 -->
+      <div v-else-if="hasSearched && !searchingMusic" class="music-search-empty">
+        未找到相关音乐，请尝试其他关键词
       </div>
     </div>
   </el-dialog>
@@ -485,11 +524,25 @@ interface MusicInfo {
   title: string;
   artist: string;
   pic: string;
-  type: 'search' | 'song' | 'album' | 'artist' | 'playlist'; // 音乐类型
-  server: 'netease' | 'tencent' | 'kugou' | 'xiami' | 'baidu' | 'kuwo'; // 平台
+  type: 'song' | 'album' | 'artist' | 'playlist'; // 音乐类型
+  server: 'netease' | 'tencent'; // 平台
 }
 const musicInfo = ref<MusicInfo | null>(null);
 const fetchingMusic = ref(false);
+
+// 音乐搜索相关
+interface MusicSearchItem {
+  title: string;
+  author: string;
+  url: string;
+  pic: string;
+  lrc: string;
+}
+const musicSearchDialogVisible = ref(false);
+const musicSearchKeyword = ref('');
+const musicSearchResults = ref<MusicSearchItem[]>([]);
+const searchingMusic = ref(false);
+const hasSearched = ref(false);
 
 // 图片数据项
 interface ImageItem {
@@ -619,6 +672,12 @@ const resetForm = () => {
   videoUrlInput.value = '';
   musicInfo.value = null;
 
+  // 重置音乐搜索状态
+  musicSearchDialogVisible.value = false;
+  musicSearchKeyword.value = '';
+  musicSearchResults.value = [];
+  hasSearched.value = false;
+
   // 关闭所有dialog
   linkDialogVisible.value = false;
   imageDialogVisible.value = false;
@@ -667,7 +726,7 @@ const handleParseMusic = async () => {
   fetchingMusic.value = true;
   try {
     const { server, type, id } = formData.content.music;
-    const apiUrl = `https://api.injahow.cn/meting/?server=${server}&type=${type}&id=${id}`;
+    const apiUrl = `https://meting.flec.top/api?server=${server}&type=${type}&id=${id}`;
 
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -678,8 +737,8 @@ const handleParseMusic = async () => {
         title: info.name || info.title || '未知歌曲',
         artist: info.artist || info.author || '未知艺术家',
         pic: info.pic || info.cover || '',
-        type: type as 'search' | 'song' | 'album' | 'artist' | 'playlist',
-        server: server as 'netease' | 'tencent' | 'kugou' | 'xiami' | 'baidu' | 'kuwo',
+        type: type as 'song' | 'album' | 'artist' | 'playlist',
+        server: server as 'netease' | 'tencent',
       };
       ElMessage.success('解析成功');
     } else {
@@ -691,6 +750,79 @@ const handleParseMusic = async () => {
   } finally {
     fetchingMusic.value = false;
   }
+};
+
+/**
+ * 从URL中提取音乐ID
+ * @param url - 音乐URL
+ * @returns 音乐ID
+ */
+const extractMusicIdFromUrl = (url: string): string => {
+  // 匹配 id=数字 或 id=数字& 的模式
+  const match = url.match(/[?&]id=(\d+)/);
+  return match?.[1] ?? '';
+};
+
+/**
+ * 搜索网易云音乐
+ */
+const handleSearchMusic = async () => {
+  const keyword = musicSearchKeyword.value.trim();
+  if (!keyword) {
+    ElMessage.warning('请输入搜索关键词');
+    return;
+  }
+
+  searchingMusic.value = true;
+  hasSearched.value = true;
+
+  try {
+    const apiUrl = `https://meting.flec.top/api?server=netease&type=search&id=${encodeURIComponent(keyword)}`;
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    musicSearchResults.value = Array.isArray(data) ? data : [];
+  } catch {
+    ElMessage.error('搜索失败，请稍后重试');
+    musicSearchResults.value = [];
+  } finally {
+    searchingMusic.value = false;
+  }
+};
+
+/**
+ * 选择搜索结果中的音乐
+ * @param item - 搜索到的音乐项
+ */
+const selectMusic = (item: MusicSearchItem) => {
+  const musicId = extractMusicIdFromUrl(item.url);
+  if (!musicId) {
+    ElMessage.error('无法获取音乐ID');
+    return;
+  }
+
+  // 回填到音乐Dialog
+  formData.content.music!.id = musicId;
+  formData.content.music!.server = 'netease';
+  formData.content.music!.type = 'song';
+
+  // 更新音乐信息预览
+  musicInfo.value = {
+    title: item.title,
+    artist: item.author,
+    pic: item.pic,
+    type: 'song',
+    server: 'netease',
+  };
+
+  // 关闭搜索Dialog
+  musicSearchDialogVisible.value = false;
+
+  // 清空搜索状态
+  musicSearchKeyword.value = '';
+  musicSearchResults.value = [];
+  hasSearched.value = false;
+
+  ElMessage.success('已选择音乐');
 };
 
 // 本地上传图片
@@ -1263,6 +1395,65 @@ const handleSubmit = async () => {
         color: #999;
       }
     }
+  }
+}
+
+// 音乐搜索样式
+.music-search-form {
+  .music-search-results {
+    max-height: 400px;
+    overflow-y: auto;
+
+    .music-search-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #f5f7fa;
+      }
+
+      .search-item-cover {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+
+      .search-item-info {
+        flex: 1;
+        min-width: 0;
+
+        .search-item-title {
+          font-weight: 500;
+          font-size: 14px;
+          margin-bottom: 4px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .search-item-artist {
+          font-size: 12px;
+          color: #999;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+
+  .music-search-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 14px;
   }
 }
 
