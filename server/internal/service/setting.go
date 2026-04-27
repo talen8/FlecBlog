@@ -74,7 +74,9 @@ const (
 const (
 	KeyNotificationEmailHost     = "notification.email_host"
 	KeyNotificationEmailPort     = "notification.email_port"
+	KeyNotificationEmailSecure   = "notification.email_secure"
 	KeyNotificationEmailUsername = "notification.email_username"
+	KeyNotificationEmailFrom     = "notification.email_from"
 	KeyNotificationEmailPassword = "notification.email_password"
 	KeyNotificationFeishuAppID   = "notification.feishu_app_id"
 	KeyNotificationFeishuSecret  = "notification.feishu_secret"
@@ -400,8 +402,16 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 				cfg.Notification.EmailPort = port
 			}
 		}
+		// 默认使用 SSL
+		cfg.Notification.EmailSecure = "ssl"
+		if v, ok := notificationSettings[KeyNotificationEmailSecure]; ok && v != "" {
+			cfg.Notification.EmailSecure = v
+		}
 		if v, ok := notificationSettings[KeyNotificationEmailUsername]; ok && v != "" {
 			cfg.Notification.EmailUsername = v
+		}
+		if v, ok := notificationSettings[KeyNotificationEmailFrom]; ok && v != "" {
+			cfg.Notification.EmailFrom = v
 		}
 		if v, ok := notificationSettings[KeyNotificationEmailPassword]; ok && v != "" {
 			cfg.Notification.EmailPassword = v

@@ -115,7 +115,9 @@ const basicForm = ref({
 const notificationForm = ref<NotificationForm>({
   email_host: '',
   email_port: '465',
+  email_secure: 'ssl',
   email_username: '',
+  email_from: '',
   email_password: '',
   feishu_app_id: '',
   feishu_secret: '',
@@ -346,7 +348,9 @@ const loadNotificationConfigs = async () => {
     Object.assign(notificationForm.value, {
       email_host: configs.email_host || '',
       email_port: configs.email_port || '465',
+      email_secure: configs.email_secure || 'ssl',
       email_username: configs.email_username || '',
+      email_from: configs.email_from || '',
       email_password: configs.email_password || '',
       feishu_app_id: configs.feishu_app_id || '',
       feishu_secret: configs.feishu_secret || '',
@@ -577,7 +581,9 @@ const handleSave = async () => {
     const notificationPayload: Record<string, string> = {
       'notification.email_host': notificationForm.value.email_host,
       'notification.email_port': String(notificationForm.value.email_port),
+      'notification.email_secure': notificationForm.value.email_secure,
       'notification.email_username': notificationForm.value.email_username,
+      'notification.email_from': notificationForm.value.email_from,
       'notification.email_password': notificationForm.value.email_password,
       'notification.feishu_app_id': notificationForm.value.feishu_app_id,
       'notification.feishu_secret': notificationForm.value.feishu_secret,
