@@ -65,7 +65,7 @@ body {
     <p>Hi，<strong>{{index .Data "receiver_name"}}</strong>：</p>
     <p>您在 <strong>"{{index .Data "page_title"}}"</strong> 的评论收到了回复：</p>
     <div class="quote">
-      <p><strong>{{index .Data "sender_name"}}：</strong>{{.Content}}</p>
+      <p><strong>{{index .Data "sender_name"}}：</strong>{{index .Data "comment_content"}}</p>
     </div>
     <a href="{{.SiteURL}}{{.Link}}" class="button">查看回复</a>
   </div>
