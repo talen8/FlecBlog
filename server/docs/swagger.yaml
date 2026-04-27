@@ -1003,8 +1003,18 @@ definitions:
     - title
     - type
     type: object
+  dto.MomentAudio:
+    properties:
+      url:
+        description: 音频URL（本地音频或在线音频链接）
+        type: string
+    type: object
   dto.MomentContent:
     properties:
+      audio:
+        allOf:
+        - $ref: '#/definitions/dto.MomentAudio'
+        description: 音频（本地或在线）
       book:
         additionalProperties: {}
         description: 书籍
@@ -1066,10 +1076,10 @@ definitions:
         description: 音乐ID
         type: string
       server:
-        description: 音乐平台：netease, tencent, kugou, xiami, baidu
+        description: 音乐平台：netease, tencent
         type: string
       type:
-        description: 类型：song, playlist, album, search, artist
+        description: 类型：song, playlist, album, artist
         type: string
     type: object
   dto.MomentVideo:

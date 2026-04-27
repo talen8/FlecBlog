@@ -77,11 +77,12 @@
               </span>
             </div>
 
-            <!-- 所有标签（标签、视频、音乐、链接、位置） -->
+            <!-- 所有标签（标签、视频、音频、音乐、链接、位置） -->
             <div
               v-if="
                 row.content.tags ||
                 row.content.video ||
+                row.content.audio ||
                 row.content.music ||
                 row.content.link ||
                 row.content.location
@@ -97,6 +98,12 @@
               <el-tag v-if="row.content.video" type="primary" size="small">
                 <i class="ri-video-line"></i>
                 {{ getVideoPlatformName(row.content.video.platform) }}
+              </el-tag>
+
+              <!-- 音频 -->
+              <el-tag v-if="row.content.audio" type="success" size="small">
+                <i class="ri-mic-line"></i>
+                音频
               </el-tag>
 
               <!-- 音乐 -->
@@ -203,7 +210,6 @@ const editingMoment = ref<Moment | null>(null);
 // 音乐平台和类型映射
 const MUSIC_LABELS = {
   type: {
-    search: '搜索',
     song: '单曲',
     album: '专辑',
     artist: '艺术家',
@@ -212,10 +218,6 @@ const MUSIC_LABELS = {
   server: {
     netease: '网易云',
     tencent: 'QQ音乐',
-    kugou: '酷狗',
-    xiami: '虾米',
-    baidu: '百度',
-    kuwo: '酷我',
   },
 };
 

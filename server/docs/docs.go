@@ -8830,9 +8830,26 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.MomentAudio": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "description": "音频URL（本地音频或在线音频链接）",
+                    "type": "string"
+                }
+            }
+        },
         "dto.MomentContent": {
             "type": "object",
             "properties": {
+                "audio": {
+                    "description": "音频（本地或在线）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.MomentAudio"
+                        }
+                    ]
+                },
                 "book": {
                     "description": "书籍",
                     "type": "object",
@@ -8927,11 +8944,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "server": {
-                    "description": "音乐平台：netease, tencent, kugou, xiami, baidu",
+                    "description": "音乐平台：netease, tencent",
                     "type": "string"
                 },
                 "type": {
-                    "description": "类型：song, playlist, album, search, artist",
+                    "description": "类型：song, playlist, album, artist",
                     "type": "string"
                 }
             }

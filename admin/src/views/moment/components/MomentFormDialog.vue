@@ -41,6 +41,14 @@
           circle
           @click="videoDialogVisible = true"
         />
+
+        <!-- 音频按钮 -->
+        <el-button
+          :type="audioItem ? 'primary' : 'default'"
+          :icon="Microphone"
+          circle
+          @click="audioDialogVisible = true"
+        />
       </div>
 
       <!-- 文本输入区域 -->
@@ -141,6 +149,24 @@
             <!-- 本地视频预览（video标签） -->
             <div class="video-local-preview-container" v-else-if="preview.isLocal && preview.url">
               <video :src="preview.url" controls class="video-local"></video>
+            </div>
+            <el-button size="small" text @click="removeContent(preview.type)">
+              <el-icon>
+                <Close />
+              </el-icon>
+            </el-button>
+          </template>
+          <!-- 音频类型：使用audio标签显示 -->
+          <template v-else-if="preview.type === 'audio'">
+            <div class="content-icon">
+              <div class="audio-cover-placeholder">
+                <el-icon>
+                  <Microphone />
+                </el-icon>
+              </div>
+            </div>
+            <div class="content-info">
+              <audio :src="preview.url" controls class="audio-player"></audio>
             </div>
             <el-button size="small" text @click="removeContent(preview.type)">
               <el-icon>
@@ -422,6 +448,33 @@
     </div>
   </el-dialog>
 
+  <!-- 音频Dialog -->
+  <el-dialog v-model="audioDialogVisible" title="动态音频" width="90%" style="max-width: 400px">
+    <div class="audio-form">
+      <div style="display: flex; gap: 8px">
+        <!-- 未添加音频时：显示输入框和上传按钮 -->
+        <template v-if="!audioItem">
+          <el-input
+            v-model="audioUrlInput"
+            placeholder="输入音频链接或点击右侧上传"
+            @keyup.enter="addAudioUrl"
+            style="flex: 1"
+          />
+          <el-button type="primary" @click="addAudioUrl" :disabled="!audioUrlInput.trim()">
+            添加
+          </el-button>
+          <el-button type="primary" @click="handleAudioUpload">上传</el-button>
+        </template>
+
+        <!-- 已添加音频时：显示只读输入框和删除按钮 -->
+        <template v-else>
+          <el-input :value="audioItem.url" readonly style="flex: 1" />
+          <el-button type="danger" @click="removeAudio">删除</el-button>
+        </template>
+      </div>
+    </div>
+  </el-dialog>
+
   <!-- 标签Dialog -->
   <el-dialog v-model="tagDialogVisible" title="分类标签" width="90%" style="max-width: 400px">
     <div class="tags-form">
@@ -482,6 +535,7 @@ import {
   PriceTag,
   Close,
   Timer,
+  Microphone,
 } from '@element-plus/icons-vue';
 import type { CreateMomentRequest, UpdateMomentRequest, Moment } from '@/types/moment';
 import { createMoment, updateMoment } from '@/api/moment';
@@ -511,6 +565,7 @@ const linkDialogVisible = ref(false);
 const imageDialogVisible = ref(false);
 const musicDialogVisible = ref(false);
 const videoDialogVisible = ref(false);
+const audioDialogVisible = ref(false);
 const tagDialogVisible = ref(false);
 const locationDialogVisible = ref(false);
 const timeDialogVisible = ref(false);
@@ -518,6 +573,7 @@ const timeDialogVisible = ref(false);
 // 其他状态
 const imageUrlInput = ref('');
 const videoUrlInput = ref('');
+const audioUrlInput = ref('');
 
 // 音乐信息
 interface MusicInfo {
@@ -563,6 +619,14 @@ interface VideoItem {
 }
 const videoItem = ref<VideoItem | null>(null);
 
+// 音频数据项
+interface AudioItem {
+  type: 'file' | 'url';
+  file?: File;
+  url: string;
+}
+const audioItem = ref<AudioItem | null>(null);
+
 // 表单数据
 const formData = reactive<CreateMomentRequest>({
   content: {
@@ -570,6 +634,7 @@ const formData = reactive<CreateMomentRequest>({
     tags: '',
     images: [],
     video: { url: '', platform: '', video_id: '' },
+    audio: { url: '' },
     music: { server: 'netease', type: 'song', id: '' },
     link: { url: '', title: '', favicon: '' },
     location: '',
@@ -592,7 +657,6 @@ const otherContentPreviews = computed(() => {
   if (formData.content.music?.id) {
     const MUSIC_LABELS = {
       type: {
-        search: '搜索',
         song: '单曲',
         album: '专辑',
         artist: '艺术家',
@@ -601,10 +665,6 @@ const otherContentPreviews = computed(() => {
       server: {
         netease: '网易云',
         tencent: 'QQ音乐',
-        kugou: '酷狗',
-        xiami: '虾米',
-        baidu: '百度',
-        kuwo: '酷我',
       },
     };
 
@@ -628,6 +688,14 @@ const otherContentPreviews = computed(() => {
       url: platform && video_id ? getVideoIframeSrc(platform, video_id) : url,
       isLocal: !platform,
       text: file?.name || '视频',
+    });
+  }
+  if (audioItem.value) {
+    const { url, file } = audioItem.value;
+    previews.push({
+      type: 'audio',
+      url,
+      text: file?.name || '音频',
     });
   }
   return previews;
@@ -654,6 +722,8 @@ const resetForm = () => {
   imageItems.value = [];
   cleanupVideoBlob();
   videoItem.value = null;
+  cleanupAudioBlob();
+  audioItem.value = null;
 
   Object.assign(formData, {
     content: {
@@ -661,6 +731,7 @@ const resetForm = () => {
       tags: '',
       images: [],
       video: { url: '', platform: '', video_id: '' },
+      audio: { url: '' },
       music: { server: 'netease', type: 'song', id: '' },
       link: { url: '', title: '', favicon: '' },
       location: '',
@@ -670,6 +741,7 @@ const resetForm = () => {
   publishTime.value = '';
   imageUrlInput.value = '';
   videoUrlInput.value = '';
+  audioUrlInput.value = '';
   musicInfo.value = null;
 
   // 重置音乐搜索状态
@@ -683,6 +755,7 @@ const resetForm = () => {
   imageDialogVisible.value = false;
   musicDialogVisible.value = false;
   videoDialogVisible.value = false;
+  audioDialogVisible.value = false;
   tagDialogVisible.value = false;
   locationDialogVisible.value = false;
   timeDialogVisible.value = false;
@@ -934,6 +1007,51 @@ const removeVideo = () => {
   videoItem.value = null;
 };
 
+// 清理旧的音频Blob URL
+const cleanupAudioBlob = () => {
+  if (audioItem.value?.type === 'file' && audioItem.value.url.startsWith('blob:')) {
+    URL.revokeObjectURL(audioItem.value.url);
+  }
+};
+
+// 本地上传音频
+const handleAudioUpload = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'audio/*';
+  input.onchange = e => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    cleanupAudioBlob();
+    audioItem.value = {
+      type: 'file',
+      file,
+      url: URL.createObjectURL(file),
+    };
+  };
+  input.click();
+};
+
+// 添加网络音频
+const addAudioUrl = () => {
+  const url = audioUrlInput.value.trim();
+  if (!url) return;
+
+  cleanupAudioBlob();
+  audioItem.value = {
+    type: 'url',
+    url,
+  };
+  audioUrlInput.value = '';
+};
+
+// 删除音频
+const removeAudio = () => {
+  cleanupAudioBlob();
+  audioItem.value = null;
+};
+
 // 清理 Blob URL
 const cleanupBlobUrl = (item: ImageItem) => {
   if (item.type === 'file' && item.url.startsWith('blob:')) {
@@ -975,6 +1093,9 @@ const removeContent = (type: string) => {
     video: () => {
       removeVideo();
     },
+    audio: () => {
+      removeAudio();
+    },
   };
   removeMap[type as keyof typeof removeMap]?.();
 };
@@ -1007,6 +1128,14 @@ watch(
           video_id: moment.content.video.video_id,
         };
       }
+
+      // 加载已有音频（编辑时）
+      if (moment.content.audio?.url) {
+        audioItem.value = {
+          type: 'url' as const,
+          url: moment.content.audio.url,
+        };
+      }
     }
   },
   { immediate: true }
@@ -1037,6 +1166,18 @@ const uploadVideo = async (): Promise<string | null> => {
   return videoItem.value.url;
 };
 
+// 上传音频（本地文件上传，网络音频直接使用）
+const uploadAudio = async (): Promise<string | null> => {
+  if (!audioItem.value) return null;
+
+  if (audioItem.value.type === 'file' && audioItem.value.file) {
+    const result = await uploadFile(audioItem.value.file, '动态音频');
+    return result.file_url;
+  }
+
+  return audioItem.value.url;
+};
+
 // 提交表单
 const handleCancel = () => {
   visible.value = false;
@@ -1051,6 +1192,9 @@ const handleSubmit = async () => {
 
     // 上传视频
     const uploadedVideo = await uploadVideo();
+
+    // 上传音频
+    const uploadedAudio = await uploadAudio();
 
     // 清理数据，只传递有值的字段
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1068,6 +1212,9 @@ const handleSubmit = async () => {
         content.video.platform = videoItem.value.platform;
         content.video.video_id = videoItem.value.video_id;
       }
+    }
+    if (uploadedAudio?.trim()) {
+      content.audio = { url: uploadedAudio.trim() };
     }
     if (formData.content.music?.id?.trim()) {
       content.music = {
@@ -1200,7 +1347,8 @@ const handleSubmit = async () => {
         }
 
         .music-cover-placeholder,
-        .video-icon-placeholder {
+        .video-icon-placeholder,
+        .audio-cover-placeholder {
           width: 50px;
           height: 50px;
           display: flex;
@@ -1279,6 +1427,14 @@ const handleSubmit = async () => {
         align-self: flex-end;
       }
     }
+
+    // 音频预览项样式
+    .audio-preview {
+      .audio-player {
+        width: 100%;
+        height: 40px;
+      }
+    }
   }
 
   .bottom-toolbar {
@@ -1326,6 +1482,7 @@ const handleSubmit = async () => {
 .image-form,
 .music-form,
 .video-form,
+.audio-form,
 .tags-form,
 .location-form,
 .time-form {

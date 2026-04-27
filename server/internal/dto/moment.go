@@ -43,6 +43,7 @@ type MomentContent struct {
 	Link     *MomentLink    `json:"link,omitempty"`     // 外链
 	Music    *MomentMusic   `json:"music,omitempty"`    // 音乐（基于MetingJS）
 	Video    *MomentVideo   `json:"video,omitempty"`    // 视频（本地或在线）
+	Audio    *MomentAudio   `json:"audio,omitempty"`    // 音频（本地或在线）
 	Book     map[string]any `json:"book,omitempty"`     // 书籍
 	Movie    map[string]any `json:"movie,omitempty"`    // 电影
 }
@@ -56,8 +57,8 @@ type MomentLink struct {
 
 // MomentMusic 音乐结构（基于 MetingJS）
 type MomentMusic struct {
-	Server string `json:"server"` // 音乐平台：netease, tencent, kugou, xiami, baidu
-	Type   string `json:"type"`   // 类型：song, playlist, album, search, artist
+	Server string `json:"server"` // 音乐平台：netease, tencent
+	Type   string `json:"type"`   // 类型：song, playlist, album, artist
 	ID     string `json:"id"`     // 音乐ID
 }
 
@@ -66,6 +67,11 @@ type MomentVideo struct {
 	URL      string `json:"url"`                // 视频URL（本地视频或在线视频链接）
 	Platform string `json:"platform,omitempty"` // 平台：bilibili, youtube（本地视频为空）
 	VideoID  string `json:"video_id,omitempty"` // 视频ID（在线视频的ID，本地视频为空）
+}
+
+// MomentAudio 音频结构
+type MomentAudio struct {
+	URL string `json:"url"` // 音频URL（本地音频或在线音频链接）
 }
 
 // MomentForWebResponse 前台动态响应
@@ -88,6 +94,7 @@ type ListMomentsRequest struct {
 	IsPublish *bool  `form:"is_publish"` // 是否发布
 	HasImages *bool  `form:"has_images"` // 是否有图片
 	HasVideo  *bool  `form:"has_video"`  // 是否有视频
+	HasAudio  *bool  `form:"has_audio"`  // 是否有音频
 	HasMusic  *bool  `form:"has_music"`  // 是否有音乐
 	HasLink   *bool  `form:"has_link"`   // 是否有链接
 	StartTime string `form:"start_time"` // 发布开始时间

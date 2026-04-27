@@ -257,6 +257,11 @@ func (s *MomentService) markFilesAsUsed(content *dto.MomentContent) {
 	if content.Video != nil && content.Video.URL != "" && content.Video.Platform == "" {
 		_ = s.fileService.MarkAsUsed(content.Video.URL)
 	}
+
+	// 标记音频（如果是本地音频）
+	if content.Audio != nil && content.Audio.URL != "" {
+		_ = s.fileService.MarkAsUsed(content.Audio.URL)
+	}
 }
 
 // markFilesAsUnused 标记内容中的所有文件为未使用
@@ -273,6 +278,11 @@ func (s *MomentService) markFilesAsUnused(content *dto.MomentContent) {
 	// 标记视频（如果是本地视频）
 	if content.Video != nil && content.Video.URL != "" && content.Video.Platform == "" {
 		_ = s.fileService.MarkAsUnused(content.Video.URL)
+	}
+
+	// 标记音频（如果是本地音频）
+	if content.Audio != nil && content.Audio.URL != "" {
+		_ = s.fileService.MarkAsUnused(content.Audio.URL)
 	}
 }
 
@@ -321,6 +331,26 @@ func (s *MomentService) updateFileStatus(oldContent, newContent *dto.MomentConte
 		}
 		if newVideoURL != "" {
 			_ = s.fileService.MarkAsUsed(newVideoURL)
+		}
+	}
+
+	// 对比音频变化（仅本地音频）
+	oldAudioURL := ""
+	if oldContent.Audio != nil {
+		oldAudioURL = oldContent.Audio.URL
+	}
+
+	newAudioURL := ""
+	if newContent.Audio != nil {
+		newAudioURL = newContent.Audio.URL
+	}
+
+	if oldAudioURL != newAudioURL {
+		if oldAudioURL != "" {
+			_ = s.fileService.MarkAsUnused(oldAudioURL)
+		}
+		if newAudioURL != "" {
+			_ = s.fileService.MarkAsUsed(newAudioURL)
 		}
 	}
 }

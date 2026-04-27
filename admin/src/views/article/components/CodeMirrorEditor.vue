@@ -522,9 +522,6 @@
                   <el-select v-model="audioDialog.musicServer" size="small" style="width: 100%">
                     <el-option value="netease" label="网易云音乐" />
                     <el-option value="tencent" label="QQ音乐" />
-                    <el-option value="kugou" label="酷狗音乐" />
-                    <el-option value="xiami" label="虾米音乐" />
-                    <el-option value="baidu" label="百度音乐" />
                   </el-select>
                 </div>
                 <div class="audio-form-item">
