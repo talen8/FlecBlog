@@ -522,9 +522,6 @@
                   <el-select v-model="audioDialog.musicServer" size="small" style="width: 100%">
                     <el-option value="netease" label="网易云音乐" />
                     <el-option value="tencent" label="QQ音乐" />
-                    <el-option value="kugou" label="酷狗音乐" />
-                    <el-option value="xiami" label="虾米音乐" />
-                    <el-option value="baidu" label="百度音乐" />
                   </el-select>
                 </div>
                 <div class="audio-form-item">
@@ -1903,7 +1900,7 @@ const handleParseMusic = async () => {
   }
   audioDialog.loading = true;
   try {
-    const apiUrl = `https://api.injahow.cn/meting/?server=${audioDialog.musicServer}&type=song&id=${audioDialog.musicId.trim()}`;
+    const apiUrl = `https://meting.flec.top/api?server=${audioDialog.musicServer}&type=song&id=${audioDialog.musicId.trim()}`;
     const response = await fetch(apiUrl);
     const data = await response.json();
     if (data && data.length > 0) {

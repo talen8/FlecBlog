@@ -357,7 +357,7 @@ function renderMusic(params: string[], sourceAttrs = ''): string {
 
   const audioId = `audio-${Math.random().toString(36).slice(2, 9)}`;
 
-  const embedUrl = `https://api.injahow.cn/meting/?server=${server}&type=song&id=${musicId}`;
+  const embedUrl = `https://meting.flec.top/api?server=${server}&type=song&id=${musicId}`;
 
   return `<div class="custom-audio" data-audio-id="${audioId}" data-music-id="${musicId}"${sourceAttrs}>
   <div class="custom-audio-type">播放在线音乐</div>

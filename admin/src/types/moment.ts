@@ -8,6 +8,9 @@ export interface MomentContent {
     platform?: string;
     video_id?: string;
   };
+  audio?: {
+    url: string;
+  };
   music?: {
     server: string;
     type: string;
@@ -79,6 +82,7 @@ export interface MomentListQuery {
   is_publish?: boolean; // 是否发布
   has_images?: boolean; // 是否有图片
   has_video?: boolean; // 是否有视频
+  has_audio?: boolean; // 是否有音频
   has_music?: boolean; // 是否有音乐
   has_link?: boolean; // 是否有链接
   start_time?: string; // 发布开始时间

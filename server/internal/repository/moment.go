@@ -79,12 +79,12 @@ func (r *MomentRepository) List(
 		}
 	}
 
-	// 按是否有音乐筛选
+	// 按是否有音乐筛选（包含音乐和音频）
 	if hasMusic != nil {
 		if *hasMusic {
-			query = query.Where("content::text ILIKE '%\"music\":%'")
+			query = query.Where("(content::text ILIKE '%\"music\":%' AND content::text NOT ILIKE '%\"music\":{}%') OR (content::text ILIKE '%\"audio\":%' AND content::text NOT ILIKE '%\"audio\":{}%')")
 		} else {
-			query = query.Where("content::text NOT ILIKE '%\"music\":%' OR content::text ILIKE '%\"music\":{}%'")
+			query = query.Where("(content::text NOT ILIKE '%\"music\":%' OR content::text ILIKE '%\"music\":{}%') AND (content::text NOT ILIKE '%\"audio\":%' OR content::text ILIKE '%\"audio\":{}%')")
 		}
 	}
 

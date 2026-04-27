@@ -94,6 +94,7 @@ onUnmounted(() => {
 const getMomentContentType = (moment: Moment) => {
   if (moment.content.images?.length) return '图片动态';
   if (moment.content.video) return '视频动态';
+  if (moment.content.audio) return '音频动态';
   if (moment.content.music) return '音乐动态';
   if (moment.content.link) return '链接分享';
   return '动态';
@@ -197,6 +198,11 @@ const handleCommentClick = (moment: Moment) => {
               "
               allowfullscreen
             />
+          </div>
+
+          <!-- 音频内容 -->
+          <div v-if="moment.content.audio" class="moment-audio">
+            <audio :src="moment.content.audio.url" controls preload="metadata" />
           </div>
 
           <!-- 音乐内容 -->
@@ -507,6 +513,24 @@ const handleCommentClick = (moment: Moment) => {
     .moment-music {
       margin-top: 12px;
       transition: transform 0.3s ease;
+
+      &:hover {
+        transform: translate3d(0, -2px, 0) scale(1.02);
+      }
+    }
+
+    .moment-audio {
+      margin-top: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--flec-moment-card-bg);
+      transition: transform 0.3s ease;
+
+      audio {
+        width: 100%;
+        height: 50px;
+        display: block;
+      }
 
       &:hover {
         transform: translate3d(0, -2px, 0) scale(1.02);

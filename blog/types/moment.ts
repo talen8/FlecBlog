@@ -8,11 +8,18 @@ export interface MomentVideo {
 }
 
 /**
+ * 音频内容
+ */
+export interface MomentAudio {
+  url: string;
+}
+
+/**
  * 音乐内容
  */
 export interface MomentMusic {
-  server: 'netease' | 'tencent' | 'kugou' | 'xiami' | 'baidu';
-  type: 'song' | 'playlist' | 'album' | 'search' | 'artist';
+  server: 'netease' | 'tencent';
+  type: 'song' | 'playlist' | 'album' | 'artist';
   id: string;
 }
 
@@ -34,6 +41,7 @@ export interface MomentContent {
   location?: string;
   tags?: string;
   video?: MomentVideo;
+  audio?: MomentAudio;
   music?: MomentMusic;
   link?: MomentLink;
 }

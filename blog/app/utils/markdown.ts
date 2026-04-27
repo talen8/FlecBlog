@@ -255,7 +255,7 @@ function renderMusic(params: string[]): string {
   if (!server || !musicId) return '';
 
   const audioId = `audio-${simpleHash(server + musicId)}`;
-  const embedUrl = `https://api.injahow.cn/meting/?server=${server}&type=song&id=${musicId}`;
+  const embedUrl = `https://meting.flec.top/api?server=${server}&type=song&id=${musicId}`;
 
   return `<div class="custom-audio" data-audio-id="${audioId}" data-music-id="${musicId}">
   <div class="custom-audio-type">播放在线音乐</div>

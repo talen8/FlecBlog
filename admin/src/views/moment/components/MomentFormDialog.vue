@@ -41,6 +41,14 @@
           circle
           @click="videoDialogVisible = true"
         />
+
+        <!-- 音频按钮 -->
+        <el-button
+          :type="audioItem ? 'primary' : 'default'"
+          :icon="Microphone"
+          circle
+          @click="audioDialogVisible = true"
+        />
       </div>
 
       <!-- 文本输入区域 -->
@@ -141,6 +149,24 @@
             <!-- 本地视频预览（video标签） -->
             <div class="video-local-preview-container" v-else-if="preview.isLocal && preview.url">
               <video :src="preview.url" controls class="video-local"></video>
+            </div>
+            <el-button size="small" text @click="removeContent(preview.type)">
+              <el-icon>
+                <Close />
+              </el-icon>
+            </el-button>
+          </template>
+          <!-- 音频类型：使用audio标签显示 -->
+          <template v-else-if="preview.type === 'audio'">
+            <div class="content-icon">
+              <div class="audio-cover-placeholder">
+                <el-icon>
+                  <Microphone />
+                </el-icon>
+              </div>
+            </div>
+            <div class="content-info">
+              <audio :src="preview.url" controls class="audio-player"></audio>
             </div>
             <el-button size="small" text @click="removeContent(preview.type)">
               <el-icon>
@@ -273,18 +299,19 @@
   <!-- 音乐Dialog -->
   <el-dialog v-model="musicDialogVisible" title="动态音乐" width="90%" style="max-width: 400px">
     <div class="music-form">
-      <el-select
-        v-model="formData.content.music!.server"
-        placeholder="音乐平台"
-        style="width: 100%; margin-bottom: 12px"
-      >
-        <el-option label="网易云音乐" value="netease" />
-        <el-option label="QQ音乐" value="tencent" />
-        <el-option label="酷狗音乐" value="kugou" />
-        <el-option label="虾米音乐" value="xiami" />
-        <el-option label="百度音乐" value="baidu" />
-        <el-option label="酷我音乐" value="kuwo" />
-      </el-select>
+      <div style="display: flex; gap: 8px; margin-bottom: 12px">
+        <el-select v-model="formData.content.music!.server" placeholder="音乐平台" style="flex: 1">
+          <el-option label="网易云音乐" value="netease" />
+          <el-option label="QQ音乐" value="tencent" />
+        </el-select>
+        <el-button
+          v-if="formData.content.music!.server === 'netease'"
+          type="primary"
+          @click="musicSearchDialogVisible = true"
+        >
+          搜索
+        </el-button>
+      </div>
       <el-select
         v-model="formData.content.music!.type"
         placeholder="类型"
@@ -294,7 +321,6 @@
         <el-option label="歌单" value="playlist" />
         <el-option label="艺术家" value="artist" />
         <el-option label="专辑" value="album" />
-        <el-option label="搜索" value="search" />
       </el-select>
       <div style="display: flex; gap: 8px; margin-bottom: 12px">
         <el-input v-model="formData.content.music!.id" placeholder="音乐ID" style="flex: 1" />
@@ -314,16 +340,11 @@
                 {
                   netease: '网易云',
                   tencent: 'QQ音乐',
-                  kugou: '酷狗',
-                  xiami: '虾米',
-                  baidu: '百度',
-                  kuwo: '酷我',
                 }[musicInfo.server]
               }}
               ·
               {{
                 {
-                  search: '搜索',
                   song: '单曲',
                   album: '专辑',
                   artist: '艺术家',
@@ -339,6 +360,50 @@
             <Close />
           </el-icon>
         </el-button>
+      </div>
+    </div>
+  </el-dialog>
+
+  <!-- 音乐搜索Dialog -->
+  <el-dialog
+    v-model="musicSearchDialogVisible"
+    title="搜索网易云音乐"
+    width="90%"
+    style="max-width: 500px"
+  >
+    <div class="music-search-form">
+      <div style="display: flex; gap: 8px; margin-bottom: 16px">
+        <el-input
+          v-model="musicSearchKeyword"
+          placeholder="输入歌曲名、歌手名搜索"
+          @keyup.enter="handleSearchMusic"
+          style="flex: 1"
+        />
+        <el-button type="primary" :loading="searchingMusic" @click="handleSearchMusic">
+          {{ searchingMusic ? '搜索中...' : '搜索' }}
+        </el-button>
+      </div>
+
+      <!-- 搜索结果列表 -->
+      <div v-if="musicSearchResults.length" class="music-search-results">
+        <div
+          v-for="(item, index) in musicSearchResults"
+          :key="index"
+          class="music-search-item"
+          @click="selectMusic(item)"
+        >
+          <img v-if="item.pic" :src="item.pic" alt="封面" class="search-item-cover" />
+          <div class="search-item-info">
+            <div class="search-item-title">{{ item.title }}</div>
+            <div class="search-item-artist">{{ item.author }}</div>
+          </div>
+          <el-button size="small" type="primary" text>选择</el-button>
+        </div>
+      </div>
+
+      <!-- 无结果提示 -->
+      <div v-else-if="hasSearched && !searchingMusic" class="music-search-empty">
+        未找到相关音乐，请尝试其他关键词
       </div>
     </div>
   </el-dialog>
@@ -378,6 +443,33 @@
             style="flex: 1"
           />
           <el-button type="danger" @click="removeVideo">删除</el-button>
+        </template>
+      </div>
+    </div>
+  </el-dialog>
+
+  <!-- 音频Dialog -->
+  <el-dialog v-model="audioDialogVisible" title="动态音频" width="90%" style="max-width: 400px">
+    <div class="audio-form">
+      <div style="display: flex; gap: 8px">
+        <!-- 未添加音频时：显示输入框和上传按钮 -->
+        <template v-if="!audioItem">
+          <el-input
+            v-model="audioUrlInput"
+            placeholder="输入音频链接或点击右侧上传"
+            @keyup.enter="addAudioUrl"
+            style="flex: 1"
+          />
+          <el-button type="primary" @click="addAudioUrl" :disabled="!audioUrlInput.trim()">
+            添加
+          </el-button>
+          <el-button type="primary" @click="handleAudioUpload">上传</el-button>
+        </template>
+
+        <!-- 已添加音频时：显示只读输入框和删除按钮 -->
+        <template v-else>
+          <el-input :value="audioItem.url" readonly style="flex: 1" />
+          <el-button type="danger" @click="removeAudio">删除</el-button>
         </template>
       </div>
     </div>
@@ -443,6 +535,7 @@ import {
   PriceTag,
   Close,
   Timer,
+  Microphone,
 } from '@element-plus/icons-vue';
 import type { CreateMomentRequest, UpdateMomentRequest, Moment } from '@/types/moment';
 import { createMoment, updateMoment } from '@/api/moment';
@@ -472,6 +565,7 @@ const linkDialogVisible = ref(false);
 const imageDialogVisible = ref(false);
 const musicDialogVisible = ref(false);
 const videoDialogVisible = ref(false);
+const audioDialogVisible = ref(false);
 const tagDialogVisible = ref(false);
 const locationDialogVisible = ref(false);
 const timeDialogVisible = ref(false);
@@ -479,17 +573,32 @@ const timeDialogVisible = ref(false);
 // 其他状态
 const imageUrlInput = ref('');
 const videoUrlInput = ref('');
+const audioUrlInput = ref('');
 
 // 音乐信息
 interface MusicInfo {
   title: string;
   artist: string;
   pic: string;
-  type: 'search' | 'song' | 'album' | 'artist' | 'playlist'; // 音乐类型
-  server: 'netease' | 'tencent' | 'kugou' | 'xiami' | 'baidu' | 'kuwo'; // 平台
+  type: 'song' | 'album' | 'artist' | 'playlist'; // 音乐类型
+  server: 'netease' | 'tencent'; // 平台
 }
 const musicInfo = ref<MusicInfo | null>(null);
 const fetchingMusic = ref(false);
+
+// 音乐搜索相关
+interface MusicSearchItem {
+  title: string;
+  author: string;
+  url: string;
+  pic: string;
+  lrc: string;
+}
+const musicSearchDialogVisible = ref(false);
+const musicSearchKeyword = ref('');
+const musicSearchResults = ref<MusicSearchItem[]>([]);
+const searchingMusic = ref(false);
+const hasSearched = ref(false);
 
 // 图片数据项
 interface ImageItem {
@@ -510,6 +619,14 @@ interface VideoItem {
 }
 const videoItem = ref<VideoItem | null>(null);
 
+// 音频数据项
+interface AudioItem {
+  type: 'file' | 'url';
+  file?: File;
+  url: string;
+}
+const audioItem = ref<AudioItem | null>(null);
+
 // 表单数据
 const formData = reactive<CreateMomentRequest>({
   content: {
@@ -517,6 +634,7 @@ const formData = reactive<CreateMomentRequest>({
     tags: '',
     images: [],
     video: { url: '', platform: '', video_id: '' },
+    audio: { url: '' },
     music: { server: 'netease', type: 'song', id: '' },
     link: { url: '', title: '', favicon: '' },
     location: '',
@@ -539,7 +657,6 @@ const otherContentPreviews = computed(() => {
   if (formData.content.music?.id) {
     const MUSIC_LABELS = {
       type: {
-        search: '搜索',
         song: '单曲',
         album: '专辑',
         artist: '艺术家',
@@ -548,10 +665,6 @@ const otherContentPreviews = computed(() => {
       server: {
         netease: '网易云',
         tencent: 'QQ音乐',
-        kugou: '酷狗',
-        xiami: '虾米',
-        baidu: '百度',
-        kuwo: '酷我',
       },
     };
 
@@ -575,6 +688,14 @@ const otherContentPreviews = computed(() => {
       url: platform && video_id ? getVideoIframeSrc(platform, video_id) : url,
       isLocal: !platform,
       text: file?.name || '视频',
+    });
+  }
+  if (audioItem.value) {
+    const { url, file } = audioItem.value;
+    previews.push({
+      type: 'audio',
+      url,
+      text: file?.name || '音频',
     });
   }
   return previews;
@@ -601,6 +722,8 @@ const resetForm = () => {
   imageItems.value = [];
   cleanupVideoBlob();
   videoItem.value = null;
+  cleanupAudioBlob();
+  audioItem.value = null;
 
   Object.assign(formData, {
     content: {
@@ -608,6 +731,7 @@ const resetForm = () => {
       tags: '',
       images: [],
       video: { url: '', platform: '', video_id: '' },
+      audio: { url: '' },
       music: { server: 'netease', type: 'song', id: '' },
       link: { url: '', title: '', favicon: '' },
       location: '',
@@ -617,13 +741,21 @@ const resetForm = () => {
   publishTime.value = '';
   imageUrlInput.value = '';
   videoUrlInput.value = '';
+  audioUrlInput.value = '';
   musicInfo.value = null;
+
+  // 重置音乐搜索状态
+  musicSearchDialogVisible.value = false;
+  musicSearchKeyword.value = '';
+  musicSearchResults.value = [];
+  hasSearched.value = false;
 
   // 关闭所有dialog
   linkDialogVisible.value = false;
   imageDialogVisible.value = false;
   musicDialogVisible.value = false;
   videoDialogVisible.value = false;
+  audioDialogVisible.value = false;
   tagDialogVisible.value = false;
   locationDialogVisible.value = false;
   timeDialogVisible.value = false;
@@ -667,7 +799,7 @@ const handleParseMusic = async () => {
   fetchingMusic.value = true;
   try {
     const { server, type, id } = formData.content.music;
-    const apiUrl = `https://api.injahow.cn/meting/?server=${server}&type=${type}&id=${id}`;
+    const apiUrl = `https://meting.flec.top/api?server=${server}&type=${type}&id=${id}`;
 
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -678,8 +810,8 @@ const handleParseMusic = async () => {
         title: info.name || info.title || '未知歌曲',
         artist: info.artist || info.author || '未知艺术家',
         pic: info.pic || info.cover || '',
-        type: type as 'search' | 'song' | 'album' | 'artist' | 'playlist',
-        server: server as 'netease' | 'tencent' | 'kugou' | 'xiami' | 'baidu' | 'kuwo',
+        type: type as 'song' | 'album' | 'artist' | 'playlist',
+        server: server as 'netease' | 'tencent',
       };
       ElMessage.success('解析成功');
     } else {
@@ -691,6 +823,79 @@ const handleParseMusic = async () => {
   } finally {
     fetchingMusic.value = false;
   }
+};
+
+/**
+ * 从URL中提取音乐ID
+ * @param url - 音乐URL
+ * @returns 音乐ID
+ */
+const extractMusicIdFromUrl = (url: string): string => {
+  // 匹配 id=数字 或 id=数字& 的模式
+  const match = url.match(/[?&]id=(\d+)/);
+  return match?.[1] ?? '';
+};
+
+/**
+ * 搜索网易云音乐
+ */
+const handleSearchMusic = async () => {
+  const keyword = musicSearchKeyword.value.trim();
+  if (!keyword) {
+    ElMessage.warning('请输入搜索关键词');
+    return;
+  }
+
+  searchingMusic.value = true;
+  hasSearched.value = true;
+
+  try {
+    const apiUrl = `https://meting.flec.top/api?server=netease&type=search&id=${encodeURIComponent(keyword)}`;
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    musicSearchResults.value = Array.isArray(data) ? data : [];
+  } catch {
+    ElMessage.error('搜索失败，请稍后重试');
+    musicSearchResults.value = [];
+  } finally {
+    searchingMusic.value = false;
+  }
+};
+
+/**
+ * 选择搜索结果中的音乐
+ * @param item - 搜索到的音乐项
+ */
+const selectMusic = (item: MusicSearchItem) => {
+  const musicId = extractMusicIdFromUrl(item.url);
+  if (!musicId) {
+    ElMessage.error('无法获取音乐ID');
+    return;
+  }
+
+  // 回填到音乐Dialog
+  formData.content.music!.id = musicId;
+  formData.content.music!.server = 'netease';
+  formData.content.music!.type = 'song';
+
+  // 更新音乐信息预览
+  musicInfo.value = {
+    title: item.title,
+    artist: item.author,
+    pic: item.pic,
+    type: 'song',
+    server: 'netease',
+  };
+
+  // 关闭搜索Dialog
+  musicSearchDialogVisible.value = false;
+
+  // 清空搜索状态
+  musicSearchKeyword.value = '';
+  musicSearchResults.value = [];
+  hasSearched.value = false;
+
+  ElMessage.success('已选择音乐');
 };
 
 // 本地上传图片
@@ -790,7 +995,7 @@ const addVideoUrl = async () => {
     videoUrlInput.value = '';
     ElMessage.success(`已识别：${getPlatformName(result.platform)} - ${result.video_id}`);
   } catch (_error) {
-    ElMessage.error('无法识别的视频链接，请检查URL格式（支持B站、YouTube）');
+    ElMessage.error('无法识别的视频链接，请检查URL格式');
   } finally {
     fetchingVideo.value = false;
   }
@@ -800,6 +1005,51 @@ const addVideoUrl = async () => {
 const removeVideo = () => {
   cleanupVideoBlob();
   videoItem.value = null;
+};
+
+// 清理旧的音频Blob URL
+const cleanupAudioBlob = () => {
+  if (audioItem.value?.type === 'file' && audioItem.value.url.startsWith('blob:')) {
+    URL.revokeObjectURL(audioItem.value.url);
+  }
+};
+
+// 本地上传音频
+const handleAudioUpload = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'audio/*';
+  input.onchange = e => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    cleanupAudioBlob();
+    audioItem.value = {
+      type: 'file',
+      file,
+      url: URL.createObjectURL(file),
+    };
+  };
+  input.click();
+};
+
+// 添加网络音频
+const addAudioUrl = () => {
+  const url = audioUrlInput.value.trim();
+  if (!url) return;
+
+  cleanupAudioBlob();
+  audioItem.value = {
+    type: 'url',
+    url,
+  };
+  audioUrlInput.value = '';
+};
+
+// 删除音频
+const removeAudio = () => {
+  cleanupAudioBlob();
+  audioItem.value = null;
 };
 
 // 清理 Blob URL
@@ -843,6 +1093,9 @@ const removeContent = (type: string) => {
     video: () => {
       removeVideo();
     },
+    audio: () => {
+      removeAudio();
+    },
   };
   removeMap[type as keyof typeof removeMap]?.();
 };
@@ -875,6 +1128,14 @@ watch(
           video_id: moment.content.video.video_id,
         };
       }
+
+      // 加载已有音频（编辑时）
+      if (moment.content.audio?.url) {
+        audioItem.value = {
+          type: 'url' as const,
+          url: moment.content.audio.url,
+        };
+      }
     }
   },
   { immediate: true }
@@ -905,6 +1166,18 @@ const uploadVideo = async (): Promise<string | null> => {
   return videoItem.value.url;
 };
 
+// 上传音频（本地文件上传，网络音频直接使用）
+const uploadAudio = async (): Promise<string | null> => {
+  if (!audioItem.value) return null;
+
+  if (audioItem.value.type === 'file' && audioItem.value.file) {
+    const result = await uploadFile(audioItem.value.file, '动态音频');
+    return result.file_url;
+  }
+
+  return audioItem.value.url;
+};
+
 // 提交表单
 const handleCancel = () => {
   visible.value = false;
@@ -919,6 +1192,9 @@ const handleSubmit = async () => {
 
     // 上传视频
     const uploadedVideo = await uploadVideo();
+
+    // 上传音频
+    const uploadedAudio = await uploadAudio();
 
     // 清理数据，只传递有值的字段
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -936,6 +1212,9 @@ const handleSubmit = async () => {
         content.video.platform = videoItem.value.platform;
         content.video.video_id = videoItem.value.video_id;
       }
+    }
+    if (uploadedAudio?.trim()) {
+      content.audio = { url: uploadedAudio.trim() };
     }
     if (formData.content.music?.id?.trim()) {
       content.music = {
@@ -1068,7 +1347,8 @@ const handleSubmit = async () => {
         }
 
         .music-cover-placeholder,
-        .video-icon-placeholder {
+        .video-icon-placeholder,
+        .audio-cover-placeholder {
           width: 50px;
           height: 50px;
           display: flex;
@@ -1147,6 +1427,14 @@ const handleSubmit = async () => {
         align-self: flex-end;
       }
     }
+
+    // 音频预览项样式
+    .audio-preview {
+      .audio-player {
+        width: 100%;
+        height: 40px;
+      }
+    }
   }
 
   .bottom-toolbar {
@@ -1194,6 +1482,7 @@ const handleSubmit = async () => {
 .image-form,
 .music-form,
 .video-form,
+.audio-form,
 .tags-form,
 .location-form,
 .time-form {
@@ -1263,6 +1552,65 @@ const handleSubmit = async () => {
         color: #999;
       }
     }
+  }
+}
+
+// 音乐搜索样式
+.music-search-form {
+  .music-search-results {
+    max-height: 400px;
+    overflow-y: auto;
+
+    .music-search-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #f5f7fa;
+      }
+
+      .search-item-cover {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+
+      .search-item-info {
+        flex: 1;
+        min-width: 0;
+
+        .search-item-title {
+          font-weight: 500;
+          font-size: 14px;
+          margin-bottom: 4px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .search-item-artist {
+          font-size: 12px;
+          color: #999;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+
+  .music-search-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 14px;
   }
 }
 
