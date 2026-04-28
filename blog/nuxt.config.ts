@@ -151,11 +151,6 @@ export default defineNuxtConfig({
               return 'highlight';
             }
 
-            // 图标库（较大，独立分割）
-            if (id.includes('node_modules/remixicon')) {
-              return 'remixicon';
-            }
-
             // VueUse 工具库
             if (id.includes('node_modules/@vueuse')) {
               return 'vueuse';

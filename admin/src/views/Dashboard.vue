@@ -285,9 +285,35 @@ import {
   CaretBottom,
   Right,
 } from '@element-plus/icons-vue';
-import * as echarts from 'echarts';
+// 按需引入 Echarts
+import * as echarts from 'echarts/core';
+import { LineChart, PieChart, HeatmapChart } from 'echarts/charts';
+import {
+  GridComponent,
+  TooltipComponent,
+  LegendComponent,
+  VisualMapComponent,
+  CalendarComponent,
+  TitleComponent,
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import type { ECharts } from 'echarts/core';
 import 'echarts-wordcloud';
 import { getToday, getDaysAgo, getMonthsAgo, generateDateSeries } from '@/utils/date';
+
+// 注册需要的组件
+echarts.use([
+  LineChart,
+  PieChart,
+  HeatmapChart,
+  GridComponent,
+  TooltipComponent,
+  LegendComponent,
+  VisualMapComponent,
+  CalendarComponent,
+  TitleComponent,
+  CanvasRenderer,
+]);
 import { getUserInfo } from '@/utils/auth';
 
 // 响应式断点
@@ -325,10 +351,10 @@ const trendChartRef = ref<HTMLElement>();
 const pieChartRef = ref<HTMLElement>();
 const tagCloudRef = ref<HTMLElement>();
 const calendarChartRef = ref<HTMLElement>();
-let trendChart: echarts.ECharts | null = null;
-let pieChart: echarts.ECharts | null = null;
-let tagCloud: echarts.ECharts | null = null;
-let calendarChart: echarts.ECharts | null = null;
+let trendChart: ECharts | null = null;
+let pieChart: ECharts | null = null;
+let tagCloud: ECharts | null = null;
+let calendarChart: ECharts | null = null;
 
 const CHART_COLORS = [
   '#5470c6',

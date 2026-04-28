@@ -672,7 +672,9 @@ import type { Panel, DecorationSet } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { SearchCursor } from '@codemirror/search';
-import mermaid from 'mermaid';
+
+// Mermaid 类型声明
+type MermaidType = typeof import('mermaid').default;
 
 // 简易搜索功能
 const setSearchQuery = StateEffect.define<string>();
@@ -931,27 +933,58 @@ const setPhotoImageUrl = (rowIndex: number, imgIndex: number, url: string) => {
 const editorViewRef = shallowRef<EditorView | null>(null);
 
 // ==================== Mermaid 图表渲染 ====================
-const initMermaid = () => {
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: 'default',
-    securityLevel: 'loose',
+// Mermaid 实例缓存
+let mermaidInstance: MermaidType | null = null;
+
+/**
+ * 获取 Mermaid 实例（动态导入）
+ * @returns Mermaid 实例
+ */
+const getMermaidInstance = async (): Promise<MermaidType> => {
+  if (!mermaidInstance) {
+    const mermaidModule = await import('mermaid');
+    mermaidInstance = mermaidModule.default;
+    mermaidInstance.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+    });
+  }
+  return mermaidInstance;
+};
+
+/**
+ * 初始化 Mermaid（懒加载）
+ */
+const initMermaid = async () => {
+  // 预加载 Mermaid 实例，但不阻塞初始化
+  getMermaidInstance().catch(error => {
+    console.error('Mermaid 初始化失败:', error);
   });
 };
 
+/**
+ * 渲染 Mermaid 图表
+ */
 const renderMermaidDiagrams = async () => {
   const preview = previewPaneRef.value;
   if (!preview) return;
 
   const elements = preview.querySelectorAll('.mermaid:not(:has(svg))');
+  if (elements.length === 0) return;
 
-  for (const element of elements) {
-    try {
-      const { svg } = await mermaid.render(`mermaid-${Date.now()}`, element.textContent || '');
-      element.innerHTML = svg;
-    } catch (error) {
-      console.error('Mermaid 渲染失败:', error);
+  try {
+    const mermaid = await getMermaidInstance();
+    for (const element of elements) {
+      try {
+        const { svg } = await mermaid.render(`mermaid-${Date.now()}`, element.textContent || '');
+        element.innerHTML = svg;
+      } catch (error) {
+        console.error('Mermaid 渲染失败:', error);
+      }
     }
+  } catch (error) {
+    console.error('Mermaid 加载失败:', error);
   }
 };
 

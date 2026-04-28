@@ -117,7 +117,7 @@ jobs:
 
       - name: 上传构建产物
         if: matrix.target == 'server'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: server-dist
           path: server/dist/
@@ -135,7 +135,7 @@ jobs:
           fetch-depth: 0
 
       - name: 下载构建产物
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: server-dist
           path: server/dist/
@@ -179,7 +179,7 @@ jobs:
           echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
 
       - name: 创建 GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: release_notes.md
           draft: false

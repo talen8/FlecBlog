@@ -1,7 +1,7 @@
 # 多阶段构建 Dockerfile for Nuxt 3
 
 # 阶段 1: 构建阶段
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ COPY . .
 RUN npm run build
 
 # 阶段 2: 运行阶段
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
