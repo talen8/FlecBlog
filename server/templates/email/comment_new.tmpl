@@ -69,7 +69,7 @@ body {
     <p>您在 <strong>"{{index .Data "page_title"}}"</strong> 收到了新评论：</p>
     {{end}}
     <div class="quote">
-      <p><strong>{{index .Data "sender_name"}}：</strong>{{.Content}}</p>
+      <p><strong>{{index .Data "sender_name"}}：</strong>{{index .Data "comment_content"}}</p>
     </div>
     {{if index .Data "is_reply"}}
     <a href="{{.SiteURL}}{{.Link}}" class="button">查看回复</a>

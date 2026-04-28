@@ -79,7 +79,9 @@ type BlogConfig struct {
 type NotificationConfig struct {
 	EmailHost     string // SMTP服务器地址
 	EmailPort     int    // SMTP服务器端口
-	EmailUsername string // 邮箱账号
+	EmailSecure   string // 加密方式: none/ssl/starttls
+	EmailUsername string // SMTP登录账号
+	EmailFrom     string // 发件人邮箱地址
 	EmailPassword string // 邮箱密码
 	FeishuAppID   string // 飞书应用ID
 	FeishuSecret  string // 飞书应用Secret
