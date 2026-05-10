@@ -1,10 +1,10 @@
 <template>
   <div class="header">
     <div class="left">
-      <!-- 移动端：label 触发 checkbox -->
-      <label for="sidebar-toggle" class="toggle-sidebar mobile-only">
+      <!-- 移动端：打开抽屉侧边栏 -->
+      <button type="button" class="toggle-sidebar mobile-only" @click="handleOpenMobileSidebar">
         <i class="ri-menu-line ri-lg"></i>
-      </label>
+      </button>
       <!-- 桌面端：折叠按钮 -->
       <div class="toggle-sidebar desktop-only" @click="handleToggleSidebar">
         <i class="ri-menu-fold-3-line ri-lg" v-if="!sidebarCollapsed"></i>
@@ -59,10 +59,14 @@ interface Props {
 defineProps<Props>();
 
 // 定义事件
-const emit = defineEmits(['toggle-sidebar']);
+const emit = defineEmits(['toggle-sidebar', 'open-mobile-sidebar']);
 
 const handleToggleSidebar = () => {
   emit('toggle-sidebar');
+};
+
+const handleOpenMobileSidebar = () => {
+  emit('open-mobile-sidebar');
 };
 
 const handleLogout = async () => {
@@ -104,6 +108,10 @@ const handleLogout = async () => {
     align-items: center;
 
     .toggle-sidebar {
+      border: none;
+      background: transparent;
+      color: inherit;
+      line-height: 1;
       margin-right: 20px;
       cursor: pointer;
       padding: 8px;
