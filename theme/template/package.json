@@ -1,0 +1,35 @@
+{
+  "name": "flec-blog-theme",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@vueuse/nuxt": "^14.2.1",
+    "dayjs": "^1.11.19",
+    "isomorphic-dompurify": "^2.20.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0",
+    "nuxt": "^4.3.1",
+    "vue": "^3.5.29"
+  },
+  "devDependencies": {
+    "@nuxt/eslint-config": "^1.0.0",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^25.3.2",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "prettier": "^3.5.3",
+    "sass": "^1.97.3",
+    "typescript": "^5.9.3"
+  }
+}

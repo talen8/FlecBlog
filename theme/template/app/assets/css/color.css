@@ -1,0 +1,11 @@
+:root {
+  --theme-color: #49b1f5;
+  --theme-meta-color: #858585;
+  --font-color: #1f2d3d;
+  --flec-card-bg: #fff;
+  --flec-page-bg: #f5f7fa;
+  --flec-border: #e4e7ed;
+  --flec-border-color: #ebeef5;
+  --flec-hover-bg: rgba(0, 0, 0, 0.02);
+  --flec-heavy-bg: #f5f7fa;
+}
