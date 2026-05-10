@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlecPanel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: 12px;
+    }
+
+    .sidebar-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      padding: 10px 20px;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover {
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .nav-item.active {
+      background: #e6f4ff;
+      color: #1890ff;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 220px;
+    }
+
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h2 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #e8e8e8;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h3 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-item {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      color: #999;
+      font-size: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    th {
+      font-weight: 500;
+      color: #999;
+      font-size: 13px;
+    }
+
+    tr:hover td {
+      background: #fafafa;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+
+    .btn-primary {
+      background: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #40a9ff;
+      border-color: #40a9ff;
+      color: #fff;
+    }
+
+    .btn-danger {
+      color: #ff4d4f;
+      border-color: #ff4d4f;
+    }
+
+    .btn-danger:hover {
+      background: #ff4d4f;
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: 4px 12px;
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .badge-success { background: #f6ffed; color: #52c41a; }
+    .badge-default { background: #fafafa; color: #999; }
+    .badge-info { background: #e6f7ff; color: #1890ff; }
+
+    .form-item {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #1890ff;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .modal-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-head h3 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #999;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-foot {
+      padding: 12px 20px;
+      border-top: 1px solid #f0f0f0;
+      text-align: right;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #333;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: transform 0.3s;
+      z-index: 200;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .hidden { display: none !important; }
+
+    .loading {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading -->
+  <div id="loadingPage" class="loading">
+    <div>加载中...</div>
+  </div>
+
+  <!-- Admin -->
+  <div id="adminPage" class="layout hidden">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>FlecPanel</h1>
+      </div>
+      <nav>
+        <div class="nav-item active" onclick="showPage('dashboard')">仪表盘</div>
+        <div class="nav-item" onclick="showPage('versions')">版本管理</div>
+        <div class="nav-item" onclick="showPage('announcements')">公告管理</div>
+        <div class="nav-item" onclick="showPage('settings')">系统设置</div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="header">
+        <h2 id="pageTitle">仪表盘</h2>
+      </header>
+
+      <div class="content">
+        <!-- Dashboard -->
+        <div id="dashboardPage">
+          <div class="stats">
+            <div class="stat-item">
+              <div class="stat-value" id="statVersions">-</div>
+              <div class="stat-label">版本总数</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statEnabled">-</div>
+              <div class="stat-label">已推送</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statAnnouncements">-</div>
+              <div class="stat-label">公告</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>最新版本</h3>
+              <button class="btn btn-sm" onclick="showPage('versions')">查看全部</button>
+            </div>
+            <table>
+              <thead><tr><th>版本</th><th>日期</th><th>状态</th></tr></thead>
+              <tbody id="dashboardVersionList"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Versions -->
+        <div id="versionsPage" class="hidden">
+          <div style="margin-bottom: 16px;">
+            <button class="btn" onclick="syncGitHub()">同步 GitHub</button>
+          </div>
+          <div class="card">
+            <table>
+              <thead><tr><th>版本</th><th>日期</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody id="versionList"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Announcements -->
+        <div id="announcementsPage" class="hidden">
+          <div style="margin-bottom: 16px;">
+            <button class="btn btn-primary" onclick="openModal('annModal')">发布公告</button>
+          </div>
+          <div class="card">
+            <table>
+              <thead><tr><th>标题</th><th>内容</th><th>链接</th><th>时间</th><th>操作</th></tr></thead>
+              <tbody id="annList"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div id="settingsPage" class="hidden">
+          <div class="card" style="max-width: 500px;">
+            <div class="card-header"><h3>系统设置</h3></div>
+            <div class="card-body">
+              <div class="form-item">
+                <label class="form-label">GitHub 仓库</label>
+                <input type="text" id="settingGithubRepo" class="form-input" placeholder="owner/repo">
+                <div class="form-hint">每小时自动同步 Release</div>
+              </div>
+              <div class="form-item">
+                <label class="form-label">GitHub Token</label>
+                <input type="password" id="settingGithubToken" class="form-input" placeholder="ghp_xxxx">
+                <div class="form-hint">可选，用于提高 API 速率限制</div>
+              </div>
+              <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Version Edit Modal -->
+  <div id="versionEditModal" class="modal-mask hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>编辑版本</h3>
+        <button class="modal-close" onclick="closeModal('versionEditModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editVersionName">
+        <div class="form-item">
+          <label class="form-label">版本号</label>
+          <input type="text" id="editVersionDisplay" class="form-input" disabled style="background: #f5f5f5;">
+        </div>
+        <div class="form-item">
+          <label class="form-label">发布日期</label>
+          <input type="date" id="editVersionDate" class="form-input">
+        </div>
+        <div class="form-item">
+          <label class="form-label">更新内容</label>
+          <textarea id="editVersionChanges" class="form-input" style="min-height: 150px; resize: vertical;"></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('versionEditModal')">取消</button>
+        <button class="btn btn-primary" onclick="updateVersionFromModal()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Announcement Modal -->
+  <div id="annModal" class="modal-mask hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="annModalTitle">发布公告</h3>
+        <button class="modal-close" onclick="closeModal('annModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="annEditId">
+        <div class="form-item">
+          <label class="form-label">标题</label>
+          <input type="text" id="annTitle" class="form-input">
+        </div>
+        <div class="form-item">
+          <label class="form-label">内容</label>
+          <textarea id="annContent" class="form-input" style="min-height: 100px; resize: vertical;"></textarea>
+        </div>
+        <div class="form-item">
+          <label class="form-label">链接（可选）</label>
+          <input type="text" id="annLink" class="form-input" placeholder="https://...">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('annModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveAnnouncement()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    /**
+     * 打开模态框
+     */
+    function openModal(id) {
+      if (id === 'annModal' && !document.getElementById('annEditId').value) {
+        document.getElementById('annModalTitle').textContent = '发布公告';
+      }
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    /**
+     * 关闭模态框
+     */
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    /**
+     * 显示提示消息
+     */
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    /**
+     * 切换页面
+     */
+    function showPage(page) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const pages = ['dashboard', 'versions', 'announcements', 'settings'];
+      const titles = { dashboard: '仪表盘', versions: '版本管理', announcements: '公告管理', settings: '系统设置' };
+
+      pages.forEach(p => document.getElementById(p + 'Page').classList.toggle('hidden', p !== page));
+      document.getElementById('pageTitle').textContent = titles[page];
+
+      if (page === 'versions') loadVersions();
+      if (page === 'announcements') loadAnnouncements();
+      if (page === 'settings') loadSettings();
+      if (page === 'dashboard') loadDashboard();
+    }
+
+    /**
+     * 加载仪表盘数据
+     */
+    async function loadDashboard() {
+      try {
+        const [vRes, aRes] = await Promise.all([
+          fetch('/admin/versions?all=true'),
+          fetch('/admin/announcements')
+        ]);
+
+        const versions = (await vRes.json()).versions || [];
+        const announcements = (await aRes.json()).announcements || [];
+
+        document.getElementById('statVersions').textContent = versions.length;
+        document.getElementById('statEnabled').textContent = versions.filter(v => v.enabled).length;
+        document.getElementById('statAnnouncements').textContent = announcements.length;
+
+        const tbody = document.getElementById('dashboardVersionList');
+        tbody.innerHTML = versions.slice(0, 5).map(v =>
+          '<tr><td><code style="background:#f5f5f5;padding:2px 6px;border-radius:3px;">' + v.version + '</code></td><td>' + v.date + '</td><td><span class="badge ' + (v.enabled ? 'badge-success' : 'badge-default') + '">' + (v.enabled ? '已推送' : '未推送') + '</span></td></tr>'
+        ).join('') || '<tr><td colspan="3" class="empty">暂无数据</td></tr>';
+      } catch (e) {
+        console.error('Load dashboard failed:', e);
+        document.getElementById('statVersions').textContent = '-';
+        document.getElementById('statEnabled').textContent = '-';
+        document.getElementById('statAnnouncements').textContent = '-';
+        document.getElementById('dashboardVersionList').innerHTML = '<tr><td colspan="3" class="empty">加载失败</td></tr>';
+      }
+    }
+
+    /**
+     * 加载版本列表
+     */
+    async function loadVersions() {
+      const res = await fetch('/admin/versions?all=true');
+      const data = await res.json();
+      const tbody = document.getElementById('versionList');
+
+      if (!data.versions.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">暂无版本</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.versions.map(v => {
+        const changesStr = typeof v.changes === 'string' ? v.changes : JSON.stringify(v.changes || {});
+        return '<tr>' +
+          '<td><code style="background:#f5f5f5;padding:2px 6px;border-radius:3px;">' + v.version + '</code></td>' +
+          '<td>' + v.date + '</td>' +
+          '<td><span class="badge ' + (v.enabled ? 'badge-success' : 'badge-default') + '">' + (v.enabled ? '已推送' : '未推送') + '</span></td>' +
+          '<td>' +
+            '<button class="btn btn-sm" data-version="' + escapeHtml(v.version) + '" data-date="' + v.date + '" data-changes="' + escapeHtml(changesStr) + '" onclick="openEditVersionModal(this)">编辑</button> ' +
+            '<button class="btn btn-sm ' + (v.enabled ? '' : 'btn-primary') + '" onclick="toggleVersion(\'' + encodeURIComponent(v.version) + '\', ' + !v.enabled + ')">' + (v.enabled ? '取消推送' : '推送') + '</button> ' +
+            '<button class="btn btn-sm btn-danger" onclick="deleteVersion(\'' + encodeURIComponent(v.version) + '\')">删除</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    /**
+     * 切换版本启用状态
+     */
+    async function toggleVersion(version, enabled) {
+      const res = await fetch('/admin/versions/' + version, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled })
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadVersions();
+        showToast(enabled ? '已推送' : '已取消推送');
+      }
+    }
+
+    /**
+     * 删除版本
+     */
+    async function deleteVersion(version) {
+      if (!confirm('确定删除 ' + decodeURIComponent(version) + '?')) return;
+      const res = await fetch('/admin/versions/' + version, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        loadVersions();
+        showToast('已删除');
+      }
+    }
+
+    /**
+     * 打开版本编辑模态框
+     */
+    function openEditVersionModal(btn) {
+      document.getElementById('editVersionName').value = btn.dataset.version;
+      document.getElementById('editVersionDisplay').value = btn.dataset.version;
+      document.getElementById('editVersionDate').value = btn.dataset.date;
+      document.getElementById('editVersionChanges').value = btn.dataset.changes || '';
+      openModal('versionEditModal');
+    }
+
+    /**
+     * 从模态框更新版本
+     */
+    async function updateVersionFromModal() {
+      const version = document.getElementById('editVersionName').value;
+      const res = await fetch('/admin/versions/' + encodeURIComponent(version), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: document.getElementById('editVersionDate').value,
+          changes: document.getElementById('editVersionChanges').value
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeModal('versionEditModal');
+        loadVersions();
+        showToast('已更新');
+      } else {
+        showToast(data.error || '更新失败');
+      }
+    }
+
+    /**
+     * 加载公告列表
+     */
+    async function loadAnnouncements() {
+      const res = await fetch('/admin/announcements');
+      const data = await res.json();
+      const tbody = document.getElementById('annList');
+
+      if (!data.announcements.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">暂无公告</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.announcements.map(a => {
+        return '<tr>' +
+          '<td>' + escapeHtml(a.title) + '</td>' +
+          '<td>' + escapeHtml(a.content) + '</td>' +
+          '<td>' + escapeHtml(a.link || '-') + '</td>' +
+          '<td>' + a.created_at + '</td>' +
+          '<td>' +
+            '<button class="btn btn-sm" onclick="openEditAnnouncement(this)" data-id="' + a.id + '" data-title="' + escapeHtml(a.title) + '" data-content="' + escapeHtml(a.content) + '" data-link="' + escapeHtml(a.link || '') + '">编辑</button> ' +
+            '<button class="btn btn-sm btn-danger" onclick="deleteAnnouncement(' + a.id + ')">删除</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    /**
+     * HTML 转义
+     */
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    /**
+     * 打开公告编辑模态框
+     */
+    function openEditAnnouncement(btn) {
+      document.getElementById('annEditId').value = btn.dataset.id;
+      document.getElementById('annTitle').value = btn.dataset.title;
+      document.getElementById('annContent').value = btn.dataset.content;
+      document.getElementById('annLink').value = btn.dataset.link;
+      document.getElementById('annModalTitle').textContent = '编辑公告';
+      openModal('annModal');
+    }
+
+    /**
+     * 保存公告
+     */
+    async function saveAnnouncement() {
+      const editId = document.getElementById('annEditId').value;
+      const body = {
+        title: document.getElementById('annTitle').value,
+        content: document.getElementById('annContent').value,
+        link: document.getElementById('annLink').value || undefined
+      };
+      if (!body.title || !body.content) {
+        showToast('请填写标题和内容');
+        return;
+      }
+
+      let url = '/admin/announcements';
+      let method = 'POST';
+
+      if (editId) {
+        url = '/admin/announcements/' + editId;
+        method = 'PUT';
+      }
+
+      const res = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeModal('annModal');
+        document.getElementById('annEditId').value = '';
+        document.getElementById('annTitle').value = '';
+        document.getElementById('annContent').value = '';
+        document.getElementById('annLink').value = '';
+        document.getElementById('annModalTitle').textContent = '发布公告';
+        loadAnnouncements();
+        showToast(editId ? '更新成功' : '发布成功');
+      } else {
+        showToast(data.error || (editId ? '更新失败' : '发布失败'));
+      }
+    }
+
+    /**
+     * 删除公告
+     */
+    async function deleteAnnouncement(id) {
+      if (!confirm('确定删除?')) return;
+      const res = await fetch('/admin/announcements/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        loadAnnouncements();
+        showToast('已删除');
+      }
+    }
+
+    /**
+     * 加载系统设置
+     */
+    async function loadSettings() {
+      const res = await fetch('/admin/settings');
+      const data = await res.json();
+      if (data.settings) {
+        document.getElementById('settingGithubRepo').value = data.settings.github_repo || '';
+        document.getElementById('settingGithubToken').value = data.settings.github_token || '';
+      }
+    }
+
+    /**
+     * 保存系统设置
+     */
+    async function saveSettings() {
+      const res = await fetch('/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          github_repo: document.getElementById('settingGithubRepo').value || undefined,
+          github_token: document.getElementById('settingGithubToken').value || undefined
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('已保存');
+      } else {
+        showToast(data.error || '保存失败');
+      }
+    }
+
+    /**
+     * 同步 GitHub Releases
+     */
+    async function syncGitHub() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '同步中...';
+      const res = await fetch('/admin/versions/sync', { method: 'POST' });
+      const data = await res.json();
+      btn.disabled = false;
+      btn.textContent = '同步 GitHub';
+      if (data.success) {
+        loadVersions();
+        showToast('同步成功');
+      } else {
+        showToast(data.error || '同步失败');
+      }
+    }
+
+    // 初始化
+    document.getElementById('loadingPage').classList.add('hidden');
+    document.getElementById('adminPage').classList.remove('hidden');
+    loadDashboard();
+  </script>
+</body>
+</html>

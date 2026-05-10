@@ -1,0 +1,18 @@
+name = "flecb-panel"
+main = "src/app.ts"
+compatibility_date = "2024-05-01"
+
+[assets]
+directory = "public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "flecb-panel-d1"
+database_id = "588a1972-3e09-4534-a742-d9fad41b4808"
+
+[triggers]
+crons = ["0 * * * *"]
+
+[observability]
+enabled = true
