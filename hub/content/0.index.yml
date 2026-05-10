@@ -198,7 +198,7 @@ cta:
   description: 只需几分钟，即可部署属于你的博客系统。
   links:
     - label: 快速部署
-      to: /docs/getting-started/installation
+      to: /docs/getting-started/installer
       trailingIcon: i-lucide-arrow-right
     - label: 在 GitHub 上查看
       to: https://github.com/talen8/FlecBlog
