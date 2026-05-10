@@ -42,3 +42,20 @@ type SystemDynamicInfo struct {
 	VersionLatestVersion  string `json:"version_latest_version"`
 	VersionLastCheckError string `json:"version_last_check_error"`
 }
+
+// VersionInfo 版本信息
+type VersionInfo struct {
+	ID      int    `json:"id"`
+	Version string `json:"version"`
+	Date    string `json:"date"`
+	Changes string `json:"changes"`
+}
+
+// CheckUpdateResponse 检查更新响应
+type CheckUpdateResponse struct {
+	HasUpdate      bool          `json:"has_update"`
+	CurrentVersion string        `json:"current_version"`
+	LatestVersion  string        `json:"latest_version"`
+	Versions       []VersionInfo `json:"versions"`
+	LastCheckError string        `json:"last_check_error"`
+}

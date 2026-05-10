@@ -14,6 +14,7 @@ const (
 	TypeSystemAlert    NotificationType = "system_alert"    // 系统通知
 
 	AlertTypeVersionUpdate = "version_update" // 版本更新提醒
+	AlertTypeAnnouncement  = "announcement"   // 官方公告
 )
 
 // Notification 通知模型

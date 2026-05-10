@@ -335,6 +335,21 @@ definitions:
     - new_password
     - old_password
     type: object
+  dto.CheckUpdateResponse:
+    properties:
+      current_version:
+        type: string
+      has_update:
+        type: boolean
+      last_check_error:
+        type: string
+      latest_version:
+        type: string
+      versions:
+        items:
+          $ref: '#/definitions/dto.VersionInfo'
+        type: array
+    type: object
   dto.CollectRequest:
     properties:
       article_id:
@@ -1619,6 +1634,17 @@ definitions:
       role:
         $ref: '#/definitions/model.UserRole'
       website:
+        type: string
+    type: object
+  dto.VersionInfo:
+    properties:
+      changes:
+        type: string
+      date:
+        type: string
+      id:
+        type: integer
+      version:
         type: string
     type: object
   dto.WeChatExportResult:
@@ -4175,6 +4201,28 @@ paths:
       summary: 访问日志
       tags:
       - 统计管理
+  /admin/system/check-update:
+    post:
+      consumes:
+      - application/json
+      description: 检查是否有新版本，如有更新则返回版本列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CheckUpdateResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 检查版本更新
+      tags:
+      - 系统管理
   /admin/system/dynamic:
     get:
       consumes:

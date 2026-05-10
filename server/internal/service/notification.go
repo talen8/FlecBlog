@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"time"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
@@ -182,6 +185,86 @@ func (s *NotificationService) NotifyVersionUpdateToSuperAdmins(ctx context.Conte
 // HasVersionUpdateNotification 检查指定版本是否已经通知过
 func (s *NotificationService) HasVersionUpdateNotification(ctx context.Context, latestVersion string) (bool, error) {
 	return s.repo.ExistsVersionUpdateNotification(ctx, latestVersion)
+}
+
+// SyncAnnouncements 同步官方公告
+func (s *NotificationService) SyncAnnouncements(ctx context.Context, announcements []Announcement) error {
+	if len(announcements) == 0 {
+		return nil
+	}
+
+	userIDs, err := s.repo.GetAllUserIDs(ctx)
+	if err != nil {
+		return fmt.Errorf("获取用户列表失败: %w", err)
+	}
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	for _, ann := range announcements {
+		exists, err := s.repo.ExistsAnnouncementNotification(ctx, ann.ID)
+		if err != nil {
+			logger.Warn("检查公告通知失败 (ID: %d): %v", ann.ID, err)
+			continue
+		}
+		if exists {
+			continue
+		}
+
+		data := map[string]interface{}{
+			"alert_type":      model.AlertTypeAnnouncement,
+			"announcement_id": ann.ID,
+			"link":            ann.Link,
+		}
+
+		if err := s.sendInApp(ctx, model.TypeSystemAlert, ann.Title, ann.Content, ann.Link, data, nil, nil, userIDs); err != nil {
+			logger.Warn("同步公告失败 (ID: %d): %v", ann.ID, err)
+			continue
+		}
+		logger.Info("同步公告成功: %s", ann.Title)
+	}
+
+	return nil
+}
+
+// Announcement 官方公告
+type Announcement struct {
+	ID      int    `json:"id"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
+	Link    string `json:"link"`
+}
+
+const panelURL = "https://panel.flec.top"
+
+// FetchAndSyncAnnouncements 从 Panel 获取公告并同步
+func (s *NotificationService) FetchAndSyncAnnouncements() error {
+	ctx := context.Background()
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(panelURL + "/api/announcements")
+	if err != nil {
+		return fmt.Errorf("获取公告失败: %w", err)
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("panel 返回错误状态码: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("读取响应失败: %w", err)
+	}
+
+	var announcements []Announcement
+	if err := json.Unmarshal(body, &announcements); err != nil {
+		return fmt.Errorf("解析响应失败: %w", err)
+	}
+
+	return s.SyncAnnouncements(ctx, announcements)
 }
 
 // ============ 查询方法 ============

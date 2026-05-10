@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"flec_blog/internal/model"
 
@@ -142,4 +143,25 @@ func (r *NotificationRepository) GetUserByID(ctx context.Context, userID uint) (
 	var user model.User
 	err := r.db.WithContext(ctx).First(&user, userID).Error
 	return &user, err
+}
+
+// ExistsAnnouncementNotification 检查指定公告ID是否已创建过通知
+func (r *NotificationRepository) ExistsAnnouncementNotification(ctx context.Context, announcementID int) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).
+		Model(&model.Notification{}).
+		Where("type = ? AND data::jsonb ->> 'alert_type' = ? AND data::jsonb ->> 'announcement_id' = ?",
+			model.TypeSystemAlert, model.AlertTypeAnnouncement, fmt.Sprintf("%d", announcementID)).
+		Count(&count).Error
+	return count > 0, err
+}
+
+// GetAllUserIDs 获取所有用户ID
+func (r *NotificationRepository) GetAllUserIDs(ctx context.Context) ([]uint, error) {
+	var userIDs []uint
+	err := r.db.WithContext(ctx).
+		Model(&model.User{}).
+		Where("is_enabled = ?", true).
+		Pluck("id", &userIDs).Error
+	return userIDs, err
 }

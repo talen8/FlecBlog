@@ -21,13 +21,4 @@ routes.delete('/:id', async (c) => {
   return c.json({ success: true });
 });
 
-routes.put('/:id', async (c) => {
-  const id = c.req.param('id');
-  const body = await c.req.json<Announcement>();
-  if (!body.title || !body.content) return c.json({ error: 'Missing fields' }, 400);
-  await c.env.DB.prepare('UPDATE announcements SET title = ?, content = ?, link = ? WHERE id = ?')
-    .bind(body.title, body.content, body.link || null, id).run();
-  return c.json({ success: true });
-});
-
 export { routes as announcementRoutes };

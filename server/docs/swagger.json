@@ -3951,6 +3951,46 @@
                 }
             }
         },
+        "/admin/system/check-update": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "检查是否有新版本，如有更新则返回版本列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "检查版本更新",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CheckUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/admin/system/dynamic": {
             "get": {
                 "security": [
@@ -7859,6 +7899,29 @@
                 }
             }
         },
+        "dto.CheckUpdateResponse": {
+            "type": "object",
+            "properties": {
+                "current_version": {
+                    "type": "string"
+                },
+                "has_update": {
+                    "type": "boolean"
+                },
+                "last_check_error": {
+                    "type": "string"
+                },
+                "latest_version": {
+                    "type": "string"
+                },
+                "versions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.VersionInfo"
+                    }
+                }
+            }
+        },
         "dto.CollectRequest": {
             "type": "object",
             "properties": {
@@ -9719,6 +9782,23 @@
                     "$ref": "#/definitions/model.UserRole"
                 },
                 "website": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.VersionInfo": {
+            "type": "object",
+            "properties": {
+                "changes": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "version": {
                     "type": "string"
                 }
             }

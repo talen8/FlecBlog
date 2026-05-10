@@ -93,7 +93,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	articleService.SetSubscriberService(subscriberService) // 设置订阅服务，用于文章推送
 
 	// 初始化并启动定时任务调度器
-	initScheduler(fileService, userService, verificationService, rssFeedService, friendService, systemService)
+	initScheduler(fileService, userService, verificationService, rssFeedService, friendService)
 
 	// 初始化控制器
 	userController := v1.NewUserController(userService, verificationService, conf)
@@ -433,8 +433,9 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 		// ==================== 系统信息 ====================
 		systemManagement := adminAPI.Group("/system")
 		{
-			systemManagement.GET("/static", systemController.GetSystemStatic)   // 获取系统静态信息
-			systemManagement.GET("/dynamic", systemController.GetSystemDynamic) // 获取系统动态信息
+			systemManagement.GET("/static", systemController.GetSystemStatic)    // 获取系统静态信息
+			systemManagement.GET("/dynamic", systemController.GetSystemDynamic)  // 获取系统动态信息
+			systemManagement.POST("/check-update", systemController.CheckUpdate) // 检查版本更新
 		}
 
 		// ==================== 管理工具相关 ====================
@@ -470,7 +471,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 }
 
 // initScheduler 初始化并启动定时任务调度器
-func initScheduler(fileService *service.FileService, userService *service.UserService, verificationService *service.VerificationService, rssFeedService *service.RssFeedService, friendService *service.FriendService, systemService *service.SystemService) {
+func initScheduler(fileService *service.FileService, userService *service.UserService, verificationService *service.VerificationService, rssFeedService *service.RssFeedService, friendService *service.FriendService) {
 	s := scheduler.NewScheduler()
 
 	// 注册清理任务
@@ -485,8 +486,6 @@ func initScheduler(fileService *service.FileService, userService *service.UserSe
 
 	// 友链检测任务
 	_ = s.AddJob(scheduler.NewJob("友链状态检测", "0 0 2 * * 3", friendService.CheckAllFriends))
-
-	_ = s.AddJob(scheduler.NewJob("版本更新检测", "0 0 8 * * *", systemService.CheckForUpdates))
 
 	s.Start()
 }

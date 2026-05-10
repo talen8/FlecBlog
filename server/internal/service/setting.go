@@ -46,7 +46,7 @@ const (
 	KeyBlogScreenshot        = "blog.screenshot"          // 站点截图
 	KeyBlogAnnouncement      = "blog.announcement"        // 公告内容
 	KeyBlogTypingTexts       = "blog.typing_texts"        // 打字机效果文本（JSON数组）
-	KeyBlogSidebarSocial     = "blog.sidebar_social"      // 侧边栏社交媒体（JSON数组）
+	KeyBlogSidebarSocial     = "blog.sidebar_social"      // 侧边社交媒体（JSON数组）
 	KeyBlogFooterSocial      = "blog.footer_social"       // 页脚社交媒体（JSON数组）
 	KeyBlogFooterLinks       = "blog.footer_links"        // 页脚右侧链接（JSON数组）
 	KeyBlogAboutDescribe     = "blog.about_describe"      // 个人描述

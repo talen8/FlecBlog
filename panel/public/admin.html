@@ -464,11 +464,10 @@
   <div id="annModal" class="modal-mask hidden">
     <div class="modal">
       <div class="modal-head">
-        <h3 id="annModalTitle">发布公告</h3>
+        <h3>发布公告</h3>
         <button class="modal-close" onclick="closeModal('annModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <input type="hidden" id="annEditId">
         <div class="form-item">
           <label class="form-label">标题</label>
           <input type="text" id="annTitle" class="form-input">
@@ -484,7 +483,7 @@
       </div>
       <div class="modal-foot">
         <button class="btn" onclick="closeModal('annModal')">取消</button>
-        <button class="btn btn-primary" onclick="saveAnnouncement()">保存</button>
+        <button class="btn btn-primary" onclick="saveAnnouncement()">发布</button>
       </div>
     </div>
   </div>
@@ -497,9 +496,6 @@
      * 打开模态框
      */
     function openModal(id) {
-      if (id === 'annModal' && !document.getElementById('annEditId').value) {
-        document.getElementById('annModalTitle').textContent = '发布公告';
-      }
       document.getElementById(id).classList.remove('hidden');
     }
 
@@ -680,7 +676,6 @@
           '<td>' + escapeHtml(a.link || '-') + '</td>' +
           '<td>' + a.created_at + '</td>' +
           '<td>' +
-            '<button class="btn btn-sm" onclick="openEditAnnouncement(this)" data-id="' + a.id + '" data-title="' + escapeHtml(a.title) + '" data-content="' + escapeHtml(a.content) + '" data-link="' + escapeHtml(a.link || '') + '">编辑</button> ' +
             '<button class="btn btn-sm btn-danger" onclick="deleteAnnouncement(' + a.id + ')">删除</button>' +
           '</td>' +
         '</tr>';
@@ -696,22 +691,9 @@
     }
 
     /**
-     * 打开公告编辑模态框
-     */
-    function openEditAnnouncement(btn) {
-      document.getElementById('annEditId').value = btn.dataset.id;
-      document.getElementById('annTitle').value = btn.dataset.title;
-      document.getElementById('annContent').value = btn.dataset.content;
-      document.getElementById('annLink').value = btn.dataset.link;
-      document.getElementById('annModalTitle').textContent = '编辑公告';
-      openModal('annModal');
-    }
-
-    /**
      * 保存公告
      */
     async function saveAnnouncement() {
-      const editId = document.getElementById('annEditId').value;
       const body = {
         title: document.getElementById('annTitle').value,
         content: document.getElementById('annContent').value,
@@ -722,31 +704,21 @@
         return;
       }
 
-      let url = '/admin/announcements';
-      let method = 'POST';
-
-      if (editId) {
-        url = '/admin/announcements/' + editId;
-        method = 'PUT';
-      }
-
-      const res = await fetch(url, {
-        method: method,
+      const res = await fetch('/admin/announcements', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
       const data = await res.json();
       if (data.success) {
         closeModal('annModal');
-        document.getElementById('annEditId').value = '';
         document.getElementById('annTitle').value = '';
         document.getElementById('annContent').value = '';
         document.getElementById('annLink').value = '';
-        document.getElementById('annModalTitle').textContent = '发布公告';
         loadAnnouncements();
-        showToast(editId ? '更新成功' : '发布成功');
+        showToast('发布成功');
       } else {
-        showToast(data.error || (editId ? '更新失败' : '发布失败'));
+        showToast(data.error || '发布失败');
       }
     }
 
