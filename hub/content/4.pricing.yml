@@ -1,0 +1,76 @@
+title: 方案
+description: 从个人博客到定制需求，总有一款适合你
+faq:
+  title: 常见问题
+  description: 关于 FlecBlog 方案的常见问题解答。
+  items:
+    - label: 免费版有什么限制？
+      content: 免费版包含完整的博客功能，包括文章发布、Markdown 编辑、多端渲染和安全认证等，没有功能限制。专业版和定制版提供额外的高级特性和服务。
+    - label: 专业版什么时候发布？
+      content: 专业版正在规划中，具体功能和时间安排请关注我们的公告。现在可以提前锁定专业版名额。
+    - label: 定制版如何收费？
+      content: 定制版根据具体需求评估报价，包括功能开发、主题设计和技术支持等。请通过 GitHub 或其他渠道联系我们，沟通详细需求。
+    - label: 可以从免费版升级到专业版吗？
+      content: 当然可以！专业版发布后，您可以随时从免费版升级，已有的数据和配置会完整保留。
+    - label: 开源协议是什么？
+      content: FlecBlog 采用开源协议发布，个人和非商业用途可免费使用。商业用途需要购买定制版获取商业授权。
+logos:
+  icons: []
+navigation:
+  icon: i-ri-price-tag-3-line
+plans:
+  - title: 免费版
+    description: 适合个人博客、技术分享
+    price:
+      month: ¥0
+      year: ¥0
+    billingCycle: /永久
+    button:
+      label: 立即使用
+      color: neutral
+      variant: subtle
+      to: https://github.com/talen8/FlecBlog
+      target: _blank
+    features:
+      - 完整全站博客功能
+      - Markdown 写作体验
+      - 多端自适应渲染
+      - 安全认证与防护
+      - 开源社区支持
+  - title: 专业版
+    description: 适合内容创作者、独立开发者
+    price:
+      month: ¥99
+      year: ¥99
+    discount: ¥9.9
+    billingCycle: /永久
+    highlight: true
+    scale: true
+    button:
+      label: 立即购买
+      color: primary
+      to: https://qm.qq.com/q/EWeJyj4Bws
+      target: _blank
+    features:
+      - 免费版全部功能
+      - 请作者喝一杯奶茶
+      - 低价锁定专业版名额
+      - 正在规划中...
+  - title: 定制版
+    description: 适合有个性化需求的用户
+    price:
+      month: 联系我们
+      year: 联系我们
+    billingCycle: ""
+    button:
+      label: 联系我们
+      color: neutral
+      variant: subtle
+      to: https://qm.qq.com/q/EWeJyj4Bws
+      target: _blank
+    features:
+      - 免费版全部功能
+      - 定制功能开发
+      - 定制主题设计
+      - 专属技术支持
+      - 源码商业授权

@@ -1,0 +1,25 @@
+title: 社区
+description: 加入 FlecBlog 社区，与开发者和其他用户交流
+items:
+  - title: QQ 交流群
+    description: 加入 QQ 群，与其他用户交流
+    icon: i-simple-icons-tencentqq
+    link: https://qm.qq.com/q/Zzm9XN6lOi
+    link_label: 加入群聊
+  - title: Telegram
+    description: 加入 Telegram 群组，实时交流讨论
+    icon: i-simple-icons-telegram
+    link: https://t.me/+ROXTV2iY1TY2YjE1
+    link_label: 加入群组
+  - title: GitHub
+    description: 查看源码、提交 Issue、参与贡献
+    icon: i-simple-icons-github
+    link: https://github.com/talen8/FlecBlog
+    link_label: 前往 GitHub
+  - title: 作者博客
+    description: 访问作者博客，了解更多技术分享
+    icon: i-lucide-pen-line
+    link: https://blog.talen.top/
+    link_label: 访问博客
+navigation:
+  icon: i-lucide-users

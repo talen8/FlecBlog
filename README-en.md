@@ -14,7 +14,7 @@
 
   <p>
     <a href="https://blog.talen.top">Live Demo</a> /
-    <a href="https://ccnlf8xcz6k3.feishu.cn/wiki/space/7618178485001046989">Documentation</a> /
+    <a href="https://hub.flec.top">Documentation</a> /
     <a href="https://github.com/talen8/FlecBlog/issues/new">Report an Issue</a> /
     <a href="https://qm.qq.com/q/Zzm9XN6lOi">Community</a>
   </p>
@@ -27,7 +27,7 @@
     <img src="https://img.shields.io/badge/Monorepo-FlecBlog-111111?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAACDUlEQVR4nO3XS4iNYRgH8BNRNhYmkctMkpXJSslth1hiKxsbRmqoQU2NjY2J1GwsbGgsSG5FQ0kozMrKQhZqUCbkMsjdT2/znvo6fd93vjnznSPlX2dx3vN/nv//vT3PeyqV//hXgZt4jSEcRjeuYASf42ckjnVHzlCMuV2GgVGNY7QMA5cmYeBiGQb2T8JAT6Oii7E97ufdmqSrsCZFLG1870REZ+MQntSZVRBZW3D8VBHhqTiIj8rHiXriM3FL87A7T3w67jVR/BPm5Bno11yczRPvwNcmG/iG9r81+yr60sRn4I3W4E6agc1ah1dpBo7lBIRq1o4DIbgEA9/TDAznBKxO8NpiW50I3uECBvEstRvieU6C33iAdYlaUdsLshDeDW0JnWnYmWZgrECyn+hKXNkPBWL6I38DtmJK1hX8UnBGwcTKGNNXgB9W70Xi+74sA48j4WGBpMOJnhGeWBPB0SwDVyOhq855qGJLjFuAXXhbIOYl5mUZ6I2kc1has2xpeIpFifjOOmU85OtMFQ/AEvyKScIjZC6uFdjfR9XE4aGRwTuPWZV6ME4MGEyMbcSNKJaFI5HbU3NYL2N9XeEqsDBxtXprfpuPHTiJ+7GgjMXzsjxy9mAA28LZqDQC4zP+EU2cLrR0ZQObEoXpfewTKzKLSJNMdMS/Vcm9v94yAwkjy3A8PsvPlC3wB5cqDes3vUmxAAAAAElFTkSuQmCC&style=flat-square" alt="Monorepo" />
     <img src="https://img.shields.io/badge/Server-Go%201.25-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go" />
     <img src="https://img.shields.io/badge/Admin-Vue%203-42B883?style=flat-square&logo=vuedotjs&logoColor=white" alt="Vue 3" />
-    <img src="https://img.shields.io/badge/Blog-Nuxt%204.2.2-00DC82?style=flat-square&logo=nuxt&logoColor=white" alt="Nuxt 4" />
+    <img src="https://img.shields.io/badge/Blog-Nuxt%204.3.1-00DC82?style=flat-square&logo=nuxt&logoColor=white" alt="Nuxt 4" />
   </p>
 </div>
 
@@ -45,7 +45,7 @@ By separating the public blog, the admin console, and the backend service into c
 | --- | --- | --- |
 | `server` | Go 1.25 / Gin / GORM / PostgreSQL | Backend services, authentication, APIs, data management, and scheduled jobs |
 | `admin` | Vue 3 / Element Plus / Vite | Content management, dashboards, the editor, and admin operations |
-| `blog` | Nuxt 4.2.2 / Vue 3 / SCSS | Public-facing blog, SSR, SEO, and reading experience |
+| `blog` | Nuxt 4.3.1 / Vue 3.5 / SCSS | Public-facing blog, SSR, SEO, and reading experience |
 
 **Why FlecBlog**
 
@@ -97,7 +97,43 @@ By separating the public blog, the admin console, and the backend service into c
 
 ## Deployment
 
-### Docker Compose Setup (Recommended)
+### Installer (Recommended)
+
+FlecBlog provides an interactive installer `flecb` that supports one-click installation, upgrades, backups, and configuration management.
+
+**Installation:**
+
+```bash
+curl -fsSL https://install.flec.top | sudo bash
+```
+
+**Key Features:**
+
+- `flecb install` - Interactive installation
+- `flecb upgrade` - Upgrade to the latest version
+- `flecb reconfig` - Modify configuration (ports, API URL, etc.)
+- `flecb backup` - Backup and restore data
+- `flecb uninstall` - Uninstall FlecBlog
+- `flecb version` - Display version information
+
+**Installation Process:**
+
+1. Run the installation command `curl -fsSL https://install.flec.top | sudo bash`
+2. Choose deployment method (Docker deployment)
+3. Configure ports (Server, Blog, Admin)
+4. Confirm configuration and automatically pull images to start services
+5. Access the admin panel to create an administrator account
+
+**Highlights:**
+
+- Fully interactive guidance, no manual configuration file editing required
+- Automatic port conflict detection
+- One-click upgrades and rollbacks
+- Built-in data backup and recovery
+
+### Docker Compose Manual Setup
+
+Suitable for users who need custom configurations or already have a Docker environment.
 
 1. Create a `.env` file:
 

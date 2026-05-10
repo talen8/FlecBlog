@@ -1,0 +1,207 @@
+title: 一款有 [边界感]{class="text-primary"} 的博客系统
+description: 简约，不是把内容做空。高级，也不是故作夸张。
+seo:
+  title: FlecBlog
+  description: 一款有边界感的博客系统，简约而不空洞，高级而不夸张。
+navigation: false
+hero:
+  headline: Where content finds its calm.
+  command: curl -fsSL https://install.flec.top | sudo bash
+  links:
+    - label: 立即开始
+      icon: i-lucide-rocket
+      trailing: false
+      to: /docs
+      size: xl
+    - label: GitHub
+      icon: i-simple-icons-github
+      size: xl
+      color: neutral
+      variant: subtle
+      to: https://github.com/talen8/FlecBlog
+      target: _blank
+sections:
+  - title: 精致的博客界面
+    description: Nuxt 4 SSR + PWA 双模式驱动，深色模式自动切换，响应式多端适配，自定义字体实时切换，每一处细节都为阅读而生。
+    id: blog-ui
+    orientation: horizontal
+    image: /images/blog-home.png
+    features:
+      - name: SSR + PWA 双模式
+        description: 服务端渲染首屏秒开，PWA 离线缓存随时访问
+        icon: i-ri-speed-line
+      - name: 深色模式
+        description: 跟随系统自动切换，过渡流畅，护眼阅读
+        icon: i-ri-palette-line
+      - name: 响应式设计
+        description: 桌面、平板、手机多端适配，随时访问
+        icon: i-ri-smartphone-line
+      - name: 丰富的页面类型
+        description: 归档、友链、动态、留言、关于等页面开箱即用
+        icon: i-ri-layout-grid-line
+      - name: SEO 全套优化
+        description: Sitemap、Robots、OG Image、关键 CSS 内联
+        icon: i-ri-search-line
+  - title: 沉浸式的文章展示
+    description: 15+ Markdown 插件渲染引擎，KaTeX 公式、Mermaid 图表、代码高亮、自定义容器语法。AI 摘要打字机效果，图片点击放大，让每一篇文章都赏心悦目。
+    orientation: horizontal
+    reverse: true
+    image: /images/blog-article.png
+    features:
+      - name: Markdown 渲染引擎
+        description: 15+ 插件，支持 KaTeX、Mermaid、代码高亮、任务列表
+        icon: i-ri-code-s-slash-line
+      - name: 自定义容器语法
+        description: 提示框、标签页、折叠面板、链接卡片、音频嵌入
+        icon: i-ri-layout-4-line
+      - name: AI 摘要打字机
+        description: AI 生成摘要逐字展示，闪烁光标动画效果
+        icon: i-ri-magic-line
+      - name: 图片缩放与右键菜单
+        description: 点击图片放大查看，智能右键菜单按类型展示操作
+        icon: i-ri-image-line
+  - title: 高效的内容管理
+    description: Vue 3 + Element Plus 现代管理界面。全功能仪表盘、数据导入导出、评论审核、六合一系统配置，让博客管理井井有条。
+    orientation: horizontal
+    image: /images/admin-dashboard.png
+    features:
+      - name: 全功能仪表盘
+        description: 浏览量/访客/评论多维统计，趋势图表一目了然
+        icon: i-ri-bar-chart-box-line
+      - name: 数据导入导出
+        description: 支持 Hexo/Markdown 批量导入，Artalk 评论迁移
+        icon: i-ri-download-2-line
+      - name: 评论与友链管理
+        description: 评论审核、友链管理、反馈处理，社区互动尽在掌控
+        icon: i-ri-chat-check-line
+      - name: RSS 订阅管理
+        description: 管理订阅源、查看文章、标记已读，定时自动刷新
+        icon: i-ri-rss-line
+      - name: 六合一系统配置
+        description: 基本/博客/通知/上传/AI/OAuth 配置，热重载无需重启
+        icon: i-ri-settings-3-line
+  - title: 专业的文章编辑
+    description: CodeMirror 6 编辑器配合完整工具栏，封面制作器集成三大图库，AI 辅助一键生成摘要与标题，让创作专注而高效。
+    orientation: horizontal
+    reverse: true
+    image: /images/admin-editor.png
+    features:
+      - name: CodeMirror 编辑器
+        description: 完整工具栏、表情选择器、在线图片上传、全屏实时预览
+        icon: i-ri-file-edit-line
+      - name: 封面制作器
+        description: 内置封面图工具，集成 Unsplash/Pixabay/Pexels 图库搜索
+        icon: i-ri-image-add-line
+      - name: AI 辅助写作
+        description: OpenAI 集成，一键生成摘要、总结、标题
+        icon: i-ri-robot-line
+      - name: 文件管理
+        description: 7 种存储后端，文件使用追踪，定时清理未使用文件
+        icon: i-ri-upload-cloud-line
+  - title: 稳定可靠的技术底座
+    description: Go + Gin + GORM 高性能后端。MCP Server 暴露全量管理能力给 AI Agent，飞书机器人深度集成，一键 CLI 部署运维。
+    orientation: horizontal
+    image: /images/preview.png
+    features:
+      - name: MCP Server
+        description: 8 个 MCP Tool，AI Agent 可直接管理博客内容
+        icon: i-ri-robot-2-line
+      - name: 7 合 1 对象存储
+        description: S3/COS/OSS/Kodo/R2/MinIO/本地，工厂模式统一接口
+        icon: i-ri-cloud-line
+      - name: 飞书机器人集成
+        description: 交互式卡片消息，斜杠命令，友链/评论即时通知
+        icon: i-ri-message-3-line
+      - name: 多通道通知与微信导出
+        description: 邮件+飞书双通道推送，Markdown 转微信公众号排版
+        icon: i-ri-notification-3-line
+      - name: 一键 CLI 部署
+        description: 安装/升级/备份/恢复/重配/卸载，Docker Compose 全生命周期
+        icon: i-ri-terminal-box-line
+features:
+  title: 为内容创作者打造
+  description: 从写作到发布，从管理到展示，每一个环节都经过精心设计。
+  items:
+    - title: Markdown 写作
+      description: CodeMirror 6 编辑器，支持实时预览、代码高亮、数学公式、Mermaid 图表。
+      icon: i-ri-quill-pen-line
+    - title: 仪表盘统计
+      description: ECharts 可视化图表，访问趋势、文章数据、词云分析一目了然。
+      icon: i-ri-dashboard-3-line
+    - title: AI 辅助
+      description: 集成 OpenAI，支持 AI 摘要生成、智能问答、MCP 工具调用。
+      icon: i-ri-magic-line
+    - title: 多渠道通知
+      description: 邮件通知、飞书推送，评论提醒不错过。
+      icon: i-ri-notification-3-line
+    - title: RSS 订阅
+      description: 内置 RSS/Atom Feed，支持 RSS 源聚合阅读，内容订阅更便捷。
+      icon: i-ri-rss-line
+    - title: 安全认证
+      description: JWT + OAuth2 多平台登录，RBAC 权限控制，限流防护。
+      icon: i-ri-shield-check-line
+testimonials:
+  headline: 来自用户的声音
+  title: 开发者们正在使用 FlecBlog
+  description: 看看他们怎么说。
+  items:
+    - quote: CodeMirror 编辑器加实时预览，写技术文章的体验比很多商业平台都好。AI 摘要生成也省了不少时间。
+      user:
+        name: NightOwl
+        description: 全栈工程师
+        avatar:
+          src: https://i.pravatar.cc/120?img=3
+    - quote: 主题二开模板非常清晰，composables 和 types 都导出了，定制自己的博客风格几乎零门槛。
+      user:
+        name: PixelDrift
+        description: 前端架构师
+        avatar:
+          src: https://i.pravatar.cc/120?img=5
+    - quote: MCP Server 让我可以通过 AI 助手直接管理博客内容，这在其他博客系统里从没见过，太方便了。
+      user:
+        name: ZeroCool
+        description: AI 应用开发者
+        avatar:
+          src: https://i.pravatar.cc/120?img=8
+    - quote: 飞书机器人收到评论通知后直接在群里处理审核，不用打开后台，社区运营效率高了很多。
+      user:
+        name: Starfall
+        description: 技术社区运营
+        avatar:
+          src: https://i.pravatar.cc/120?img=9
+    - quote: SSR 加上 PWA 离线缓存，Lighthouse 评分全绿，搜索引擎收录速度比之前用 SPA 方案快多了。
+      user:
+        name: ByteRunner
+        description: SEO 顾问
+        avatar:
+          src: https://i.pravatar.cc/120?img=11
+    - quote: 7 种对象存储后端随意切换，从本地开发到云上部署只需要改一个配置，迁移成本几乎为零。
+      user:
+        name: CloudDive
+        description: DevOps 工程师
+        avatar:
+          src: https://i.pravatar.cc/120?img=12
+    - quote: 一行命令装好，升级备份也都是一条命令搞定。终于不用手搓 docker-compose 了，省心。
+      user:
+        name: ShellWay
+        description: 独立开发者
+        avatar:
+          src: https://i.pravatar.cc/120?img=14
+    - quote: Markdown 渲染效果惊艳，KaTeX 公式、Mermaid 图表、自定义容器都能完美支持。
+      user:
+        name: LogicLeaf
+        description: 技术博主
+        avatar:
+          src: https://i.pravatar.cc/120?img=15
+cta:
+  title: 准备好开始了吗？
+  description: 只需几分钟，即可部署属于你的博客系统。
+  links:
+    - label: 快速部署
+      to: /docs/getting-started/installation
+      trailingIcon: i-lucide-arrow-right
+    - label: 在 GitHub 上查看
+      to: https://github.com/talen8/FlecBlog
+      target: _blank
+      variant: subtle
+      icon: i-simple-icons-github
