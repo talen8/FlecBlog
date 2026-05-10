@@ -40,15 +40,15 @@ func NewConfig() *Config {
 }
 
 func (c *Config) GetBlogImage() string {
-	return fmt.Sprintf("talen8520/flec-blog:%s", c.getVersionOrLatest())
+	return fmt.Sprintf("talen8/flec-blog:%s", c.getVersionOrLatest())
 }
 
 func (c *Config) GetServerImage() string {
-	return fmt.Sprintf("talen8520/flec-server:%s", c.getVersionOrLatest())
+	return fmt.Sprintf("talen8/flec-server:%s", c.getVersionOrLatest())
 }
 
 func (c *Config) GetAdminImage() string {
-	return fmt.Sprintf("talen8520/flec-admin:%s", c.getVersionOrLatest())
+	return fmt.Sprintf("talen8/flec-admin:%s", c.getVersionOrLatest())
 }
 
 func (c *Config) getVersionOrLatest() string {

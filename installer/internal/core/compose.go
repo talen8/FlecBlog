@@ -247,6 +247,7 @@ func UpdateComposePorts(installPath string, serverPort, blogPort, adminPort int)
 	}
 	_ = encoder.Close()
 
+	// #nosec G306 - docker-compose.yml 需要 0644 权限以便 Docker 读取
 	if err := os.WriteFile(composePath, buf.Bytes(), 0644); err != nil {
 		_ = os.Rename(backupPath, composePath)
 		return fmt.Errorf("写入 docker-compose.yml 失败: %w", err)

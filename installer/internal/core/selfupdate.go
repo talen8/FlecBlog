@@ -45,40 +45,46 @@ func (u *SelfUpdater) Update() error {
 		return err
 	}
 
+	// #nosec G302 - 可执行文件需要 0755 权限
 	if err := os.Chmod(tempFile, 0755); err != nil {
-		os.Remove(tempFile)
+		_ = os.Remove(tempFile)
 		return err
 	}
 
 	backupPath := execPath + ".bak"
-	os.Rename(execPath, backupPath)
+	if err := os.Rename(execPath, backupPath); err != nil {
+		_ = os.Remove(tempFile)
+		return fmt.Errorf("备份可执行文件失败: %w", err)
+	}
 
 	if err := os.Rename(tempFile, execPath); err != nil {
-		os.Rename(backupPath, execPath)
-		os.Remove(tempFile)
+		_ = os.Rename(backupPath, execPath)
+		_ = os.Remove(tempFile)
 		return err
 	}
 
-	os.Remove(backupPath)
+	_ = os.Remove(backupPath)
 	return nil
 }
 
 func (u *SelfUpdater) downloadFile(url, targetPath string) error {
+	// #nosec G107 - URL 来自 GitHub API，是受信任的源
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("下载失败: %d", resp.StatusCode)
 	}
 
+	// #nosec G304 - targetPath 来自内部调用，是受信任的源
 	out, err := os.Create(targetPath)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer func() { _ = out.Close() }()
 
 	_, err = io.Copy(out, resp.Body)
 	return err
@@ -92,11 +98,12 @@ func GetPlatformSuffix() string {
 // 从 /releases 中筛选 installer/v 前缀的 tag，与 worker.js 逻辑一致
 func (u *SelfUpdater) getLatestInstallerTag() (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/releases", githubRepo)
+	// #nosec G107 - URL 来自 GitHub API，是受信任的源
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", fmt.Errorf("获取 releases 列表失败: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("获取 releases 列表失败: HTTP %d", resp.StatusCode)

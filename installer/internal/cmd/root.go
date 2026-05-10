@@ -67,6 +67,7 @@ func startBackgroundUpdate() {
 		return
 	}
 
+	// #nosec G204 - execPath 来自 os.Executable()，是受信任的源
 	cmd := exec.Command(execPath, "self-update")
 	cmd.Stdout = nil
 	cmd.Stderr = nil

@@ -27,6 +27,7 @@ func runSelfUpdate(cmd *cobra.Command, args []string) error {
 	_ = updater.Update()
 
 	lockFile := filepath.Join(os.TempDir(), "flecb-update.lock")
+	// #nosec G306 - lockFile 是临时文件，0644 权限足够
 	_ = os.WriteFile(lockFile, []byte(time.Now().Format(time.RFC3339)), 0644)
 
 	return nil
