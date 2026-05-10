@@ -5,6 +5,7 @@ import (
 	"flec_blog/config"
 	"flec_blog/pkg/logger"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -141,7 +142,11 @@ func (c *Client) SendEmail(to, subject, htmlBody, fromName string) error {
 
 	// 创建邮件
 	msg := gomail.NewMessage()
-	msg.SetHeader("From", msg.FormatAddress(fromEmail, fromName))
+	if strings.Contains(fromEmail, "<") && strings.Contains(fromEmail, ">") {
+		msg.SetHeader("From", fromEmail)
+	} else {
+		msg.SetHeader("From", msg.FormatAddress(fromEmail, fromName))
+	}
 	msg.SetHeader("To", to)
 	msg.SetHeader("Subject", subject)
 	msg.SetBody("text/html", htmlBody)
