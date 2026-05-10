@@ -416,7 +416,7 @@ const openLink = (url: string) => {
 // 获取随机一言
 const fetchHitokoto = async () => {
   try {
-    const response = await fetch('https://api.pearktrue.cn/api/hitokoto/');
+    const response = await fetch('https://api.pearapi.ai/api/hitokoto/');
     const text = await response.text();
     hitokoto.value = text || '获取一言失败';
   } catch (error) {
