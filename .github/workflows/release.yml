@@ -1,4 +1,4 @@
-name: CI/CD
+name: Release
 
 on:
   push:
@@ -17,12 +17,15 @@ jobs:
           - target: admin
             image_name: flec-admin
             context: ./admin
+            output_dir: dist
           - target: blog
             image_name: flec-blog
             context: ./blog
+            output_dir: .output
           - target: server
             image_name: flec-server
             context: ./server
+            output_dir: ""
 
     steps:
       - uses: actions/checkout@v6
@@ -50,11 +53,46 @@ jobs:
             echo "🚀 正式版本: v${VERSION} (打 latest 标签)"
           fi
 
+      - name: 设置 Node.js
+        if: matrix.target != 'server'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: ${{ matrix.context }}/package-lock.json
+
+      - name: 构建前端项目
+        if: matrix.target != 'server'
+        working-directory: ${{ matrix.context }}
+        run: |
+          npm ci
+          if [ "${{ matrix.target }}" = "blog" ]; then
+            NUXT_PUBLIC_API_URL= npm run build
+          else
+            npm run build
+          fi
+
+      - name: 打包前端静态产物
+        if: matrix.target != 'server'
+        run: |
+          PKG_DIR="${{ matrix.target }}-pkg"
+          mkdir -p ${PKG_DIR}
+          cp -r ${{ matrix.context }}/${{ matrix.output_dir }} ${PKG_DIR}/
+          tar -czf ${{ matrix.image_name }}.tar.gz -C ${PKG_DIR} .
+
+      - name: 上传前端构建产物
+        if: matrix.target != 'server'
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}-frontend-dist
+          path: ${{ matrix.image_name }}.tar.gz
+          retention-days: 1
+
       - name: 设置 Go 环境
         if: matrix.target == 'server'
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25'
+          go-version: "1.25"
           cache-dependency-path: server/go.sum
 
       - name: 交叉编译多平台二进制文件
@@ -63,7 +101,7 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           mkdir -p dist
-          
+
           prepare_package() {
             local pkg_dir=$1
             mkdir -p ${pkg_dir}
@@ -71,40 +109,18 @@ jobs:
             cp .env.example ${pkg_dir}/.env.example
             echo "请将 .env.example 复制为 .env 并配置相关参数" > ${pkg_dir}/README.txt
           }
-          
+
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}'" -o flec-server ./cmd/main.go
           prepare_package "dist/linux_amd64"
           mv flec-server dist/linux_amd64/
-          tar -czf dist/flec-server_${VERSION}_linux_amd64.tar.gz -C dist linux_amd64
+          tar -czf dist/flec-server_linux_amd64.tar.gz -C dist linux_amd64
           rm -rf dist/linux_amd64
-          
+
           GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}'" -o flec-server ./cmd/main.go
           prepare_package "dist/linux_arm64"
           mv flec-server dist/linux_arm64/
-          tar -czf dist/flec-server_${VERSION}_linux_arm64.tar.gz -C dist linux_arm64
+          tar -czf dist/flec-server_linux_arm64.tar.gz -C dist linux_arm64
           rm -rf dist/linux_arm64
-          
-          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}'" -o flec-server ./cmd/main.go
-          prepare_package "dist/darwin_amd64"
-          mv flec-server dist/darwin_amd64/
-          tar -czf dist/flec-server_${VERSION}_darwin_amd64.tar.gz -C dist darwin_amd64
-          rm -rf dist/darwin_amd64
-          
-          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}'" -o flec-server ./cmd/main.go
-          prepare_package "dist/darwin_arm64"
-          mv flec-server dist/darwin_arm64/
-          tar -czf dist/flec-server_${VERSION}_darwin_arm64.tar.gz -C dist darwin_arm64
-          rm -rf dist/darwin_arm64
-          
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}'" -o flec-server.exe ./cmd/main.go
-          prepare_package "dist/windows_amd64"
-          mv flec-server.exe dist/windows_amd64/
-          cd dist && zip -r flec-server_${VERSION}_windows_amd64.zip windows_amd64 && cd ..
-          rm -rf dist/windows_amd64
-          
-          cd dist
-          sha256sum *.tar.gz *.zip > checksums.txt
-          cd ..
 
       - name: 构建并推送 Docker 镜像
         uses: docker/build-push-action@v7
@@ -115,7 +131,7 @@ jobs:
           build-args: |
             APP_VERSION=${{ github.ref_name }}
 
-      - name: 上传构建产物
+      - name: 上传 Server 构建产物
         if: matrix.target == 'server'
         uses: actions/upload-artifact@v7
         with:
@@ -124,7 +140,7 @@ jobs:
           retention-days: 1
 
   release:
-    needs: build
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -134,11 +150,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 下载构建产物
+      - name: 下载 Server 构建产物
         uses: actions/download-artifact@v8
         with:
           name: server-dist
           path: server/dist/
+
+      - name: 下载 Blog 前端产物
+        uses: actions/download-artifact@v8
+        with:
+          name: blog-frontend-dist
+          path: blog-frontend/dist/
+
+      - name: 下载 Admin 前端产物
+        uses: actions/download-artifact@v8
+        with:
+          name: admin-frontend-dist
+          path: admin-frontend/dist/
 
       - name: 生成 Changelog
         id: changelog
@@ -147,9 +175,13 @@ jobs:
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
 
           if [ -n "$PREV_TAG" ]; then
-            COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+            COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges --invert-grep --grep="^hub:")
           else
-            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges -10)
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges -10 --invert-grep --grep="^hub:")
+          fi
+
+          if [ -z "$COMMITS" ]; then
+            COMMITS="- 无功能性更新"
           fi
 
           if [[ "$VERSION" =~ (alpha|beta|rc|pre) ]]; then
@@ -187,5 +219,5 @@ jobs:
           generate_release_notes: false
           files: |
             server/dist/*.tar.gz
-            server/dist/*.zip
-            server/dist/checksums.txt
+            blog-frontend/dist/*.tar.gz
+            admin-frontend/dist/*.tar.gz

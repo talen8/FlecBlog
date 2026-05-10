@@ -21,14 +21,21 @@
             <div class="version-item">
               <span class="label">最新版本</span>
               <span class="version-value">
-                <span class="value">{{ dynamicInfo.version_latest_version || '尚未检测' }}</span>
-                <el-tooltip
-                  v-if="versionCheckErrorMessage"
-                  :content="versionCheckErrorMessage"
-                  placement="top"
+                <template v-if="latestVersion">
+                  <span v-if="hasNewVersion" class="value version-link" @click="showUpdateDialog">
+                    <span class="new-version-dot"></span>{{ latestVersion }}
+                  </span>
+                  <span v-else class="value">{{ latestVersion }}</span>
+                </template>
+                <el-button
+                  type="primary"
+                  size="small"
+                  link
+                  :loading="checking"
+                  @click="handleCheckUpdate"
                 >
-                  <span class="error-dot"></span>
-                </el-tooltip>
+                  {{ checking ? '检查中...' : '检查更新' }}
+                </el-button>
               </span>
             </div>
           </div>
@@ -274,15 +281,39 @@
         </div>
       </div>
     </el-card>
+
+    <!-- 更新内容弹窗 -->
+    <el-dialog
+      v-model="updateDialogVisible"
+      title="版本更新内容"
+      width="600px"
+      :close-on-click-modal="false"
+    >
+      <div v-if="updatingVersions.length > 0">
+        <div v-for="version in updatingVersions" :key="version.id" class="version-item-detail">
+          <div class="version-header">
+            <span class="version-tag">{{ version.version }}</span>
+            <span class="version-date">{{ version.date }}</span>
+          </div>
+          <div class="version-changes" v-html="formatChanges(version.changes)"></div>
+        </div>
+      </div>
+      <div v-else class="no-changes">暂无更新内容</div>
+      <template #footer>
+        <el-button type="primary" @click="updateDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="goToGitHub">前往 GitHub</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Monitor, Cpu, Coin, DataLine, FolderOpened, Connection } from '@element-plus/icons-vue';
-import { getSystemStatic, getSystemDynamic } from '@/api/system';
+import { getSystemStatic, getSystemDynamic, checkUpdate } from '@/api/system';
 import type { SystemStatic, SystemDynamic } from '@/types/system';
+import type { VersionInfo } from '@/api/system';
 
 let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -323,6 +354,58 @@ const dynamicInfo = ref<SystemDynamic>({
   version_last_check_error: '',
 });
 
+const checking = ref(false);
+const updateDialogVisible = ref(false);
+const panelVersions = ref<VersionInfo[]>([]);
+const updatingVersions = ref<VersionInfo[]>([]);
+
+const latestVersion = computed(() => dynamicInfo.value.version_latest_version);
+
+const currentVersion = computed(() => staticInfo.value.app_version || 'dev');
+
+const hasNewVersion = computed(() => {
+  if (!latestVersion.value || currentVersion.value === 'dev') return false;
+  return compareVersion(latestVersion.value, currentVersion.value) > 0;
+});
+
+const compareVersion = (a: string, b: string): number => {
+  const parseVersion = (v: string): number[] => {
+    return v
+      .replace(/^v/, '')
+      .split('.')
+      .map(n => parseInt(n, 10) || 0);
+  };
+  const av = parseVersion(a);
+  const bv = parseVersion(b);
+  for (let i = 0; i < Math.max(av.length, bv.length); i++) {
+    const an = av[i] || 0;
+    const bn = bv[i] || 0;
+    if (an > bn) return 1;
+    if (an < bn) return -1;
+  }
+  return 0;
+};
+
+const showUpdateDialog = async () => {
+  updatingVersions.value = panelVersions.value
+    .filter(version => {
+      const comparedCurrent = compareVersion(version.version, currentVersion.value);
+      return comparedCurrent > 0;
+    })
+    .sort((a, b) => compareVersion(b.version, a.version));
+
+  updateDialogVisible.value = true;
+};
+
+const formatChanges = (changes: string): string => {
+  // 简单的换行处理，支持换行
+  return changes.replace(/\n/g, '<br>');
+};
+
+const goToGitHub = () => {
+  window.open('https://github.com/talen8/FlecBlog/releases', '_blank');
+};
+
 const fetchStaticInfo = async () => {
   try {
     staticInfo.value = await getSystemStatic();
@@ -336,6 +419,24 @@ const fetchDynamicInfo = async () => {
     dynamicInfo.value = await getSystemDynamic();
   } catch (_error) {
     ElMessage.error('获取系统动态信息失败');
+  }
+};
+
+const handleCheckUpdate = async () => {
+  checking.value = true;
+  try {
+    const result = await checkUpdate();
+    panelVersions.value = result.versions;
+    await fetchDynamicInfo();
+    if (result.has_update) {
+      ElMessage.success('发现新版本');
+    } else {
+      ElMessage.success('已是最新版本');
+    }
+  } catch (_error) {
+    ElMessage.error('检查更新失败');
+  } finally {
+    checking.value = false;
   }
 };
 
@@ -362,13 +463,6 @@ const getProgressColor = (percentage: number): string => {
   if (percentage < 80) return '#e6a23c';
   return '#f56c6c';
 };
-
-const versionCheckErrorMessage = computed(() => {
-  if (!dynamicInfo.value.version_last_check_error) {
-    return '';
-  }
-  return `版本检查失败，请检查服务端网络是否可以访问 GitHub Releases API。错误信息：${dynamicInfo.value.version_last_check_error}`;
-});
 
 onMounted(() => {
   fetchStaticInfo();
@@ -472,17 +566,8 @@ onUnmounted(() => {
 .version-value {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-
-.error-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #f56c6c;
-  flex-shrink: 0;
-  cursor: help;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .info-section {
@@ -561,33 +646,73 @@ onUnmounted(() => {
     word-break: break-all;
   }
 
-  .version-value-wrapper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-  }
-
-  .multiline {
-    white-space: pre-wrap;
-    text-align: right;
-  }
-
-  .link-value {
-    color: #409eff;
-    font-size: 14px;
-    text-align: right;
-    word-break: break-all;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
   :deep(.el-progress__text) {
     min-width: auto;
   }
+}
+
+.version-link {
+  cursor: pointer;
+  color: #409eff;
+  text-decoration: underline;
+
+  &:hover {
+    color: #79bbff;
+  }
+
+  .new-version-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #f56c6c;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+}
+
+.version-item-detail {
+  border-bottom: 1px solid #ebeef5;
+  padding: 16px 0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .version-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .version-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      background: #ecf5ff;
+      color: #409eff;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .version-date {
+      color: #909399;
+      font-size: 13px;
+    }
+  }
+
+  .version-changes {
+    color: #303133;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+}
+
+.no-changes {
+  text-align: center;
+  color: #909399;
+  padding: 40px 0;
 }
 
 @media (max-width: 768px) {

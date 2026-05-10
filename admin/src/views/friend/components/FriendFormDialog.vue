@@ -326,7 +326,7 @@ const downloadPreviewImage = async (
     const blob = await fetch(`data:image/png;base64,${response.data}`).then(res => res.blob());
 
     // 获取content-type
-    const contentType = response.headers?.['content-type'] || 'image/png';
+    const contentType = String(response.headers?.['content-type'] || 'image/png');
 
     // 创建File对象
     const file = new File([blob], filename, { type: contentType });

@@ -3,9 +3,11 @@ import type { PaginationQuery } from './request';
 // 通知类型（后台管理系统）
 export type NotificationType =
   | 'comment_new' // 新评论
+  | 'comment_reply' // 评论回复
   | 'feedback_new' // 反馈投诉
   | 'system_alert' // 系统告警
-  | 'friend_apply'; // 友链申请
+  | 'friend_apply' // 友链申请
+  | 'friend_abnormal'; // 异常友链
 
 // 通知数据类型定义
 export interface CommentNotificationData {

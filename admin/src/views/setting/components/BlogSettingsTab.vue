@@ -103,7 +103,7 @@
       </el-form-item>
     </div>
 
-    <el-form-item label="侧边栏公告">
+    <el-form-item label="公告">
       <el-input
         v-model="form.announcement"
         type="textarea"
@@ -124,7 +124,7 @@
 
     <el-divider content-position="left">社交媒体</el-divider>
 
-    <el-form-item label="侧边栏社交">
+    <el-form-item label="侧边社交">
       <JsonListEditor
         v-model="form.sidebarSocialList"
         :fields="sidebarSocialFields"

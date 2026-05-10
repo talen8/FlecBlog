@@ -84,7 +84,14 @@
 import { ref, onMounted, onUnmounted, type Component } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { Bell, ChatDotRound, QuestionFilled, Warning, Link } from '@element-plus/icons-vue';
+import {
+  Bell,
+  ChatDotRound,
+  QuestionFilled,
+  Warning,
+  Link,
+  WarningFilled,
+} from '@element-plus/icons-vue';
 import { getNotifications, markAsRead, markAllAsRead } from '@/api/notification';
 import type { Notification, NotificationType } from '@/types/notification';
 import { formatMomentTime } from '@/utils/date';
@@ -222,10 +229,12 @@ const requestNotificationPermission = async () => {
 
 // 通知图标配置
 const notificationIconConfig: Record<NotificationType, { icon: Component; color: string }> = {
+  comment_reply: { icon: ChatDotRound, color: '#409EFF' },
   comment_new: { icon: ChatDotRound, color: '#409EFF' },
   feedback_new: { icon: QuestionFilled, color: '#E6A23C' },
   system_alert: { icon: Warning, color: '#F56C6C' },
   friend_apply: { icon: Link, color: '#67C23A' },
+  friend_abnormal: { icon: WarningFilled, color: '#E6A23C' },
 };
 
 const getNotificationIcon = (type: NotificationType) => notificationIconConfig[type]?.icon || Bell;

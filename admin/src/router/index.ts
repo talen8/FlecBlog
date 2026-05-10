@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 import { checkAuth, ensureUserInfo, isSuperAdmin } from '@/utils/auth';
+import { getSystemDynamic } from '@/api/system';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -141,6 +142,7 @@ router.beforeEach(async to => {
   if (requiresAuth) {
     try {
       await ensureUserInfo();
+      getSystemDynamic().catch(() => {});
     } catch {
       return '/login';
     }
