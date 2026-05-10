@@ -7,7 +7,7 @@ import { publicRoutes } from './routes/public';
 import { versionRoutes } from './routes/versions';
 import { announcementRoutes } from './routes/announcements';
 import { settingsRoutes } from './routes/settings';
-import { syncGitHubReleases } from './services/github';
+import { syncGitHubReleases, autoEnablePendingVersions } from './services/github';
 
 type AppEnv = Env & { ASSETS: Fetcher };
 const app = new Hono<{ Bindings: AppEnv }>();
@@ -32,5 +32,6 @@ export default {
   fetch: app.fetch,
   async scheduled(event: ScheduledEvent, env: Env) {
     await syncGitHubReleases(env);
+    await autoEnablePendingVersions(env);
   },
 };

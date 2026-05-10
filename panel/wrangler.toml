@@ -1,4 +1,4 @@
-name = "flecb-panel"
+name = "flec-panel"
 main = "src/app.ts"
 compatibility_date = "2024-05-01"
 
@@ -8,8 +8,8 @@ binding = "ASSETS"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "flecb-panel-d1"
-database_id = "588a1972-3e09-4534-a742-d9fad41b4808"
+database_name = "flec-panel-d1"
+database_id = "b39b8f3d-1734-498a-a3aa-ad05b1356ea7"
 
 [triggers]
 crons = ["0 * * * *"]

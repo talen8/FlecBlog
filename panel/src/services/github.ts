@@ -65,6 +65,14 @@ export async function syncGitHubReleases(env: Env): Promise<{ success: boolean; 
   }
 }
 
+export async function autoEnablePendingVersions(env: Env): Promise<number> {
+  const result = await env.DB.prepare(
+    "UPDATE versions SET enabled = 1 WHERE enabled = 0 AND datetime(created_at) <= datetime('now', '-6 hours')"
+  ).run();
+
+  return result.meta?.changes || 0;
+}
+
 function parseReleaseBody(body: string): string {
   const lines: string[] = [];
 
