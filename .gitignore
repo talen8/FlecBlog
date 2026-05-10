@@ -38,6 +38,7 @@ logs/
 # AI 编辑器配置
 .claude/
 .trae/
+.codebuddy/
 .cursor/
 .copilot/
 .aider*
