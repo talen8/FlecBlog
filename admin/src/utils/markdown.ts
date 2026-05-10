@@ -498,7 +498,10 @@ function renderFence(
     )
     .join('\n');
 
-  return `<div class="code-block-container"${sourceAttrs}><div class="code-toolbar"><button class="code-fold-btn" onclick="this.closest('.code-block-container').classList.toggle('collapsed')" title="折叠/展开"><i class="ri-arrow-down-s-line"></i></button><span class="code-lang">${displayLang}</span><button class="code-copy-btn" onclick="copyCodeBlock(this)" title="复制代码"><i class="ri-file-copy-fill"></i></button></div><pre><code>${numberedLines}</code></pre></div>`;
+  // 将原始代码内容存储在 data 属性中，用于复制功能
+  const escapedCode = escapeHtml(code.replace(/\n$/, ''));
+
+  return `<div class="code-block-container" data-code-content="${escapedCode}"${sourceAttrs}><div class="code-toolbar"><button class="code-fold-btn" onclick="this.closest('.code-block-container').classList.toggle('collapsed')" title="折叠/展开"><i class="ri-arrow-down-s-line"></i></button><span class="code-lang">${displayLang}</span><button class="code-copy-btn" onclick="copyCodeBlock(this)" title="复制代码"><i class="ri-file-copy-fill"></i></button></div><pre><code>${numberedLines}</code></pre></div>`;
 }
 
 // 创建 markdown-it 实例
@@ -896,6 +899,7 @@ const SANITIZE_CONFIG = {
     'data-server',
     'data-type',
     'data-id',
+    'data-code-content',
     // KaTeX / MathML 属性
     'style',
     'mathvariant',
@@ -1156,7 +1160,7 @@ export function renderMarkdownWithStyles(markdown: string): string {
   if (!markdown) return '';
 
   const html = renderMarkdown(markdown);
-  const script = `;(function(){function f(t){var e=t.closest('.code-block-container');if(!e)return'';var n=e.querySelector('code');if(!n)return'';var r=Array.from(n.querySelectorAll('.line-content'));return r.map(function(o){return o.textContent||''}).join('\\n')}function c(t,e){try{if(navigator.clipboard&&navigator.clipboard.writeText){return navigator.clipboard.writeText(t).then(e)} }catch(o){}var n=document.createElement('textarea');n.value=t;n.style.position='fixed';n.style.opacity='0';document.body.appendChild(n);n.select();try{document.execCommand('copy')}catch(o){}document.body.removeChild(n);e&&e()}function copyCodeBlock(t){var e=f(t);if(!e)return;c(e,function(){var n=t.querySelector('i');if(n){n.className='ri-check-line';t.classList.add('copied')}setTimeout(function(){if(n){n.className='ri-file-copy-fill';t.classList.remove('copied')}},2000)})}function switchTab(t,e){var n=document.getElementById(t);if(!n)return;Array.from(n.querySelectorAll('.custom-tab-btn')).forEach(function(r){r.textContent===e?r.classList.add('active'):r.classList.remove('active')});Array.from(n.querySelectorAll('.custom-tab-panel')).forEach(function(r){var o=r; o.dataset&&o.dataset.tab===e?r.classList.add('active'):r.classList.remove('active')})}function toggleFold(t){var e=document.getElementById(t);if(!e)return;e.classList.toggle('open')}window.copyCodeBlock=copyCodeBlock;window.switchTab=switchTab;window.toggleFold=toggleFold})();`;
+  const script = `;(function(){function f(t){var e=t.closest('.code-block-container');if(!e)return'';var n=e.dataset.codeContent;if(n){var r=document.createElement('textarea');r.innerHTML=n;return r.value}var a=e.querySelector('code');if(!a)return'';var i=Array.from(a.querySelectorAll('.line-content'));return i.map(function(o){return o.textContent||''}).join('\\n')}function c(t,e){try{if(navigator.clipboard&&navigator.clipboard.writeText){return navigator.clipboard.writeText(t).then(e)}}catch(o){}var n=document.createElement('textarea');n.value=t;n.style.position='fixed';n.style.opacity='0';document.body.appendChild(n);n.select();try{document.execCommand('copy')}catch(o){}document.body.removeChild(n);e&&e()}function copyCodeBlock(t){var e=f(t);if(!e)return;c(e,function(){var n=t.querySelector('i');if(n){n.className='ri-check-line';t.classList.add('copied')}setTimeout(function(){if(n){n.className='ri-file-copy-fill';t.classList.remove('copied')}},2000)})}function switchTab(t,e){var n=document.getElementById(t);if(!n)return;Array.from(n.querySelectorAll('.custom-tab-btn')).forEach(function(r){r.textContent===e?r.classList.add('active'):r.classList.remove('active')});Array.from(n.querySelectorAll('.custom-tab-panel')).forEach(function(r){var o=r;o.dataset&&o.dataset.tab===e?r.classList.add('active'):r.classList.remove('active')})}function toggleFold(t){var e=document.getElementById(t);if(!e)return;e.classList.toggle('open')}window.copyCodeBlock=copyCodeBlock;window.switchTab=switchTab;window.toggleFold=toggleFold})();`;
 
   return `<style>${MARKDOWN_STYLES}</style><div class="markdown-content">${html}</div>\n<script>${script}</script>\n`;
 }
@@ -1260,25 +1264,24 @@ export function copyCodeBlock(button: HTMLElement): void {
   const container = button.closest('.code-block-container');
   if (!container) return;
 
-  const code = container.querySelector('code');
-  if (!code) return;
+  const codeContent = (container as HTMLElement).dataset.codeContent;
+  if (!codeContent) return;
 
-  // 只提取代码内容，不包含行号
-  const codeLines = Array.from(code.querySelectorAll('.line-content'));
-  const codeText = codeLines.map(line => line.textContent || '').join('\n');
+  // HTML 解码
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = codeContent;
+  const codeText = textarea.value;
 
   // 复制到剪贴板
   navigator.clipboard
     .writeText(codeText)
     .then(() => {
-      // 更新按钮状态
       const icon = button.querySelector('i');
       if (icon) {
         icon.className = 'ri-check-line';
         button.classList.add('copied');
       }
 
-      // 2秒后恢复
       setTimeout(() => {
         if (icon) {
           icon.className = 'ri-file-copy-fill';

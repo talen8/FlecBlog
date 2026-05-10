@@ -382,8 +382,11 @@ md.renderer.rules.fence = (tokens, idx) => {
     )
     .join('\n');
 
+  // 将原始代码内容存储在 data 属性中，用于复制功能
+  const escapedCode = md.utils.escapeHtml(code.replace(/\n$/, ''));
+
   // 返回完整结构
-  return `<div class="code-block-container"><div class="code-toolbar"><button class="code-fold-btn" onclick="this.closest('.code-block-container').classList.toggle('collapsed')" title="折叠/展开"><i class="ri-arrow-down-s-line"></i></button><span class="code-lang">${displayLang}</span><button class="code-copy-btn" onclick="copyCodeBlock(this)" title="复制代码"><i class="ri-file-copy-fill"></i></button></div><pre><code>${numberedLines}</code></pre></div>`;
+  return `<div class="code-block-container" data-code-content="${escapedCode}"><div class="code-toolbar"><button class="code-fold-btn" onclick="this.closest('.code-block-container').classList.toggle('collapsed')" title="折叠/展开"><i class="ri-arrow-down-s-line"></i></button><span class="code-lang">${displayLang}</span><button class="code-copy-btn" onclick="copyCodeBlock(this)" title="复制代码"><i class="ri-file-copy-fill"></i></button></div><pre><code>${numberedLines}</code></pre></div>`;
 };
 
 // 使用 anchor 插件生成标题 ID
@@ -815,6 +818,7 @@ export function renderMarkdown(markdown: string): string {
       'data-server',
       'data-type',
       'data-id',
+      'data-code-content',
       // KaTeX / MathML 属性
       'style',
       'mathvariant',
@@ -1027,25 +1031,24 @@ export function copyCodeBlock(button: HTMLElement): void {
   const container = button.closest('.code-block-container');
   if (!container) return;
 
-  const code = container.querySelector('code');
-  if (!code) return;
+  const codeContent = (container as HTMLElement).dataset.codeContent;
+  if (!codeContent) return;
 
-  // 只提取代码内容，不包含行号
-  const codeLines = Array.from(code.querySelectorAll('.line-content'));
-  const codeText = codeLines.map(line => line.textContent || '').join('\n');
+  // HTML 解码
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = codeContent;
+  const codeText = textarea.value;
 
   // 复制到剪贴板
   navigator.clipboard
     .writeText(codeText)
     .then(() => {
-      // 更新按钮状态
       const icon = button.querySelector('i');
       if (icon) {
         icon.className = 'ri-check-line';
         button.classList.add('copied');
       }
 
-      // 2秒后恢复
       setTimeout(() => {
         if (icon) {
           icon.className = 'ri-file-copy-fill';
