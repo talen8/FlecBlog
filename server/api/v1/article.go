@@ -87,6 +87,24 @@ func (c *ArticleController) Search(ctx *gin.Context) {
 	response.PageSuccess(ctx, articles, total, req.Page, req.PageSize)
 }
 
+// GetRandom 随机文章
+//
+//	@Summary		随机文章
+//	@Description	随机返回一篇已发布文章的 slug
+//	@Tags			文章
+//	@Produce		json
+//	@Success		200	{object}	response.Response{data=string}
+//	@Failure		404	{object}	response.Response
+//	@Router			/articles/random [get]
+func (c *ArticleController) GetRandom(ctx *gin.Context) {
+	slug, err := c.articleService.GetRandomSlug(ctx.Request.Context())
+	if err != nil {
+		response.NotFound(ctx, "暂无可用文章")
+		return
+	}
+	response.Success(ctx, slug)
+}
+
 // GetBySlug 文章详情
 //
 //	@Summary		文章详情

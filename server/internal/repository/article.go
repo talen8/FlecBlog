@@ -69,6 +69,18 @@ func (r *ArticleRepository) ListForWeb(page, pageSize int, year, month, category
 	return articles, total, nil
 }
 
+// GetRandomSlug 随机返回一篇已发布文章的 slug
+func (r *ArticleRepository) GetRandomSlug() (string, error) {
+	var article model.Article
+	err := r.db.Model(&model.Article{}).
+		Where("is_publish = ?", true).
+		Order("RANDOM()").
+		Limit(1).
+		Select("slug").
+		First(&article).Error
+	return article.Slug, err
+}
+
 // Search 搜索文章
 func (r *ArticleRepository) Search(keyword string, offset, limit int) ([]model.Article, int64, error) {
 	var articles []model.Article

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getRandomArticleSlug } from '@/composables/api/article';
+
 interface Emits {
   (e: 'toggleDrawer'): void;
 }
@@ -59,6 +61,19 @@ const openSearch = () => {
   showSearchModal.value = true;
 };
 
+// 随机阅读
+const isRandomLoading = ref(false);
+const handleRandom = async () => {
+  if (isRandomLoading.value) return;
+  isRandomLoading.value = true;
+  try {
+    const slug = await getRandomArticleSlug();
+    window.location.href = `/posts/${slug}`;
+  } finally {
+    isRandomLoading.value = false;
+  }
+};
+
 // 用户菜单显示状态
 const showUserMenu = ref(false);
 const userMenuRef = ref<HTMLElement>();
@@ -84,6 +99,14 @@ const handleLogout = () => {
   <div class="nav-button">
     <button class="brighten" aria-label="搜索" @click="openSearch">
       <i class="ri-search-line ri-xl" />
+    </button>
+    <button
+      class="brighten"
+      aria-label="随机阅读"
+      :disabled="isRandomLoading"
+      @click="handleRandom"
+    >
+      <i class="ri-shuffle-line ri-xl" />
     </button>
     <!-- 主题切换按钮 - 使用 CSS 控制图标显示，避免 SSR 闪烁 -->
     <button class="brighten theme-toggle" aria-label="切换主题" @click="toggleTheme">

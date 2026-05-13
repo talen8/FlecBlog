@@ -5330,6 +5330,28 @@ paths:
       summary: 文章详情
       tags:
       - 文章
+  /articles/random:
+    get:
+      description: 随机返回一篇已发布文章的 slug
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 随机文章
+      tags:
+      - 文章
   /articles/search:
     get:
       consumes:

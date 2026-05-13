@@ -153,6 +153,11 @@ func (s *ArticleService) ListForWeb(ctx context.Context, req *dto.ListArticlesFo
 	return response, total, nil
 }
 
+// GetRandomSlug 随机返回一篇已发布文章的 slug
+func (s *ArticleService) GetRandomSlug(ctx context.Context) (string, error) {
+	return s.articleRepo.GetRandomSlug()
+}
+
 // Search 搜索文章
 func (s *ArticleService) Search(ctx context.Context, req *dto.SearchArticlesRequest) ([]dto.ArticleWebResponse, int64, error) {
 	offset := (req.Page - 1) * req.PageSize

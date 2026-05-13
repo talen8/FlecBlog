@@ -183,9 +183,10 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 		articleGroup := frontendAPI.Group("/articles")
 		{
 			// 公开接口
-			articleGroup.GET("", articleController.ListForWeb)      // 获取前台文章列表
-			articleGroup.GET("/search", articleController.Search)   // 搜索文章
-			articleGroup.GET("/:slug", articleController.GetBySlug) // 通过slug获取文章详情
+			articleGroup.GET("", articleController.ListForWeb)       // 获取前台文章列表
+			articleGroup.GET("/search", articleController.Search)    // 搜索文章
+			articleGroup.GET("/random", articleController.GetRandom) // 随机文章
+			articleGroup.GET("/:slug", articleController.GetBySlug)  // 通过slug获取文章详情
 		}
 
 		// ==================== 标签相关 ====================

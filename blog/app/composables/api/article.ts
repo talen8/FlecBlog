@@ -18,3 +18,8 @@ export const getArticleBySlug = async (slug: string) => {
 export const searchArticles = async (keyword: string, params: Partial<ArticleQuery> = {}) => {
   return articleApi.get<PaginationData<Article>>('/search', { keyword, ...params });
 };
+
+/** 随机文章 slug */
+export const getRandomArticleSlug = async () => {
+  return articleApi.get<string>('/random');
+};
