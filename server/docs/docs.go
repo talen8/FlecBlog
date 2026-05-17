@@ -1598,6 +1598,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/comments/{id}/toggle-pinned": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "切换评论的置顶状态，置顶的评论会在同级评论中排在最前面",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论管理"
+                ],
+                "summary": "切换评论置顶",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "评论 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/comments/{id}/toggle-status": {
             "put": {
                 "security": [
@@ -8036,6 +8097,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_pinned": {
+                    "description": "是否置顶",
+                    "type": "boolean"
+                },
                 "parent_id": {
                     "type": "integer"
                 },
@@ -8097,6 +8162,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "is_deleted": {
+                    "type": "boolean"
+                },
+                "is_pinned": {
+                    "description": "是否置顶",
                     "type": "boolean"
                 },
                 "location": {

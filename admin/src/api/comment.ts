@@ -39,6 +39,15 @@ export function toggleCommentStatus(id: number): Promise<void> {
 }
 
 /**
+ * 切换评论置顶状态
+ * @param id 评论ID
+ * @returns Promise<void>
+ */
+export function toggleCommentPinned(id: number): Promise<void> {
+  return request.put(`/admin/comments/${id}/toggle-pinned`);
+}
+
+/**
  * 删除评论
  * @param id 评论ID
  * @returns Promise<void>

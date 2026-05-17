@@ -13,6 +13,7 @@ type Comment struct {
 	RootID     *uint  `gorm:"column:root_id" json:"root_id"`   // 根评论ID（用于扁平化）
 	ReplyTo    *uint  `gorm:"column:reply_to" json:"reply_to"` // 回复的目标用户ID
 	Status     int    `gorm:"default:1" json:"status"`         // 0:隐藏 1:显示
+	IsPinned   bool   `gorm:"default:false" json:"is_pinned"`  // 是否置顶
 
 	// 用户环境信息
 	IP       string `gorm:"type:varchar(45)" json:"ip"`        // IP地址（支持IPv6）

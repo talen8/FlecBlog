@@ -3,6 +3,7 @@ export interface Comment {
   id: number;
   content: string;
   status: number; // 0: 隐藏, 1: 显示
+  is_pinned: boolean; // 是否置顶
   parent_id?: number; // 父评论ID，用于回复
   created_at: string;
   deleted_at?: string;

@@ -58,8 +58,11 @@
           <el-image
             v-if="isImage(row)"
             :src="row.file_url"
+            :preview-src-list="[row.file_url]"
             fit="cover"
-            style="width: 50px; height: 50px; border-radius: 4px"
+            style="width: 50px; height: 50px; border-radius: 4px; cursor: pointer"
+            preview-teleported
+            hide-on-click-modal
           />
         </template>
       </el-table-column>

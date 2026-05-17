@@ -267,6 +267,36 @@ func (c *CommentController) ToggleStatus(ctx *gin.Context) {
 	response.Success(ctx, nil)
 }
 
+// TogglePinned 切换评论置顶状态
+//
+//	@Summary		切换评论置顶
+//	@Description	切换评论的置顶状态，置顶的评论会在同级评论中排在最前面
+//	@Tags			评论管理
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			id	path		int	true	"评论 ID"
+//	@Success		200	{object}	response.Response
+//	@Failure		400	{object}	response.Response
+//	@Failure		401	{object}	response.Response
+//	@Failure		403	{object}	response.Response
+//	@Failure		404	{object}	response.Response
+//	@Router			/admin/comments/{id}/toggle-pinned [put]
+func (c *CommentController) TogglePinned(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
+	if err != nil {
+		response.ValidateFailed(ctx, err.Error())
+		return
+	}
+
+	if err := c.commentService.TogglePinned(ctx.Request.Context(), uint(id)); err != nil {
+		response.Failed(ctx, err.Error())
+		return
+	}
+
+	response.Success(ctx, nil)
+}
+
 // Delete 删除评论
 //
 //	@Summary		删除评论

@@ -142,6 +142,19 @@
         </template>
       </el-table-column>
 
+      <el-table-column label="置顶" width="100" align="center">
+        <template #default="{ row }">
+          <el-switch
+            v-model="row.is_pinned"
+            :disabled="!!row.deleted_at"
+            inline-prompt
+            active-text="是"
+            inactive-text="否"
+            @change="handlePinned(row)"
+          />
+        </template>
+      </el-table-column>
+
       <el-table-column label="操作" width="180" align="center" fixed="right">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="openReplyDialog(row)">
@@ -204,7 +217,13 @@ import { User } from '@element-plus/icons-vue';
 import CommonList from '@/components/common/CommonList.vue';
 import CommentFilter from './components/CommentFilter.vue';
 import type { Comment, CommentListQuery } from '@/types/comment';
-import { getComments, deleteComment, toggleCommentStatus, createComment } from '@/api/comment';
+import {
+  getComments,
+  deleteComment,
+  toggleCommentStatus,
+  toggleCommentPinned,
+  createComment,
+} from '@/api/comment';
 import { formatDateTime } from '@/utils/date';
 
 const loading = ref(false);
@@ -297,6 +316,21 @@ const handleStatusChange = async (comment: Comment) => {
       ElMessage.error(error.message);
     } else {
       ElMessage.error('状态切换失败');
+    }
+  }
+};
+
+const handlePinned = async (comment: Comment) => {
+  const pinnedText = comment.is_pinned ? '置顶' : '取消置顶';
+  try {
+    await toggleCommentPinned(comment.id);
+    ElMessage.success(`已${pinnedText}`);
+  } catch (error) {
+    comment.is_pinned = !comment.is_pinned;
+    if (error instanceof Error) {
+      ElMessage.error(error.message);
+    } else {
+      ElMessage.error('置顶操作失败');
     }
   }
 };

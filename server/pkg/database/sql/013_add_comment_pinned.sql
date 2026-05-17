@@ -1,0 +1,2 @@
+-- 添加置顶字段到评论表
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN NOT NULL DEFAULT FALSE;

@@ -12,6 +12,7 @@ export interface Comment {
   id: number;
   content: string;
   is_deleted: boolean;
+  is_pinned: boolean; // 是否置顶
   parent_id: number | null;
   created_at: string;
   location?: string; // 地理位置

@@ -131,6 +131,9 @@ const handleReplyClick = () => {
         <span v-if="comment.location" class="comment-meta">{{ comment.location }}</span>
         <span v-if="comment.os" class="comment-meta">{{ comment.os }}</span>
         <span v-if="comment.browser" class="comment-meta">{{ comment.browser }}</span>
+        <span v-if="comment.is_pinned" class="comment-meta comment-pinned">
+          <i class="ri-pushpin-fill" />
+        </span>
       </div>
 
       <!-- 中：内容 -->
@@ -199,6 +202,12 @@ const handleReplyClick = () => {
     &:not(:last-child) {
       border-bottom: 1px solid var(--flec-border-color);
     }
+  }
+}
+
+.comment-pinned {
+  i {
+    color: #ea4a4a;
   }
 }
 
