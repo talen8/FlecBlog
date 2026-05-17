@@ -390,6 +390,17 @@
         :disabled="loading"
       />
     </el-form-item>
+
+    <el-divider content-position="left">赞赏配置</el-divider>
+
+    <el-form-item label="赞赏方式">
+      <JsonListEditor
+        v-model="form.donationMethodsList"
+        :fields="donationMethodsFields"
+        :default-item="{ name: '', qrcode: '' }"
+        :disabled="loading"
+      />
+    </el-form-item>
   </el-form>
 </template>
 
@@ -449,6 +460,7 @@ interface BlogFormData {
   custom_body: string;
   emojis: string;
   font: string;
+  donationMethodsList: Array<{ name: string; qrcode: string }>;
 }
 
 const form = defineModel<BlogFormData>('form', { required: true });
@@ -597,6 +609,22 @@ const versionsFields: FieldConfig[] = [
     type: 'text',
     placeholder: '版本号',
     style: 'flex: 1; margin: 0 8px',
+  },
+];
+
+const donationMethodsFields: FieldConfig[] = [
+  {
+    key: 'name',
+    type: 'text',
+    placeholder: '赞赏方式',
+    style: 'width: 200px',
+  },
+  {
+    key: 'qrcode',
+    type: 'image',
+    placeholder: '赞赏二维码',
+    style: 'flex: 1',
+    uploadType: '赞赏图片',
   },
 ];
 

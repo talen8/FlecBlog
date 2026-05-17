@@ -22,6 +22,11 @@ var reconciledSettingImageKeys = []string{
 	KeyBlogScreenshot,
 }
 
+// jsonArrayImageKeys 需要检查 JSON 数组中图片 URL 的配置键
+var jsonArrayImageKeys = map[string]string{
+	KeyBlogDonationMethods: "qrcode", // 赞赏方式，检查 qrcode 字段
+}
+
 // FileUsageChecker 文件引用检查器
 type FileUsageChecker struct {
 	articleRepo  *repository.ArticleRepository
@@ -69,6 +74,9 @@ func (c *FileUsageChecker) IsActuallyUsed(fileURL string) (bool, string, error) 
 		{name: "动态内容", fn: c.momentRepo.ExistsByContentURL},
 		{name: "设置图片", fn: func(url string) (bool, error) {
 			return c.settingRepo.ExistsByValueAndKeys(url, reconciledSettingImageKeys)
+		}},
+		{name: "赞赏图片", fn: func(url string) (bool, error) {
+			return c.settingRepo.ExistsByJSONArrayField(url, jsonArrayImageKeys)
 		}},
 		{name: "用户头像", fn: c.userRepo.ExistsByAvatar},
 		{name: "菜单图标", fn: c.menuRepo.ExistsByIcon},

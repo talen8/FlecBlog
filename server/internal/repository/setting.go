@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -70,4 +71,29 @@ func (r *SettingRepository) ExistsByValueAndKeys(value string, keys []string) (b
 	}
 	err := query.Count(&count).Error
 	return count > 0, err
+}
+
+// ExistsByJSONArrayField 检查 JSON 数组配置中是否包含指定 URL
+func (r *SettingRepository) ExistsByJSONArrayField(value string, keyFieldMap map[string]string) (bool, error) {
+	for key, field := range keyFieldMap {
+		var setting model.Setting
+		if err := r.db.Where("\"key\" = ?", key).First(&setting).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
+			return false, err
+		}
+		// 解析 JSON 数组
+		var items []map[string]interface{}
+		if err := json.Unmarshal([]byte(setting.Value), &items); err != nil {
+			continue
+		}
+		// 检查每个项的指定字段
+		for _, item := range items {
+			if v, ok := item[field].(string); ok && v == value {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }

@@ -175,6 +175,7 @@ const blogForm = ref({
   custom_body: '',
   emojis: '',
   font: '',
+  donationMethodsList: [] as Array<{ name: string; qrcode: string }>,
 });
 
 // 上传配置表单
@@ -336,6 +337,7 @@ const loadBlogConfigs = async () => {
     blogForm.value.custom_body = configs.custom_body || '';
     blogForm.value.emojis = configs.emojis || '';
     blogForm.value.font = configs.font || '';
+    blogForm.value.donationMethodsList = parseJSON(configs.donation_methods || '', []);
   } catch {
     ElMessage.error('获取博客配置失败');
   }
@@ -575,6 +577,7 @@ const handleSave = async () => {
       'blog.moments_size': String(blogForm.value.moments_size),
       'blog.message_content': blogForm.value.message_content,
       'blog.home_layout': blogForm.value.home_layout,
+      'blog.donation_methods': JSON.stringify(blogForm.value.donationMethodsList),
     };
 
     // 通知配置

@@ -64,6 +64,27 @@
           :disabled="disabled"
           @change="emitUpdate"
         />
+
+        <!-- 图片URL输入 -->
+        <el-input
+          v-else-if="field.type === 'image'"
+          v-model="item[field.key]"
+          :placeholder="field.placeholder || '图片URL'"
+          :style="field.style"
+          :disabled="disabled"
+          @input="emitUpdate"
+        >
+          <template #append>
+            <el-upload
+              :show-file-list="false"
+              :http-request="(opts: UploadRequestOptions) => handleUpload(opts, index, field)"
+              accept="image/*"
+              :disabled="disabled"
+            >
+              <el-button :icon="Upload" :loading="uploadingKey === `${index}-${field.key}`" />
+            </el-upload>
+          </template>
+        </el-input>
       </template>
 
       <!-- 删除按钮 -->
@@ -94,17 +115,20 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { Delete, Plus, ArrowUp, ArrowDown } from '@element-plus/icons-vue';
+import { Delete, Plus, ArrowUp, ArrowDown, Upload } from '@element-plus/icons-vue';
+import { ElMessage, type UploadRequestOptions } from 'element-plus';
+import { uploadFile } from '@/api/file';
 
 export interface FieldConfig {
   key: string;
-  type: 'text' | 'select' | 'color';
+  type: 'text' | 'select' | 'color' | 'image';
   placeholder?: string;
   style?: string;
   prefix?: string;
   filterable?: boolean;
   allowCreate?: boolean;
   options?: Array<{ label: string; value: string; icon?: string }>;
+  uploadType?: string;
 }
 
 export interface JsonListEditorProps {
@@ -131,6 +155,9 @@ const emit = defineEmits<{
 // 内部值（深拷贝避免直接修改 prop）
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const internalValue = ref<any[]>([]);
+
+// 上传状态
+const uploadingKey = ref<string | null>(null);
 
 // 监听 modelValue 变化
 watch(
@@ -181,6 +208,28 @@ const addItem = () => {
   });
   internalValue.value.push(newItem);
   emitUpdate();
+};
+
+// 处理图片上传
+const handleUpload = async (opts: UploadRequestOptions, index: number, field: FieldConfig) => {
+  const file = opts.file as File;
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error('请选择图片文件');
+    return;
+  }
+  const refKey = `${index}-${field.key}`;
+  uploadingKey.value = refKey;
+  try {
+    const result = await uploadFile(file, field.uploadType || '图片');
+    if (internalValue.value[index]) {
+      internalValue.value[index][field.key] = result.file_url;
+      emitUpdate();
+    }
+  } catch (e) {
+    ElMessage.error((e as Error)?.message || '上传失败');
+  } finally {
+    uploadingKey.value = null;
+  }
 };
 </script>
 

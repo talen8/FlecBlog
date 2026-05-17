@@ -396,6 +396,7 @@ export function useSysConfig() {
     moments_size: '30',
     message_content: '',
     home_layout: 'waterfall',
+    donation_methods: '',
   }));
 
   const oauthConfig = useState<Record<string, string>>('sysconfig-oauth', () => ({

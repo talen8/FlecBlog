@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -68,6 +69,7 @@ const (
 	KeyBlogMomentsSize       = "blog.moments_size"        // 动态列表每页数量
 	KeyBlogMessageContent    = "blog.message_content"     // 留言信内容
 	KeyBlogHomeLayout        = "blog.home_layout"         // 首页布局（waterfall/single_column）
+	KeyBlogDonationMethods   = "blog.donation_methods"    // 赞赏方式（JSON数组）
 )
 
 // 配置键常量 - Notification 相关
@@ -258,6 +260,34 @@ func (s *SettingService) UpdateGroup(group string, updates map[string]string) er
 			handleImageChange(KeyBlogBackgroundImage)
 			handleImageChange(KeyBlogAboutExhibition)
 			handleImageChange(KeyBlogScreenshot)
+			// 处理赞赏图片变化
+			if newVal, ok := updates[KeyBlogDonationMethods]; ok {
+				oldVal := oldSettings[KeyBlogDonationMethods]
+				// 提取URL
+				extractURLs := func(jsonStr string) []string {
+					if jsonStr == "" {
+						return nil
+					}
+					var items []map[string]interface{}
+					if err := json.Unmarshal([]byte(jsonStr), &items); err != nil {
+						return nil
+					}
+					var urls []string
+					for _, item := range items {
+						if u, ok := item["qrcode"].(string); ok && u != "" {
+							urls = append(urls, u)
+						}
+					}
+					return urls
+				}
+				// 旧的标记未使用，新的标记已使用
+				for _, u := range extractURLs(oldVal) {
+					_ = s.fileService.MarkAsUnused(u)
+				}
+				for _, u := range extractURLs(newVal) {
+					_ = s.fileService.MarkAsUsed(u)
+				}
+			}
 		}
 	}
 
