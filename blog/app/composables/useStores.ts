@@ -397,6 +397,8 @@ export function useSysConfig() {
     message_content: '',
     home_layout: 'waterfall',
     donation_methods: '',
+    theme_light_start: '06:00',
+    theme_dark_start: '18:00',
   }));
 
   const oauthConfig = useState<Record<string, string>>('sysconfig-oauth', () => ({

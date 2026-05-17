@@ -153,6 +153,9 @@ const blogForm = ref({
   // 页脚链接
   footerLinksList: [] as Array<{ name: string; url: string }>,
 
+  theme_light_start: '06:00',
+  theme_dark_start: '18:00',
+
   // 页面配置
   moments_size: 30,
   message_content: '',
@@ -289,6 +292,8 @@ const loadBlogConfigs = async () => {
       moments_size: Number(configs.moments_size) || 30,
       message_content: configs.message_content || '',
       home_layout: configs.home_layout || 'waterfall',
+      theme_light_start: configs.theme_light_start || '06:00',
+      theme_dark_start: configs.theme_dark_start || '18:00',
     });
 
     // 解析 JSON 字段
@@ -578,6 +583,8 @@ const handleSave = async () => {
       'blog.message_content': blogForm.value.message_content,
       'blog.home_layout': blogForm.value.home_layout,
       'blog.donation_methods': JSON.stringify(blogForm.value.donationMethodsList),
+      'blog.theme_light_start': blogForm.value.theme_light_start,
+      'blog.theme_dark_start': blogForm.value.theme_dark_start,
     };
 
     // 通知配置

@@ -73,6 +73,8 @@ type BlogConfig struct {
 	MomentsSize     int    // 动态列表每页数量
 	MessageContent  string // 留言信内容
 	HomeLayout      string // 首页布局（waterfall/single_column）
+	ThemeLightStart string // 日间主题开始时间（HH:MM）
+	ThemeDarkStart  string // 夜间主题开始时间（HH:MM）
 }
 
 // NotificationConfig 通知配置（从数据库动态加载）
