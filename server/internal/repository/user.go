@@ -149,6 +149,8 @@ func (r *UserRepository) List(
 			query = query.Where("qq_id IS NOT NULL AND qq_id != ''")
 		case "microsoft":
 			query = query.Where("microsoft_id IS NOT NULL AND microsoft_id != ''")
+		case "oidc":
+			query = query.Where("oidc_id IS NOT NULL AND oidc_id != ''")
 		}
 	}
 
@@ -176,7 +178,7 @@ func (r *UserRepository) List(
 
 	// 获取列表
 	err = query.
-		Select("id, email, nickname, avatar, badge, website, is_enabled, role, last_login, created_at, updated_at, deleted_at, has_password, github_id, google_id, qq_id, feishu_open_id").
+		Select("id, email, nickname, avatar, badge, website, is_enabled, role, last_login, created_at, updated_at, deleted_at, has_password, github_id, google_id, qq_id, microsoft_id, oidc_id, feishu_open_id").
 		Order("created_at DESC").
 		Offset(offset).Limit(limit).Find(&users).Error
 	if err != nil {
@@ -269,6 +271,8 @@ func (r *UserRepository) GetByOAuthID(provider, providerID string) (*model.User,
 		query = "qq_id = ?"
 	case "microsoft":
 		query = "microsoft_id = ?"
+	case "oidc":
+		query = "oidc_id = ?"
 	case "feishu":
 		query = "feishu_open_id = ?"
 	default:
@@ -295,6 +299,8 @@ func (r *UserRepository) UpdateOAuthBinding(userID uint, provider, providerID st
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("qq_id", providerID).Error
 	case "microsoft":
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("microsoft_id", providerID).Error
+	case "oidc":
+		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("oidc_id", providerID).Error
 	case "feishu":
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("feishu_open_id", providerID).Error
 	default:
@@ -314,6 +320,8 @@ func (r *UserRepository) ClearOAuthBinding(userID uint, provider string) error {
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("qq_id", "").Error
 	case "microsoft":
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("microsoft_id", "").Error
+	case "oidc":
+		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("oidc_id", "").Error
 	default:
 		return gorm.ErrInvalidData
 	}

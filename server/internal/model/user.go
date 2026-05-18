@@ -28,13 +28,14 @@ type User struct {
 	Website      string     `gorm:"size:255" json:"website"`        // 用户网站地址
 	IsEnabled    bool       `gorm:"default:true" json:"is_enabled"` // 是否启用
 	Role         UserRole   `gorm:"default:'user'" json:"role"`
-	LastLogin    *time.Time `json:"last_login"`             // 最后登录时间，未登录为 null
-	TokenVersion uint       `gorm:"default:0" json:"-"`     // Token版本号，用于撤销所有token
-	GithubID     string     `gorm:"size:50;index" json:"-"` // GitHub 用户ID
-	GoogleID     string     `gorm:"size:50;index" json:"-"` // Google 用户ID
-	QQID         string     `gorm:"size:50;index" json:"-"` // QQ OpenID
-	FeishuOpenID string     `gorm:"size:50;index" json:"-"` // 飞书 OpenID
-	MicrosoftID  string     `gorm:"size:50;index" json:"-"` // Microsoft 用户ID
+	LastLogin    *time.Time `json:"last_login"`              // 最后登录时间，未登录为 null
+	TokenVersion uint       `gorm:"default:0" json:"-"`      // Token版本号，用于撤销所有token
+	GithubID     string     `gorm:"size:50;index" json:"-"`  // GitHub 用户ID
+	GoogleID     string     `gorm:"size:50;index" json:"-"`  // Google 用户ID
+	QQID         string     `gorm:"size:50;index" json:"-"`  // QQ OpenID
+	FeishuOpenID string     `gorm:"size:50;index" json:"-"`  // 飞书 OpenID
+	MicrosoftID  string     `gorm:"size:50;index" json:"-"`  // Microsoft 用户ID
+	OidcID       string     `gorm:"size:100;index" json:"-"` // 通用 OIDC 用户ID
 }
 
 // TokenBlacklist Token黑名单模型

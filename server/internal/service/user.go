@@ -241,6 +241,8 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 			user.QQID = providerID
 		case "microsoft":
 			user.MicrosoftID = providerID
+		case "oidc":
+			user.OidcID = providerID
 		}
 
 		if err := s.repo.Create(user); err != nil {
@@ -265,6 +267,8 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 			user.QQID = providerID
 		case "microsoft":
 			user.MicrosoftID = providerID
+		case "oidc":
+			user.OidcID = providerID
 		}
 
 		// 如果用户没有头像，异步下载
@@ -610,6 +614,7 @@ func (s *UserService) List(req *dto.ListUsersRequest) ([]dto.UserListResponse, i
 			GoogleID:     user.GoogleID,
 			QQID:         user.QQID,
 			MicrosoftID:  user.MicrosoftID,
+			OidcID:       user.OidcID,
 			FeishuOpenID: user.FeishuOpenID,
 		}
 
@@ -963,6 +968,8 @@ func (s *UserService) UnbindOAuth(userID uint, provider string) error {
 		isBound = user.QQID != ""
 	case "microsoft":
 		isBound = user.MicrosoftID != ""
+	case "oidc":
+		isBound = user.OidcID != ""
 	default:
 		return fmt.Errorf("不支持的登录方式: %s", provider)
 	}
@@ -986,6 +993,9 @@ func (s *UserService) UnbindOAuth(userID uint, provider string) error {
 		loginCount++
 	}
 	if user.MicrosoftID != "" {
+		loginCount++
+	}
+	if user.OidcID != "" {
 		loginCount++
 	}
 
@@ -1012,6 +1022,9 @@ func (s *UserService) mergeAccounts(primary, secondary *model.User) error {
 	}
 	if secondary.MicrosoftID != "" && primary.MicrosoftID == "" {
 		primary.MicrosoftID = secondary.MicrosoftID
+	}
+	if secondary.OidcID != "" && primary.OidcID == "" {
+		primary.OidcID = secondary.OidcID
 	}
 	if secondary.FeishuOpenID != "" && primary.FeishuOpenID == "" {
 		primary.FeishuOpenID = secondary.FeishuOpenID

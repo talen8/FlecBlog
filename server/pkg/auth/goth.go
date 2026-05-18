@@ -3,8 +3,10 @@ package auth
 import (
 	"flec_blog/config"
 	"flec_blog/pkg/auth/providers/qq"
+	"flec_blog/pkg/logger"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -13,6 +15,7 @@ import (
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/microsoftonline"
+	"github.com/markbates/goth/providers/openidConnect"
 )
 
 // workerProxy Cloudflare Worker 的代理地址
@@ -56,6 +59,21 @@ func UpdateConfig(cfg *config.OAuthConfig) {
 		p.SetName("microsoft")
 		p.HTTPClient = httpClient
 		providers = append(providers, p)
+	}
+	if cfg.OIDC.Enabled && cfg.OIDC.ClientID != "" && cfg.OIDC.IssuerURL != "" {
+		// 如果用户只填了 issuer URL，自动拼接 discovery URL
+		discoveryURL := cfg.OIDC.IssuerURL
+		if !strings.HasSuffix(discoveryURL, "/.well-known/openid-configuration") {
+			discoveryURL = strings.TrimRight(discoveryURL, "/") + "/.well-known/openid-configuration"
+		}
+		p, err := openidConnect.New(cfg.OIDC.ClientID, cfg.OIDC.ClientSecret, cfg.OIDC.RedirectURL, discoveryURL, "openid", "profile", "email")
+		if err == nil {
+			p.SetName("oidc")
+			p.HTTPClient = httpClient
+			providers = append(providers, p)
+		} else {
+			logger.Error("OIDC provider 注册失败: issuerURL=%s err=%v", cfg.OIDC.IssuerURL, err)
+		}
 	}
 
 	if len(providers) > 0 {

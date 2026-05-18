@@ -131,6 +131,43 @@
         :disabled="loading"
       />
     </el-form-item>
+
+    <el-divider content-position="left">OIDC 登录</el-divider>
+    <el-form-item label="启用 OIDC">
+      <el-switch
+        v-model="form['oidc.enabled']"
+        active-value="true"
+        inactive-value="false"
+        :disabled="loading"
+      />
+    </el-form-item>
+    <el-form-item label="Issuer URL">
+      <el-input
+        v-model="form['oidc.issuer_url']"
+        placeholder="https://your-casdoor.example.com/.well-known/openid-configuration"
+        :disabled="loading"
+      />
+    </el-form-item>
+    <el-form-item label="Client ID">
+      <el-input v-model="form['oidc.client_id']" placeholder="OIDC Client ID" :disabled="loading" />
+    </el-form-item>
+    <el-form-item label="Client Secret">
+      <el-input
+        v-model="form['oidc.client_secret']"
+        type="password"
+        show-password
+        placeholder="OIDC Client Secret"
+        :disabled="loading"
+        autocomplete="off"
+      />
+    </el-form-item>
+    <el-form-item label="回调地址">
+      <el-input
+        v-model="form['oidc.redirect_url']"
+        placeholder="例如 https://api.your-domain.com/v1/auth/oidc/callback"
+        :disabled="loading"
+      />
+    </el-form-item>
   </el-form>
 </template>
 
@@ -152,6 +189,11 @@ interface OAuthForm {
   'microsoft.client_id': string;
   'microsoft.client_secret': string;
   'microsoft.redirect_url': string;
+  'oidc.enabled': string;
+  'oidc.issuer_url': string;
+  'oidc.client_id': string;
+  'oidc.client_secret': string;
+  'oidc.redirect_url': string;
 }
 
 const form = defineModel<OAuthForm>('form', { required: true });

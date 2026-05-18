@@ -224,6 +224,11 @@ const oauthForm = ref({
   'microsoft.client_id': '',
   'microsoft.client_secret': '',
   'microsoft.redirect_url': '',
+  'oidc.enabled': 'false',
+  'oidc.issuer_url': '',
+  'oidc.client_id': '',
+  'oidc.client_secret': '',
+  'oidc.redirect_url': '',
 });
 
 // 通用配置加载函数
@@ -437,6 +442,11 @@ const loadOAuthConfigs = async () => {
       'microsoft.client_id': configs['microsoft.client_id'] || '',
       'microsoft.client_secret': configs['microsoft.client_secret'] || '',
       'microsoft.redirect_url': configs['microsoft.redirect_url'] || '',
+      'oidc.enabled': configs['oidc.enabled'] || 'false',
+      'oidc.issuer_url': configs['oidc.issuer_url'] || '',
+      'oidc.client_id': configs['oidc.client_id'] || '',
+      'oidc.client_secret': configs['oidc.client_secret'] || '',
+      'oidc.redirect_url': configs['oidc.redirect_url'] || '',
     });
   } catch {
     ElMessage.error('获取 OAuth 配置失败');
@@ -642,6 +652,11 @@ const handleSave = async () => {
       'oauth.microsoft.client_id': oauthForm.value['microsoft.client_id'],
       'oauth.microsoft.client_secret': oauthForm.value['microsoft.client_secret'],
       'oauth.microsoft.redirect_url': oauthForm.value['microsoft.redirect_url'],
+      'oauth.oidc.enabled': oauthForm.value['oidc.enabled'],
+      'oauth.oidc.issuer_url': oauthForm.value['oidc.issuer_url'],
+      'oauth.oidc.client_id': oauthForm.value['oidc.client_id'],
+      'oauth.oidc.client_secret': oauthForm.value['oidc.client_secret'],
+      'oauth.oidc.redirect_url': oauthForm.value['oidc.redirect_url'],
     };
 
     // 构建需要保存的配置组列表

@@ -123,6 +123,16 @@ type OAuthConfig struct {
 	Google        OAuthProviderConfig
 	QQ            OAuthProviderConfig
 	Microsoft     OAuthProviderConfig
+	OIDC          OIDCConfig
+}
+
+// OIDCConfig 通用 OIDC 提供商配置
+type OIDCConfig struct {
+	Enabled      bool   // 开关
+	ClientID     string // Client ID
+	ClientSecret string // Client Secret
+	RedirectURL  string // 回调地址
+	IssuerURL    string // OIDC Issuer URL
 }
 
 // OAuthProviderConfig 单个OAuth提供商配置

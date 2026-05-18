@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"flec_blog/config"
 	"flec_blog/internal/dto"
@@ -135,6 +136,9 @@ func (c *UserController) AuthCallback(ctx *gin.Context) {
 	nickname := oauthUser.NickName
 	if nickname == "" {
 		nickname = oauthUser.Name
+	}
+	if nickname == "" {
+		nickname = "用户" + strconv.FormatInt(time.Now().UnixMilli()%1000000, 10)
 	}
 	email := oauthUser.Email
 	if email == "" {
@@ -570,7 +574,7 @@ func (c *UserController) UnbindOAuth(ctx *gin.Context) {
 
 	// 验证提供商类型
 	provider := ctx.Param("provider")
-	if provider != "github" && provider != "google" && provider != "qq" {
+	if provider != "github" && provider != "google" && provider != "qq" && provider != "oidc" && provider != "microsoft" {
 		response.ValidateFailed(ctx, "不支持的登录方式")
 		return
 	}

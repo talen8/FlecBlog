@@ -446,6 +446,15 @@ const handleSubmit = async () => {
                 <i v-if="oauthLoading === 'microsoft'" class="ri-loader-4-line spin" />
                 <i v-else class="ri-microsoft-fill" />
               </button>
+              <button
+                v-if="oauthConfig['oidc.enabled'] === 'true'"
+                class="social-btn oidc"
+                :disabled="oauthLoading !== null"
+                @click="handleOAuthClick('oidc')"
+              >
+                <i v-if="oauthLoading === 'oidc'" class="ri-loader-4-line spin" />
+                <i v-else class="ri-door-open-fill" />
+              </button>
             </div>
           </div>
 
@@ -542,6 +551,10 @@ const handleSubmit = async () => {
       &.microsoft {
         color: var(--flec-microsoft-icon, #00a4ef);
       }
+
+      &.oidc {
+        color: var(--flec-oidc-icon, var(--theme-color));
+      }
     }
   }
 }
@@ -550,6 +563,7 @@ const handleSubmit = async () => {
   --flec-github-icon: #202328;
   --flec-google-icon: #5383ec;
   --flec-qq-icon: #12b7f5;
+  --flec-oidc-icon: #6366f1;
 }
 
 :global([data-theme='dark']) {
@@ -557,6 +571,7 @@ const handleSubmit = async () => {
   --flec-google-icon: #8fb4ff;
   --flec-qq-icon: #5cd9ff;
   --flec-microsoft-icon: #41bce9;
+  --flec-oidc-icon: #a5b4fc;
 }
 
 .close-btn {

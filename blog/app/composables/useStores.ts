@@ -406,6 +406,7 @@ export function useSysConfig() {
     'google.enabled': 'false',
     'qq.enabled': 'false',
     'microsoft.enabled': 'false',
+    'oidc.enabled': 'false',
   }));
 
   const uploadConfig = useState<Record<string, string>>('sysconfig-upload', () => ({

@@ -326,6 +326,7 @@ const getLoginMethodCount = () => {
   if (userInfo.value.linked_oauths?.includes('google')) count++;
   if (userInfo.value.linked_oauths?.includes('qq')) count++;
   if (userInfo.value.linked_oauths?.includes('microsoft')) count++;
+  if (userInfo.value.linked_oauths?.includes('oidc')) count++;
   return count;
 };
 
@@ -350,6 +351,7 @@ const getProviderName = (provider: string) => {
     google: 'Google',
     qq: 'QQ',
     microsoft: 'Microsoft',
+    oidc: 'OIDC',
   };
   return names[provider] || provider;
 };
@@ -613,6 +615,35 @@ onMounted(async () => {
                 >
                   <i v-if="oauthBindLoading === 'microsoft'" class="ri-loader-4-line spin" />
                   <i v-else class="ri-microsoft-fill" />
+                </div>
+
+                <!-- OIDC登录方式 -->
+                <div
+                  v-if="oauthConfig['oidc.enabled'] === 'true'"
+                  class="method-icon clickable"
+                  :class="{
+                    enabled: userInfo?.linked_oauths?.includes('oidc'),
+                    disabled: !userInfo?.linked_oauths?.includes('oidc'),
+                    loading: oauthBindLoading === 'oidc',
+                  }"
+                  :title="
+                    oauthBindLoading === 'oidc'
+                      ? '绑定中...'
+                      : userInfo?.linked_oauths?.includes('oidc')
+                        ? 'OIDC'
+                        : '绑定OIDC'
+                  "
+                  @click="
+                    oauthBindLoading
+                      ? null
+                      : handleLoginMethodClick(
+                          'oidc',
+                          userInfo?.linked_oauths?.includes('oidc') ?? false
+                        )
+                  "
+                >
+                  <i v-if="oauthBindLoading === 'oidc'" class="ri-loader-4-line spin" />
+                  <i v-else class="ri-door-open-fill" />
                 </div>
               </div>
             </span>

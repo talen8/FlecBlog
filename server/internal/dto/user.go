@@ -40,6 +40,9 @@ func NewUserResponse(user *model.User) *UserResponse {
 	if user.MicrosoftID != "" {
 		linkedOAuths = append(linkedOAuths, "microsoft")
 	}
+	if user.OidcID != "" {
+		linkedOAuths = append(linkedOAuths, "oidc")
+	}
 	if user.FeishuOpenID != "" {
 		linkedOAuths = append(linkedOAuths, "feishu")
 	}
@@ -171,5 +174,6 @@ type UserListResponse struct {
 	GoogleID     string          `json:"google_id"`      // Google ID
 	QQID         string          `json:"qq_id"`          // QQ OpenID
 	MicrosoftID  string          `json:"microsoft_id"`   // Microsoft ID
+	OidcID       string          `json:"oidc_id"`        // 通用 OIDC 用户ID
 	FeishuOpenID string          `json:"feishu_open_id"` // 飞书 OpenID
 }

@@ -131,6 +131,11 @@ const (
 	KeyOAuthMicrosoftClientID     = "oauth.microsoft.client_id"
 	KeyOAuthMicrosoftClientSecret = "oauth.microsoft.client_secret"
 	KeyOAuthMicrosoftRedirectURL  = "oauth.microsoft.redirect_url"
+	KeyOAuthOIDCEnabled           = "oauth.oidc.enabled"
+	KeyOAuthOIDCIssuerURL         = "oauth.oidc.issuer_url"
+	KeyOAuthOIDCClientID          = "oauth.oidc.client_id"
+	KeyOAuthOIDCClientSecret      = "oauth.oidc.client_secret"
+	KeyOAuthOIDCRedirectURL       = "oauth.oidc.redirect_url"
 	KeyOAuthSessionSecret         = "oauth.session_secret" // Session 加密密钥
 )
 
@@ -625,6 +630,25 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 		}
 		if v, ok := oauthSettings[KeyOAuthMicrosoftRedirectURL]; ok && v != "" {
 			cfg.OAuth.Microsoft.RedirectURL = v
+		}
+
+		// OIDC
+		if v, ok := oauthSettings[KeyOAuthOIDCEnabled]; ok && v != "" {
+			if enabled, err := strconv.ParseBool(v); err == nil {
+				cfg.OAuth.OIDC.Enabled = enabled
+			}
+		}
+		if v, ok := oauthSettings[KeyOAuthOIDCIssuerURL]; ok && v != "" {
+			cfg.OAuth.OIDC.IssuerURL = v
+		}
+		if v, ok := oauthSettings[KeyOAuthOIDCClientID]; ok && v != "" {
+			cfg.OAuth.OIDC.ClientID = v
+		}
+		if v, ok := oauthSettings[KeyOAuthOIDCClientSecret]; ok && v != "" {
+			cfg.OAuth.OIDC.ClientSecret = v
+		}
+		if v, ok := oauthSettings[KeyOAuthOIDCRedirectURL]; ok && v != "" {
+			cfg.OAuth.OIDC.RedirectURL = v
 		}
 	}
 
