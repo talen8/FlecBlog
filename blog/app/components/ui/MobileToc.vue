@@ -129,18 +129,16 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+@use '@/assets/css/mixins' as *;
+
 .mobile-toc-popover {
+  @extend .cardHover;
   position: fixed;
   right: 12px;
   bottom: 90px;
   width: 280px;
   max-width: calc(100vw - 24px);
   max-height: 60vh;
-  background: var(--theme-bg-color, #fff);
-  border-radius: 12px;
-  box-shadow:
-    0 6px 30px rgba(0, 0, 0, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -152,7 +150,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 14px 18px;
-  border-bottom: 1px solid var(--theme-border-color, rgba(0, 0, 0, 0.06));
+  border-bottom: 1px solid var(--flec-border);
   flex-shrink: 0;
 
   .header-left {
@@ -161,7 +159,7 @@ onMounted(() => {
     gap: 8px;
     font-size: 15px;
     font-weight: 600;
-    color: var(--theme-text-color, #333);
+    color: var(--font-color);
 
     i {
       font-size: 16px;
@@ -172,7 +170,7 @@ onMounted(() => {
   .toc-count {
     font-size: 13px;
     font-weight: 500;
-    color: #999;
+    color: var(--theme-meta-color);
     min-width: 20px;
     text-align: right;
   }
@@ -189,7 +187,7 @@ onMounted(() => {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15);
+    background: color-mix(in srgb, var(--font-color) 30%, transparent);
     border-radius: 3px;
   }
 
@@ -208,7 +206,7 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.25s ease;
   line-height: 1.5;
-  color: var(--theme-text-color, #555);
+  color: var(--font-color);
   font-family: inherit;
   font-size: inherit;
   position: relative;
@@ -227,8 +225,8 @@ onMounted(() => {
   }
 
   &:hover {
-    background-color: rgba(73, 177, 245, 0.06);
-    color: var(--theme-text-color, #333);
+    background-color: color-mix(in srgb, var(--flec-btn-hover) 8%, transparent);
+    color: var(--font-color);
 
     &::before {
       height: 16px;
