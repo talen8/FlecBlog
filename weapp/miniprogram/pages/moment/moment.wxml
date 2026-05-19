@@ -1,0 +1,99 @@
+<!-- 动态页面 -->
+<view class="moment-list">
+  <!-- 骨架屏 -->
+  <view wx:if="{{loading && moments.length === 0}}" class="list-wrapper">
+    <view wx:for="{{[1,2,3]}}" wx:key="*this" class="skeleton-card">
+      <view class="skeleton-content">
+        <view class="skeleton-line"></view>
+        <view class="skeleton-line short"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view wx:elif="{{error && moments.length === 0}}" class="state-wrapper">
+    <t-icon name="error-circle" size="80rpx" color="#999999" />
+    <text class="state-text">{{error}}</text>
+    <t-button theme="primary" size="small" bindtap="onRefresh">重新加载</t-button>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:elif="{{isEmpty}}" class="state-wrapper">
+    <t-icon name="file-unknown" size="80rpx" color="#999999" />
+    <text class="state-text">暂无动态</text>
+  </view>
+
+  <!-- 动态列表 -->
+  <view wx:else class="list-wrapper">
+    <view wx:for="{{moments}}"
+      wx:key="id"
+      class="moment-card"
+    >
+      <!-- 动态文本 -->
+      <view wx:if="{{item.content.text}}" class="moment-text">
+        <text>{{item.content.text}}</text>
+      </view>
+
+      <!-- 图片网格 -->
+      <view wx:if="{{item.content.images && item.content.images.length > 0}}" class="images-grid {{item.content.images.length === 1 ? 'single' : ''}}">
+        <image
+          wx:for="{{item.content.images}}"
+          wx:for-item="img"
+          wx:key="*this"
+          class="moment-image"
+          src="{{img}}"
+          mode="{{item.content.images.length === 1 ? 'widthFix' : 'aspectFill'}}"
+          bindtap="onImageTap"
+          data-images="{{item.content.images}}"
+          data-current="{{img}}"
+        />
+      </view>
+
+      <!-- 视频卡片 -->
+      <view wx:if="{{item.content.video}}" class="video-card" bindtap="onVideoTap" data-url="{{item.content.video.url}}">
+        <view class="video-icon">
+          <t-icon name="play-circle" size="36rpx" color="#fff" />
+        </view>
+        <text class="video-platform">{{item.content.video.platform === 'bilibili' ? '哔哩哔哩' : item.content.video.platform}}</text>
+        <t-icon name="link" size="28rpx" color="#999" />
+      </view>
+
+      <!-- 链接卡片 -->
+      <view wx:if="{{item.content.link}}" class="link-card" bindtap="onLinkTap" data-url="{{item.content.link.url}}">
+        <image wx:if="{{item.content.link.favicon}}" class="link-favicon" src="{{item.content.link.favicon}}" mode="aspectFit" />
+        <view class="link-info">
+          <text class="link-title">{{item.content.link.title}}</text>
+          <text class="link-url">{{item.content.link.url}}</text>
+        </view>
+        <t-icon name="chevron-right" size="32rpx" color="#999" />
+      </view>
+
+      <!-- 音乐卡片 -->
+      <view wx:if="{{item.content.music}}" class="music-card">
+        <view class="music-icon">
+          <t-icon name="music" size="36rpx" color="#fff" />
+        </view>
+        <text class="music-platform">{{item.content.music.server === 'netease' ? '网易云音乐' : item.content.music.server}}</text>
+      </view>
+
+      <!-- 底部信息 -->
+      <view class="moment-footer">
+        <text class="moment-time">{{item.formattedTime}}</text>
+        <view wx:if="{{item.content.tags}}" class="moment-tags">
+          <text class="moment-tag">{{item.content.tags}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loading && moments.length > 0}}" class="loading-more">
+      <t-loading size="40rpx" />
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 没有更多 -->
+    <view wx:elif="{{!hasMore && moments.length > 0}}" class="no-more">
+      <text>没有更多了</text>
+    </view>
+  </view>
+</view>

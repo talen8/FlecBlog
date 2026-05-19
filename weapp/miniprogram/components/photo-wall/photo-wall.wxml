@@ -1,0 +1,19 @@
+<view class="photo-wall">
+  <view wx:for="{{processedRows}}" wx:for-item="row" wx:for-index="rowIndex" class="photo-row" style="grid-template-columns: repeat({{row.length}}, 1fr);">
+    <view
+      wx:for="{{row}}"
+      wx:for-item="img"
+      wx:for-index="imgIndex"
+      class="photo-item"
+      data-src="{{img}}"
+      bindtap="onPreview"
+    >
+      <image
+        class="photo-img"
+        src="{{img}}"
+        mode="aspectFill"
+        lazy-load
+      />
+    </view>
+  </view>
+</view>

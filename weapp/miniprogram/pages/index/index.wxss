@@ -1,0 +1,295 @@
+/* 首页样式 */
+.article-list {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+/* 置顶轮播 */
+.top-swiper {
+  height: 360rpx;
+  margin: 24rpx 24rpx 0;
+}
+
+.swiper-slide {
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.swiper-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.swiper-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);
+}
+
+.swiper-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  padding: 28rpx;
+  z-index: 1;
+}
+
+.swiper-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.swiper-category {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 4rpx 14rpx;
+  border-radius: 6rpx;
+  font-size: 22rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.swiper-tag {
+  font-size: 22rpx;
+  color: #fff;
+}
+
+.swiper-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.swiper-summary {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+
+/* 骨架屏 */
+.skeleton-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+}
+
+.skeleton-content {
+  flex: 1;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.skeleton-title {
+  width: 70%;
+  height: 40rpx;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 16rpx;
+  border-radius: 4rpx;
+}
+
+.skeleton-line {
+  width: 100%;
+  height: 28rpx;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 12rpx;
+  border-radius: 4rpx;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 状态 */
+.state-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 48rpx;
+}
+
+.state-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 24rpx;
+  margin-bottom: 32rpx;
+}
+
+/* 列表 */
+.list-wrapper {
+  padding: 0 24rpx 24rpx;
+}
+
+/* 第一个卡片顶部间距 */
+.list-wrapper .article-card:first-child {
+  margin-top: 24rpx;
+}
+
+/* 文章卡片 */
+.article-card {
+  position: relative;
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  padding: 24rpx;
+}
+
+.article-card:active {
+  transform: scale(0.98);
+}
+
+
+/* 左侧内容 */
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.title-wrapper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1f1f1f;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+}
+
+.title-wrapper.outdated {
+  color: #999;
+  text-decoration: line-through;
+}
+
+.title-text {
+  color: inherit;
+}
+
+/* 标题内的分类标签（铭牌样式） */
+.category-tag {
+  display: inline-flex;
+  background-color: rgba(0, 82, 217, 0.1);
+  padding: 2rpx 12rpx;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+  color: #0052d9;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.summary {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.meta-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tags-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.tag {
+  display: inline-flex;
+  background-color: #f5f5f5;
+  padding: 6rpx 14rpx;
+  border-radius: 6rpx;
+}
+
+.tag:active {
+  background-color: #e8e8e8;
+}
+
+.tag text {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.time-comment {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.time,
+.comment {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 加载更多 */
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 32rpx 0;
+}
+
+.loading-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 没有更多 */
+.no-more {
+  text-align: center;
+  padding: 32rpx 0;
+  font-size: 26rpx;
+  color: #999;
+}
+

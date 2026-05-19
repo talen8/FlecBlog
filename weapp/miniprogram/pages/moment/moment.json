@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "动态",
+  "backgroundColor": "#f5f7fa",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-loading": "tdesign-miniprogram/loading/loading"
+  }
+}

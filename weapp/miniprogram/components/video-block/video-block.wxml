@@ -1,0 +1,22 @@
+<view class="video-block">
+  <block wx:if="{{isDirectVideo}}">
+    <video
+      class="video-player"
+      src="{{videoUrl}}"
+      controls
+      show-center-play-btn
+      enable-progress-gesture
+      binderror="onVideoError"
+    />
+  </block>
+  <block wx:else>
+    <view class="video-link" bindtap="onTapLink">
+      <view class="video-icon">🎬</view>
+      <view class="video-info">
+        <view class="video-title">{{videoTitle}}</view>
+        <view class="video-hint">点击复制链接，在浏览器中观看</view>
+      </view>
+      <view class="video-arrow">↗</view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,67 @@
+<!--登录页面-->
+<view class="login-page">
+  <!-- Logo 区域 -->
+  <view class="logo-section">
+    <view class="logo-icon">
+      <t-icon name="book" size="80rpx" color="#0052d9" />
+    </view>
+    <text class="logo-title">FlecBlog</text>
+    <text class="logo-subtitle">登录您的账户</text>
+  </view>
+
+  <!-- 登录表单 -->
+  <view class="form-section">
+    <view class="form-item">
+      <view class="form-label">
+        <t-icon name="mail" size="36rpx" color="#999" />
+        <text>邮箱</text>
+      </view>
+      <input
+        class="form-input {{emailError ? 'error' : ''}}"
+        type="text"
+        placeholder="请输入邮箱"
+        value="{{email}}"
+        bindinput="onEmailInput"
+        confirm-type="next"
+      />
+      <text class="form-error" wx:if="{{emailError}}">{{emailError}}</text>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">
+        <t-icon name="lock-on" size="36rpx" color="#999" />
+        <text>密码</text>
+      </view>
+      <input
+        class="form-input {{passwordError ? 'error' : ''}}"
+        type="password"
+        placeholder="请输入密码"
+        value="{{password}}"
+        bindinput="onPasswordInput"
+        confirm-type="done"
+        bindconfirm="handleSubmit"
+      />
+      <text class="form-error" wx:if="{{passwordError}}">{{passwordError}}</text>
+    </view>
+
+    <view class="form-extra">
+      <text class="forgot-link" bindtap="handleForgotPassword">忘记密码？</text>
+    </view>
+
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bindtap="handleSubmit"
+    >
+      登录
+    </t-button>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="tips-section">
+    <text class="tips-text">还没有账户？请在后台管理系统注册</text>
+  </view>
+</view>

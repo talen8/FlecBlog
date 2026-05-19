@@ -1,0 +1,98 @@
+<view class="detail-page">
+  <!-- loading -->
+  <view wx:if="{{loading}}" class="state-box">
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <!-- error -->
+  <view wx:elif="{{error}}" class="state-box">
+    <text class="state-text">{{error}}</text>
+    <t-button theme="primary" size="small" bindtap="onRetry">重新加载</t-button>
+  </view>
+
+  <!-- article -->
+  <view wx:else class="article-wrap">
+    <!-- title -->
+    <text class="article-title">{{article.title}}</text>
+
+    <!-- meta -->
+    <view class="meta-bar">
+      <text class="meta-time">{{formattedTime}}</text>
+      <text class="meta-views">{{article.view_count}} 次阅读</text>
+      <text wx:if="{{article.location}}" class="meta-location">{{article.location}}</text>
+    </view>
+
+    <!-- category + tags -->
+    <view class="meta-tags">
+      <text wx:if="{{article.category.name}}" class="tag-category">{{article.category.name}}</text>
+      <text wx:for="{{article.tags}}" wx:for-item="tag" wx:key="id" class="tag-item">{{tag.name}}</text>
+    </view>
+
+    <!-- content -->
+    <view class="content-divider"></view>
+
+    <!-- 分段渲染内容 -->
+    <block wx:for="{{contentBlocks}}" wx:key="index">
+      <!-- Markdown 内容 -->
+      <towxml wx:if="{{item.type === 'markdown'}}" nodes="{{item.content}}" class="rich-content" />
+
+      <!-- 提示框 -->
+      <note
+        wx:elif="{{item.type === 'note'}}"
+        type="{{item.noteType}}"
+        title="{{item.title}}"
+        contentBlocks="{{item.contentBlocks}}"
+      />
+
+      <!-- 折叠面板 -->
+      <fold
+        wx:elif="{{item.type === 'fold'}}"
+        title="{{item.title}}"
+        open="{{item.open}}"
+        contentBlocks="{{item.contentBlocks}}"
+      />
+
+      <!-- 标签页 -->
+      <tabs
+        wx:elif="{{item.type === 'tabs'}}"
+        tabs="{{item.tabs}}"
+        activeTab="{{item.activeTab}}"
+      />
+
+      <!-- 链接卡片 -->
+      <link-card
+        wx:elif="{{item.type === 'link'}}"
+        title="{{item.title}}"
+        link="{{item.link}}"
+        description="{{item.description}}"
+      />
+
+      <!-- 视频 -->
+      <video-block
+        wx:elif="{{item.type === 'video'}}"
+        platform="{{item.platform}}"
+        videoId="{{item.videoId}}"
+      />
+
+      <!-- 音频 -->
+      <audio-block
+        wx:elif="{{item.type === 'audio'}}"
+        title="{{item.title}}"
+        audioUrl="{{item.audioUrl}}"
+      />
+
+      <!-- 在线音乐 -->
+      <audio-block
+        wx:elif="{{item.type === 'music'}}"
+        server="{{item.server}}"
+        musicId="{{item.musicId}}"
+      />
+
+      <!-- 照片墙 -->
+      <photo-wall
+        wx:elif="{{item.type === 'photo'}}"
+        rows="{{item.rows}}"
+      />
+    </block>
+  </view>
+</view>

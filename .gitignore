@@ -8,6 +8,7 @@ docker.env
 
 # 依赖目录
 node_modules/
+miniprogram_npm/
 vendor/
 
 # 构建产物
@@ -56,6 +57,7 @@ AGENTS.md
 # 系统文件
 .DS_Store
 Thumbs.db
+project.private.config.json
 
 # 测试覆盖率
 coverage/

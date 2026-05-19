@@ -1,0 +1,138 @@
+/* 我的页面样式 */
+
+.profile-page {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 用户信息区域 */
+.user-section {
+  background-color: #fff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+}
+
+.user-header.guest {
+  padding: 40rpx 32rpx;
+}
+
+.user-avatar {
+  flex-shrink: 0;
+  margin-right: 24rpx;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.user-nickname {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-badge {
+  margin-left: 12rpx;
+  padding: 2rpx 10rpx;
+  font-size: 20rpx;
+  color: #0052d9;
+  background-color: rgba(0, 82, 217, 0.1);
+  border-radius: 4rpx;
+}
+
+.user-email {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.login-btn {
+  flex-shrink: 0;
+}
+
+/* 用户详情 */
+.user-details {
+  padding: 0 32rpx 16rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+}
+
+.detail-label {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.detail-value {
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 登录方式 */
+.login-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.method-tag {
+  padding: 4rpx 12rpx;
+  font-size: 24rpx;
+  color: #0052d9;
+  background-color: rgba(0, 82, 217, 0.1);
+  border-radius: 6rpx;
+}
+
+/* 操作按钮 */
+.action-btn,
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx 32rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.action-btn text {
+  font-size: 28rpx;
+  color: #0052d9;
+}
+
+.logout-btn text {
+  font-size: 28rpx;
+  color: #e57373;
+}
+
+/* 版本信息 */
+.version-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx 0 24rpx;
+}
+
+.version-info text {
+  font-size: 24rpx;
+  color: #ccc;
+}

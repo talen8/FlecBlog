@@ -1,0 +1,20 @@
+<view class="audio-block">
+  <view class="audio-main">
+    <view class="audio-icon" bindtap="togglePlay">
+      <text class="icon-text">{{isPlaying ? '⏸' : '▶'}}</text>
+    </view>
+    <view class="audio-info">
+      <view class="audio-title">{{displayTitle}}</view>
+      <view class="audio-progress">
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{progress}}%;"></view>
+        </view>
+        <view class="progress-time">
+          <text>{{currentTime}}</text>
+          <text> / </text>
+          <text>{{duration}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,15 @@
+<view class="link-card {{isExternal ? 'external' : 'internal'}}" bindtap="onTap">
+  <view class="link-type">{{linkType}}</view>
+  <view class="link-main">
+    <view class="link-icon">
+      <text class="icon-text">🔗</text>
+    </view>
+    <view class="link-info">
+      <view class="link-title">{{title || link}}</view>
+      <view class="link-desc">{{description || link}}</view>
+    </view>
+    <view class="link-arrow">
+      <text class="arrow-text">↗</text>
+    </view>
+  </view>
+</view>

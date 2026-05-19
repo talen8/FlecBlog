@@ -1,0 +1,50 @@
+.fold {
+  margin: 24rpx 0;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.fold-header {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.fold-header:active {
+  background-color: #eee;
+}
+
+.fold-arrow {
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12rpx;
+}
+
+.arrow-icon {
+  font-size: 24rpx;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+.fold.open .arrow-icon {
+  transform: rotate(90deg);
+}
+
+.fold-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.fold-content {
+  padding: 24rpx;
+  border-top: 1rpx solid #e0e0e0;
+  background-color: #fff;
+}

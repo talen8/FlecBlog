@@ -1,0 +1,93 @@
+<!--我的页面-->
+<view class="profile-page">
+  <!-- 用户信息区域 -->
+  <view class="user-section">
+    <block wx:if="{{isLoggedIn}}">
+      <!-- 已登录状态 -->
+      <view class="user-header">
+        <view class="user-avatar">
+          <t-avatar
+            image="{{userInfo.avatar}}"
+            icon="user"
+            size="120rpx"
+          />
+        </view>
+        <view class="user-info">
+          <view class="user-name-row">
+            <text class="user-nickname">{{userInfo.nickname || '未设置昵称'}}</text>
+            <text class="user-badge" wx:if="{{userInfo.badge}}">{{userInfo.badge}}</text>
+          </view>
+          <text class="user-email">{{userInfo.email}}</text>
+        </view>
+      </view>
+
+      <!-- 用户详情 -->
+      <view class="user-details">
+        <view class="detail-item" wx:if="{{userInfo.website}}">
+          <text class="detail-label">个人网站</text>
+          <text class="detail-value">{{userInfo.website}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">角色权限</text>
+          <text class="detail-value">{{roleName}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{loginMethods.length > 0}}">
+          <text class="detail-label">登录方式</text>
+          <view class="login-methods">
+            <text class="method-tag" wx:for="{{loginMethods}}" wx:key="name">{{item.name}}</text>
+          </view>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">注册时间</text>
+          <text class="detail-value">{{userInfo.created_at}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{userInfo.last_login}}">
+          <text class="detail-label">最后登录</text>
+          <text class="detail-value">{{userInfo.last_login}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">缓存大小</text>
+          <text class="detail-value">{{cacheSize}}</text>
+        </view>
+      </view>
+
+      <!-- 退出登录 -->
+      <view class="logout-btn" bindtap="handleLogout">
+        <text>退出登录</text>
+      </view>
+    </block>
+    <block wx:else>
+      <!-- 未登录状态 -->
+      <view class="user-header guest">
+        <view class="user-avatar">
+          <t-avatar icon="user" size="120rpx" />
+        </view>
+        <view class="user-info">
+          <text class="user-nickname">未登录</text>
+          <text class="user-email">登录后查看更多内容</text>
+        </view>
+        <view class="login-btn">
+          <t-button theme="primary" size="small" bindtap="goToLogin">登录</t-button>
+        </view>
+      </view>
+
+      <!-- 缓存信息 -->
+      <view class="user-details">
+        <view class="detail-item">
+          <text class="detail-label">缓存大小</text>
+          <text class="detail-value">{{cacheSize}}</text>
+        </view>
+      </view>
+
+      <!-- 清除缓存 -->
+      <view class="action-btn" bindtap="handleClearCache">
+        <text>清除缓存</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text>FlecBlog v1.0.0</text>
+  </view>
+</view>

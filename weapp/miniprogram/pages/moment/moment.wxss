@@ -1,0 +1,249 @@
+/* 动态页面样式 */
+.moment-list {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* 骨架屏 */
+.skeleton-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+}
+
+.skeleton-content {
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.skeleton-line {
+  width: 100%;
+  height: 28rpx;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 12rpx;
+  border-radius: 4rpx;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 状态 */
+.state-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 48rpx;
+}
+
+.state-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 24rpx;
+  margin-bottom: 32rpx;
+}
+
+/* 列表 */
+.list-wrapper {
+  padding: 24rpx;
+}
+
+/* 动态卡片 */
+.moment-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 动态文本 */
+.moment-text {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.7;
+  margin-bottom: 20rpx;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 图片网格 */
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.images-grid.single {
+  display: block;
+}
+
+.moment-image {
+  width: 100%;
+  height: 200rpx;
+  border-radius: 8rpx;
+  background-color: #f5f5f5;
+}
+
+.images-grid.single .moment-image {
+  height: auto;
+  max-height: 800rpx;
+}
+
+/* 视频卡片 */
+.video-card {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  background-color: #f5f5f5;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.video-icon {
+  width: 64rpx;
+  height: 64rpx;
+  background-color: #0052d9;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-platform {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 链接卡片 */
+.link-card {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.link-favicon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+}
+
+.link-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.link-title {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-url {
+  font-size: 22rpx;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 音乐卡片 */
+.music-card {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  background-color: #f5f5f5;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.music-icon {
+  width: 64rpx;
+  height: 64rpx;
+  background-color: #e34d59;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.music-platform {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 底部信息 */
+.moment-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.moment-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.moment-tags {
+  display: flex;
+  gap: 12rpx;
+}
+
+.moment-tag {
+  font-size: 22rpx;
+  color: #0052d9;
+  background-color: rgba(0, 82, 217, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+}
+
+/* 加载更多 */
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 32rpx 0;
+}
+
+.loading-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 没有更多 */
+.no-more {
+  text-align: center;
+  padding: 32rpx 0;
+  font-size: 26rpx;
+  color: #999;
+}

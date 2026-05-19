@@ -1,0 +1,32 @@
+<view class="tabs">
+  <view class="tabs-header">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="name"
+      class="tab-btn {{currentTab === item.name ? 'active' : ''}}"
+      data-tab="{{item.name}}"
+      bindtap="switchTab"
+    >
+      <text>{{item.name}}</text>
+    </view>
+  </view>
+  <view class="tabs-content">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="name"
+      class="tab-panel {{currentTab === item.name ? 'active' : ''}}"
+    >
+      <block wx:for="{{item.contentBlocks}}" wx:for-item="block" wx:key="index">
+        <towxml wx:if="{{block.type === 'markdown'}}" nodes="{{block.content}}" />
+        <note wx:elif="{{block.type === 'note'}}" type="{{block.noteType}}" title="{{block.title}}" contentBlocks="{{block.contentBlocks}}" />
+        <fold wx:elif="{{block.type === 'fold'}}" title="{{block.title}}" open="{{block.open}}" contentBlocks="{{block.contentBlocks}}" />
+        <tabs wx:elif="{{block.type === 'tabs'}}" tabs="{{block.tabs}}" activeTab="{{block.activeTab}}" />
+        <link-card wx:elif="{{block.type === 'link'}}" title="{{block.title}}" link="{{block.link}}" description="{{block.description}}" />
+        <video-block wx:elif="{{block.type === 'video'}}" platform="{{block.platform}}" videoId="{{block.videoId}}" />
+        <audio-block wx:elif="{{block.type === 'audio'}}" title="{{block.title}}" audioUrl="{{block.audioUrl}}" />
+        <audio-block wx:elif="{{block.type === 'music'}}" server="{{block.server}}" musicId="{{block.musicId}}" />
+        <photo-wall wx:elif="{{block.type === 'photo'}}" rows="{{block.rows}}" />
+      </block>
+    </view>
+  </view>
+</view>

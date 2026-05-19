@@ -1,0 +1,13 @@
+{
+  "component": true,
+  "usingComponents": {
+    "towxml": "/towxml/towxml",
+    "note": "/components/note/note",
+    "fold": "/components/fold/fold",
+    "tabs": "/components/tabs/tabs",
+    "link-card": "/components/link-card/link-card",
+    "video-block": "/components/video-block/video-block",
+    "audio-block": "/components/audio-block/audio-block",
+    "photo-wall": "/components/photo-wall/photo-wall"
+  }
+}

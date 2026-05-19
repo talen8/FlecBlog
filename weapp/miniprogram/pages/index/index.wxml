@@ -1,0 +1,94 @@
+<!-- 首页 -->
+<view class="article-list">
+  <!-- 置顶轮播 -->
+  <swiper wx:if="{{topArticles.length > 0}}"
+    class="top-swiper"
+    circular
+    autoplay
+    interval="{{5000}}"
+    duration="{{400}}"
+    indicator-dots
+    indicator-active-color="#0052d9"
+    indicator-color="rgba(0,82,217,0.3)"
+  >
+    <swiper-item wx:for="{{topArticles}}" wx:key="id" class="swiper-slide">
+      <view class="swiper-card" bindtap="onArticleTap" data-article="{{item}}">
+        <image wx:if="{{item.cover}}" class="swiper-bg" src="{{item.cover}}" mode="aspectFill" />
+        <view class="swiper-overlay"></view>
+        <view class="swiper-content">
+          <view wx:if="{{ (item.category && item.category.name) || item.tags.length > 0 }}" class="swiper-tags">
+            <text wx:if="{{item.category && item.category.name}}" class="swiper-category">{{item.category.name}}</text>
+            <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="id" class="swiper-tag">{{tag.name}}</text>
+          </view>
+          <text class="swiper-title">{{item.title}}</text>
+          <text class="swiper-summary">{{item.summary}}</text>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- 骨架屏 -->
+  <view wx:if="{{loading && articles.length === 0}}" class="list-wrapper">
+    <view wx:for="{{[1,2,3]}}" wx:key="*this" class="skeleton-card">
+      <view class="skeleton-content">
+        <view class="skeleton-title"></view>
+        <view class="skeleton-line"></view>
+        <view class="skeleton-line short"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view wx:elif="{{error && articles.length === 0}}" class="state-wrapper">
+    <t-icon name="error-circle" size="80rpx" color="#999999" />
+    <text class="state-text">{{error}}</text>
+    <t-button theme="primary" size="small" bindtap="onRefresh">重新加载</t-button>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:elif="{{isEmpty}}" class="state-wrapper">
+    <t-icon name="file-unknown" size="80rpx" color="#999999" />
+    <text class="state-text">暂无文章</text>
+  </view>
+
+  <!-- 文章列表 -->
+  <view wx:else class="list-wrapper">
+    <view wx:for="{{articles}}"
+      wx:key="id"
+      class="article-card"
+      bindtap="onArticleTap"
+      data-article="{{item}}"
+    >
+      <view class="content-wrapper">
+        <view class="title-wrapper {{item.is_outdated ? 'outdated' : ''}}">
+          <text wx:if="{{item.category && item.category.name}}" class="category-tag" catchtap="onCategoryTap" data-category="{{item.category}}">{{item.category.name}}</text>
+          <text class="title-text" catchtap="onArticleTap" data-article="{{item}}">{{item.title}}</text>
+        </view>
+        <text wx:if="{{item.summary}}" class="summary" decode>{{item.summary}}</text>
+
+        <view class="meta-wrapper">
+          <view class="time-comment">
+            <text class="time">{{item.formattedTime}}</text>
+            <text wx:if="{{item.comment_count > 0}}" class="comment">· {{item.comment_count}} 评论</text>
+          </view>
+          <view wx:if="{{item.tags.length > 0}}" class="tags-wrapper">
+            <view wx:for="{{item.tags}}" wx:for-item="tag" wx:key="id" class="tag" catchtap="onTagTap" data-tag="{{tag}}">
+              <text>{{tag.name}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loading && articles.length > 0}}" class="loading-more">
+      <t-loading size="40rpx" />
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 没有更多 -->
+    <view wx:elif="{{!hasMore && articles.length > 0}}" class="no-more">
+      <text>没有更多了</text>
+    </view>
+  </view>
+</view>

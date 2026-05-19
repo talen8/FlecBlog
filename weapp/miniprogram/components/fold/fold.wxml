@@ -1,0 +1,21 @@
+<view class="fold {{isOpen ? 'open' : ''}}">
+  <view class="fold-header" bindtap="toggle">
+    <view class="fold-arrow">
+      <text class="arrow-icon">{{isOpen ? '▼' : '▶'}}</text>
+    </view>
+    <text class="fold-title">{{title}}</text>
+  </view>
+  <view class="fold-content" wx:if="{{isOpen}}">
+    <block wx:for="{{contentBlocks}}" wx:key="index">
+      <towxml wx:if="{{item.type === 'markdown'}}" nodes="{{item.content}}" />
+      <note wx:elif="{{item.type === 'note'}}" type="{{item.noteType}}" title="{{item.title}}" contentBlocks="{{item.contentBlocks}}" />
+      <fold wx:elif="{{item.type === 'fold'}}" title="{{item.title}}" open="{{item.open}}" contentBlocks="{{item.contentBlocks}}" />
+      <tabs wx:elif="{{item.type === 'tabs'}}" tabs="{{item.tabs}}" activeTab="{{item.activeTab}}" />
+      <link-card wx:elif="{{item.type === 'link'}}" title="{{item.title}}" link="{{item.link}}" description="{{item.description}}" />
+      <video-block wx:elif="{{item.type === 'video'}}" platform="{{item.platform}}" videoId="{{item.videoId}}" />
+      <audio-block wx:elif="{{item.type === 'audio'}}" title="{{item.title}}" audioUrl="{{item.audioUrl}}" />
+      <audio-block wx:elif="{{item.type === 'music'}}" server="{{item.server}}" musicId="{{item.musicId}}" />
+      <photo-wall wx:elif="{{item.type === 'photo'}}" rows="{{item.rows}}" />
+    </block>
+  </view>
+</view>
