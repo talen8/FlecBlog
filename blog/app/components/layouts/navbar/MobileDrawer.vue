@@ -21,9 +21,14 @@ const topAggregateMenus = computed(() =>
   aggregateMenus.value.filter((menu: { parent_id: number | null }) => !menu.parent_id)
 );
 
-const isIconUrl = (icon: string) => {
+// 判断图标是否为图片URL
+const isImageUrl = (icon: string): boolean => {
+  if (!icon) return false;
   return (
-    icon && (icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('/'))
+    icon.startsWith('http://') ||
+    icon.startsWith('https://') ||
+    icon.startsWith('/') ||
+    icon.startsWith('data:')
   );
 };
 
@@ -99,7 +104,13 @@ watch(
                   <template v-for="menu in navigationMenus" :key="menu.id">
                     <template v-if="menu.children?.length">
                       <div class="nav-item parent-item" @click="toggleSubmenu(menu.id)">
-                        <i v-if="menu.icon && !isIconUrl(menu.icon)" :class="menu.icon" />
+                        <img
+                          v-if="menu.icon && isImageUrl(menu.icon)"
+                          :src="menu.icon"
+                          :alt="menu.title"
+                          class="menu-icon-img"
+                        />
+                        <i v-else-if="menu.icon" :class="menu.icon" />
                         <span>{{ menu.title }}</span>
                         <i
                           class="ri-arrow-right-s-line"
@@ -115,13 +126,26 @@ watch(
                             class="nav-item"
                             @click="close"
                           >
+                            <img
+                              v-if="child.icon && isImageUrl(child.icon)"
+                              :src="child.icon"
+                              :alt="child.title"
+                              class="menu-icon-img"
+                            />
+                            <i v-else-if="child.icon" :class="child.icon" />
                             <span>{{ child.title }}</span>
                           </a>
                         </div>
                       </Transition>
                     </template>
                     <a v-else :href="menu.url" class="nav-item" @click="close">
-                      <i v-if="menu.icon && !isIconUrl(menu.icon)" :class="menu.icon" />
+                      <img
+                        v-if="menu.icon && isImageUrl(menu.icon)"
+                        :src="menu.icon"
+                        :alt="menu.title"
+                        class="menu-icon-img"
+                      />
+                      <i v-else-if="menu.icon" :class="menu.icon" />
                       <span>{{ menu.title }}</span>
                     </a>
                   </template>
@@ -144,7 +168,7 @@ watch(
                         @click="close"
                       >
                         <NuxtImg
-                          v-if="child.icon && isIconUrl(child.icon)"
+                          v-if="child.icon && isImageUrl(child.icon)"
                           :src="child.icon"
                           :alt="child.title"
                           loading="lazy"
@@ -306,6 +330,14 @@ watch(
         width: 20px;
       }
 
+      .menu-icon-img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        object-fit: contain;
+        border-radius: 4px;
+      }
+
       span {
         flex: 1;
       }
@@ -367,8 +399,10 @@ watch(
         }
 
         img {
+          width: 1rem;
+          height: 1rem;
           border-radius: 4px;
-          object-fit: cover;
+          object-fit: contain;
         }
 
         i {

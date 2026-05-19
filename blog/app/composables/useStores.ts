@@ -186,26 +186,11 @@ export function useMenus() {
   const filterByType = (type: string) =>
     menus.value.filter(menu => menu.type === type).sort((a, b) => a.sort - b.sort);
 
-  const flatNavigationMenus = computed(() => {
-    const result: Menu[] = [];
-    const flatten = (items: Menu[]) => {
-      items.forEach(item => {
-        if (item.type === 'navigation') {
-          result.push(item);
-          if (item.children?.length) flatten(item.children);
-        }
-      });
-    };
-    flatten(filterByType('navigation'));
-    return result;
-  });
-
   return {
     menus,
     navigationMenus: computed(() => filterByType('navigation')),
     footerMenus: computed(() => filterByType('footer')),
     aggregateMenus: computed(() => filterByType('aggregate')),
-    flatNavigationMenus,
   };
 }
 

@@ -6,7 +6,7 @@ interface Props {
 
 defineProps<Props>();
 
-const { flatNavigationMenus } = useMenus();
+const { navigationMenus } = useMenus();
 const { blogConfig } = useSysConfig();
 const { currentArticle } = useCurrentArticle();
 
@@ -17,22 +17,45 @@ const scrollToTop = () => {
 const displayTitle = computed(() => {
   return currentArticle.value?.title || blogConfig.value.title;
 });
+
+// 判断图标是否为图片URL
+const isImageUrl = (icon: string): boolean => {
+  if (!icon) return false;
+  return (
+    icon.startsWith('http://') ||
+    icon.startsWith('https://') ||
+    icon.startsWith('/') ||
+    icon.startsWith('data:')
+  );
+};
 </script>
 
 <template>
   <div class="nav-menu">
     <div class="menu-items" :class="{ hide: isScrollingDown && isFixed }">
-      <template v-for="menu in flatNavigationMenus" :key="menu.id">
+      <template v-for="menu in navigationMenus" :key="menu.id">
         <!-- 有子菜单的菜单项 -->
         <div v-if="menu.children && menu.children.length > 0" class="menu-item dropdown">
           <a v-if="menu.url" :href="menu.url" class="brighten" :aria-label="menu.title">
-            <i v-if="menu.icon" :class="menu.icon" />
+            <img
+              v-if="menu.icon && isImageUrl(menu.icon)"
+              :src="menu.icon"
+              :alt="menu.title"
+              class="menu-icon-img"
+            />
+            <i v-else-if="menu.icon" :class="menu.icon" />
             <span>{{ menu.title }}</span>
             <i class="ri-arrow-down-s-line arrow-icon" />
           </a>
 
           <span v-else class="brighten menu-label">
-            <i v-if="menu.icon" :class="menu.icon" />
+            <img
+              v-if="menu.icon && isImageUrl(menu.icon)"
+              :src="menu.icon"
+              :alt="menu.title"
+              class="menu-icon-img"
+            />
+            <i v-else-if="menu.icon" :class="menu.icon" />
             <span>{{ menu.title }}</span>
             <i class="ri-arrow-down-s-line arrow-icon" />
           </span>
@@ -41,7 +64,13 @@ const displayTitle = computed(() => {
           <ul class="dropdown-menu">
             <li v-for="child in menu.children" :key="child.id">
               <a :href="child.url" :aria-label="child.title">
-                <i v-if="child.icon" :class="child.icon" />
+                <img
+                  v-if="child.icon && isImageUrl(child.icon)"
+                  :src="child.icon"
+                  :alt="child.title"
+                  class="menu-icon-img"
+                />
+                <i v-else-if="child.icon" :class="child.icon" />
                 <span>{{ child.title }}</span>
               </a>
             </li>
@@ -50,7 +79,13 @@ const displayTitle = computed(() => {
 
         <!-- 无子菜单的菜单项 -->
         <a v-else :href="menu.url" class="brighten" :aria-label="menu.title">
-          <i v-if="menu.icon" :class="menu.icon" />
+          <img
+            v-if="menu.icon && isImageUrl(menu.icon)"
+            :src="menu.icon"
+            :alt="menu.title"
+            class="menu-icon-img"
+          />
+          <i v-else-if="menu.icon" :class="menu.icon" />
           <span>{{ menu.title }}</span>
         </a>
       </template>
@@ -103,6 +138,13 @@ const displayTitle = computed(() => {
 
       i {
         font-size: 1rem;
+      }
+
+      .menu-icon-img {
+        width: 1rem;
+        height: 1rem;
+        object-fit: contain;
+        vertical-align: middle;
       }
 
       .arrow-icon {
@@ -172,7 +214,8 @@ const displayTitle = computed(() => {
           }
 
           a {
-            display: inline-block;
+            display: flex;
+            align-items: center;
             padding: 4px 14px;
             margin: 0;
             width: 100%;
@@ -188,6 +231,13 @@ const displayTitle = computed(() => {
 
             i {
               margin-right: 6px;
+            }
+
+            .menu-icon-img {
+              width: 1rem;
+              height: 1rem;
+              margin-right: 6px;
+              object-fit: contain;
             }
           }
         }
