@@ -135,7 +135,7 @@ onMounted(() => {
   @extend .cardHover;
   position: fixed;
   right: 12px;
-  bottom: 90px;
+  bottom: 40px;
   width: 280px;
   max-width: calc(100vw - 24px);
   max-height: 60vh;
