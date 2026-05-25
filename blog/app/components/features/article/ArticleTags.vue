@@ -34,16 +34,26 @@ const hasDonation = computed(() => {
 }
 .tags {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
   flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar {
+    display: none;
+  }
   a {
+    flex: 0 0 auto;
     padding: 1px 8px;
     border: 1px solid var(--theme-color);
     border-radius: 8px;
     color: var(--theme-color);
     text-decoration: none;
     font-size: 0.85rem;
+    white-space: nowrap;
     &:hover {
       background: var(--theme-color);
       color: #fff;
@@ -73,12 +83,10 @@ const hasDonation = computed(() => {
 }
 @media (max-width: 600px) {
   .wrapper {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
   }
   .donate {
-    align-self: flex-end;
+    padding-inline: 10px;
   }
 }
 </style>
