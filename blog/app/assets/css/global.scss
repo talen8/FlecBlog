@@ -20,6 +20,8 @@
 html {
   scroll-behavior: smooth;
   color-scheme: light dark;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -34,6 +36,8 @@ body {
     sans-serif;
   line-height: 2;
   color: var(--font-color);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 h1,

@@ -251,11 +251,19 @@ const handleReplyClick = () => {
   font-size: 0.85rem;
   display: inline-flex;
   align-items: center;
-  line-height: 1;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  line-height: 1.4;
+  overflow-wrap: break-word;
 
   .reply-arrow {
     display: inline-flex;
     align-items: center;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
 
     i {
       color: var(--theme-meta-color);
@@ -318,6 +326,7 @@ const handleReplyClick = () => {
   color: var(--font-color);
   line-height: 1.5;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .expand-btn {
