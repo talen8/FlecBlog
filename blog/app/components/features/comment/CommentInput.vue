@@ -172,6 +172,10 @@ const handleSubmitComment = async () => {
         }
       : undefined;
 
+    commentContent.value = '';
+    localStorage.removeItem('comment_draft');
+    resetToDefaultHeight();
+
     if (isReplyMode.value && props.commentId) {
       await context.addReply(props.commentId, content, guestInfo);
       // 回复成功后关闭回复输入框
@@ -191,8 +195,6 @@ const handleSubmitComment = async () => {
       );
     }
 
-    commentContent.value = '';
-    resetToDefaultHeight();
     success('评论发表成功');
 
     if (isLoggedIn.value) triggerOnComment();
