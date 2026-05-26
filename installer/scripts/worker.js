@@ -73,7 +73,7 @@ get_version() {
     grep '"tag_name":' | \\
     grep '"installer/v' | \\
     head -1 | \\
-    sed -E 's#.*"installer/v([^"]+)".*#\\1#'
+    grep -oP '(?<=installer/v)[^"]+'
 }
 
 # 主函数
