@@ -384,6 +384,8 @@ export function useSysConfig() {
     donation_methods: '',
     theme_light_start: '06:00',
     theme_dark_start: '18:00',
+    wechat_qrcode: '',
+    wechat_name: '',
   }));
 
   const oauthConfig = useState<Record<string, string>>('sysconfig-oauth', () => ({

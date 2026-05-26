@@ -72,6 +72,8 @@ const (
 	KeyBlogDonationMethods   = "blog.donation_methods"    // 赞赏方式（JSON数组）
 	KeyBlogThemeLightStart   = "blog.theme_light_start"   // 日间主题开始时间（HH:MM）
 	KeyBlogThemeDarkStart    = "blog.theme_dark_start"    // 夜间主题开始时间（HH:MM）
+	KeyBlogWechatQRCode      = "blog.wechat_qrcode"       // 公众号二维码图片URL
+	KeyBlogWechatName        = "blog.wechat_name"         // 公众号名称
 )
 
 // 配置键常量 - Notification 相关
@@ -267,6 +269,18 @@ func (s *SettingService) UpdateGroup(group string, updates map[string]string) er
 			handleImageChange(KeyBlogBackgroundImage)
 			handleImageChange(KeyBlogAboutExhibition)
 			handleImageChange(KeyBlogScreenshot)
+			// 处理公众号二维码变化（使用特定上传类型）
+			if newVal, ok := updates[KeyBlogWechatQRCode]; ok {
+				oldVal := oldSettings[KeyBlogWechatQRCode]
+				if oldVal != newVal {
+					if oldVal != "" {
+						_ = s.fileService.MarkAsUnused(oldVal)
+					}
+					if newVal != "" {
+						_ = s.fileService.MarkAsUsedWithType(newVal, "微信订阅")
+					}
+				}
+			}
 			// 处理赞赏图片变化
 			if newVal, ok := updates[KeyBlogDonationMethods]; ok {
 				oldVal := oldSettings[KeyBlogDonationMethods]
@@ -430,6 +444,12 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 		cfg.Blog.ThemeDarkStart = "18:00"
 		if v, ok := blogSettings[KeyBlogThemeDarkStart]; ok && v != "" {
 			cfg.Blog.ThemeDarkStart = v
+		}
+		if v, ok := blogSettings[KeyBlogWechatQRCode]; ok && v != "" {
+			cfg.Blog.WechatQRCode = v
+		}
+		if v, ok := blogSettings[KeyBlogWechatName]; ok && v != "" {
+			cfg.Blog.WechatName = v
 		}
 	}
 

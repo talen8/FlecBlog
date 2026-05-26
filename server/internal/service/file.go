@@ -153,6 +153,22 @@ func (s *FileService) MarkAsUsed(fileUrl string) error {
 	return s.fileRepo.UpdateStatus(fileUrl, 1)
 }
 
+// MarkAsUsedWithType 标记文件为使用中并设置上传类型
+func (s *FileService) MarkAsUsedWithType(fileUrl string, uploadType string) error {
+	if fileUrl == "" {
+		return nil
+	}
+	// 先标记为使用中
+	if err := s.fileRepo.UpdateStatus(fileUrl, 1); err != nil {
+		return err
+	}
+	// 再更新上传类型
+	if uploadType != "" {
+		return s.fileRepo.UpdateUploadType(fileUrl, uploadType)
+	}
+	return nil
+}
+
 // MarkAsUnused 标记文件为未使用
 func (s *FileService) MarkAsUnused(fileUrl string) error {
 	if fileUrl == "" {

@@ -178,6 +178,27 @@
       />
     </el-form-item>
 
+    <div class="image-row">
+      <el-form-item label="公众号二维码">
+        <ImageUploader
+          ref="wechatQRCodeUploaderRef"
+          v-model="form.wechat_qrcode"
+          upload-type="公众号二维码"
+          width="120px"
+          height="120px"
+          :disabled="loading"
+        />
+      </el-form-item>
+
+      <el-form-item label="公众号名称" style="flex: 1; max-width: 300px">
+        <el-input
+          v-model="form.wechat_name"
+          placeholder="公众号名称，如：FlecBlog"
+          :disabled="loading"
+        />
+      </el-form-item>
+    </div>
+
     <el-divider content-position="left">页面配置</el-divider>
 
     <el-form-item label="动态数量">
@@ -453,6 +474,10 @@ interface BlogFormData {
   announcement: string;
   typingTextsList: Array<{ value: string }>;
 
+  // 公众号配置
+  wechat_qrcode: string;
+  wechat_name: string;
+
   // 社交媒体
   sidebarSocialList: Array<{ name: string; url: string; icon: string }>;
   footerSocialList: Array<{
@@ -505,6 +530,7 @@ const faviconUploaderRef = ref<InstanceType<typeof ImageUploader>>();
 const backgroundUploaderRef = ref<InstanceType<typeof ImageUploader>>();
 const screenshotUploaderRef = ref<InstanceType<typeof ImageUploader>>();
 const aboutExhibitionUploaderRef = ref<InstanceType<typeof ImageUploader>>();
+const wechatQRCodeUploaderRef = ref<InstanceType<typeof ImageUploader>>();
 
 // 背景图片输入模式
 const backgroundInputMode = ref<'upload' | 'url'>('upload');
@@ -670,6 +696,7 @@ defineExpose({
   backgroundUploaderRef,
   screenshotUploaderRef,
   aboutExhibitionUploaderRef,
+  wechatQRCodeUploaderRef,
 });
 </script>
 

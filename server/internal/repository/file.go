@@ -138,6 +138,13 @@ func (r *FileRepository) UpdateStatus(url string, status int) error {
 		Update("status", status).Error
 }
 
+// UpdateUploadType 更新文件上传类型
+func (r *FileRepository) UpdateUploadType(url string, uploadType string) error {
+	return r.db.Model(&model.File{}).
+		Where("file_url = ?", url).
+		Update("upload_type", uploadType).Error
+}
+
 // UpdateFileStatusByUrls 批量更新文件状态
 func (r *FileRepository) UpdateFileStatusByUrls(urls []string, status int) error {
 	if len(urls) == 0 {

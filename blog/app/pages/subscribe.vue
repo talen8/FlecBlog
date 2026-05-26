@@ -15,6 +15,16 @@ const {
   public: { apiUrl },
 } = useRuntimeConfig();
 const { success, error: errorToast } = useToast();
+const { blogConfig } = useSysConfig();
+const { copy: copyToClipboard } = useClipboard();
+
+// 公众号订阅
+const showWechatDialog = ref(false);
+
+// RSS订阅
+const showRSSDialog = ref(false);
+const rss2Url = computed(() => `${import.meta.client ? window.location.origin : ''}/rss.xml`);
+const atomUrl = computed(() => `${import.meta.client ? window.location.origin : ''}/atom.xml`);
 
 // 订阅
 const showSubscribeDialog = ref(false);
@@ -36,10 +46,13 @@ onMounted(() => {
   }
 });
 
-// 订阅
-const openSubscribeDialog = () => {
-  showSubscribeDialog.value = true;
-  email.value = '';
+const handleCopy = async (text: string) => {
+  try {
+    await copyToClipboard(text);
+    success('已复制到剪贴板');
+  } catch {
+    errorToast('复制失败');
+  }
 };
 
 const handleSubscribe = async () => {
@@ -97,21 +110,29 @@ const closeUnsubscribeDialog = () => {
     <!-- 订阅方式卡片 -->
     <div class="subscribe-list">
       <!-- 公众号订阅 -->
-      <a class="subscribe-item subscribe-wechat" href="#" title="公众号" @click.prevent>
+      <button
+        type="button"
+        class="subscribe-item subscribe-wechat"
+        title="公众号"
+        @click="showWechatDialog = true"
+      >
         <div class="subscribe-description">推送精选文章<br />推送全文</div>
         <div class="subscribe-info-group">
           <div class="subscribe-title">公众号订阅</div>
           <div class="subscribe-info">推荐的订阅方式</div>
           <i class="ri-wechat-fill subscribe-icon" />
         </div>
-      </a>
+      </button>
 
       <!-- 邮件订阅 -->
-      <a
+      <button
+        type="button"
         class="subscribe-item subscribe-mail"
-        href="#"
         title="邮件订阅"
-        @click.prevent="openSubscribeDialog"
+        @click="
+          showSubscribeDialog = true;
+          email = '';
+        "
       >
         <div class="subscribe-description">推送全部文章<br />推送简介</div>
         <div class="subscribe-info-group">
@@ -119,18 +140,97 @@ const closeUnsubscribeDialog = () => {
           <div class="subscribe-info">推荐的订阅方式</div>
           <i class="ri-mail-fill subscribe-icon" />
         </div>
-      </a>
+      </button>
 
       <!-- RSS 订阅 -->
-      <a class="subscribe-item subscribe-rss" href="/atom.xml" title="RSS" target="_blank">
+      <button
+        type="button"
+        class="subscribe-item subscribe-rss"
+        title="RSS"
+        @click="showRSSDialog = true"
+      >
         <div class="subscribe-description">推送全部文章<br />推送简介</div>
         <div class="subscribe-info-group">
           <div class="subscribe-title">RSS</div>
           <div class="subscribe-info">备用订阅方式</div>
           <i class="ri-rss-fill subscribe-icon" />
         </div>
-      </a>
+      </button>
     </div>
+
+    <!-- 公众号二维码弹窗 -->
+    <UiBaseDialog
+      v-model="showWechatDialog"
+      :title="blogConfig.wechat_qrcode ? '关注公众号' : '公众号订阅'"
+      confirm-text=""
+    >
+      <div class="wechat-dialog-content">
+        <template v-if="blogConfig.wechat_qrcode">
+          <p class="wechat-desc">
+            扫描二维码关注公众号<br />
+            获取最新文章推送
+          </p>
+          <div class="qrcode-wrapper">
+            <NuxtImg
+              :src="blogConfig.wechat_qrcode"
+              :alt="blogConfig.wechat_name || '公众号二维码'"
+              class="qrcode-image"
+              loading="lazy"
+            />
+          </div>
+          <p v-if="blogConfig.wechat_name" class="wechat-name">
+            {{ blogConfig.wechat_name }}
+          </p>
+        </template>
+        <template v-else>
+          <p class="wechat-desc">
+            公众号订阅功能暂未配置<br />
+            建议您使用邮件订阅或 RSS 订阅获取最新文章
+          </p>
+        </template>
+      </div>
+    </UiBaseDialog>
+
+    <!-- RSS订阅弹窗 -->
+    <UiBaseDialog v-model="showRSSDialog" title="RSS 订阅" confirm-text="">
+      <div class="rss-dialog-content">
+        <p class="rss-desc">
+          复制下方地址到您的 RSS 阅读器<br />
+          或使用以下客户端快速订阅
+        </p>
+
+        <!-- RSS地址复制区域 -->
+        <div class="rss-url-item">
+          <span class="url-label">RSS 2.0</span>
+          <div class="url-copy-box">
+            <code class="url-text">{{ rss2Url }}</code>
+            <button class="copy-btn" @click="handleCopy(rss2Url)">复制</button>
+          </div>
+        </div>
+        <div class="rss-url-item">
+          <span class="url-label">Atom</span>
+          <div class="url-copy-box">
+            <code class="url-text">{{ atomUrl }}</code>
+            <button class="copy-btn" @click="handleCopy(atomUrl)">复制</button>
+          </div>
+        </div>
+
+        <!-- 客户端订阅按钮 -->
+        <div class="rss-url-item">
+          <span class="url-label">Follow</span>
+          <div class="url-copy-box">
+            <code class="url-text">follow://add?url={{ atomUrl }}</code>
+            <a
+              :href="`follow://add?url=${encodeURIComponent(atomUrl)}`"
+              target="_blank"
+              class="copy-btn"
+            >
+              订阅
+            </a>
+          </div>
+        </div>
+      </div>
+    </UiBaseDialog>
 
     <!-- 订阅弹窗 -->
     <UiBaseDialog
@@ -216,7 +316,6 @@ const closeUnsubscribeDialog = () => {
   width: 100%;
   flex-direction: row;
   flex-wrap: wrap;
-  position: relative;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 20px;
@@ -232,14 +331,14 @@ const closeUnsubscribeDialog = () => {
   overflow: hidden;
   text-decoration: none;
   width: calc(100% / 3 - 8px);
+  padding: 0;
+  border: none;
+  font: inherit;
+  text-align: left;
   transition: all 0.4s ease-in-out;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   cursor: pointer;
-
-  &:visited {
-    color: white;
-  }
 
   &.subscribe-wechat {
     background: var(--flec-subscribe-wechat);
@@ -285,14 +384,12 @@ const closeUnsubscribeDialog = () => {
 .subscribe-title {
   font-size: 36px;
   font-weight: 700;
-  width: fit-content;
   line-height: 1;
   margin-bottom: 8px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subscribe-info {
-  width: fit-content;
   opacity: 0.9;
   font-size: 14px;
 }
@@ -311,13 +408,100 @@ const closeUnsubscribeDialog = () => {
   color: rgba(255, 255, 255, 0.3);
 }
 
+.rss-desc,
+.wechat-desc,
+.dialog-desc {
+  color: var(--theme-meta-color);
+  line-height: 1.6;
+}
+
+// RSS弹窗内容
+.rss-dialog-content {
+  text-align: center;
+  padding: 10px 0;
+
+  .rss-desc {
+    margin-bottom: 24px;
+  }
+
+  .rss-url-item {
+    margin-bottom: 16px;
+    text-align: left;
+
+    .url-label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .url-copy-box {
+      display: flex;
+      gap: 8px;
+
+      .url-text {
+        flex: 1;
+        padding: 10px 12px;
+        background: var(--flec-card-bg);
+        border: 1px solid var(--flec-border);
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: monospace;
+        word-break: break-all;
+      }
+
+      .copy-btn {
+        padding: 10px 16px;
+        background: var(--theme-color);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+
+        &:hover {
+          opacity: 0.9;
+        }
+      }
+    }
+  }
+}
+
+// 公众号弹窗内容
+.wechat-dialog-content {
+  text-align: center;
+  padding: 10px 0;
+
+  .wechat-desc {
+    margin-bottom: 20px;
+  }
+
+  .qrcode-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+
+    .qrcode-image {
+      width: 200px;
+      height: 200px;
+      border-radius: 8px;
+      object-fit: contain;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .wechat-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--font-color);
+    margin: 0;
+  }
+}
+
 // 弹窗内容样式
 .dialog-content {
   .dialog-desc {
-    color: var(--theme-meta-color);
     margin-bottom: 20px;
     text-align: center;
-    line-height: 1.6;
   }
 
   .input-group {
