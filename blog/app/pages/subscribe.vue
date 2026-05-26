@@ -322,6 +322,7 @@ const closeUnsubscribeDialog = () => {
 }
 
 .subscribe-item {
+  appearance: none;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -437,9 +438,11 @@ const closeUnsubscribeDialog = () => {
     .url-copy-box {
       display: flex;
       gap: 8px;
+      min-width: 0;
 
       .url-text {
         flex: 1;
+        min-width: 0;
         padding: 10px 12px;
         background: var(--flec-card-bg);
         border: 1px solid var(--flec-border);
@@ -450,6 +453,10 @@ const closeUnsubscribeDialog = () => {
       }
 
       .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
         padding: 10px 16px;
         background: var(--theme-color);
         color: white;
@@ -457,6 +464,7 @@ const closeUnsubscribeDialog = () => {
         border-radius: 6px;
         font-size: 13px;
         cursor: pointer;
+        text-decoration: none;
 
         &:hover {
           opacity: 0.9;
@@ -649,13 +657,15 @@ const closeUnsubscribeDialog = () => {
   }
 
   .subscribe-list {
+    flex-direction: column;
     gap: 10px;
     margin-bottom: 16px;
   }
 
   .subscribe-item {
+    min-width: 0;
     width: 100%;
-    height: 200px;
+    height: 180px;
 
     .subscribe-description {
       font-size: 14px;
@@ -677,6 +687,30 @@ const closeUnsubscribeDialog = () => {
     .subscribe-icon {
       font-size: 100px;
       bottom: -90px;
+    }
+  }
+
+  .rss-dialog-content {
+    .rss-url-item {
+      .url-copy-box {
+        flex-direction: column;
+
+        .url-text,
+        .copy-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .wechat-dialog-content {
+    .qrcode-wrapper {
+      .qrcode-image {
+        width: 70vw;
+        max-width: 200px;
+        height: auto;
+        aspect-ratio: 1;
+      }
     }
   }
 }

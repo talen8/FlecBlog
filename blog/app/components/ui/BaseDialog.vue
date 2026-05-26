@@ -165,13 +165,13 @@ const handleConfirm = () => {
 
 @media (max-width: 768px) {
   .dialog-overlay {
-    padding: 0;
+    padding: 16px;
   }
 
   .dialog-container {
-    max-width: 100% !important;
-    max-height: 100vh;
-    border-radius: 0;
+    max-width: 92vw !important;
+    max-height: calc(100vh - 32px);
+    border-radius: 12px;
   }
 
   .dialog-header {
