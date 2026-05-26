@@ -11,7 +11,9 @@ const isArticlePage = computed(() => route.meta.typeHeader === 'post');
     <LayoutsSidebarAnnouncementCard />
     <div class="sticky-sidebar">
       <template v-if="isArticlePage">
-        <LayoutsSidebarTocCard />
+        <ClientOnly>
+          <LayoutsSidebarTocCard />
+        </ClientOnly>
       </template>
       <template v-else>
         <LayoutsSidebarCategoriesCard />

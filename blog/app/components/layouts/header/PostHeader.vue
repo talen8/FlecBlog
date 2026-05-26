@@ -61,14 +61,16 @@ const goToCategory = () => {
           <i class="ri-folder-line" />
           <span>{{ article.category.name }}</span>
         </span>
-        <span class="post-meta-item">
-          <i class="ri-file-word-line" />
-          <span>总字数: {{ wordCount }}</span>
-        </span>
-        <span class="post-meta-item">
-          <i class="ri-time-line" />
-          <span>阅读时长: {{ readingTime }}分钟</span>
-        </span>
+        <ClientOnly>
+          <span class="post-meta-item">
+            <i class="ri-file-word-line" />
+            <span>总字数: {{ wordCount }}</span>
+          </span>
+          <span class="post-meta-item">
+            <i class="ri-time-line" />
+            <span>阅读时长: {{ readingTime }}分钟</span>
+          </span>
+        </ClientOnly>
         <span class="post-meta-item">
           <i class="ri-eye-line" />
           <span>浏览量: {{ article.view_count }}</span>
@@ -100,14 +102,16 @@ const goToCategory = () => {
           </span>
         </div>
         <div class="post-meta">
-          <span class="post-meta-item">
-            <i class="ri-file-word-line" />
-            <span>总字数: {{ wordCount }}</span>
-          </span>
-          <span class="post-meta-item">
-            <i class="ri-time-line" />
-            <span>阅读时长: {{ readingTime }}分钟</span>
-          </span>
+          <ClientOnly>
+            <span class="post-meta-item">
+              <i class="ri-file-word-line" />
+              <span>总字数: {{ wordCount }}</span>
+            </span>
+            <span class="post-meta-item">
+              <i class="ri-time-line" />
+              <span>阅读时长: {{ readingTime }}分钟</span>
+            </span>
+          </ClientOnly>
           <span class="post-meta-item">
             <i class="ri-eye-line" />
             <span>浏览量: {{ article.view_count }}</span>

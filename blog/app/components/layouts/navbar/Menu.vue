@@ -90,16 +90,18 @@ const isImageUrl = (icon: string): boolean => {
         </a>
       </template>
     </div>
-    <div class="scroll-title" :class="{ show: isScrollingDown && isFixed }">
-      <a
-        href="#"
-        class="scroll-to-top brighten no-after"
-        aria-label="回到顶部"
-        @click.prevent="scrollToTop"
-      >
-        <span class="title" aria-hidden="true">{{ displayTitle }}</span>
-      </a>
-    </div>
+    <ClientOnly>
+      <div class="scroll-title" :class="{ show: isScrollingDown && isFixed }">
+        <a
+          href="#"
+          class="scroll-to-top brighten no-after"
+          aria-label="回到顶部"
+          @click.prevent="scrollToTop"
+        >
+          <span class="title" aria-hidden="true">{{ displayTitle }}</span>
+        </a>
+      </div>
+    </ClientOnly>
   </div>
 </template>
 

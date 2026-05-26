@@ -172,12 +172,18 @@ provideCommentContext({
       <h3 class="comments-title">
         <i class="ri-chat-3-line" />
         评论
-        <span v-if="totalCommentsCount > 0" class="comments-count">({{ totalCommentsCount }})</span>
+        <ClientOnly>
+          <span v-if="totalCommentsCount > 0" class="comments-count"
+            >({{ totalCommentsCount }})</span
+          >
+        </ClientOnly>
       </h3>
     </div>
 
     <!-- 评论输入框 -->
-    <CommentInput />
+    <ClientOnly>
+      <CommentInput />
+    </ClientOnly>
 
     <!-- 评论列表 -->
     <CommentList v-if="emojiMapLoaded && hasComments" :comments="flatComments" />

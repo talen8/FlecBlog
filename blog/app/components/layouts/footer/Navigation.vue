@@ -60,11 +60,8 @@ const fetchFriends = async () => {
 
 // 随机获取3个友链
 const randomFriends = computed(() => {
-  if (friendGroups.value.length <= 3) {
-    return friendGroups.value;
-  }
-  const shuffled = [...friendGroups.value].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 3);
+  if (friendGroups.value.length <= 3) return friendGroups.value;
+  return [...friendGroups.value].sort(() => Math.random() - 0.5).slice(0, 3);
 });
 
 // 刷新友链
@@ -93,39 +90,41 @@ const refreshFriends = () => {
     </div>
 
     <!-- 友链列 -->
-    <div class="group-item">
-      <div class="item-title friend-title" role="heading" aria-level="2">
-        友链
-        <i
-          class="refresh-icon ri-refresh-line"
-          :class="{ 'is-loading': isLoadingFriends }"
-          :aria-label="isLoadingFriends ? '正在加载友链' : '刷新友链'"
-          @click="refreshFriends"
-        />
+    <ClientOnly>
+      <div class="group-item">
+        <div class="item-title friend-title" role="heading" aria-level="2">
+          友链
+          <i
+            class="refresh-icon ri-refresh-line"
+            :class="{ 'is-loading': isLoadingFriends }"
+            :aria-label="isLoadingFriends ? '正在加载友链' : '刷新友链'"
+            @click="refreshFriends"
+          />
+        </div>
+        <nav class="item-content friend-content" aria-label="友情链接">
+          <a
+            v-for="friend in randomFriends"
+            :key="friend.id"
+            class="content_link"
+            :href="friend.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            :aria-label="friend.name"
+            :title="friend.description"
+          >
+            {{ friend.name }}
+          </a>
+          <a
+            v-if="friendGroups.length > 3"
+            href="/friend"
+            class="content_link"
+            aria-label="查看更多友链"
+          >
+            更多...
+          </a>
+        </nav>
       </div>
-      <nav class="item-content friend-content" aria-label="友情链接">
-        <a
-          v-for="friend in randomFriends"
-          :key="friend.id"
-          class="content_link"
-          :href="friend.url"
-          target="_blank"
-          rel="noopener noreferrer"
-          :aria-label="friend.name"
-          :title="friend.description"
-        >
-          {{ friend.name }}
-        </a>
-        <a
-          v-if="friendGroups.length > 3"
-          href="/friend"
-          class="content_link"
-          aria-label="查看更多友链"
-        >
-          更多...
-        </a>
-      </nav>
-    </div>
+    </ClientOnly>
   </div>
 </template>
 

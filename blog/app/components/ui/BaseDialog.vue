@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false });
+
 interface Props {
   modelValue: boolean;
   title?: string;
@@ -33,7 +35,7 @@ const handleConfirm = () => {
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="modelValue" class="dialog-overlay" @click.self="handleClose">
-        <div class="dialog-container">
+        <div class="dialog-container" v-bind="$attrs">
           <!-- 头部 -->
           <div v-if="title" class="dialog-header">
             <h3 class="dialog-title">{{ title }}</h3>

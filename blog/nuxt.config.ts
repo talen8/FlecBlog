@@ -76,6 +76,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiUrl: '',
+      appVersion: process.env.FLECBLOG_VERSION || '1.0.0',
     },
   },
 

@@ -9,10 +9,11 @@ const isLoggedIn = useAuth();
 const { open: openLogin } = useLoginModal();
 
 const contactEmail = computed(() => basicConfig.value.author_email || '');
+const requestURL = useRequestURL();
 
 const siteConfig = computed(() => ({
   name: blogConfig.value.title,
-  link: import.meta.client ? window.location.origin : '',
+  link: requestURL.origin,
   avatar: blogConfig.value.favicon,
   description: blogConfig.value.slogan,
   screenshot: blogConfig.value.screenshot,
@@ -279,8 +280,10 @@ watch(showForm, newValue => {
             </p>
             <p>友链申请需要<b>登录后</b>才能提交，确保申请的真实性和可追踪性。</p>
           </div>
-          <button v-if="isLoggedIn" class="submit-btn" @click="showApplyForm">表单提交</button>
-          <button v-else class="submit-btn" @click="openLogin">注册登录</button>
+          <ClientOnly>
+            <button v-if="isLoggedIn" class="submit-btn" @click="showApplyForm">表单提交</button>
+            <button v-else class="submit-btn" @click="openLogin">注册登录</button>
+          </ClientOnly>
         </div>
       </div>
     </div>

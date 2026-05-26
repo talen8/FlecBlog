@@ -5,6 +5,9 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# 构建参数
+ARG APP_VERSION=dev
+
 # 复制 package 文件
 COPY package*.json ./
 
@@ -14,7 +17,8 @@ RUN npm ci
 # 复制源代码
 COPY . .
 
-# 构建应用
+# 注入版本号并构建应用
+ENV FLECBLOG_VERSION=${APP_VERSION}
 RUN npm run build
 
 # 阶段 2: 运行阶段

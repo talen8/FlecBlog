@@ -170,7 +170,7 @@ useHead({
     { name: 'author', content: blogConfig.value.author },
     // PWA 主题色
     { name: 'theme-color', content: '#f7f7f7' },
-    { name: 'apple-mobile-web-app-capable', content: 'yes' },
+    { name: 'mobile-web-app-capable', content: 'yes' },
     { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
   ]),
   script: [
