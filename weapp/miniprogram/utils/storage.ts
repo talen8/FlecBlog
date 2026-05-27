@@ -37,13 +37,3 @@ export function removeStorage(key: string): void {
   }
 }
 
-/**
- * 清空本地所有数据
- */
-export function clearStorage(): void {
-  try {
-    wx.clearStorageSync();
-  } catch (error) {
-    console.error('Storage clear error:', error);
-  }
-}

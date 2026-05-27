@@ -139,6 +139,9 @@ const (
 	KeyOAuthOIDCClientSecret      = "oauth.oidc.client_secret"
 	KeyOAuthOIDCRedirectURL       = "oauth.oidc.redirect_url"
 	KeyOAuthSessionSecret         = "oauth.session_secret" // Session 加密密钥
+	KeyOAuthWechatEnabled         = "oauth.wechat.enabled" // 微信小程序是否启用
+	KeyOAuthWechatAppID           = "oauth.wechat.appid"   // 微信小程序 AppID
+	KeyOAuthWechatSecret          = "oauth.wechat.secret"  // 微信小程序 AppSecret
 )
 
 // SettingService 配置服务

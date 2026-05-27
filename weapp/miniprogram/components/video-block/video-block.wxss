@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #0052d9;
+  background-color: var(--theme-color);
   border-radius: 12rpx;
   margin-right: 20rpx;
   font-size: 40rpx;
@@ -51,5 +51,5 @@
 
 .video-arrow {
   font-size: 32rpx;
-  color: #0052d9;
+  color: var(--theme-color);
 }

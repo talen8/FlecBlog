@@ -4,11 +4,9 @@
  */
 
 import type { ArticleListItem } from '../../types';
-import type { IAppOption } from '../../app';
+import { APP_CONFIG } from '../../config';
 import { getArticles } from '../../api/article';
 import { formatRelativeTime } from '../../utils/format';
-
-const app = getApp<IAppOption>();
 
 Page({
   data: {
@@ -22,7 +20,7 @@ Page({
   },
 
   onLoad() {
-    wx.setNavigationBarTitle({ title: app.globalData.siteConfig.site_name || 'FlecBlog' });
+    wx.setNavigationBarTitle({ title: APP_CONFIG.APP_NAME });
     this.loadData(true);
   },
 
@@ -44,7 +42,7 @@ Page({
         ...item,
         formattedTime: formatRelativeTime(item.publish_time),
         slug: (item.url || '').split('/').pop(),
-      }));
+      } as ArticleListItem & { formattedTime: string; slug: string }));
 
       const topItems = reset ? items.filter(item => item.is_top) : [];
       const normalItems = reset
@@ -109,10 +107,10 @@ Page({
   },
 
   onShareAppMessage() {
-    return { title: app.globalData.siteConfig.site_name || 'FlecBlog', path: '/pages/index/index' };
+    return { title: APP_CONFIG.APP_NAME, path: '/pages/index/index' };
   },
 
   onShareTimeline() {
-    return { title: app.globalData.siteConfig.site_name || 'FlecBlog' };
+    return { title: APP_CONFIG.APP_NAME };
   },
 });

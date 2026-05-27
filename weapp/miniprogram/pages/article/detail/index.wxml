@@ -20,6 +20,7 @@
       <text class="meta-time">{{formattedTime}}</text>
       <text class="meta-views">{{article.view_count}} 次阅读</text>
       <text wx:if="{{article.location}}" class="meta-location">{{article.location}}</text>
+      <text class="meta-original" bindtap="onCopyOriginal">阅读原文</text>
     </view>
 
     <!-- category + tags -->
@@ -94,5 +95,11 @@
         rows="{{item.rows}}"
       />
     </block>
+
+    <!-- 阅读原文 -->
+    <view class="read-original" bindtap="onCopyOriginal">
+      <text class="read-original-text">阅读原文</text>
+      <t-icon name="chevron-right" size="28rpx" color="var(--theme-color)" />
+    </view>
   </view>
 </view>

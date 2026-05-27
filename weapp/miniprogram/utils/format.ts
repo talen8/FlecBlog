@@ -4,21 +4,27 @@
  */
 
 /**
+ * 兼容 iOS 日期格式
+ * iOS 只支持 ISO 格式 (yyyy-MM-ddTHH:mm:ss)，将空格替换为 T
+ */
+function normalizeDate(date: string | Date | number): Date {
+  if (typeof date === 'string' && date.includes(' ')) {
+    return new Date(date.replace(' ', 'T'));
+  }
+  return new Date(date);
+}
+
+/**
  * 格式化日期
  * @param date - 日期字符串或 Date 对象
  * @param format - 格式化模板，默认 'YYYY-MM-DD'
  * @returns 格式化后的日期字符串
  */
-export function formatDate(
+function formatDate(
   date: string | Date | number,
   format = 'YYYY-MM-DD'
 ): string {
-  // iOS 只支持 ISO 格式 (yyyy-MM-ddTHH:mm:ss)，将空格替换为 T
-  let dateStr = date;
-  if (typeof date === 'string' && date.includes(' ')) {
-    dateStr = date.replace(' ', 'T');
-  }
-  const d = new Date(dateStr);
+  const d = normalizeDate(date);
 
   if (isNaN(d.getTime())) {
     return '';
@@ -48,12 +54,7 @@ export function formatDate(
  * @returns 相对时间描述（如：刚刚、5分钟前、1小时前、昨天、3天前）
  */
 export function formatRelativeTime(date: string | Date | number): string {
-  // iOS 只支持 ISO 格式，将空格替换为 T
-  let dateStr = date;
-  if (typeof date === 'string' && date.includes(' ')) {
-    dateStr = date.replace(' ', 'T');
-  }
-  const d = new Date(dateStr);
+  const d = normalizeDate(date);
   const now = new Date();
   const diff = now.getTime() - d.getTime();
 

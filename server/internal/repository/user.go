@@ -275,6 +275,8 @@ func (r *UserRepository) GetByOAuthID(provider, providerID string) (*model.User,
 		query = "oidc_id = ?"
 	case "feishu":
 		query = "feishu_open_id = ?"
+	case "wechat":
+		query = "wechat_open_id = ?"
 	default:
 		return nil, gorm.ErrRecordNotFound
 	}
@@ -303,6 +305,8 @@ func (r *UserRepository) UpdateOAuthBinding(userID uint, provider, providerID st
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("oidc_id", providerID).Error
 	case "feishu":
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("feishu_open_id", providerID).Error
+	case "wechat":
+		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("wechat_open_id", providerID).Error
 	default:
 		return gorm.ErrInvalidData
 	}
@@ -322,6 +326,8 @@ func (r *UserRepository) ClearOAuthBinding(userID uint, provider string) error {
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("microsoft_id", "").Error
 	case "oidc":
 		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("oidc_id", "").Error
+	case "wechat":
+		return r.db.Model(&model.User{}).Where("id = ?", userID).Update("wechat_open_id", "").Error
 	default:
 		return gorm.ErrInvalidData
 	}

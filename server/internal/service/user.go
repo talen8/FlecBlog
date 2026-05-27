@@ -12,6 +12,7 @@ import (
 	"flec_blog/internal/repository"
 	"flec_blog/pkg/random"
 	"flec_blog/pkg/utils"
+	"flec_blog/pkg/wechat"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -280,6 +281,87 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 	}
 
 	// 5. 签发 Token
+	return s.buildLoginResponse(user)
+}
+
+// LoginByWechat 微信小程序登录
+func (s *UserService) LoginByWechat(openID string) (*dto.LoginResponse, string, error) {
+	// 1. 通过 openid 查找用户
+	user, err := s.repo.GetByOAuthID("wechat", openID)
+	if err == nil {
+		// 已绑定，直接登录
+		now := utils.Now().Time
+		user.LastLogin = &now
+		_ = s.repo.Update(user)
+		return s.buildLoginResponse(user)
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, "", err
+	}
+
+	// 2. 用户不存在，自动创建
+	now := utils.Now().Time
+	user = &model.User{
+		Email:        "wechat_" + openID + "@virtual.local",
+		WechatOpenID: openID,
+		Nickname:     "微信用户" + openID[:4],
+		HasPassword:  false,
+		Role:         model.RoleUser,
+		LastLogin:    &now,
+		IsEnabled:    true,
+	}
+
+	if err := s.repo.Create(user); err != nil {
+		return nil, "", err
+	}
+
+	return s.buildLoginResponse(user)
+}
+
+// ============ 微信扫码登录 Scene ============
+
+// CreateWechatLoginScene 创建扫码登录场景
+func (s *UserService) CreateWechatLoginScene() string {
+	scene := random.String(32)
+	wechat.CreateScene(scene)
+	return scene
+}
+
+// GetWechatLoginScene 查询扫码登录场景状态
+func (s *UserService) GetWechatLoginScene(scene string) (string, uint, bool) {
+	return wechat.GetSceneStatus(scene)
+}
+
+// ConfirmWechatLoginScene 小程序确认授权
+func (s *UserService) ConfirmWechatLoginScene(scene string, userID uint) bool {
+	return wechat.ConfirmScene(scene, userID)
+}
+
+// BindWechatToUser 将微信 openid 绑定到指定用户，如果 openid 已绑到其他用户则合并
+func (s *UserService) BindWechatToUser(userID uint, openID string) error {
+	// 检查 openid 是否已绑到其他用户
+	existing, err := s.repo.GetByOAuthID("wechat", openID)
+	if err == nil && existing.ID != userID {
+		// openid 已绑到另一个用户，需要合并：保留目标用户，删除旧用户
+		if err := s.repo.Delete(existing.ID); err != nil {
+			return err
+		}
+	}
+
+	// 绑定到目标用户
+	return s.repo.UpdateOAuthBinding(userID, "wechat", openID)
+}
+
+// GetLoginResponseByUserID 通过用户 ID 构建登录响应（用于扫码确认后 blog 端获取 token）
+func (s *UserService) GetLoginResponseByUserID(userID uint) (*dto.LoginResponse, string, error) {
+	user, err := s.repo.Get(userID)
+	if err != nil {
+		return nil, "", err
+	}
+	now := utils.Now().Time
+	user.LastLogin = &now
+	_ = s.repo.Update(user)
 	return s.buildLoginResponse(user)
 }
 

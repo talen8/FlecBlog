@@ -132,6 +132,29 @@
       />
     </el-form-item>
 
+    <el-divider content-position="left">微信小程序登录</el-divider>
+    <el-form-item label="启用微信">
+      <el-switch
+        v-model="form['wechat.enabled']"
+        active-value="true"
+        inactive-value="false"
+        :disabled="loading"
+      />
+    </el-form-item>
+    <el-form-item label="AppID">
+      <el-input v-model="form['wechat.appid']" placeholder="微信小程序 AppID" :disabled="loading" />
+    </el-form-item>
+    <el-form-item label="AppSecret">
+      <el-input
+        v-model="form['wechat.secret']"
+        type="password"
+        show-password
+        placeholder="微信小程序 AppSecret"
+        :disabled="loading"
+        autocomplete="off"
+      />
+    </el-form-item>
+
     <el-divider content-position="left">OIDC 登录</el-divider>
     <el-form-item label="启用 OIDC">
       <el-switch
@@ -189,6 +212,9 @@ interface OAuthForm {
   'microsoft.client_id': string;
   'microsoft.client_secret': string;
   'microsoft.redirect_url': string;
+  'wechat.enabled': string;
+  'wechat.appid': string;
+  'wechat.secret': string;
   'oidc.enabled': string;
   'oidc.issuer_url': string;
   'oidc.client_id': string;

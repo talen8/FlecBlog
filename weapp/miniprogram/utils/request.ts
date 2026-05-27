@@ -4,7 +4,7 @@
  */
 
 import type { ApiResponse, ApiError, RequestConfig, RequestInterceptor, ErrorInterceptor } from '../types';
-import { API_CONFIG, ERROR_MESSAGES } from '../config';
+import { APP_CONFIG } from '../config';
 
 // ==================== 拦截器管理器 ====================
 
@@ -54,8 +54,8 @@ async function runErrorInterceptors(error: ApiError, config: RequestConfig): Pro
 
 /** Token 刷新状态锁 */
 let isRefreshing = false;
-/** 等待刷新的请求队列 */
-let refreshSubscribers: Array<(token: string) => void> = [];
+/** 刷新 Token 的 Promise，用于并发请求共享 */
+let refreshPromise: Promise<boolean> | null = null;
 
 /**
  * 获取当前 Token
@@ -79,18 +79,64 @@ export function clearToken(): void {
 }
 
 /**
- * 添加到 Token 刷新等待队列
+ * 清除登录状态
  */
-function subscribeTokenRefresh(callback: (token: string) => void): void {
-  refreshSubscribers.push(callback);
+export function clearAuth(): void {
+  clearToken();
+  wx.removeStorageSync('user_info');
 }
 
 /**
- * 通知所有等待的请求 Token 已刷新
+ * 执行 Token 刷新
+ * @returns 是否刷新成功
  */
-function notifyTokenRefresh(token: string): void {
-  refreshSubscribers.forEach((callback) => callback(token));
-  refreshSubscribers = [];
+async function doRefreshToken(): Promise<boolean> {
+  try {
+    const token = getToken();
+    if (!token) return false;
+
+    const res = await new Promise<{ code: number; data?: { access_token: string } }>((resolve, reject) => {
+      wx.request({
+        url: `${APP_CONFIG.API_URL}/auth/refresh`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 30000,
+        success: (res) => resolve(res.data as { code: number; data?: { access_token: string } }),
+        fail: (err) => reject(err),
+      });
+    });
+
+    if (res.code === 0 && res.data?.access_token) {
+      setToken(res.data.access_token);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 登出操作
+ */
+export function logout(): void {
+  const token = getToken();
+  clearAuth();
+
+  // 尝试调用后端登出接口（静默失败）
+  if (token) {
+    wx.request({
+      url: `${APP_CONFIG.API_URL}/auth/logout`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
 }
 
 // ==================== URL 构建 ====================
@@ -101,8 +147,8 @@ function notifyTokenRefresh(token: string): void {
  * @param params - 查询参数
  * @returns 完整 URL
  */
-function buildUrl(url: string, params?: Record<string, unknown>): string {
-  let fullUrl = url.startsWith('http') ? url : `${API_CONFIG.BASE_URL}${url}`;
+function buildUrl(url: string, params?: Record<string, any>): string {
+  let fullUrl = url.startsWith('http') ? url : `${APP_CONFIG.API_URL}${url}`;
 
   if (params && Object.keys(params).length > 0) {
     const queryString = Object.entries(params)
@@ -180,7 +226,7 @@ export function request<T>(config: RequestConfig): Promise<T> {
         method: processedConfig.method as WechatMiniprogram.RequestOption['method'],
         data: processedConfig.data,
         header: processedConfig.header,
-        timeout: API_CONFIG.TIMEOUT,
+        timeout: 30000,
         success: (res) => {
           if (loading) wx.hideLoading();
 
@@ -195,7 +241,7 @@ export function request<T>(config: RequestConfig): Promise<T> {
             } else {
               const apiError: ApiError = {
                 code: apiResponse.code,
-                message: apiResponse.message || ERROR_MESSAGES.REQUEST_FAILED,
+                message: apiResponse.message || '请求失败，请稍后重试',
                 url: processedConfig.url,
                 statusCode,
               };
@@ -215,31 +261,31 @@ export function request<T>(config: RequestConfig): Promise<T> {
           } else if (statusCode >= 500) {
             const apiError: ApiError = {
               code: statusCode,
-              message: ERROR_MESSAGES.SERVER_ERROR,
+              message: '服务器繁忙，请稍后重试',
               url: processedConfig.url,
               statusCode,
             };
             runErrorInterceptors(apiError, processedConfig).catch(() => {
-              reject(new Error(ERROR_MESSAGES.SERVER_ERROR));
+              reject(new Error('服务器繁忙，请稍后重试'));
             });
           } else {
             const apiError: ApiError = {
               code: statusCode,
-              message: ERROR_MESSAGES.REQUEST_FAILED,
+              message: '请求失败，请稍后重试',
               url: processedConfig.url,
               statusCode,
             };
             runErrorInterceptors(apiError, processedConfig).catch(() => {
-              reject(new Error(ERROR_MESSAGES.REQUEST_FAILED));
+              reject(new Error('请求失败，请稍后重试'));
             });
           }
         },
         fail: (err) => {
           if (loading) wx.hideLoading();
 
-          let errorMsg: string = ERROR_MESSAGES.NETWORK_ERROR;
+          let errorMsg: string = '网络连接失败，请检查网络设置';
           if (err.errMsg && err.errMsg.includes('timeout')) {
-            errorMsg = ERROR_MESSAGES.TIMEOUT_ERROR;
+            errorMsg = '请求超时，请稍后重试';
           }
 
           const apiError: ApiError = {
@@ -259,55 +305,57 @@ export function request<T>(config: RequestConfig): Promise<T> {
 
 /**
  * 处理 401 未授权
+ * 参考 blog 端实现，支持 Token 自动刷新
  */
-function handleUnauthorized<T>(
+async function handleUnauthorized<T>(
   config: RequestConfig,
   resolve: (value: T) => void,
   reject: (reason?: unknown) => void
-): void {
-  // 如果已经在刷新 Token，将请求加入队列等待
-  if (isRefreshing) {
-    subscribeTokenRefresh(() => {
-      // Token 刷新后，重新执行请求
-      request<T>(config).then(resolve).catch(reject);
-    });
+): Promise<void> {
+  // 如果是刷新 Token 的请求本身失败，直接登出
+  if (config.url === '/auth/refresh') {
+    handleLogout();
+    reject(new Error('登录已过期，请重新登录'));
     return;
   }
 
+  // 避免并发刷新：如果已经在刷新，等待刷新结果
+  if (isRefreshing && refreshPromise) {
+    const success = await refreshPromise;
+    if (success) {
+      // 刷新成功，重试当前请求
+      request<T>(config).then(resolve).catch(reject);
+    } else {
+      reject(new Error('登录已过期，请重新登录'));
+    }
+    return;
+  }
+
+  // 开始刷新 Token
   isRefreshing = true;
+  refreshPromise = doRefreshToken().finally(() => {
+    isRefreshing = false;
+    refreshPromise = null;
+  });
 
-  // TODO: 调用刷新 Token 接口
-  // 这里需要根据实际后端接口实现
-  // refreshToken()
-  //   .then((newToken) => {
-  //     setToken(newToken);
-  //     isRefreshing = false;
-  //     notifyTokenRefresh(newToken);
-  //     // 重试当前请求
-  //     request<T>(config).then(resolve).catch(reject);
-  //   })
-  //   .catch(() => {
-  //     isRefreshing = false;
-  //     notifyTokenRefresh('');
-  //     clearToken();
-  //     wx.showToast({ title: ERROR_MESSAGES.UNAUTHORIZED, icon: 'none' });
-  //     reject(new Error(ERROR_MESSAGES.UNAUTHORIZED));
-  //   });
-
-  // 临时方案：直接提示登录
-  wx.showToast({ title: ERROR_MESSAGES.UNAUTHORIZED, icon: 'none' });
-  reject(new Error(ERROR_MESSAGES.UNAUTHORIZED));
+  const success = await refreshPromise;
+  if (success) {
+    // 刷新成功，重试当前请求
+    request<T>(config).then(resolve).catch(reject);
+  } else {
+    // 刷新失败，登出
+    handleLogout();
+    reject(new Error('登录已过期，请重新登录'));
+  }
 }
 
 /**
- * 设置基础认证 Token
+ * 处理登出逻辑
  */
-function setAuthHeader(token: string | null): void {
-  if (token) {
-    setToken(token);
-  } else {
-    clearToken();
-  }
+function handleLogout(): void {
+  clearAuth();
+  wx.showToast({ title: '登录已过期，请重新登录', icon: 'none' });
+  wx.navigateTo({ url: '/pages/login/login' });
 }
 
 // ==================== 便捷请求方法 ====================
@@ -315,7 +363,7 @@ function setAuthHeader(token: string | null): void {
 /** GET 请求 */
 export function get<T>(
   url: string,
-  params?: Record<string, unknown>,
+  params?: Record<string, any>,
   config?: Omit<RequestConfig, 'url' | 'method' | 'params'>
 ): Promise<T> {
   return request<T>({ url, method: 'GET', params, ...config });
@@ -324,7 +372,7 @@ export function get<T>(
 /** POST 请求 */
 export function post<T>(
   url: string,
-  data?: Record<string, unknown>,
+  data?: Record<string, any>,
   config?: Omit<RequestConfig, 'url' | 'method' | 'data'>
 ): Promise<T> {
   return request<T>({ url, method: 'POST', data, ...config });
@@ -333,7 +381,7 @@ export function post<T>(
 /** PUT 请求 */
 export function put<T>(
   url: string,
-  data?: Record<string, unknown>,
+  data?: Record<string, any>,
   config?: Omit<RequestConfig, 'url' | 'method' | 'data'>
 ): Promise<T> {
   return request<T>({ url, method: 'PUT', data, ...config });
@@ -350,7 +398,7 @@ export function del<T>(
 /** PATCH 请求 */
 export function patch<T>(
   url: string,
-  data?: Record<string, unknown>,
+  data?: Record<string, any>,
   config?: Omit<RequestConfig, 'url' | 'method' | 'data'>
 ): Promise<T> {
   return request<T>({ url, method: 'PATCH', data, ...config });

@@ -50,7 +50,7 @@
       </view>
 
       <!-- 视频卡片 -->
-      <view wx:if="{{item.content.video}}" class="video-card" bindtap="onVideoTap" data-url="{{item.content.video.url}}">
+      <view wx:if="{{item.content.video}}" class="video-card" bindtap="onCopyUrl" data-url="{{item.content.video.url}}">
         <view class="video-icon">
           <t-icon name="play-circle" size="36rpx" color="#fff" />
         </view>
@@ -59,7 +59,7 @@
       </view>
 
       <!-- 链接卡片 -->
-      <view wx:if="{{item.content.link}}" class="link-card" bindtap="onLinkTap" data-url="{{item.content.link.url}}">
+      <view wx:if="{{item.content.link}}" class="link-card" bindtap="onCopyUrl" data-url="{{item.content.link.url}}">
         <image wx:if="{{item.content.link.favicon}}" class="link-favicon" src="{{item.content.link.favicon}}" mode="aspectFit" />
         <view class="link-info">
           <text class="link-title">{{item.content.link.title}}</text>

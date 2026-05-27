@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "FlecBlog",
+  "navigationBarTitleText": "",
   "backgroundTextStyle": "dark",
   "enablePullDownRefresh": true,
   "usingComponents": {

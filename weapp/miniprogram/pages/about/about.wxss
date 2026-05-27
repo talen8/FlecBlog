@@ -1,14 +1,177 @@
-.page-placeholder {
+.about-page {
+  padding: 24rpx;
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+/* 头部 */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding: 32rpx 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.header-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.header-desc {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.4;
+}
+
+.header-tips {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 通用区块 */
+.block {
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+}
+
+.block-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  padding: 24rpx 24rpx 16rpx;
+  display: block;
+}
+
+/* 行：label - value */
+.row {
+  display: flex;
+  align-items: flex-start;
+  padding: 20rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row-label {
+  font-size: 26rpx;
+  color: #999;
+  width: 120rpx;
+  flex-shrink: 0;
+  padding-top: 2rpx;
+}
+
+.row-value {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* 性格代码 */
+.personality-code {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-left: 8rpx;
+}
+
+/* 座右铭 */
+.motto-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.motto-line {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+.motto-dim {
+  color: #999;
+}
+
+/* 统计数据行 */
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 24rpx;
+}
+
+.stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #f5f7fa;
 }
 
-.placeholder-text {
+.stat-num {
   font-size: 32rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 22rpx;
   color: #999;
-  margin-top: 24rpx;
+  margin-top: 4rpx;
+}
+
+/* 站长联盟标签 */
+.union-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  padding: 0 24rpx 24rpx;
+}
+
+.union-tag {
+  font-size: 24rpx;
+  color: #666;
+  background: #f5f7fa;
+  padding: 10rpx 20rpx;
+  border-radius: 6rpx;
+}
+
+.union-tag:active {
+  background: #e8e8e8;
+}
+
+/* 心路历程 */
+.story-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.8;
+  white-space: pre-line;
+  padding: 0 24rpx 24rpx;
+  display: block;
 }

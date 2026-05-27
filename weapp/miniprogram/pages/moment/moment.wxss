@@ -116,7 +116,7 @@
 .video-icon {
   width: 64rpx;
   height: 64rpx;
-  background-color: #0052d9;
+  background-color: var(--theme-color);
   border-radius: 8rpx;
   display: flex;
   align-items: center;
@@ -220,7 +220,7 @@
 
 .moment-tag {
   font-size: 22rpx;
-  color: #0052d9;
+  color: var(--theme-color);
   background-color: rgba(0, 82, 217, 0.1);
   padding: 4rpx 12rpx;
   border-radius: 6rpx;

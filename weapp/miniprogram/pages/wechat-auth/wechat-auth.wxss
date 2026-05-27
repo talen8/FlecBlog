@@ -1,0 +1,64 @@
+/* 微信扫码登录授权确认页样式 */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
+  padding: 48rpx;
+}
+
+.auth-card {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 24rpx;
+  padding: 60rpx 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+.auth-icon {
+  margin-bottom: 32rpx;
+}
+
+.auth-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.auth-desc {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 48rpx;
+}
+
+.auth-error {
+  font-size: 26rpx;
+  color: #e57373;
+  margin-top: 24rpx;
+  text-align: center;
+}
+
+.auth-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  padding: 32rpx 0;
+}
+
+.success-text {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #07c160;
+}
+
+.success-tip {
+  font-size: 28rpx;
+  color: #999;
+}

@@ -6283,6 +6283,171 @@
                 }
             }
         },
+        "/auth/wechat": {
+            "post": {
+                "description": "使用微信小程序 wx.login 获取的 code 进行登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "微信小程序登录",
+                "parameters": [
+                    {
+                        "description": "微信登录请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.WechatLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/wechat/confirm": {
+            "post": {
+                "description": "小程序用户通过微信身份确认授权",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "小程序确认扫码登录授权",
+                "parameters": [
+                    {
+                        "description": "确认请求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.WechatConfirmRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/wechat/qrcode": {
+            "get": {
+                "description": "创建 scene 并生成小程序码，scene 通过 X-Scene 响应头返回",
+                "produces": [
+                    "image/png"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "获取微信扫码登录二维码",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/wechat/scene/{scene}": {
+            "get": {
+                "description": "Blog 端轮询此接口等待用户扫码确认",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "轮询微信扫码登录状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "场景值",
+                        "name": "scene",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.WechatPollResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/{provider}": {
             "get": {
                 "description": "跳转到第三方认证页面，支持登录和绑定",
@@ -8805,6 +8970,9 @@
                 },
                 "password": {
                     "type": "string"
+                },
+                "wechat_code": {
+                    "type": "string"
                 }
             }
         },
@@ -9915,6 +10083,43 @@
             "properties": {
                 "html": {
                     "description": "公众号 HTML，用于复制粘贴到微信公众平台",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.WechatConfirmRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "scene"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "scene": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.WechatLoginRequest": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.WechatPollResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

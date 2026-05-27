@@ -84,25 +84,20 @@
   color: #e57373;
 }
 
-.form-extra {
+/* 微信登录按钮 */
+.wechat-btn {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 48rpx;
-}
-
-.forgot-link {
-  font-size: 26rpx;
-  color: #0052d9;
-}
-
-/* 提示区域 */
-.tips-section {
-  display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 48rpx 0;
+  height: 88rpx;
+  margin-top: 24rpx;
+  background-color: #f5f7fa;
+  border-radius: 12rpx;
+  border: 2rpx solid #e5e5e5;
 }
 
-.tips-text {
-  font-size: 26rpx;
-  color: #999;
+.wechat-btn-text {
+  margin-left: 12rpx;
+  font-size: 30rpx;
+  color: #333;
 }

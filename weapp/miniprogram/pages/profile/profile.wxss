@@ -52,7 +52,7 @@
   margin-left: 12rpx;
   padding: 2rpx 10rpx;
   font-size: 20rpx;
-  color: #0052d9;
+  color: var(--theme-color);
   background-color: rgba(0, 82, 217, 0.1);
   border-radius: 4rpx;
 }
@@ -99,24 +99,18 @@
 .method-tag {
   padding: 4rpx 12rpx;
   font-size: 24rpx;
-  color: #0052d9;
+  color: var(--theme-color);
   background-color: rgba(0, 82, 217, 0.1);
   border-radius: 6rpx;
 }
 
-/* 操作按钮 */
-.action-btn,
+/* 退出登录按钮 */
 .logout-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24rpx 32rpx;
   border-top: 1rpx solid #f5f5f5;
-}
-
-.action-btn text {
-  font-size: 28rpx;
-  color: #0052d9;
 }
 
 .logout-btn text {

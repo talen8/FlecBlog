@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #0052d9;
+  background-color: var(--theme-color);
   border-radius: 50%;
   margin-right: 20rpx;
 }
@@ -58,7 +58,7 @@
 
 .progress-fill {
   height: 100%;
-  background-color: #0052d9;
+  background-color: var(--theme-color);
   border-radius: 4rpx;
   transition: width 0.1s linear;
 }

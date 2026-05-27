@@ -394,6 +394,7 @@ export function useSysConfig() {
     'qq.enabled': 'false',
     'microsoft.enabled': 'false',
     'oidc.enabled': 'false',
+    'wechat.enabled': 'false',
   }));
 
   const uploadConfig = useState<Record<string, string>>('sysconfig-upload', () => ({

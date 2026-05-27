@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "文章详情",
+  "navigationBarTitleText": "",
   "backgroundColor": "#ffffff",
   "usingComponents": {
     "towxml": "/towxml/towxml",

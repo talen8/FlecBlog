@@ -36,6 +36,7 @@ type User struct {
 	FeishuOpenID string     `gorm:"size:50;index" json:"-"`  // 飞书 OpenID
 	MicrosoftID  string     `gorm:"size:50;index" json:"-"`  // Microsoft 用户ID
 	OidcID       string     `gorm:"size:100;index" json:"-"` // 通用 OIDC 用户ID
+	WechatOpenID string     `gorm:"size:100;index" json:"-"` // 微信小程序 OpenID
 }
 
 // TokenBlacklist Token黑名单模型

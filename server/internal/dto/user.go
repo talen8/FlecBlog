@@ -46,6 +46,9 @@ func NewUserResponse(user *model.User) *UserResponse {
 	if user.FeishuOpenID != "" {
 		linkedOAuths = append(linkedOAuths, "feishu")
 	}
+	if user.WechatOpenID != "" {
+		linkedOAuths = append(linkedOAuths, "wechat")
+	}
 
 	return &UserResponse{
 		ID:             user.ID,
@@ -76,8 +79,26 @@ type RegisterRequest struct {
 
 // LoginRequest 用户登录请求
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+	Email      string `json:"email" binding:"required,email"`
+	Password   string `json:"password" binding:"required"`
+	WechatCode string `json:"wechat_code,omitempty"`
+}
+
+// WechatLoginRequest 微信小程序登录请求
+type WechatLoginRequest struct {
+	Code string `json:"code" binding:"required"`
+}
+
+// WechatConfirmRequest 微信扫码登录确认请求
+type WechatConfirmRequest struct {
+	Scene string `json:"scene" binding:"required"`
+	Code  string `json:"code" binding:"required"`
+}
+
+// WechatPollResponse 微信扫码登录轮询响应
+type WechatPollResponse struct {
+	Status      string `json:"status"`
+	AccessToken string `json:"access_token,omitempty"`
 }
 
 // UpdateUserRequest 用户信息更新请求

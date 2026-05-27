@@ -10,7 +10,7 @@
   padding: 8rpx 16rpx;
   font-size: 22rpx;
   color: #fff;
-  background-color: #0052d9;
+  background-color: var(--theme-color);
 }
 
 .link-card.external .link-type {
@@ -75,5 +75,5 @@
 
 .arrow-text {
   font-size: 28rpx;
-  color: #0052d9;
+  color: var(--theme-color);
 }

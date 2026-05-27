@@ -45,10 +45,6 @@
           <text class="detail-label">最后登录</text>
           <text class="detail-value">{{userInfo.last_login}}</text>
         </view>
-        <view class="detail-item">
-          <text class="detail-label">缓存大小</text>
-          <text class="detail-value">{{cacheSize}}</text>
-        </view>
       </view>
 
       <!-- 退出登录 -->
@@ -71,23 +67,11 @@
         </view>
       </view>
 
-      <!-- 缓存信息 -->
-      <view class="user-details">
-        <view class="detail-item">
-          <text class="detail-label">缓存大小</text>
-          <text class="detail-value">{{cacheSize}}</text>
-        </view>
-      </view>
-
-      <!-- 清除缓存 -->
-      <view class="action-btn" bindtap="handleClearCache">
-        <text>清除缓存</text>
-      </view>
     </block>
   </view>
 
   <!-- 版本信息 -->
   <view class="version-info">
-    <text>FlecBlog v1.0.0</text>
+    <text>{{appName}} v{{version}}</text>
   </view>
 </view>

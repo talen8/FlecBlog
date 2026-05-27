@@ -3,9 +3,9 @@
   <!-- Logo 区域 -->
   <view class="logo-section">
     <view class="logo-icon">
-      <t-icon name="book" size="80rpx" color="#0052d9" />
+      <t-icon name="user" size="80rpx" color="#0052d9" />
     </view>
-    <text class="logo-title">FlecBlog</text>
+    <text class="logo-title">{{appName}}</text>
     <text class="logo-subtitle">登录您的账户</text>
   </view>
 
@@ -44,10 +44,6 @@
       <text class="form-error" wx:if="{{passwordError}}">{{passwordError}}</text>
     </view>
 
-    <view class="form-extra">
-      <text class="forgot-link" bindtap="handleForgotPassword">忘记密码？</text>
-    </view>
-
     <t-button
       theme="primary"
       size="large"
@@ -58,10 +54,12 @@
     >
       登录
     </t-button>
+
+    <view class="wechat-btn" bindtap="handleWechatLogin">
+      <t-loading size="48rpx" wx:if="{{wechatLoading}}" />
+      <t-icon name="logo-wechat" size="48rpx" color="#07c160" wx:else />
+      <text class="wechat-btn-text">微信登录</text>
+    </view>
   </view>
 
-  <!-- 提示信息 -->
-  <view class="tips-section">
-    <text class="tips-text">还没有账户？请在后台管理系统注册</text>
-  </view>
 </view>

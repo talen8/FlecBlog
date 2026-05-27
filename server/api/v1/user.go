@@ -14,6 +14,7 @@ import (
 	"flec_blog/pkg/auth"
 	"flec_blog/pkg/response"
 	"flec_blog/pkg/upload"
+	"flec_blog/pkg/wechat"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
@@ -23,14 +24,16 @@ import (
 type UserController struct {
 	userService         *service.UserService
 	verificationService *service.VerificationService
+	settingService      *service.SettingService
 	config              *config.Config
 }
 
 // NewUserController 创建用户控制器
-func NewUserController(userService *service.UserService, verificationService *service.VerificationService, cfg *config.Config) *UserController {
+func NewUserController(userService *service.UserService, verificationService *service.VerificationService, settingService *service.SettingService, cfg *config.Config) *UserController {
 	return &UserController{
 		userService:         userService,
 		verificationService: verificationService,
+		settingService:      settingService,
 		config:              cfg,
 	}
 }
@@ -248,10 +251,215 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
+	// 如果提供了微信 code，绑定微信身份到该用户
+	if req.WechatCode != "" {
+		settings, err := c.settingService.GetByGroup("oauth")
+		if err == nil {
+			appID := settings[service.KeyOAuthWechatAppID]
+			appSecret := settings[service.KeyOAuthWechatSecret]
+			if appID != "" && appSecret != "" {
+				if openID, err := wechat.Code2Session(appID, appSecret, req.WechatCode); err == nil {
+					_ = c.userService.BindWechatToUser(loginResp.User.ID, openID)
+				}
+			}
+		}
+	}
+
 	// 设置 refresh token 到 HttpOnly Cookie
 	auth.SetRefreshTokenCookie(ctx, refreshToken)
 
 	response.Success(ctx, loginResp)
+}
+
+// WechatLogin 微信小程序登录
+//
+//	@Summary		微信小程序登录
+//	@Description	使用微信小程序 wx.login 获取的 code 进行登录
+//	@Tags			认证
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		dto.WechatLoginRequest	true	"微信登录请求"
+//	@Success		200		{object}	response.Response{data=dto.LoginResponse}
+//	@Failure		400		{object}	response.Response
+//	@Router			/auth/wechat [post]
+func (c *UserController) WechatLogin(ctx *gin.Context) {
+	var req dto.WechatLoginRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.ValidateFailed(ctx, err.Error())
+		return
+	}
+
+	// 读取微信小程序配置
+	settings, err := c.settingService.GetByGroup("oauth")
+	if err != nil {
+		response.Failed(ctx, "获取微信配置失败")
+		return
+	}
+
+	if settings[service.KeyOAuthWechatEnabled] != "true" {
+		response.Failed(ctx, "微信小程序登录未启用")
+		return
+	}
+
+	appID := settings[service.KeyOAuthWechatAppID]
+	appSecret := settings[service.KeyOAuthWechatSecret]
+	if appID == "" || appSecret == "" {
+		response.Failed(ctx, "微信小程序未配置")
+		return
+	}
+
+	// 调用微信 code2session 接口获取 openid
+	openID, err := wechat.Code2Session(appID, appSecret, req.Code)
+	if err != nil {
+		response.Failed(ctx, err.Error())
+		return
+	}
+
+	// 登录或创建用户
+	loginResp, refreshToken, err := c.userService.LoginByWechat(openID)
+	if err != nil {
+		response.Failed(ctx, err.Error())
+		return
+	}
+
+	auth.SetRefreshTokenCookie(ctx, refreshToken)
+	response.Success(ctx, loginResp)
+}
+
+// GetWechatQRCode 获取微信扫码登录二维码
+//
+//	@Summary		获取微信扫码登录二维码
+//	@Description	创建 scene 并生成小程序码，scene 通过 X-Scene 响应头返回
+//	@Tags			认证
+//	@Produce		image/png
+//	@Success		200	{file}	binary
+//	@Failure		400	{object}	response.Response
+//	@Router			/auth/wechat/qrcode [get]
+func (c *UserController) GetWechatQRCode(ctx *gin.Context) {
+	// 读取微信配置
+	settings, err := c.settingService.GetByGroup("oauth")
+	if err != nil {
+		response.Failed(ctx, "获取微信配置失败")
+		return
+	}
+	if settings[service.KeyOAuthWechatEnabled] != "true" {
+		response.Failed(ctx, "微信小程序登录未启用")
+		return
+	}
+	appID := settings[service.KeyOAuthWechatAppID]
+	appSecret := settings[service.KeyOAuthWechatSecret]
+	if appID == "" || appSecret == "" {
+		response.Failed(ctx, "微信小程序未配置")
+		return
+	}
+
+	// 创建 scene
+	scene := c.userService.CreateWechatLoginScene()
+
+	// 生成小程序码
+	qrCode, err := wechat.GetUnlimitedQRCode(appID, appSecret, scene)
+	if err != nil {
+		response.Failed(ctx, err.Error())
+		return
+	}
+
+	ctx.Header("X-Scene", scene)
+	ctx.Data(http.StatusOK, "image/png", qrCode)
+}
+
+// PollWechatScene 轮询微信扫码登录状态
+//
+//	@Summary		轮询微信扫码登录状态
+//	@Description	Blog 端轮询此接口等待用户扫码确认
+//	@Tags			认证
+//	@Produce		json
+//	@Param			scene	path		string	true	"场景值"
+//	@Success		200		{object}	response.Response{data=dto.WechatPollResponse}
+//	@Failure		400		{object}	response.Response
+//	@Router			/auth/wechat/scene/{scene} [get]
+func (c *UserController) PollWechatScene(ctx *gin.Context) {
+	scene := ctx.Param("scene")
+	if scene == "" {
+		response.ValidateFailed(ctx, "scene 不能为空")
+		return
+	}
+
+	status, userID, exists := c.userService.GetWechatLoginScene(scene)
+	if !exists {
+		response.Success(ctx, dto.WechatPollResponse{Status: "expired"})
+		return
+	}
+
+	switch status {
+	case "pending":
+		response.Success(ctx, dto.WechatPollResponse{Status: "pending"})
+	case "confirmed":
+		loginResp, refreshToken, err := c.userService.GetLoginResponseByUserID(userID)
+		if err != nil {
+			response.Failed(ctx, "获取用户信息失败")
+			return
+		}
+		auth.SetRefreshTokenCookie(ctx, refreshToken)
+		response.Success(ctx, dto.WechatPollResponse{
+			Status:      "confirmed",
+			AccessToken: loginResp.AccessToken,
+		})
+	default:
+		response.Success(ctx, dto.WechatPollResponse{Status: "expired"})
+	}
+}
+
+// ConfirmWechatLogin 小程序确认扫码登录授权
+//
+//	@Summary		小程序确认扫码登录授权
+//	@Description	小程序用户通过微信身份确认授权
+//	@Tags			认证
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		dto.WechatConfirmRequest	true	"确认请求"
+//	@Success		200		{object}	response.Response
+//	@Failure		400		{object}	response.Response
+//	@Router			/auth/wechat/confirm [post]
+func (c *UserController) ConfirmWechatLogin(ctx *gin.Context) {
+	var req dto.WechatConfirmRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.ValidateFailed(ctx, err.Error())
+		return
+	}
+
+	// 读取微信配置
+	settings, err := c.settingService.GetByGroup("oauth")
+	if err != nil {
+		response.Failed(ctx, "获取微信配置失败")
+		return
+	}
+	appID := settings[service.KeyOAuthWechatAppID]
+	appSecret := settings[service.KeyOAuthWechatSecret]
+	if appID == "" || appSecret == "" {
+		response.Failed(ctx, "微信小程序未配置")
+		return
+	}
+
+	// 用 code 换 openid
+	openID, err := wechat.Code2Session(appID, appSecret, req.Code)
+	if err != nil {
+		response.Failed(ctx, "微信身份验证失败")
+		return
+	}
+
+	// 通过 openid 查找或创建用户
+	loginResp, _, err := c.userService.LoginByWechat(openID)
+	if err != nil {
+		response.Failed(ctx, "微信登录失败")
+		return
+	}
+
+	if !c.userService.ConfirmWechatLoginScene(req.Scene, loginResp.User.ID) {
+		response.Failed(ctx, "确认失败，场景可能已过期")
+		return
+	}
+
+	response.Success(ctx, nil)
 }
 
 // RefreshToken 刷新token

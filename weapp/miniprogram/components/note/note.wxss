@@ -8,7 +8,7 @@
 .note-info,
 .note-tip {
   background-color: #e8f4fd;
-  border-left-color: #0052d9;
+  border-left-color: var(--theme-color);
 }
 
 .note-warning,

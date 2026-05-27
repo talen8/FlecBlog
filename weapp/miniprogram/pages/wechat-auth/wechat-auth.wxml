@@ -1,0 +1,32 @@
+<!--微信扫码登录授权确认页-->
+<view class="auth-page">
+  <view class="auth-card">
+    <view class="auth-icon">
+      <t-icon name="logo-wechat" size="120rpx" color="#07c160" />
+    </view>
+    <text class="auth-title">微信扫码登录</text>
+    <text class="auth-desc">您正在通过微信扫码登录博客</text>
+
+    <block wx:if="{{confirmed}}">
+      <view class="auth-success">
+        <t-icon name="check-circle-filled" size="80rpx" color="#07c160" />
+        <text class="success-text">授权成功</text>
+        <text class="success-tip">请返回浏览器继续操作</text>
+      </view>
+    </block>
+
+    <block wx:else>
+      <t-button
+        theme="primary"
+        size="large"
+        block
+        loading="{{loading}}"
+        disabled="{{loading}}"
+        bindtap="handleConfirm"
+      >
+        确认授权登录
+      </t-button>
+      <text class="auth-error" wx:if="{{error}}">{{error}}</text>
+    </block>
+  </view>
+</view>

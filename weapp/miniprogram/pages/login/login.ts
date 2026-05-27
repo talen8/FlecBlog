@@ -3,19 +3,18 @@
  * 支持邮箱密码登录
  */
 
-import type { UserInfo } from '../../types';
-import type { IAppOption } from '../../app';
-import { login } from '../../api/user';
+import { login, wechatLogin } from '../../api/user';
+import { APP_CONFIG } from '../../config';
 import { setToken } from '../../utils/request';
 import { setStorage } from '../../utils/storage';
 
-const app = getApp<IAppOption>();
-
 Page({
   data: {
+    appName: APP_CONFIG.APP_NAME,
     email: '',
     password: '',
     loading: false,
+    wechatLoading: false,
     emailError: '',
     passwordError: '',
   },
@@ -23,7 +22,7 @@ Page({
   /**
    * 输入邮箱
    */
-  onEmailInput(e: WechatMiniprogram.Input) {
+  onEmailInput(e: WechatMiniprogram.InputEvent) {
     this.setData({
       email: e.detail.value,
       emailError: '',
@@ -33,7 +32,7 @@ Page({
   /**
    * 输入密码
    */
-  onPasswordInput(e: WechatMiniprogram.Input) {
+  onPasswordInput(e: WechatMiniprogram.InputEvent) {
     this.setData({
       password: e.detail.value,
       passwordError: '',
@@ -78,9 +77,21 @@ Page({
     this.setData({ loading: true });
 
     try {
+      // 获取微信 code 用于绑定微信身份
+      let wechatCode = '';
+      try {
+        const loginResult = await new Promise<WechatMiniprogram.LoginSuccessCallbackResult>((resolve, reject) => {
+          wx.login({ success: resolve, fail: reject });
+        });
+        wechatCode = loginResult.code;
+      } catch {
+        // wx.login 失败不影响邮箱登录
+      }
+
       const { access_token, user } = await login({
         email: email.trim(),
         password,
+        wechat_code: wechatCode || undefined,
       });
 
       setToken(access_token);
@@ -103,15 +114,30 @@ Page({
   },
 
   /**
-   * 忘记密码
+   * 微信登录
    */
-  handleForgotPassword() {
-    wx.showModal({
-      title: '提示',
-      content: '请在后台管理系统重置密码',
-      showCancel: false,
-      confirmColor: '#0052d9',
-    });
+  async handleWechatLogin() {
+    if (this.data.wechatLoading) return;
+    this.setData({ wechatLoading: true });
+    try {
+      const { code } = await new Promise<WechatMiniprogram.LoginSuccessCallbackResult>((resolve, reject) => {
+        wx.login({ success: resolve, fail: reject });
+      });
+      const { access_token, user } = await wechatLogin(code);
+      setToken(access_token);
+      setStorage('user_info', user);
+      wx.showToast({ title: '登录成功', icon: 'success' });
+      setTimeout(() => {
+        wx.switchTab({ url: '/pages/profile/profile' });
+      }, 1000);
+    } catch (error) {
+      wx.showToast({
+        title: (error as Error).message || '登录失败',
+        icon: 'none',
+      });
+    } finally {
+      this.setData({ wechatLoading: false });
+    }
   },
 
   onShareAppMessage() {

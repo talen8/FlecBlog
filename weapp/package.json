@@ -11,7 +11,6 @@
   },
   "main": "index.js",
   "dependencies": {
-    "mp-html": "^2.5.2",
     "tdesign-miniprogram": "^1.14.0"
   }
 }

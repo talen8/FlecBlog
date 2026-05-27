@@ -96,7 +96,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	initScheduler(fileService, userService, verificationService, rssFeedService, friendService)
 
 	// 初始化控制器
-	userController := v1.NewUserController(userService, verificationService, conf)
+	userController := v1.NewUserController(userService, verificationService, settingService, conf)
 	articleController := v1.NewArticleController(articleService)
 	categoryController := v1.NewCategoryController(categoryService)
 	tagController := v1.NewTagController(tagService)
@@ -157,6 +157,10 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 			// 公开接口
 			authGroup.POST("/register", userController.Register)
 			authGroup.POST("/login", userController.Login)
+			authGroup.POST("/wechat", userController.WechatLogin)
+			authGroup.GET("/wechat/qrcode", userController.GetWechatQRCode)
+			authGroup.GET("/wechat/scene/:scene", userController.PollWechatScene)
+			authGroup.POST("/wechat/confirm", userController.ConfirmWechatLogin)
 			authGroup.POST("/refresh", userController.RefreshToken)
 
 			// 密码找回接口

@@ -5,7 +5,7 @@
 
 import type {
   MomentListItem,
-  MomentQuery,
+  PageQuery,
   PageResult,
 } from '../types';
 import { get } from '../utils/request';
@@ -15,6 +15,6 @@ import { get } from '../utils/request';
  * @param params - 查询参数
  * @returns 分页动态列表
  */
-export function getMoments(params: MomentQuery = {}): Promise<PageResult<MomentListItem>> {
+export function getMoments(params: PageQuery = {}): Promise<PageResult<MomentListItem>> {
   return get<PageResult<MomentListItem>>('/moments', params);
 }

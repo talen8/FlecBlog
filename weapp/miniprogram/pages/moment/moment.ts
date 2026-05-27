@@ -87,25 +87,13 @@ Page({
     }
   },
 
-  onLinkTap(e: any) {
+  onCopyUrl(e: any) {
     const { url } = e.currentTarget.dataset;
     if (url) {
       wx.setClipboardData({
         data: url,
         success: () => {
           wx.showToast({ title: '链接已复制', icon: 'success' });
-        },
-      });
-    }
-  },
-
-  onVideoTap(e: any) {
-    const { url } = e.currentTarget.dataset;
-    if (url) {
-      wx.setClipboardData({
-        data: url,
-        success: () => {
-          wx.showToast({ title: '视频链接已复制', icon: 'success' });
         },
       });
     }

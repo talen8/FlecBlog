@@ -5,10 +5,11 @@
     "pages/about/about",
     "pages/profile/profile",
     "pages/article/detail/index",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/wechat-auth/wechat-auth"
   ],
   "window": {
-    "navigationBarTitleText": "FlecBlog",
+    "navigationBarTitleText": "",
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#f5f7fa"
@@ -17,7 +18,6 @@
     "skyline": {
       "defaultDisplayBlock": true,
       "defaultContentBox": true,
-      "tagNameStyleIsolation": "legacy",
       "disableABTest": true,
       "sdkVersionBegin": "3.0.0",
       "sdkVersionEnd": "15.255.255"

@@ -233,6 +233,9 @@ const oauthForm = ref({
   'oidc.client_id': '',
   'oidc.client_secret': '',
   'oidc.redirect_url': '',
+  'wechat.enabled': 'false',
+  'wechat.appid': '',
+  'wechat.secret': '',
 });
 
 // 通用配置加载函数
@@ -455,6 +458,9 @@ const loadOAuthConfigs = async () => {
       'oidc.client_id': configs['oidc.client_id'] || '',
       'oidc.client_secret': configs['oidc.client_secret'] || '',
       'oidc.redirect_url': configs['oidc.redirect_url'] || '',
+      'wechat.enabled': configs['wechat.enabled'] || 'false',
+      'wechat.appid': configs['wechat.appid'] || '',
+      'wechat.secret': configs['wechat.secret'] || '',
     });
   } catch {
     ElMessage.error('获取 OAuth 配置失败');
@@ -674,6 +680,9 @@ const handleSave = async () => {
       'oauth.oidc.client_id': oauthForm.value['oidc.client_id'],
       'oauth.oidc.client_secret': oauthForm.value['oidc.client_secret'],
       'oauth.oidc.redirect_url': oauthForm.value['oidc.redirect_url'],
+      'oauth.wechat.enabled': oauthForm.value['wechat.enabled'],
+      'oauth.wechat.appid': oauthForm.value['wechat.appid'],
+      'oauth.wechat.secret': oauthForm.value['wechat.secret'],
     };
 
     // 构建需要保存的配置组列表

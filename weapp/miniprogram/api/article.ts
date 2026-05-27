@@ -29,18 +29,3 @@ export function getArticleBySlug(slug: string): Promise<ArticleDetail> {
   return get<ArticleDetail>(`/articles/${slug}`);
 }
 
-/**
- * 搜索文章
- * @param keyword - 搜索关键词
- * @param params - 其他查询参数
- * @returns 分页文章列表
- */
-export function searchArticles(
-  keyword: string,
-  params: Omit<ArticleQuery, 'keyword'> = {}
-): Promise<PageResult<ArticleListItem>> {
-  return get<PageResult<ArticleListItem>>('/articles/search', {
-    keyword,
-    ...params,
-  });
-}

@@ -887,6 +887,8 @@ definitions:
         type: string
       password:
         type: string
+      wechat_code:
+        type: string
     required:
     - email
     - password
@@ -1657,6 +1659,30 @@ definitions:
     properties:
       html:
         description: 公众号 HTML，用于复制粘贴到微信公众平台
+        type: string
+    type: object
+  dto.WechatConfirmRequest:
+    properties:
+      code:
+        type: string
+      scene:
+        type: string
+    required:
+    - code
+    - scene
+    type: object
+  dto.WechatLoginRequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  dto.WechatPollResponse:
+    properties:
+      access_token:
+        type: string
+      status:
         type: string
     type: object
   linkparser.Metadata:
@@ -5665,6 +5691,108 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: 重置密码
+      tags:
+      - 认证
+  /auth/wechat:
+    post:
+      consumes:
+      - application/json
+      description: 使用微信小程序 wx.login 获取的 code 进行登录
+      parameters:
+      - description: 微信登录请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WechatLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 微信小程序登录
+      tags:
+      - 认证
+  /auth/wechat/confirm:
+    post:
+      consumes:
+      - application/json
+      description: 小程序用户通过微信身份确认授权
+      parameters:
+      - description: 确认请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WechatConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 小程序确认扫码登录授权
+      tags:
+      - 认证
+  /auth/wechat/qrcode:
+    get:
+      description: 创建 scene 并生成小程序码，scene 通过 X-Scene 响应头返回
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取微信扫码登录二维码
+      tags:
+      - 认证
+  /auth/wechat/scene/{scene}:
+    get:
+      description: Blog 端轮询此接口等待用户扫码确认
+      parameters:
+      - description: 场景值
+        in: path
+        name: scene
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.WechatPollResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 轮询微信扫码登录状态
       tags:
       - 认证
   /categories:

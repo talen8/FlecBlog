@@ -3,10 +3,10 @@
  * 使用分段渲染支持自定义块
  */
 import type { ArticleDetail } from '../../../types';
+import type { IAppOption } from '../../../app';
 import { getArticleBySlug } from '../../../api/article';
 import { formatRelativeTime } from '../../../utils/format';
 import { parseMarkdownToBlocks, type ContentBlock } from '../../../utils/markdown';
-import { IAppOption } from '../../../app';
 
 /**
  * 渲染后的内容块
@@ -140,10 +140,21 @@ Page({
     });
   },
 
-  /**
-   * 重试加载
-   */
   onRetry() {
     if (this.data.slug) this.loadArticle(this.data.slug);
+  },
+
+  onCopyOriginal() {
+    const { url } = this.data.article;
+    if (!url) return;
+    const app = getApp<IAppOption>();
+    const blogUrl = app.globalData.siteConfig.blog_url || '';
+    const fullUrl = blogUrl ? `${blogUrl.replace(/\/$/, '')}${url}` : url;
+    wx.setClipboardData({
+      data: fullUrl,
+      success: () => {
+        wx.showToast({ title: '链接已复制', icon: 'success' });
+      },
+    });
   },
 });

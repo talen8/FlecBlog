@@ -3,11 +3,12 @@
  * 用户个人中心，包含用户信息、设置等功能
  */
 
-import type { UserInfo, UserRole } from '../../types';
+import type { UserInfo, UserRole, OAuthConfig } from '../../types';
 import type { IAppOption } from '../../app';
-import { getUserProfile, logout } from '../../api/user';
-import { getToken, clearToken } from '../../utils/request';
-import { getStorage, setStorage, removeStorage } from '../../utils/storage';
+import { getUserProfile, logout as apiLogout } from '../../api/user';
+import { getOAuthConfig } from '../../api/setting';
+import { getToken, clearAuth, logout } from '../../utils/request';
+import { getStorage, setStorage } from '../../utils/storage';
 
 const app = getApp<IAppOption>();
 
@@ -33,29 +34,31 @@ function getProviderName(provider: string): string {
     qq: 'QQ',
     microsoft: 'Microsoft',
     oidc: 'OIDC',
+    wechat: '微信',
   };
   return names[provider] || provider;
 }
 
 Page({
   data: {
+    appName: 'flec-weapp',
     isLoggedIn: false,
     userInfo: null as UserInfo | null,
     roleName: '',
     loginMethods: [] as { name: string; enabled: boolean }[],
-    cacheSize: '0 KB',
     loading: false,
+    oauthConfig: null as OAuthConfig | null,
+    version: '',
   },
 
   onLoad() {
+    this.setData({ version: app.globalData.version || '1.0.0' });
+    this.loadOAuthConfig();
     this.checkLoginStatus();
   },
 
   onShow() {
-    if (this.data.isLoggedIn) {
-      this.loadUserData();
-    }
-    this.calculateCacheSize();
+    this.checkLoginStatus();
   },
 
   /**
@@ -84,18 +87,67 @@ Page({
   },
 
   /**
+   * 加载 OAuth 配置
+   * 从 globalData 中获取，如果不存在则从 API 获取
+   */
+  async loadOAuthConfig() {
+    try {
+      // 优先使用 globalData 中的配置
+      let oauthConfig: Partial<OAuthConfig> | null = app.globalData.oauthConfig;
+      if (!oauthConfig || Object.keys(oauthConfig).length === 0) {
+        oauthConfig = await getOAuthConfig().catch(() => null) as Partial<OAuthConfig> | null;
+      }
+
+      if (oauthConfig) {
+        this.setData({ oauthConfig: oauthConfig as OAuthConfig });
+
+        if (this.data.isLoggedIn && this.data.userInfo) {
+          this.setData({
+            loginMethods: this.buildLoginMethods(this.data.userInfo),
+          });
+        }
+      }
+    } catch (error) {
+      console.error('加载 OAuth 配置失败:', error);
+    }
+  },
+
+  /**
    * 构建登录方式列表
+   * 只显示在管理端开启了的 OAuth 提供商
    */
   buildLoginMethods(user: UserInfo): { name: string; enabled: boolean }[] {
     const methods: { name: string; enabled: boolean }[] = [];
 
     if (user.has_password) {
-      methods.push({ name: '密码', enabled: true });
+      methods.push({ name: '邮箱', enabled: true });
     }
 
-    const oauthProviders = ['github', 'google', 'qq', 'microsoft', 'oidc'];
-    oauthProviders.forEach((provider) => {
-      if (user.linked_oauths?.includes(provider)) {
+    const oauthConfig = this.data.oauthConfig;
+    if (!oauthConfig) {
+      // 如果没有获取到配置，只显示用户已绑定的方式
+      const oauthProviders = ['github', 'google', 'qq', 'microsoft', 'oidc', 'wechat'];
+      oauthProviders.forEach((provider) => {
+        if (user.linked_oauths?.includes(provider)) {
+          methods.push({ name: getProviderName(provider), enabled: true });
+        }
+      });
+      return methods;
+    }
+
+    // 只显示在管理端开启了的 OAuth 提供商
+    const providerConfigMap: Record<string, string> = {
+      github: 'oauth.github.enabled',
+      google: 'oauth.google.enabled',
+      qq: 'oauth.qq.enabled',
+      microsoft: 'oauth.microsoft.enabled',
+      oidc: 'oauth.oidc.enabled',
+      wechat: 'oauth.wechat.enabled',
+    };
+
+    Object.entries(providerConfigMap).forEach(([provider, configKey]) => {
+      const isEnabled = oauthConfig[configKey as keyof OAuthConfig] === 'true';
+      if (isEnabled && user.linked_oauths?.includes(provider)) {
         methods.push({ name: getProviderName(provider), enabled: true });
       }
     });
@@ -121,6 +173,15 @@ Page({
           roleName: getRoleName(userInfo.role),
           loginMethods: this.buildLoginMethods(userInfo),
         });
+      } else {
+        // API 请求失败（可能是 token 过期），清除登录状态
+        clearAuth();
+        this.setData({
+          isLoggedIn: false,
+          userInfo: null,
+          roleName: '',
+          loginMethods: [],
+        });
       }
     } catch (error) {
       console.error('加载用户数据失败:', error);
@@ -140,10 +201,9 @@ Page({
       success: async (res) => {
         if (res.confirm) {
           try {
-            await logout().catch(() => {});
+            await apiLogout().catch(() => {});
           } finally {
-            clearToken();
-            removeStorage('user_info');
+            logout();
 
             this.setData({
               isLoggedIn: false,
@@ -159,57 +219,6 @@ Page({
     });
   },
 
-  /**
-   * 清除缓存
-   */
-  handleClearCache() {
-    wx.showModal({
-      title: '提示',
-      content: '确定要清除缓存吗？',
-      confirmColor: '#0052d9',
-      success: (res) => {
-        if (res.confirm) {
-          try {
-            const keys = wx.getStorageInfoSync().keys;
-            const keepKeys = ['access_token', 'user_info', 'site_config', 'blog_config'];
-
-            keys.forEach((key) => {
-              if (!keepKeys.includes(key)) {
-                wx.removeStorageSync(key);
-              }
-            });
-
-            this.calculateCacheSize();
-            wx.showToast({ title: '清除成功', icon: 'success' });
-          } catch (error) {
-            console.error('清除缓存失败:', error);
-            wx.showToast({ title: '清除失败', icon: 'none' });
-          }
-        }
-      },
-    });
-  },
-
-  /**
-   * 计算缓存大小
-   */
-  calculateCacheSize() {
-    try {
-      const info = wx.getStorageInfoSync();
-      const sizeKB = info.currentSize;
-      let sizeStr: string;
-
-      if (sizeKB < 1024) {
-        sizeStr = `${sizeKB} KB`;
-      } else {
-        sizeStr = `${(sizeKB / 1024).toFixed(2)} MB`;
-      }
-
-      this.setData({ cacheSize: sizeStr });
-    } catch {
-      this.setData({ cacheSize: '0 KB' });
-    }
-  },
 
   /**
    * 跳转到关于页面

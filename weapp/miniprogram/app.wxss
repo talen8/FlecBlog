@@ -1,7 +1,6 @@
-/** 全局样式 **/
-
 /* 页面容器 */
 page {
+  --theme-color: #0052d9;
   background-color: #f5f7fa;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 28rpx;

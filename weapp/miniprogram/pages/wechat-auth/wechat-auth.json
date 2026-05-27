@@ -1,11 +1,10 @@
 {
-  "navigationBarTitleText": "登录",
+  "navigationBarTitleText": "授权登录",
   "navigationBarBackgroundColor": "#ffffff",
   "navigationBarTextStyle": "black",
   "backgroundColor": "#f5f7fa",
   "usingComponents": {
     "t-icon": "tdesign-miniprogram/icon/icon",
-    "t-button": "tdesign-miniprogram/button/button",
-    "t-loading": "tdesign-miniprogram/loading/loading"
+    "t-button": "tdesign-miniprogram/button/button"
   }
 }
