@@ -23,6 +23,8 @@ tmp/
 .nitro/
 .cache/
 flec_blog
+desktop/out/
+desktop/release/
 
 # 日志
 logs/

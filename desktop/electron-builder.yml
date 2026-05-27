@@ -1,0 +1,23 @@
+appId: com.flecblog.desktop
+productName: Flec管理端
+directories:
+  buildResources: resources
+  output: release
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron/*'
+  - '!{.env,.env.*,.eslintrc.*,*.md,electron.vite.config.*,tsconfig.*,tsconfig.*.json}'
+  - '!{package.json,package-lock.json}'
+asar: true
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: Flec管理端
+  uninstallDisplayName: Flec管理端
+  createDesktopShortcut: always
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico

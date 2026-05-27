@@ -1,0 +1,65 @@
+@use './prose.scss';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+// ========== 暗色主题变量 ==========
+:root,
+[data-theme='dark'] {
+  // 背景层级（从深到浅）
+  --bg-base: #1e1e1e;
+  --bg-surface: #252526;
+  --bg-elevated: #2d2d2d;
+  --bg-hover: #2a2d2e;
+  --bg-active: #37373d;
+
+  // 边框
+  --border-primary: #3e3e3e;
+  --border-secondary: #333;
+
+  // 文字层级（从亮到暗）
+  --text-primary: #e0e0e0;
+  --text-regular: #d4d4d4;
+  --text-secondary: #a0a0a0;
+  --text-muted: #808080;
+
+  // 强调色
+  --accent-blue: #007acc;
+  --accent-blue-hover: #1a8cff;
+  --accent-green: #4ec9b0;
+  --accent-red: #f48771;
+  --accent-gold: #dcb67a;
+
+  // 滚动条
+  --scrollbar-thumb: #424242;
+  --scrollbar-thumb-hover: #555;
+
+  // Element Plus 覆盖
+  --el-bg-color: var(--bg-surface);
+  --el-bg-color-overlay: var(--bg-elevated);
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-regular);
+  --el-text-color-secondary: var(--text-secondary);
+  --el-text-color-placeholder: var(--text-muted);
+  --el-border-color: var(--border-primary);
+  --el-border-color-light: var(--border-secondary);
+  --el-fill-color-blank: var(--bg-elevated);
+  --el-fill-color-light: var(--border-secondary);
+  --el-color-primary: var(--accent-blue);
+
+  color: var(--text-regular);
+  background: var(--bg-base);
+}
