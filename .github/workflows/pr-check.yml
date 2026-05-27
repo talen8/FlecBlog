@@ -81,7 +81,7 @@ jobs:
       - name: 设置 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: admin/package-lock.json
 
@@ -164,7 +164,7 @@ jobs:
       - name: 设置 Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: blog/package-lock.json
 
