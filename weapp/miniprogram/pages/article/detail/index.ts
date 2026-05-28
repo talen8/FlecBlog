@@ -157,4 +157,21 @@ Page({
       },
     });
   },
+
+  onShareAppMessage() {
+    const { title } = this.data.article;
+    return {
+      title: title || '文章分享',
+      path: `/pages/article/detail/index?slug=${this.data.slug}`,
+      imageUrl: this.data.article.cover,
+    };
+  },
+
+  onShareTimeline() {
+    const { title } = this.data.article;
+    return {
+      title: title || '文章分享',
+      imageUrl: this.data.article.cover,
+    };
+  },
 });
