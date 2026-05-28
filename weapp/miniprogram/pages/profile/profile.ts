@@ -5,6 +5,7 @@
 
 import type { UserInfo, UserRole, OAuthConfig } from '../../types';
 import type { IAppOption } from '../../app';
+import { APP_CONFIG } from '../../config';
 import { getUserProfile, logout as apiLogout } from '../../api/user';
 import { getOAuthConfig } from '../../api/setting';
 import { getToken, clearAuth, logout } from '../../utils/request';
@@ -41,7 +42,7 @@ function getProviderName(provider: string): string {
 
 Page({
   data: {
-    appName: 'flec-weapp',
+    appName: APP_CONFIG.APP_NAME,
     isLoggedIn: false,
     userInfo: null as UserInfo | null,
     roleName: '',
