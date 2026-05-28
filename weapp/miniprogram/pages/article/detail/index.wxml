@@ -1,4 +1,7 @@
 <view class="detail-page">
+  <!-- 提醒横幅 -->
+  <notice-banner />
+
   <!-- loading -->
   <view wx:if="{{loading}}" class="state-box">
     <text class="state-text">加载中...</text>

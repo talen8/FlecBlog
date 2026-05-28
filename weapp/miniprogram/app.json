@@ -60,6 +60,8 @@
   },
   "usingComponents": {
     "t-icon": "tdesign-miniprogram/icon/icon",
-    "t-button": "tdesign-miniprogram/button/button"
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-notice-bar": "tdesign-miniprogram/notice-bar/notice-bar",
+    "notice-banner": "/components/notice-banner/index"
   }
 }

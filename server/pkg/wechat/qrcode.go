@@ -13,21 +13,27 @@ const getUnlimitedURL = "https://api.weixin.qq.com/wxa/getwxacodeunlimit"
 
 // qrcodeRequest 小程序码请求参数
 type qrcodeRequest struct {
-	Scene string `json:"scene"`
-	Page  string `json:"page,omitempty"`
-	Width int    `json:"width,omitempty"`
+	Scene      string `json:"scene"`
+	Page       string `json:"page,omitempty"`
+	Width      int    `json:"width,omitempty"`
+	EnvVersion string `json:"env_version,omitempty"`
 }
 
 // GetUnlimitedQRCode 生成小程序码（getUnlimited）
-func GetUnlimitedQRCode(appID, secret, scene string) ([]byte, error) {
+func GetUnlimitedQRCode(appID, secret, scene string, envVersion ...string) ([]byte, error) {
 	accessToken, err := GetAccessToken(appID, secret)
 	if err != nil {
 		return nil, err
 	}
 
 	reqBody := qrcodeRequest{
-		Scene: scene,
-		Width: 280,
+		Scene:      scene,
+		Page:       "pages/wechat-auth/wechat-auth",
+		Width:      280,
+		EnvVersion: "release", // develop: 开发版, trial: 体验版, release: 正式版
+	}
+	if len(envVersion) > 0 && envVersion[0] != "" {
+		reqBody.EnvVersion = envVersion[0]
 	}
 
 	body, err := json.Marshal(reqBody)

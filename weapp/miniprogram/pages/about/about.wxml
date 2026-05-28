@@ -1,10 +1,14 @@
 <!-- 关于页面 -->
 <view class="about-page">
-  <view wx:if="{{loading}}" class="loading-wrapper">
-    <t-loading size="80rpx" />
-  </view>
+  <!-- 提醒横幅 -->
+  <notice-banner />
 
-  <block wx:else>
+  <view class="about-content">
+    <view wx:if="{{loading}}" class="loading-wrapper">
+      <t-loading size="80rpx" />
+    </view>
+
+    <block wx:else>
     <!-- 头部：头像 + 基本信息 -->
     <view class="header">
       <image
@@ -32,17 +36,21 @@
     <view wx:if="{{personality.name || mottoMain.length > 0}}" class="block">
       <view wx:if="{{personality.name}}" class="row">
         <text class="row-label">性格</text>
-        <text class="row-value">{{personality.name}}</text>
-        <text class="personality-code" style="color: {{personality.color}}">{{personality.code}}</text>
+        <view class="row-right">
+          <text class="row-value">{{personality.name}}</text>
+          <text class="personality-code" style="color: {{personality.color}}">{{personality.code}}</text>
+        </view>
       </view>
       <view wx:if="{{mottoMain.length > 0}}" class="row">
         <text class="row-label">座右铭</text>
-        <view class="motto-wrap">
-          <text
-            wx:for="{{mottoMain}}"
-            wx:key="*this"
-            class="motto-line {{index === mottoMain.length - 1 ? '' : 'motto-dim'}}"
-          >{{item}}</text>
+        <view class="row-right">
+          <view class="motto-wrap">
+            <text
+              wx:for="{{mottoMain}}"
+              wx:key="*this"
+              class="motto-line {{index === mottoMain.length - 1 ? '' : 'motto-dim'}}"
+            >{{item}}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -93,24 +101,11 @@
       </view>
     </view>
 
-    <!-- 站长联盟 -->
-    <view wx:if="{{unions.length > 0}}" class="block">
-      <text class="block-title">站长联盟</text>
-      <view class="union-list">
-        <view
-          wx:for="{{unions}}"
-          wx:key="name"
-          class="union-tag"
-          bindtap="onCopyLink"
-          data-url="{{item.url}}"
-        >{{item.name}}</view>
-      </view>
-    </view>
-
     <!-- 心路历程 -->
     <view wx:if="{{story}}" class="block">
       <text class="block-title">关于本站</text>
       <text class="story-text">{{story}}</text>
     </view>
   </block>
+  </view>
 </view>

@@ -1,5 +1,8 @@
 <!-- 动态页面 -->
 <view class="moment-list">
+  <!-- 提醒横幅 -->
+  <notice-banner />
+
   <!-- 骨架屏 -->
   <view wx:if="{{loading && moments.length === 0}}" class="list-wrapper">
     <view wx:for="{{[1,2,3]}}" wx:key="*this" class="skeleton-card">

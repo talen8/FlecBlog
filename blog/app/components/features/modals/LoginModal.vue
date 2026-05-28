@@ -3,6 +3,7 @@ import { login, register, forgotPassword, resetPassword } from '@/composables/ap
 import { setAccessToken } from '@/utils/auth';
 import { useUser } from '@/composables/useUser';
 import { get } from '@/utils/request';
+import type { ApiResponse } from '@@/types/request';
 
 defineProps<{
   modelValue: boolean;
@@ -87,16 +88,16 @@ const startWechatPoll = (scene: string) => {
       return;
     }
     try {
-      const data = await get<{ status: string; access_token?: string }>(
+      const res = await get<ApiResponse<{ status: string; access_token?: string }>>(
         `/auth/wechat/scene/${scene}`
       );
-      if (data.status === 'confirmed' && data.access_token) {
+      if (res.data.status === 'confirmed' && res.data.access_token) {
         clearWechatPoll();
-        setAccessToken(data.access_token);
+        setAccessToken(res.data.access_token);
         await fetchUserInfo();
         emit('loginSuccess');
         closeModal();
-      } else if (data.status === 'expired') {
+      } else if (res.data.status === 'expired') {
         wechatQR.value.status = 'expired';
         wechatQR.value.error = '二维码已过期';
         clearWechatPoll();
@@ -492,7 +493,7 @@ const handleSubmit = async () => {
           </form>
 
           <!-- 第三方登录 -->
-          <div v-if="mode === 'login' && !wechatQR.visible" class="social-login">
+          <div v-if="mode === 'login'" class="social-login">
             <div class="divider">
               <span>其他登录方式</span>
             </div>
@@ -552,8 +553,34 @@ const handleSubmit = async () => {
             </div>
           </div>
 
-          <!-- 微信扫码登录二维码 -->
-          <div v-if="wechatQR.visible" class="wechat-qr-section">
+          <!-- 底部链接 -->
+          <div class="modal-footer">
+            <span>{{
+              mode === 'login'
+                ? '还没有账号？'
+                : mode === 'register'
+                  ? '已有账号？'
+                  : '想起密码了？'
+            }}</span>
+            <a @click.prevent="mode === 'login' ? toggleMode() : (mode = 'login')">
+              {{ mode === 'login' ? '立即注册' : mode === 'register' ? '立即登录' : '返回登录' }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+
+  <!-- 微信扫码登录弹窗 -->
+  <Teleport to="body">
+    <Transition name="fade">
+      <div v-if="wechatQR.visible" class="modal-overlay" @click.self="backToLoginForm">
+        <div class="modal-container wechat-modal">
+          <button class="close-btn" @click="backToLoginForm">
+            <i class="ri-close-line" />
+          </button>
+          <div class="wechat-qr-section">
+            <h3 class="qr-title">微信扫码登录</h3>
             <div v-if="wechatQR.status === 'loading'" class="qr-loading">
               <i class="ri-loader-4-line spin" />
               <p>正在生成二维码...</p>
@@ -580,21 +607,6 @@ const handleSubmit = async () => {
                 <i class="ri-refresh-line" /> 重试
               </button>
             </div>
-            <a class="qr-back" @click.prevent="backToLoginForm">返回账号密码登录</a>
-          </div>
-
-          <!-- 底部链接 -->
-          <div class="modal-footer">
-            <span>{{
-              mode === 'login'
-                ? '还没有账号？'
-                : mode === 'register'
-                  ? '已有账号？'
-                  : '想起密码了？'
-            }}</span>
-            <a @click.prevent="mode === 'login' ? toggleMode() : (mode = 'login')">
-              {{ mode === 'login' ? '立即注册' : mode === 'register' ? '立即登录' : '返回登录' }}
-            </a>
           </div>
         </div>
       </div>
@@ -688,12 +700,23 @@ const handleSubmit = async () => {
   }
 }
 
+.wechat-modal {
+  max-width: 400px;
+  padding: 2rem;
+}
+
 .wechat-qr-section {
-  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+
+  .qr-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--font-color);
+    margin: 0 0 0.5rem;
+  }
 
   .qr-loading {
     display: flex;
@@ -766,16 +789,6 @@ const handleSubmit = async () => {
       i {
         margin-right: 0.25rem;
       }
-    }
-  }
-
-  .qr-back {
-    font-size: 0.85rem;
-    color: var(--theme-color);
-    cursor: pointer;
-
-    &:hover {
-      text-decoration: underline;
     }
   }
 }

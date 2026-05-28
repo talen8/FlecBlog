@@ -41,16 +41,10 @@ App<IAppOption>({
     version: wx.getAccountInfoSync().miniProgram.version,
   },
 
-  onLaunch(options: WechatMiniprogram.App.LaunchShowOption) {
+  onLaunch(_options: WechatMiniprogram.App.LaunchShowOption) {
     initInterceptors();
     this.loadConfig();
     this.checkUpdate();
-
-    if (options.query?.scene) {
-      wx.navigateTo({
-        url: `/pages/wechat-auth/wechat-auth?scene=${options.query.scene}`,
-      });
-    }
   },
 
   onShow() {

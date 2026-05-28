@@ -1,0 +1,8 @@
+<t-notice-bar
+  wx:if="{{showNotice && noticeText}}"
+  content="{{noticeText}}"
+  theme="info"
+  marquee
+  visible
+  bind:close="closeNotice"
+/>

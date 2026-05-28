@@ -48,7 +48,6 @@ Page({
     mottoMain: [] as string[],
     mottoSub: '',
     versions: [] as Array<{ name: string; version: string }>,
-    unions: [] as Array<{ name: string; url: string }>,
     story: '',
     runningDays: 0,
     stats: null as SiteStats | null,
@@ -77,9 +76,6 @@ Page({
       const versions = parseJSON<Array<{ name: string; version: string }>>(
         blogConfig.about_versions || '[]', []
       );
-      const unions = parseJSON<Array<{ name: string; url: string }>>(
-        blogConfig.about_unions || '[]', []
-      );
 
       const personalityCode = (blogConfig.about_personality || '').substring(0, 4).toUpperCase();
       const personalityInfo = PERSONALITY_MAP[personalityCode];
@@ -107,7 +103,6 @@ Page({
         mottoMain,
         mottoSub: blogConfig.about_motto_sub || '',
         versions,
-        unions,
         story: blogConfig.about_story || '',
         runningDays,
         loading: false,

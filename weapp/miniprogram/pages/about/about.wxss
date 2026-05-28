@@ -1,8 +1,11 @@
 .about-page {
-  padding: 24rpx;
-  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
   background-color: #f5f7fa;
   min-height: 100vh;
+}
+
+.about-content {
+  padding: 24rpx;
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
 }
 
 .loading-wrapper {
@@ -73,7 +76,8 @@
 /* 行：label - value */
 .row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
   padding: 20rpx 24rpx;
   border-bottom: 1rpx solid #f0f0f0;
 }
@@ -96,19 +100,22 @@
   line-height: 1.5;
 }
 
+.row-right {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
 /* 性格代码 */
 .personality-code {
   font-size: 26rpx;
   font-weight: 600;
-  margin-left: 8rpx;
 }
 
 /* 座右铭 */
 .motto-wrap {
-  flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 4rpx;
+  gap: 8rpx;
 }
 
 .motto-line {
@@ -144,26 +151,6 @@
   font-size: 22rpx;
   color: #999;
   margin-top: 4rpx;
-}
-
-/* 站长联盟标签 */
-.union-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  padding: 0 24rpx 24rpx;
-}
-
-.union-tag {
-  font-size: 24rpx;
-  color: #666;
-  background: #f5f7fa;
-  padding: 10rpx 20rpx;
-  border-radius: 6rpx;
-}
-
-.union-tag:active {
-  background: #e8e8e8;
 }
 
 /* 心路历程 */

@@ -1,5 +1,8 @@
 <!-- 首页 -->
 <view class="article-list">
+  <!-- 提醒横幅 -->
+  <notice-banner />
+
   <!-- 置顶轮播 -->
   <swiper wx:if="{{topArticles.length > 0}}"
     class="top-swiper"
