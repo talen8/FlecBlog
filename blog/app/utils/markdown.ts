@@ -17,6 +17,7 @@ import katex from '@traptitech/markdown-it-katex';
 
 import DOMPurify from 'isomorphic-dompurify';
 import { getEmojiMapSync, replaceEmojisInText } from '@/composables/useEmojis';
+import { useSysConfig } from '@/composables/useStores';
 
 // highlight.js 按需加载
 import hljs from 'highlight.js/lib/core';
@@ -39,6 +40,9 @@ import shell from 'highlight.js/lib/languages/shell';
 import dockerfile from 'highlight.js/lib/languages/dockerfile';
 // 其他
 import diff from 'highlight.js/lib/languages/diff';
+
+// Meting-API URL（从系统配置动态读取）
+let metingApiUrl = 'https://meting.flec.top/api';
 
 // 注册语言
 hljs.registerLanguage('javascript', javascript);
@@ -255,7 +259,7 @@ function renderMusic(params: string[]): string {
   if (!server || !musicId) return '';
 
   const audioId = `audio-${simpleHash(server + musicId)}`;
-  const embedUrl = `https://meting.flec.top/api?server=${server}&type=song&id=${musicId}`;
+  const embedUrl = `${metingApiUrl}?server=${server}&type=song&id=${musicId}`;
 
   return `<div class="custom-audio" data-audio-id="${audioId}" data-music-id="${musicId}">
   <div class="custom-audio-type">播放在线音乐</div>
@@ -658,6 +662,16 @@ md.use(customBlocksPlugin);
 // 渲染 Markdown 为 HTML
 export function renderMarkdown(markdown: string): string {
   if (!markdown) return '';
+
+  // 从系统配置更新 Meting-API URL
+  try {
+    const { blogConfig } = useSysConfig();
+    if (blogConfig.value.meting_api) {
+      metingApiUrl = blogConfig.value.meting_api;
+    }
+  } catch {
+    // useSysConfig 可能在非 Nuxt 上下文中调用，使用默认值
+  }
 
   const rawHtml = md.render(markdown);
 

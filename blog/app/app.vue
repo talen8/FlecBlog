@@ -197,7 +197,13 @@ useHead({
   </NuxtLayout>
 
   <!-- Toast 消息提示 -->
-  <UiToast v-for="toast in toasts" :key="toast.id" v-bind="toast" />
+  <UiToast
+    v-for="toast in toasts"
+    :key="toast.id"
+    :message="toast.message"
+    :type="toast.type"
+    :show="toast.show"
+  />
 
   <!-- 登录弹窗 -->
   <FeaturesModalsLoginModal v-model="showLoginModal" />

@@ -200,6 +200,7 @@
 import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Close, Plus, Picture, Search, Loading } from '@element-plus/icons-vue';
+import { getSettingGroup } from '@/api/sysconfig';
 
 interface TextElement {
   text: string;
@@ -314,7 +315,18 @@ const canvasStyle = computed(() => {
   };
 });
 
-const IMAGE_API_URL = 'https://pixhub.flec.top';
+const imageApiUrl = ref('https://pixhub.flec.top');
+
+// 获取封面制作 API 配置
+const loadCoverMakerConfig = async () => {
+  try {
+    const blogSettings = await getSettingGroup('blog');
+    const apiUrl = blogSettings['blog.cover_maker_api'] || '';
+    if (apiUrl) imageApiUrl.value = apiUrl;
+  } catch {
+    // 使用默认值
+  }
+};
 
 function handleClose() {
   visible.value = false;
@@ -465,7 +477,7 @@ async function searchPhotos() {
       page: '1',
       ...(searchQuery.value.trim() && { query: searchQuery.value }),
     });
-    const response = await fetch(`${IMAGE_API_URL}/?${params}`);
+    const response = await fetch(`${imageApiUrl.value}/?${params}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     const photos = data.results || [];
@@ -494,7 +506,7 @@ async function loadMorePhotos() {
       page: String(nextPage),
       ...(searchQuery.value.trim() && { query: searchQuery.value }),
     });
-    const response = await fetch(`${IMAGE_API_URL}/?${params}`);
+    const response = await fetch(`${imageApiUrl.value}/?${params}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     const photos = data.results || [];
@@ -682,9 +694,10 @@ watch(
   }
 );
 
-watch(visible, val => {
+watch(visible, async val => {
   emit('update:modelValue', val);
   if (val) {
+    await loadCoverMakerConfig();
     if (props.title) textElements.value.title.text = props.title;
     if (props.author) textElements.value.author.text = props.author;
     if (props.avatar) {

@@ -8,8 +8,23 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
+
+var (
+	cravatarURL = "https://cravatar.cn/avatar/%s?s=200&d=robohash"
+	cravatarMu  sync.RWMutex
+)
+
+// SetCravatarURL 设置头像服务 URL
+func SetCravatarURL(url string) {
+	if url != "" {
+		cravatarMu.Lock()
+		cravatarURL = url
+		cravatarMu.Unlock()
+	}
+}
 
 // GetEmailHash 计算邮箱的 MD5 哈希
 func GetEmailHash(email string) string {
@@ -22,7 +37,9 @@ func GetEmailHash(email string) string {
 // DownloadCravatarAvatar 下载 Cravatar 头像
 func DownloadCravatarAvatar(email string) (io.Reader, error) {
 	emailHash := GetEmailHash(email)
-	url := fmt.Sprintf("https://cravatar.cn/avatar/%s?s=200&d=robohash", emailHash)
+	cravatarMu.RLock()
+	url := fmt.Sprintf(cravatarURL, emailHash)
+	cravatarMu.RUnlock()
 	return DownloadRemoteImage(url)
 }
 

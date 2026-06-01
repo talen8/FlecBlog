@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { MomentMusic } from '@@/types/moment';
+import { useSysConfig } from '@/composables/useStores';
 
 interface AudioTrack {
   name: string;
@@ -28,6 +29,9 @@ interface LyricLine {
 const props = defineProps<{
   music: MomentMusic;
 }>();
+
+const { blogConfig } = useSysConfig();
+const metingApi = computed(() => blogConfig.value.meting_api || 'https://meting.flec.top/api');
 
 // 播放器状态
 const audioRef = ref<HTMLAudioElement | null>(null);
@@ -92,9 +96,7 @@ const fetchLyrics = async (lrcUrl: string): Promise<string> => {
 const fetchMusicData = async () => {
   try {
     const { server, type, id } = props.music;
-    const response = await fetch(
-      `https://meting.flec.top/api?server=${server}&type=${type}&id=${id}`
-    );
+    const response = await fetch(`${metingApi.value}?server=${server}&type=${type}&id=${id}`);
     const data = await response.json();
     const list = Array.isArray(data) ? data : [data];
 

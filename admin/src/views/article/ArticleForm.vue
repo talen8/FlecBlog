@@ -943,7 +943,7 @@ const handleCoverMakerConfirm = async (imageUrl: string) => {
 // 处理封面制作按钮点击
 const handleCoverCommand = async () => {
   // 确保系统设置已加载
-  if (!basicSettings.value.author) {
+  if (!Object.keys(basicSettings.value).length) {
     await fetchSiteSettings();
   }
   coverMakerVisible.value = true;

@@ -77,6 +77,10 @@ type BlogConfig struct {
 	ThemeDarkStart  string // 夜间主题开始时间（HH:MM）
 	WechatQRCode    string // 公众号二维码图片URL
 	WechatName      string // 公众号名称
+	MetingAPI       string // Meting-API 地址
+	CravatarURL     string // 头像服务 URL（%s 为邮箱哈希）
+	IPApiURL        string // IP 归属地查询 URL（%s 为 IP）
+	CoverMakerAPI   string // 封面制作图片源 API
 }
 
 // NotificationConfig 通知配置（从数据库动态加载）
@@ -121,6 +125,7 @@ type AIConfig struct {
 // OAuthConfig OAuth配置（从数据库动态加载）
 type OAuthConfig struct {
 	SessionSecret string // Session加密密钥（自动生成）
+	WorkerProxy   string // OAuth Worker 代理地址
 	Github        OAuthProviderConfig
 	Google        OAuthProviderConfig
 	QQ            OAuthProviderConfig

@@ -55,12 +55,26 @@ export async function apiRequest<T = any>(
   }
 
   try {
-    return await $fetch<T>(url, {
+    const response = await $fetch<T>(url, {
       ...options,
       baseURL: config.public.apiUrl,
       headers,
       credentials: 'include', // 发送 Cookie
     } as any);
+
+    // 后端返回 HTTP 200 但业务 code 非 0 时，视为错误
+    if (
+      response &&
+      typeof response === 'object' &&
+      'code' in response &&
+      (response as any).code !== 0
+    ) {
+      const err = new Error((response as any).message || '请求失败') as any;
+      err.response = { data: response };
+      throw err;
+    }
+
+    return response;
   } catch (error: any) {
     // 401 自动刷新 token
     if (error?.response?.status === 401 && !options._retry) {

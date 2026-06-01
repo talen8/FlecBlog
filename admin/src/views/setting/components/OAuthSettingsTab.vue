@@ -191,6 +191,15 @@
         :disabled="loading"
       />
     </el-form-item>
+
+    <el-divider content-position="left">代理配置</el-divider>
+    <el-form-item label="Worker 代理">
+      <el-input
+        v-model="form.worker_proxy"
+        placeholder="Cloudflare Worker 代理地址，如 https://proxy.flec.top"
+        :disabled="loading"
+      />
+    </el-form-item>
   </el-form>
 </template>
 
@@ -220,6 +229,7 @@ interface OAuthForm {
   'oidc.client_id': string;
   'oidc.client_secret': string;
   'oidc.redirect_url': string;
+  worker_proxy: string;
 }
 
 const form = defineModel<OAuthForm>('form', { required: true });

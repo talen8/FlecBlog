@@ -663,6 +663,7 @@ import {
   countWords,
   estimateReadingTime,
   extractToc,
+  setMetingApiUrl,
   type TocItem,
 } from '@/utils/markdown';
 import { EditorView, keymap, showPanel } from '@codemirror/view';
@@ -845,6 +846,7 @@ const isPageFullscreen = ref(false);
 const showToc = ref(false);
 const onlineImageUrl = ref('');
 const downloadingImage = ref(false);
+const metingApiUrl = ref('https://meting.flec.top/api');
 
 // 表情选择器状态
 const emojiState = reactive({
@@ -1713,7 +1715,15 @@ const loadEmojis = async () => {
   if (emojiState.groups.length) return;
 
   const blogSettings = await getSettingGroup('blog');
-  const emojisUrl = blogSettings.emojis || blogSettings['blog.emojis'] || '';
+
+  // 更新 Meting-API URL
+  const metingApi = blogSettings['blog.meting_api'] || '';
+  if (metingApi) {
+    metingApiUrl.value = metingApi;
+    setMetingApiUrl(metingApi);
+  }
+
+  const emojisUrl = blogSettings['blog.emojis'] || '';
   if (!emojisUrl) return;
 
   const response = await fetch(emojisUrl);
@@ -1933,7 +1943,7 @@ const handleParseMusic = async () => {
   }
   audioDialog.loading = true;
   try {
-    const apiUrl = `https://meting.flec.top/api?server=${audioDialog.musicServer}&type=song&id=${audioDialog.musicId.trim()}`;
+    const apiUrl = `${metingApiUrl.value}?server=${audioDialog.musicServer}&type=song&id=${audioDialog.musicId.trim()}`;
     const response = await fetch(apiUrl);
     const data = await response.json();
     if (data && data.length > 0) {

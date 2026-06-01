@@ -17,6 +17,14 @@ import katex from '@traptitech/markdown-it-katex';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js';
 
+// Meting-API URL（可通过 setMetingApiUrl 更新）
+let metingApiUrl = 'https://meting.flec.top/api';
+
+/** 设置 Meting-API URL */
+export function setMetingApiUrl(url: string) {
+  if (url) metingApiUrl = url;
+}
+
 // ========== 属性解析函数 ==========
 
 /**
@@ -357,7 +365,7 @@ function renderMusic(params: string[], sourceAttrs = ''): string {
 
   const audioId = `audio-${Math.random().toString(36).slice(2, 9)}`;
 
-  const embedUrl = `https://meting.flec.top/api?server=${server}&type=song&id=${musicId}`;
+  const embedUrl = `${metingApiUrl}?server=${server}&type=song&id=${musicId}`;
 
   return `<div class="custom-audio" data-audio-id="${audioId}" data-music-id="${musicId}"${sourceAttrs}>
   <div class="custom-audio-type">播放在线音乐</div>

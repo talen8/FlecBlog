@@ -429,6 +429,40 @@
       />
     </el-form-item>
 
+    <el-divider content-position="left">第三方服务</el-divider>
+
+    <el-form-item label="Meting-API">
+      <el-input
+        v-model="form.meting_api"
+        placeholder="Meting-API 地址，如 https://meting.flec.top/api"
+        :disabled="loading"
+      />
+    </el-form-item>
+
+    <el-form-item label="头像服务">
+      <el-input
+        v-model="form.cravatar_url"
+        placeholder="头像服务 URL，%s 为邮箱哈希，如 https://cravatar.cn/avatar/%s?s=200&d=robohash"
+        :disabled="loading"
+      />
+    </el-form-item>
+
+    <el-form-item label="IP 查询">
+      <el-input
+        v-model="form.ip_api_url"
+        placeholder="IP 归属地查询 URL，%s 为 IP，如 http://ip-api.com/json/%s?lang=zh-CN"
+        :disabled="loading"
+      />
+    </el-form-item>
+
+    <el-form-item label="封面制作">
+      <el-input
+        v-model="form.cover_maker_api"
+        placeholder="封面制作图片源 API，如 https://pixhub.flec.top"
+        :disabled="loading"
+      />
+    </el-form-item>
+
     <el-divider content-position="left">表情包配置</el-divider>
 
     <el-form-item label="表情包">
@@ -516,6 +550,10 @@ interface BlogFormData {
   custom_body: string;
   emojis: string;
   font: string;
+  meting_api: string;
+  cravatar_url: string;
+  ip_api_url: string;
+  cover_maker_api: string;
   donationMethodsList: Array<{ name: string; qrcode: string }>;
 }
 

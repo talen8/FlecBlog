@@ -541,6 +541,7 @@ import type { CreateMomentRequest, UpdateMomentRequest, Moment } from '@/types/m
 import { createMoment, updateMoment } from '@/api/moment';
 import { fetchLinkInfo, parseVideo } from '@/api/tools';
 import { uploadFile } from '@/api/file';
+import { getSettingGroup } from '@/api/sysconfig';
 import { formatForBackend } from '@/utils/date';
 const props = defineProps<{
   modelValue: boolean;
@@ -599,6 +600,7 @@ const musicSearchKeyword = ref('');
 const musicSearchResults = ref<MusicSearchItem[]>([]);
 const searchingMusic = ref(false);
 const hasSearched = ref(false);
+const metingApiUrl = ref('https://meting.flec.top/api');
 
 // 图片数据项
 interface ImageItem {
@@ -799,7 +801,7 @@ const handleParseMusic = async () => {
   fetchingMusic.value = true;
   try {
     const { server, type, id } = formData.content.music;
-    const apiUrl = `https://meting.flec.top/api?server=${server}&type=${type}&id=${id}`;
+    const apiUrl = `${metingApiUrl.value}?server=${server}&type=${type}&id=${id}`;
 
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -850,7 +852,7 @@ const handleSearchMusic = async () => {
   hasSearched.value = true;
 
   try {
-    const apiUrl = `https://meting.flec.top/api?server=netease&type=search&id=${encodeURIComponent(keyword)}`;
+    const apiUrl = `${metingApiUrl.value}?server=netease&type=search&id=${encodeURIComponent(keyword)}`;
     const response = await fetch(apiUrl);
     const data = await response.json();
     musicSearchResults.value = Array.isArray(data) ? data : [];
@@ -1103,8 +1105,18 @@ const removeContent = (type: string) => {
 // 监听器
 watch(
   () => props.editMoment,
-  moment => {
+  async moment => {
     resetForm();
+
+    // 获取 Meting-API 配置
+    try {
+      const blogSettings = await getSettingGroup('blog');
+      const apiUrl = blogSettings['blog.meting_api'] || '';
+      if (apiUrl) metingApiUrl.value = apiUrl;
+    } catch {
+      // 使用默认值
+    }
+
     if (moment) {
       Object.assign(formData.content, moment.content);
       formData.is_publish = moment.is_publish;

@@ -6,10 +6,23 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
-const ipAPIURL = "http://ip-api.com/json/%s?lang=zh-CN"
+var (
+	ipAPIURL = "http://ip-api.com/json/%s?lang=zh-CN"
+	ipMu     sync.RWMutex
+)
+
+// SetIPApiURL 设置 IP 归属地查询 API URL
+func SetIPApiURL(url string) {
+	if url != "" {
+		ipMu.Lock()
+		ipAPIURL = url
+		ipMu.Unlock()
+	}
+}
 
 var httpClient = &http.Client{Timeout: 5 * time.Second}
 

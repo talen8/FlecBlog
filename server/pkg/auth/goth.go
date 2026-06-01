@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -18,8 +19,20 @@ import (
 	"github.com/markbates/goth/providers/openidConnect"
 )
 
-// workerProxy Cloudflare Worker 的代理地址
-const workerProxy = "https://proxy.flec.top"
+var (
+	// workerProxy Cloudflare Worker 的代理地址
+	workerProxy = "https://proxy.flec.top"
+	workerMu    sync.RWMutex
+)
+
+// SetWorkerProxy 设置 OAuth Worker 代理地址
+func SetWorkerProxy(proxy string) {
+	if proxy != "" {
+		workerMu.Lock()
+		workerProxy = proxy
+		workerMu.Unlock()
+	}
+}
 
 // UpdateConfig 根据配置动态更新 OAuth 配置
 func UpdateConfig(cfg *config.OAuthConfig) {
@@ -106,7 +119,10 @@ func (t *workerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	newReq := req.Clone(req.Context())
-	workerURL, _ := url.Parse(workerProxy)
+	workerMu.RLock()
+	proxy := workerProxy
+	workerMu.RUnlock()
+	workerURL, _ := url.Parse(proxy)
 
 	newReq.URL.Scheme = workerURL.Scheme
 	newReq.URL.Host = workerURL.Host
