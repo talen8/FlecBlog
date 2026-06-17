@@ -6,7 +6,7 @@ seo:
 navigation: false
 hero:
   headline: Where content finds its calm.
-  command: curl -fsSL https://install.flec.top | sudo bash
+  command: curl -fsSL https://get.flec.top | sudo bash
   links:
     - label: 立即开始
       icon: i-lucide-rocket
@@ -99,7 +99,7 @@ sections:
         description: 7 种存储后端，文件使用追踪，定时清理未使用文件
         icon: i-ri-upload-cloud-line
   - title: 稳定可靠的技术底座
-    description: Go + Gin + GORM 高性能后端。MCP Server 暴露全量管理能力给 AI Agent，飞书机器人深度集成，一键 CLI 部署运维。
+    description: Go + Gin + GORM 高性能后端。MCP Server 暴露全量管理能力给 AI Agent，飞书机器人深度集成，Docker Compose 部署运维。
     orientation: horizontal
     image: /images/preview.png
     features:
@@ -115,8 +115,8 @@ sections:
       - name: 多通道通知与微信导出
         description: 邮件+飞书双通道推送，Markdown 转微信公众号排版
         icon: i-ri-notification-3-line
-      - name: 一键 CLI 部署
-        description: 安装/升级/备份/恢复/重配/卸载，Docker Compose 全生命周期
+      - name: Docker Compose 部署
+        description: 一行命令启动，Docker 全生命周期管理
         icon: i-ri-terminal-box-line
 features:
   title: 为内容创作者打造
@@ -198,7 +198,7 @@ cta:
   description: 只需几分钟，即可部署属于你的博客系统。
   links:
     - label: 快速部署
-      to: /docs/getting-started/installer
+      to: /docs/getting-started
       trailingIcon: i-lucide-arrow-right
     - label: 在 GitHub 上查看
       to: https://github.com/talen8/FlecBlog

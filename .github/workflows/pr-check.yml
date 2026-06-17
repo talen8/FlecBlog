@@ -17,7 +17,6 @@ jobs:
       server: ${{ steps.filter.outputs.server }}
       admin: ${{ steps.filter.outputs.admin }}
       blog: ${{ steps.filter.outputs.blog }}
-      installer: ${{ steps.filter.outputs.installer }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -30,9 +29,6 @@ jobs:
               - 'admin/**'
             blog:
               - 'blog/**'
-            installer:
-              - 'installer/**'
-
   # 服务端代码检查
   server-check:
     needs: changes
@@ -113,39 +109,6 @@ jobs:
           fi
 
           if [ "$has_error" == "true" ]; then
-            exit 1
-          fi
-
-  # 安装器代码检查
-  installer-check:
-    needs: changes
-    if: ${{ needs.changes.outputs.installer == 'true' }}
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: installer
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: 设置 Go 环境
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.25'
-          cache-dependency-path: installer/go.sum
-
-      - name: 下载依赖
-        run: go mod download
-
-      - name: 编译检查
-        id: build
-        run: go build -v ./...
-        continue-on-error: true
-
-      - name: 汇总检查结果
-        run: |
-          if [ "${{ steps.build.outcome }}" == "failure" ]; then
-            echo "❌ 编译失败: 修复编译错误"
             exit 1
           fi
 

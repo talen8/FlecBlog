@@ -97,41 +97,7 @@ By separating the public blog, the admin console, and the backend service into c
 
 ## Deployment
 
-### Installer (Recommended)
-
-FlecBlog provides an interactive installer `flecb` that supports one-click installation, upgrades, backups, and configuration management.
-
-**Installation:**
-
-```bash
-curl -fsSL https://install.flec.top | sudo bash
-```
-
-**Key Features:**
-
-- `flecb install` - Interactive installation
-- `flecb upgrade` - Upgrade to the latest version
-- `flecb reconfig` - Modify configuration (ports, API URL, etc.)
-- `flecb backup` - Backup and restore data
-- `flecb uninstall` - Uninstall FlecBlog
-- `flecb version` - Display version information
-
-**Installation Process:**
-
-1. Run the installation command `curl -fsSL https://install.flec.top | sudo bash`
-2. Choose deployment method (Docker deployment)
-3. Configure ports (Server, Blog, Admin)
-4. Confirm configuration and automatically pull images to start services
-5. Access the admin panel to create an administrator account
-
-**Highlights:**
-
-- Fully interactive guidance, no manual configuration file editing required
-- Automatic port conflict detection
-- One-click upgrades and rollbacks
-- Built-in data backup and recovery
-
-### Docker Compose Manual Setup
+### Docker Compose Setup
 
 Suitable for users who need custom configurations or already have a Docker environment.
 
