@@ -63,3 +63,11 @@ type ConfigUpdateRequest struct {
 type MenuUpdateRequest struct {
 	Menus map[string][]MenuDataItem `json:"menus" binding:"required" swaggertype:"object"`
 }
+
+// ThemeUpdateCheckResponse 主题更新检查响应
+type ThemeUpdateCheckResponse struct {
+	HasUpdate      bool   `json:"has_update"`
+	CurrentVersion string `json:"current_version"`
+	LatestVersion  string `json:"latest_version"`
+	ReleaseURL     string `json:"release_url"`
+}

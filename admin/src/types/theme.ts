@@ -55,3 +55,10 @@ export interface MenuSlot {
 export interface ThemeSchema {
   $menus?: Record<string, MenuSlot>;
 }
+
+export interface ThemeUpdateCheckResponse {
+  has_update: boolean;
+  current_version: string;
+  latest_version: string;
+  release_url: string;
+}

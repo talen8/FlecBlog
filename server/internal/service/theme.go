@@ -1,11 +1,15 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
@@ -429,6 +433,105 @@ func collectMenusIcons(menus map[string][]dto.MenuDataItem) map[string]bool {
 		})
 	}
 	return icons
+}
+
+// CheckThemeUpdate 检查主题版本更新
+func (s *ThemeService) CheckThemeUpdate(ctx context.Context, slug string) (*dto.ThemeUpdateCheckResponse, error) {
+	theme, err := s.themeRepo.Get(slug)
+	if err != nil {
+		return nil, fmt.Errorf("获取主题失败: %w", err)
+	}
+
+	if theme.Repo == "" {
+		return nil, errors.New("主题未设置仓库地址")
+	}
+
+	owner, repoName, ok := parseRepoURL(theme.Repo)
+	if !ok {
+		return nil, errors.New("仅支持 GitHub 仓库地址")
+	}
+
+	resp := &dto.ThemeUpdateCheckResponse{
+		CurrentVersion: strings.TrimPrefix(theme.Version, "v"),
+	}
+
+	latestVersion, releaseURL, err := fetchLatestRelease(ctx, owner, repoName)
+	if err != nil {
+		return nil, err
+	}
+
+	resp.LatestVersion = strings.TrimPrefix(latestVersion, "v")
+	resp.ReleaseURL = releaseURL
+
+	if resp.CurrentVersion == "" {
+		return resp, nil
+	}
+
+	cmp, err := compareVersion(latestVersion, resp.CurrentVersion)
+	if err != nil {
+		return nil, fmt.Errorf("比较版本失败: %w", err)
+	}
+
+	resp.HasUpdate = cmp > 0
+	return resp, nil
+}
+
+// parseRepoURL 解析 GitHub 仓库地址，返回 owner 和 repo
+func parseRepoURL(repo string) (string, string, bool) {
+	repo = strings.TrimSuffix(repo, ".git")
+	repo = strings.TrimSuffix(repo, "/")
+
+	if !strings.HasPrefix(repo, "https://github.com/") {
+		return "", "", false
+	}
+
+	parts := strings.SplitN(strings.TrimPrefix(repo, "https://github.com/"), "/", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return "", "", false
+	}
+
+	return parts[0], parts[1], true
+}
+
+// fetchLatestRelease 从 GitHub API 获取最新 release
+func fetchLatestRelease(ctx context.Context, owner, repo string) (tagName, htmlURL string, err error) {
+	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	if err != nil {
+		return "", "", fmt.Errorf("创建请求失败: %w", err)
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("User-Agent", "FlecBlog-ThemeUpdateChecker")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", "", fmt.Errorf("请求 GitHub API 失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return "", "", errors.New("仓库不存在或没有 release")
+	}
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		return "", "", fmt.Errorf("GitHub API 返回错误: status=%d body=%s", resp.StatusCode, strings.TrimSpace(string(body)))
+	}
+
+	var release struct {
+		TagName string `json:"tag_name"`
+		HTMLURL string `json:"html_url"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return "", "", fmt.Errorf("解析响应失败: %w", err)
+	}
+
+	if release.TagName == "" {
+		return "", "", errors.New("release 缺少 tag_name")
+	}
+
+	return release.TagName, release.HTMLURL, nil
 }
 
 // collectConfigImageURLs 按主题 schema 从配置中收集图片地址

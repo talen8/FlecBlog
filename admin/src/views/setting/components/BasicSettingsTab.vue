@@ -29,7 +29,7 @@
         <ImageUploader
           ref="faviconUploaderRef"
           v-model="form.favicon"
-          upload-type="Favicon"
+          upload-type="博客图标"
           width="120px"
           height="120px"
           :disabled="loading"

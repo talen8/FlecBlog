@@ -123,6 +123,25 @@ func (h *ThemeHandler) UpdateConfig(ctx *gin.Context) {
 	response.Success(ctx, result)
 }
 
+// CheckUpdate 检查主题版本更新
+//
+//	@Summary		检查主题版本更新
+//	@Description	检查指定主题是否有新版本
+//	@Tags			主题管理
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			slug	path	string	true	"主题 slug"
+//	@Success		200		{object}	response.Response{data=dto.ThemeUpdateCheckResponse}
+//	@Router			/admin/themes/{slug}/check [post]
+func (h *ThemeHandler) CheckUpdate(ctx *gin.Context) {
+	result, err := h.themeService.CheckThemeUpdate(ctx.Request.Context(), ctx.Param("slug"))
+	if err != nil {
+		response.Failed(ctx, err.Error())
+		return
+	}
+	response.Success(ctx, result)
+}
+
 // UpdateMenus 更新主题菜单
 //
 //	@Summary		更新主题菜单

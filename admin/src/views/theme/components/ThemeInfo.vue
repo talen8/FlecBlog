@@ -8,7 +8,10 @@
         {{ theme.slug }}
       </el-descriptions-item>
       <el-descriptions-item label="版本">
-        {{ theme.version || '-' }}
+        <span class="current-version">{{ theme.version || '-' }}</span>
+        <span v-if="checkResult?.has_update" class="update-info">
+          <el-tag type="danger" size="small">{{ checkResult.latest_version }}</el-tag>
+        </span>
       </el-descriptions-item>
       <el-descriptions-item label="作者">
         {{ theme.author || '-' }}
@@ -55,12 +58,45 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import type { ThemeResponse } from '@/types/theme';
+import { computed, ref, onMounted } from 'vue';
+import { checkThemeUpdate } from '@/api/theme';
+import type { ThemeResponse, ThemeUpdateCheckResponse } from '@/types/theme';
 
 const props = defineProps<{
   theme: ThemeResponse;
 }>();
+
+const checkResult = ref<ThemeUpdateCheckResponse | null>(null);
+
+onMounted(async () => {
+  try {
+    const raw = localStorage.getItem(`tcc_${props.theme.slug}`);
+    if (raw) {
+      const { v, t } = JSON.parse(raw);
+      if (Date.now() < t) {
+        checkResult.value = {
+          has_update: true,
+          latest_version: v,
+          current_version: '',
+          release_url: '',
+        };
+        return;
+      }
+      localStorage.removeItem(`tcc_${props.theme.slug}`);
+    }
+  } catch {}
+
+  try {
+    const result = await checkThemeUpdate(props.theme.slug);
+    if (result.has_update) {
+      localStorage.setItem(
+        `tcc_${props.theme.slug}`,
+        JSON.stringify({ v: result.latest_version, t: Date.now() + 300_000 })
+      );
+      checkResult.value = result;
+    }
+  } catch (_error) {}
+});
 
 const featureLabels: Record<string, { label: string; icon: string }> = {
   moments: { label: '动态', icon: 'ri-chat-3-line' },
@@ -169,5 +205,15 @@ const featureList = computed(() => {
 
 :deep(.el-descriptions__body .el-descriptions__label) {
   width: 200px;
+}
+
+.current-version {
+  margin-right: 8px;
+}
+
+.update-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 </style>

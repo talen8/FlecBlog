@@ -241,3 +241,6 @@ DROP TABLE menus;
 -- 移除 moment 作为独立的评论目标类型（实际使用 page + target_key='moment'）
 ALTER TABLE comments DROP CONSTRAINT IF EXISTS chk_comments_target_type;
 ALTER TABLE comments ADD CONSTRAINT chk_comments_target_type CHECK (target_type IN ('article', 'page'));
+
+-- 统一文件用途名称：网站Favicon → 博客图标
+UPDATE files SET upload_type = '博客图标', updated_at = CURRENT_TIMESTAMP WHERE upload_type = '网站Favicon';
