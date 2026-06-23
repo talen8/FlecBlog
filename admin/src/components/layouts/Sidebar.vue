@@ -27,7 +27,7 @@
           <i class="ri-article-line ri-lg"></i>
           <template #title>文章管理</template>
         </el-menu-item>
-        <el-menu-item index="/moments">
+        <el-menu-item v-if="isFeatureEnabled('moments')" index="/moments">
           <i class="ri-chat-3-line ri-lg"></i>
           <template #title>动态管理</template>
         </el-menu-item>
@@ -50,7 +50,7 @@
           <i class="ri-rss-line ri-lg"></i>
           <template #title>RSS订阅</template>
         </el-menu-item>
-        <el-menu-item index="/feedback">
+        <el-menu-item v-if="isFeatureEnabled('feedback')" index="/feedback">
           <i class="ri-feedback-line ri-lg"></i>
           <template #title>反馈投诉</template>
         </el-menu-item>
@@ -69,10 +69,6 @@
           <i class="ri-folder-image-line ri-lg"></i>
           <template #title>文件管理</template>
         </el-menu-item>
-        <el-menu-item index="/menus">
-          <i class="ri-menu-line ri-lg"></i>
-          <template #title>菜单管理</template>
-        </el-menu-item>
         <el-menu-item index="/visits">
           <i class="ri-file-list-3-line ri-lg"></i>
           <template #title>访问日志</template>
@@ -80,6 +76,10 @@
         <el-menu-item index="/systems">
           <i class="ri-information-line ri-lg"></i>
           <template #title>系统信息</template>
+        </el-menu-item>
+        <el-menu-item index="/theme">
+          <i class="ri-palette-line ri-lg"></i>
+          <template #title>主题配置</template>
         </el-menu-item>
         <el-menu-item index="/settings">
           <i class="ri-settings-3-line ri-lg"></i>
@@ -93,9 +93,11 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import { ref, nextTick } from 'vue';
+import { useThemeFeatures } from '@/utils/visibility';
 
 const route = useRoute();
 const menuRef = ref();
+const { isFeatureEnabled } = useThemeFeatures();
 
 // 子菜单索引列表
 const subMenus = ['content', 'interaction', 'management'];
@@ -110,7 +112,7 @@ const routeToParent: Record<string, string> = {
   '/feedback': 'interaction',
   '/users': 'management',
   '/files': 'management',
-  '/menus': 'management',
+  '/theme': 'management',
   '/visits': 'management',
   '/systems': 'management',
   '/settings': 'management',

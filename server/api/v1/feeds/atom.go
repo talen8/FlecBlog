@@ -54,7 +54,7 @@ func (c *AtomController) GetAtomFeed(ctx *gin.Context) {
 	if baseURL != "" {
 		canonicalURL = baseURL + "/"
 	}
-	siteName := c.config.Blog.Title
+	siteName := c.config.Basic.Title
 	fallbackTime := time.Now().UTC().Truncate(time.Second)
 
 	sort.SliceStable(articles, func(i, j int) bool {

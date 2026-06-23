@@ -215,7 +215,7 @@ func (r *StatsRepository) GetYesterdayUsers() (int64, error) {
 // GetTrendData 获取趋势数据
 func (r *StatsRepository) GetTrendData(startDate, endDate time.Time, groupType string) ([]dto.TrendData, error) {
 	// 查询数据库中实际有数据的记录
-	var dbResults []dto.TrendData
+	dbResults := make([]dto.TrendData, 0)
 
 	// 根据类型选择不同的日期格式
 	var dateFormat string
@@ -250,7 +250,7 @@ func (r *StatsRepository) GetTrendData(startDate, endDate time.Time, groupType s
 
 // GetCategoryStats 获取分类统计数据
 func (r *StatsRepository) GetCategoryStats() ([]dto.CategoryStats, error) {
-	var results []dto.CategoryStats
+	results := make([]dto.CategoryStats, 0)
 
 	// 实时统计每个分类下已发布文章的数量
 	err := r.db.Model(&model.Category{}).
@@ -279,7 +279,7 @@ func (r *StatsRepository) GetPublishedCategoryCount() (int64, error) {
 
 // GetTagStats 获取标签统计数据
 func (r *StatsRepository) GetTagStats() ([]dto.TagStats, error) {
-	var results []dto.TagStats
+	results := make([]dto.TagStats, 0)
 
 	// 实时统计每个标签下已发布文章的数量
 	err := r.db.Model(&model.Tag{}).
@@ -314,7 +314,7 @@ func (r *StatsRepository) GetPublishedTagCount() (int64, error) {
 
 // GetArticleContribution 获取文章贡献数据
 func (r *StatsRepository) GetArticleContribution(year *int, month *int) ([]dto.ArticleContribution, error) {
-	var results []dto.ArticleContribution
+	results := make([]dto.ArticleContribution, 0)
 
 	query := r.db.Model(&model.Article{}).
 		Select("TO_CHAR(DATE(publish_time), 'YYYY-MM-DD') as date, COUNT(*) as count").
@@ -389,7 +389,7 @@ func (r *StatsRepository) GetOnlineUsers() (int64, error) {
 
 // GetArchives 获取文章归档数据（按年月分组）
 func (r *StatsRepository) GetArchives() ([]dto.ArchiveItem, error) {
-	var results []dto.ArchiveItem
+	results := make([]dto.ArchiveItem, 0)
 
 	// 查询已发布文章按年月分组统计
 	err := r.db.Model(&model.Article{}).
@@ -408,7 +408,7 @@ func (r *StatsRepository) GetArchives() ([]dto.ArchiveItem, error) {
 
 // GetVisitLogs 获取访问日志列表
 func (r *StatsRepository) GetVisitLogs(req *dto.GetVisitLogsRequest) ([]model.Visit, int64, error) {
-	var visits []model.Visit
+	visits := make([]model.Visit, 0)
 	var total int64
 
 	query := r.db.Model(&model.Visit{})

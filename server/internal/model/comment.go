@@ -6,7 +6,7 @@ import "gorm.io/gorm"
 type Comment struct {
 	gorm.Model
 	Content    string `gorm:"type:text;not null" json:"content"`
-	TargetType string `gorm:"type:varchar(20);not null;index:idx_target" json:"target_type"` // article/page/moment
+	TargetType string `gorm:"type:varchar(20);not null;index:idx_target" json:"target_type"` // article/page
 	TargetKey  string `gorm:"type:varchar(50);not null;index:idx_target" json:"target_key"`  // 文章slug或页面key
 	UserID     uint   `gorm:"not null" json:"user_id"`
 	ParentID   *uint  `json:"parent_id"`                       // 直接父评论ID

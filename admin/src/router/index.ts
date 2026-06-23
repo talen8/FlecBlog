@@ -63,10 +63,10 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '动态管理', requiresAuth: true },
       },
       {
-        path: 'menus',
-        name: 'Menus',
-        component: () => import('@/views/menu/MenuList.vue'),
-        meta: { title: '菜单管理', requiresAuth: true },
+        path: 'theme',
+        name: 'ThemeConfig',
+        component: () => import('@/views/theme/ThemeConfig.vue'),
+        meta: { title: '主题配置', requiresAuth: true },
       },
       {
         path: 'visits',

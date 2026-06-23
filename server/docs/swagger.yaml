@@ -503,6 +503,13 @@ definitions:
             type: string
         type: object
     type: object
+  dto.ConfigUpdateRequest:
+    properties:
+      config:
+        type: object
+    required:
+    - config
+    type: object
   dto.CreateArticleRequest:
     properties:
       category_id:
@@ -900,131 +907,12 @@ definitions:
       user:
         $ref: '#/definitions/dto.UserResponse'
     type: object
-  dto.MenuCreateRequest:
-    properties:
-      icon:
-        description: 图标
-        maxLength: 500
-        type: string
-      is_enabled:
-        description: 是否启用
-        type: boolean
-      parent_id:
-        description: 父菜单ID，NULL表示主菜单
-        type: integer
-      sort:
-        description: 排序，范围1-10
-        maximum: 10
-        minimum: 1
-        type: integer
-      title:
-        description: 菜单标题
-        maxLength: 100
-        minLength: 1
-        type: string
-      type:
-        description: 菜单类型
-        enum:
-        - aggregate
-        - navigation
-        - footer
-        type: string
-      url:
-        description: 链接地址（主菜单可为空）
-        maxLength: 500
-        type: string
-    required:
-    - title
-    - type
-    type: object
-  dto.MenuDeleteRequest:
-    properties:
-      children_action:
-        description: 子菜单处理方式：delete-删除子菜单，upgrade-升级为主菜单
-        enum:
-        - delete
-        - upgrade
-        type: string
-    type: object
-  dto.MenuResponse:
-    properties:
-      icon:
-        type: string
-      id:
-        type: integer
-      is_enabled:
-        type: boolean
-      parent_id:
-        type: integer
-      sort:
-        type: integer
-      title:
-        type: string
-      type:
-        type: string
-      url:
-        type: string
-    type: object
-  dto.MenuTreeNode:
-    properties:
-      children:
-        description: 子菜单列表
-        items:
-          $ref: '#/definitions/dto.MenuTreeNode'
-        type: array
-      icon:
-        type: string
-      id:
-        type: integer
-      is_enabled:
-        type: boolean
-      parent_id:
-        type: integer
-      sort:
-        type: integer
-      title:
-        type: string
-      type:
-        type: string
-      url:
-        type: string
-    type: object
   dto.MenuUpdateRequest:
     properties:
-      icon:
-        description: 图标
-        maxLength: 500
-        type: string
-      is_enabled:
-        description: 是否启用
-        type: boolean
-      parent_id:
-        description: 父菜单ID
-        type: integer
-      sort:
-        description: 排序
-        maximum: 10
-        minimum: 1
-        type: integer
-      title:
-        description: 菜单标题
-        maxLength: 100
-        minLength: 1
-        type: string
-      type:
-        description: 菜单类型
-        enum:
-        - aggregate
-        - navigation
-        - footer
-        type: string
-      url:
-        description: 链接地址
-        maxLength: 500
-        type: string
+      menus:
+        type: object
     required:
-    - title
-    - type
+    - menus
     type: object
   dto.MomentAudio:
     properties:
@@ -1413,6 +1301,52 @@ definitions:
         type: integer
       name:
         description: 标签名称
+        type: string
+    type: object
+  dto.ThemeMetaSyncRequest:
+    properties:
+      author:
+        type: string
+      description:
+        type: string
+      license:
+        type: string
+      name:
+        type: string
+      repo:
+        type: string
+      schema:
+        type: object
+      slug:
+        type: string
+      version:
+        type: string
+    required:
+    - slug
+    type: object
+  dto.ThemeResponse:
+    properties:
+      author:
+        type: string
+      config:
+        type: object
+      description:
+        type: string
+      is_active:
+        type: boolean
+      license:
+        type: string
+      menus:
+        type: object
+      name:
+        type: string
+      repo:
+        type: string
+      schema:
+        type: object
+      slug:
+        type: string
+      version:
         type: string
     type: object
   dto.TrendData:
@@ -3428,151 +3362,6 @@ paths:
       summary: 更新友链类型 [类型]
       tags:
       - 友链管理
-  /admin/menus:
-    get:
-      consumes:
-      - application/json
-      description: 按类型获取菜单树
-      parameters:
-      - description: '菜单类型: aggregate/navigation/footer'
-        in: query
-        name: type
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/dto.MenuTreeNode'
-                  type: array
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 获取菜单树
-      tags:
-      - 菜单管理
-    post:
-      consumes:
-      - application/json
-      description: 创建新的菜单项
-      parameters:
-      - description: 菜单信息
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.MenuCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.MenuResponse'
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 创建菜单
-      tags:
-      - 菜单管理
-  /admin/menus/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: 硬删除菜单项，不可恢复
-      parameters:
-      - description: 菜单ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 删除选项
-        in: body
-        name: request
-        schema:
-          $ref: '#/definitions/dto.MenuDeleteRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
-      summary: 删除菜单
-      tags:
-      - 菜单管理
-    get:
-      consumes:
-      - application/json
-      description: 获取菜单项的详细信息
-      parameters:
-      - description: 菜单ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.MenuResponse'
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 获取菜单详情
-      tags:
-      - 菜单管理
-    put:
-      consumes:
-      - application/json
-      description: 更新菜单项信息
-      parameters:
-      - description: 菜单ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 菜单信息
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.MenuUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.MenuResponse'
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 更新菜单
-      tags:
-      - 菜单管理
   /admin/moments:
     get:
       consumes:
@@ -4538,6 +4327,112 @@ paths:
       summary: 更新标签
       tags:
       - 标签管理
+  /admin/themes:
+    get:
+      description: 获取全部主题实例
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ThemeResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 主题列表
+      tags:
+      - 主题管理
+  /admin/themes/{slug}:
+    get:
+      description: 获取指定主题详情
+      parameters:
+      - description: 主题 slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 主题详情
+      tags:
+      - 主题管理
+  /admin/themes/{slug}/config:
+    put:
+      consumes:
+      - application/json
+      description: 替换指定主题的 config JSON
+      parameters:
+      - description: 主题 slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: 主题配置
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConfigUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ThemeResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新主题配置
+      tags:
+      - 主题管理
+  /admin/themes/{slug}/menus:
+    put:
+      consumes:
+      - application/json
+      description: 整体替换指定主题菜单
+      parameters:
+      - description: 主题 slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: 主题菜单
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.MenuUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新主题菜单
+      tags:
+      - 主题管理
   /admin/users:
     get:
       consumes:
@@ -6080,32 +5975,6 @@ paths:
       summary: 申请友链
       tags:
       - 友链
-  /menus:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: '菜单类型: aggregate/navigation/footer (不传则返回所有类型)'
-        in: query
-        name: type
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/dto.MenuTreeNode'
-                  type: array
-              type: object
-      summary: 获取菜单树
-      tags:
-      - 菜单
   /moments:
     get:
       consumes:
@@ -6287,6 +6156,46 @@ paths:
       summary: 标签详情
       tags:
       - 标签
+  /themes:
+    get:
+      description: 获取当前激活主题详情，菜单仅返回启用项
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ThemeResponse'
+              type: object
+      summary: 获取激活主题
+      tags:
+      - 主题
+  /themes/_sync:
+    post:
+      consumes:
+      - application/json
+      description: 主题镜像启动时上报元数据并激活当前主题
+      parameters:
+      - description: 主题元数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ThemeMetaSyncRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 同步主题元数据
+      tags:
+      - 主题
   /upload:
     post:
       consumes:

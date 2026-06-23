@@ -36,7 +36,7 @@ func (e *EmailNotifier) Send(to string, data Data) error {
 		"Content":  data.Content,
 		"Link":     data.Link,
 		"SiteURL":  siteURL,
-		"SiteName": e.config.Blog.Title,
+		"SiteName": e.config.Basic.Title,
 		"Data":     data.Data,
 	}
 
@@ -63,7 +63,7 @@ func (e *EmailNotifier) Send(to string, data Data) error {
 
 // generateSubject 生成邮件主题
 func (e *EmailNotifier) generateSubject(data Data) string {
-	siteName := e.config.Blog.Title
+	siteName := e.config.Basic.Title
 
 	switch data.Type {
 	case "comment_reply":

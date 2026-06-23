@@ -131,7 +131,7 @@ func (c *Client) SendEmail(to, subject, htmlBody, fromName string) error {
 
 	// 如果没有指定发件人名称，使用配置中的博客标题
 	if fromName == "" {
-		fromName = c.config.Blog.Title
+		fromName = c.config.Basic.Title
 	}
 
 	// 确定发件人邮箱地址

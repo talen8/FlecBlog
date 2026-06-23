@@ -28,15 +28,6 @@
           />
         </el-tab-pane>
 
-        <!-- 博客配置标签页 -->
-        <el-tab-pane label="博客配置" name="blog">
-          <BlogSettingsTab
-            ref="blogTabRef"
-            v-model:form="blogForm"
-            :loading="loading || !canEditSettings"
-          />
-        </el-tab-pane>
-
         <!-- 通知配置标签页 -->
         <el-tab-pane label="通知配置" name="notification">
           <NotificationSettingsTab
@@ -76,7 +67,6 @@ import { ElMessage } from 'element-plus';
 import { getSettingGroup, updateSettingGroup } from '@/api/sysconfig';
 import { isSuperAdmin } from '@/utils/auth';
 import BasicSettingsTab from './components/BasicSettingsTab.vue';
-import BlogSettingsTab from './components/BlogSettingsTab.vue';
 import NotificationSettingsTab from './components/NotificationSettingsTab.vue';
 import UploadSettingsTab from './components/UploadSettingsTab.vue';
 import AISettingsTab from './components/AISettingsTab.vue';
@@ -94,21 +84,28 @@ const saving = ref(false);
 const canEditSettings = computed(() => isSuperAdmin());
 
 // 标签页引用
-const blogTabRef = ref<InstanceType<typeof BlogSettingsTab>>();
 const basicTabRef = ref<InstanceType<typeof BasicSettingsTab>>();
 
 // 基本配置表单
 const basicForm = ref({
   author: '',
-  author_email: '',
-  author_desc: '',
   author_avatar: '',
-  author_photo: '',
   icp: '',
   police_record: '',
   admin_url: '',
   blog_url: '',
-  home_url: '',
+  title: '',
+  subtitle: '',
+  description: '',
+  keywords: '',
+  favicon: '',
+  custom_head: '',
+  custom_body: '',
+  emojis: '',
+  meting_api: '',
+  cravatar_url: '',
+  ip_api_url: '',
+  cover_maker_api: '',
 });
 
 // 通知配置表单
@@ -122,71 +119,6 @@ const notificationForm = ref<NotificationForm>({
   feishu_app_id: '',
   feishu_secret: '',
   feishu_chat_id: '',
-});
-
-// 博客配置表单
-const blogForm = ref({
-  // 博客网站信息
-  title: '',
-  subtitle: '',
-  slogan: '',
-  description: '',
-  keywords: '',
-  established: '',
-
-  // 全局样式
-  favicon: '',
-  background_image: '',
-  screenshot: '',
-  announcement: '',
-  typingTextsList: [] as Array<{ value: string }>,
-
-  // 公众号配置
-  wechat_qrcode: '',
-  wechat_name: '',
-
-  // 社交媒体
-  sidebarSocialList: [] as Array<{ name: string; url: string; icon: string }>,
-  footerSocialList: [] as Array<{
-    name: string;
-    url: string;
-    icon: string;
-    position: string;
-  }>,
-
-  // 页脚链接
-  footerLinksList: [] as Array<{ name: string; url: string }>,
-
-  theme_light_start: '06:00',
-  theme_dark_start: '18:00',
-
-  // 页面配置
-  moments_size: 30,
-  message_content: '',
-  home_layout: 'waterfall',
-
-  // 关于页面配置
-  about_describe: '',
-  about_describe_tips: '',
-  about_exhibition: '',
-  profileList: [] as Array<{ label: string; value: string; color: string }>,
-  about_personality: '',
-  mottoMainList: [] as string[],
-  about_motto_sub: '',
-  socializeList: [] as Array<{ name: string; url: string }>,
-  creationList: [] as Array<{ name: string; url: string }>,
-  versionsList: [] as Array<{ name: string; version: string }>,
-  unionsList: [] as Array<{ name: string; url: string }>,
-  about_story: '',
-  custom_head: '',
-  custom_body: '',
-  emojis: '',
-  font: '',
-  meting_api: '',
-  cravatar_url: '',
-  ip_api_url: '',
-  cover_maker_api: '',
-  donationMethodsList: [] as Array<{ name: string; qrcode: string }>,
 });
 
 // 上传配置表单
@@ -264,112 +196,26 @@ const loadBasicConfigs = async () => {
     const configs = await loadConfigs('basic');
     Object.assign(basicForm.value, {
       author: configs.author || '',
-      author_email: configs.author_email || '',
-      author_desc: configs.author_desc || '',
       author_avatar: configs.author_avatar || '',
-      author_photo: configs.author_photo || '',
       icp: configs.icp || '',
       police_record: configs.police_record || '',
       admin_url: configs.admin_url || '',
       blog_url: configs.blog_url || '',
-      home_url: configs.home_url || '',
+      title: configs.title || '',
+      subtitle: configs.subtitle || '',
+      description: configs.description || '',
+      keywords: configs.keywords || '',
+      favicon: configs.favicon || '',
+      custom_head: configs.custom_head || '',
+      custom_body: configs.custom_body || '',
+      emojis: configs.emojis || '',
+      meting_api: configs.meting_api || '',
+      cravatar_url: configs.cravatar_url || '',
+      ip_api_url: configs.ip_api_url || '',
+      cover_maker_api: configs.cover_maker_api || '',
     });
   } catch {
     ElMessage.error('获取基本配置失败');
-  }
-};
-
-// 加载博客配置
-const loadBlogConfigs = async () => {
-  try {
-    const configs = await loadConfigs('blog');
-
-    // 博客网站信息
-    Object.assign(blogForm.value, {
-      title: configs.title || '',
-      subtitle: configs.subtitle || '',
-      slogan: configs.slogan || '',
-      description: configs.description || '',
-      keywords: configs.keywords || '',
-      established: configs.established || '',
-
-      // 全局样式
-      favicon: configs.favicon || '',
-      background_image: configs.background_image || '',
-      screenshot: configs.screenshot || '',
-      announcement: configs.announcement || '',
-
-      // 公众号配置
-      wechat_qrcode: configs.wechat_qrcode || '',
-      wechat_name: configs.wechat_name || '',
-
-      // 关于页面配置
-      about_describe: configs.about_describe || '',
-      about_describe_tips: configs.about_describe_tips || '',
-      about_exhibition: configs.about_exhibition || '',
-      about_personality: configs.about_personality || '',
-      about_motto_sub: configs.about_motto_sub || '',
-      about_story: configs.about_story || '',
-      moments_size: Number(configs.moments_size) || 30,
-      message_content: configs.message_content || '',
-      home_layout: configs.home_layout || 'waterfall',
-      theme_light_start: configs.theme_light_start || '06:00',
-      theme_dark_start: configs.theme_dark_start || '18:00',
-    });
-
-    // 解析 JSON 字段
-    const parsed = parseJSON<(string | { value: string } | { label: string; value: string })[]>(
-      configs.typing_texts || '',
-      []
-    );
-    blogForm.value.typingTextsList = parsed.map(item =>
-      typeof item === 'string' ? { value: item } : item
-    );
-
-    blogForm.value.sidebarSocialList = parseJSON(configs.sidebar_social || '', []);
-    blogForm.value.footerSocialList = parseJSON(configs.footer_social || '', []);
-    blogForm.value.footerLinksList = parseJSON(configs.footer_links || '', []);
-
-    blogForm.value.profileList = Array(6)
-      .fill(null)
-      .map(
-        (_, i) =>
-          parseJSON(configs.about_profile || '', [])[i] || {
-            label: '',
-            value: '',
-            color: '#43a6c6',
-          }
-      );
-
-    blogForm.value.mottoMainList = Array(2)
-      .fill(null)
-      .map((_, i) => parseJSON(configs.about_motto_main || '', [])[i] || '');
-
-    blogForm.value.socializeList = parseJSON(configs.about_socialize || '', []);
-    blogForm.value.creationList = parseJSON(configs.about_creation || '', []);
-
-    blogForm.value.versionsList = Array(3)
-      .fill(null)
-      .map(
-        (_, i) =>
-          parseJSON(configs.about_versions || '', [])[i] || {
-            name: '',
-            version: '',
-          }
-      );
-
-    blogForm.value.unionsList = parseJSON(configs.about_unions || '', []);
-    blogForm.value.custom_head = configs.custom_head || '';
-    blogForm.value.custom_body = configs.custom_body || '';
-    blogForm.value.emojis = configs.emojis || '';
-    blogForm.value.font = configs.font || '';
-    blogForm.value.meting_api = configs.meting_api || '';
-    blogForm.value.cravatar_url = configs.cravatar_url || '';
-    blogForm.value.ip_api_url = configs.ip_api_url || '';
-    blogForm.value.cover_maker_api = configs.cover_maker_api || '';
-    blogForm.value.donationMethodsList = parseJSON(configs.donation_methods || '', []);
-  } catch {
-    ElMessage.error('获取博客配置失败');
   }
 };
 
@@ -411,15 +257,6 @@ const loadUploadConfigs = async () => {
     });
   } catch {
     ElMessage.error('获取上传配置失败');
-  }
-};
-
-// JSON 解析辅助函数
-const parseJSON = <T,>(jsonStr: string, fallback: T): T => {
-  try {
-    return jsonStr ? JSON.parse(jsonStr) : fallback;
-  } catch {
-    return fallback;
   }
 };
 
@@ -483,7 +320,6 @@ const loadAllConfigs = async () => {
   try {
     await Promise.all([
       loadBasicConfigs(),
-      loadBlogConfigs(),
       loadNotificationConfigs(),
       loadUploadConfigs(),
       loadAIConfigs(),
@@ -515,49 +351,10 @@ const handleSave = async () => {
           })
         );
       }
-      if (basicUploaders.authorPhotoUploaderRef?.getPendingCount()) {
+      if (basicUploaders.faviconUploaderRef?.getPendingCount()) {
         uploadPromises.push(
-          basicUploaders.authorPhotoUploaderRef.uploadPendingFile().then(url => {
-            if (url) basicForm.value.author_photo = url;
-          })
-        );
-      }
-    }
-
-    const blogUploaders = blogTabRef.value;
-    if (blogUploaders) {
-      if (blogUploaders.faviconUploaderRef?.getPendingCount()) {
-        uploadPromises.push(
-          blogUploaders.faviconUploaderRef.uploadPendingFile().then(url => {
-            if (url) blogForm.value.favicon = url;
-          })
-        );
-      }
-      if (blogUploaders.backgroundUploaderRef?.getPendingCount()) {
-        uploadPromises.push(
-          blogUploaders.backgroundUploaderRef.uploadPendingFile().then(url => {
-            if (url) blogForm.value.background_image = url;
-          })
-        );
-      }
-      if (blogUploaders.screenshotUploaderRef?.getPendingCount()) {
-        uploadPromises.push(
-          blogUploaders.screenshotUploaderRef.uploadPendingFile().then(url => {
-            if (url) blogForm.value.screenshot = url;
-          })
-        );
-      }
-      if (blogUploaders.aboutExhibitionUploaderRef?.getPendingCount()) {
-        uploadPromises.push(
-          blogUploaders.aboutExhibitionUploaderRef.uploadPendingFile().then(url => {
-            if (url) blogForm.value.about_exhibition = url;
-          })
-        );
-      }
-      if (blogUploaders.wechatQRCodeUploaderRef?.getPendingCount()) {
-        uploadPromises.push(
-          blogUploaders.wechatQRCodeUploaderRef.uploadPendingFile().then(url => {
-            if (url) blogForm.value.wechat_qrcode = url;
+          basicUploaders.faviconUploaderRef.uploadPendingFile().then(url => {
+            if (url) basicForm.value.favicon = url;
           })
         );
       }
@@ -576,134 +373,95 @@ const handleSave = async () => {
 
     // 基本配置
     const basicPayload: Record<string, string> = {
-      'basic.author': basicForm.value.author,
-      'basic.author_email': basicForm.value.author_email,
-      'basic.author_desc': basicForm.value.author_desc,
-      'basic.author_avatar': basicForm.value.author_avatar,
-      'basic.author_photo': basicForm.value.author_photo,
-      'basic.icp': basicForm.value.icp,
-      'basic.police_record': basicForm.value.police_record,
-      'basic.admin_url': basicForm.value.admin_url,
-      'basic.blog_url': basicForm.value.blog_url,
-      'basic.home_url': basicForm.value.home_url,
-    };
-
-    // 博客配置
-    const blogPayload: Record<string, string> = {
-      'blog.title': blogForm.value.title,
-      'blog.subtitle': blogForm.value.subtitle,
-      'blog.slogan': blogForm.value.slogan,
-      'blog.description': blogForm.value.description,
-      'blog.keywords': blogForm.value.keywords,
-      'blog.established': blogForm.value.established,
-      'blog.favicon': blogForm.value.favicon,
-      'blog.background_image': blogForm.value.background_image,
-      'blog.screenshot': blogForm.value.screenshot,
-      'blog.announcement': blogForm.value.announcement,
-      'blog.typing_texts': JSON.stringify(blogForm.value.typingTextsList.map(item => item.value)),
-      'blog.sidebar_social': JSON.stringify(blogForm.value.sidebarSocialList),
-      'blog.footer_social': JSON.stringify(blogForm.value.footerSocialList),
-      'blog.footer_links': JSON.stringify(blogForm.value.footerLinksList),
-      'blog.wechat_qrcode': blogForm.value.wechat_qrcode,
-      'blog.wechat_name': blogForm.value.wechat_name,
-      'blog.about_describe': blogForm.value.about_describe,
-      'blog.about_describe_tips': blogForm.value.about_describe_tips,
-      'blog.about_exhibition': blogForm.value.about_exhibition,
-      'blog.about_profile': JSON.stringify(blogForm.value.profileList),
-      'blog.about_personality': blogForm.value.about_personality,
-      'blog.about_motto_main': JSON.stringify(blogForm.value.mottoMainList),
-      'blog.about_motto_sub': blogForm.value.about_motto_sub,
-      'blog.about_socialize': JSON.stringify(blogForm.value.socializeList),
-      'blog.about_creation': JSON.stringify(blogForm.value.creationList),
-      'blog.about_versions': JSON.stringify(blogForm.value.versionsList),
-      'blog.about_unions': JSON.stringify(blogForm.value.unionsList),
-      'blog.about_story': blogForm.value.about_story,
-      'blog.custom_head': blogForm.value.custom_head,
-      'blog.custom_body': blogForm.value.custom_body,
-      'blog.emojis': blogForm.value.emojis,
-      'blog.font': blogForm.value.font,
-      'blog.meting_api': blogForm.value.meting_api,
-      'blog.cravatar_url': blogForm.value.cravatar_url,
-      'blog.ip_api_url': blogForm.value.ip_api_url,
-      'blog.cover_maker_api': blogForm.value.cover_maker_api,
-      'blog.moments_size': String(blogForm.value.moments_size),
-      'blog.message_content': blogForm.value.message_content,
-      'blog.home_layout': blogForm.value.home_layout,
-      'blog.donation_methods': JSON.stringify(blogForm.value.donationMethodsList),
-      'blog.theme_light_start': blogForm.value.theme_light_start,
-      'blog.theme_dark_start': blogForm.value.theme_dark_start,
+      author: basicForm.value.author,
+      author_avatar: basicForm.value.author_avatar,
+      icp: basicForm.value.icp,
+      police_record: basicForm.value.police_record,
+      admin_url: basicForm.value.admin_url,
+      blog_url: basicForm.value.blog_url,
+      title: basicForm.value.title,
+      subtitle: basicForm.value.subtitle,
+      description: basicForm.value.description,
+      keywords: basicForm.value.keywords,
+      favicon: basicForm.value.favicon,
+      custom_head: basicForm.value.custom_head,
+      custom_body: basicForm.value.custom_body,
+      emojis: basicForm.value.emojis,
+      meting_api: basicForm.value.meting_api,
+      cravatar_url: basicForm.value.cravatar_url,
+      ip_api_url: basicForm.value.ip_api_url,
+      cover_maker_api: basicForm.value.cover_maker_api,
     };
 
     // 通知配置
     const notificationPayload: Record<string, string> = {
-      'notification.email_host': notificationForm.value.email_host,
-      'notification.email_port': String(notificationForm.value.email_port),
-      'notification.email_secure': notificationForm.value.email_secure,
-      'notification.email_username': notificationForm.value.email_username,
-      'notification.email_from': notificationForm.value.email_from,
-      'notification.email_password': notificationForm.value.email_password,
-      'notification.feishu_app_id': notificationForm.value.feishu_app_id,
-      'notification.feishu_secret': notificationForm.value.feishu_secret,
-      'notification.feishu_chat_id': notificationForm.value.feishu_chat_id,
+      email_host: notificationForm.value.email_host,
+      email_port: String(notificationForm.value.email_port),
+      email_secure: notificationForm.value.email_secure,
+      email_username: notificationForm.value.email_username,
+      email_from: notificationForm.value.email_from,
+      email_password: notificationForm.value.email_password,
+      feishu_app_id: notificationForm.value.feishu_app_id,
+      feishu_secret: notificationForm.value.feishu_secret,
+      feishu_chat_id: notificationForm.value.feishu_chat_id,
     };
 
     // 上传配置
     const uploadPayload: Record<string, string> = {
-      'upload.storage_type': uploadForm.value.storage_type,
-      'upload.max_file_size': String(uploadForm.value.max_file_size),
-      'upload.path_pattern': uploadForm.value.path_pattern,
-      'upload.access_key': uploadForm.value.access_key,
-      'upload.secret_key': uploadForm.value.secret_key,
-      'upload.region': uploadForm.value.region,
-      'upload.bucket': uploadForm.value.bucket,
-      'upload.endpoint': uploadForm.value.endpoint,
-      'upload.domain': uploadForm.value.domain,
-      'upload.use_ssl': uploadForm.value.use_ssl ? 'true' : 'false',
+      storage_type: uploadForm.value.storage_type,
+      max_file_size: String(uploadForm.value.max_file_size),
+      path_pattern: uploadForm.value.path_pattern,
+      access_key: uploadForm.value.access_key,
+      secret_key: uploadForm.value.secret_key,
+      region: uploadForm.value.region,
+      bucket: uploadForm.value.bucket,
+      endpoint: uploadForm.value.endpoint,
+      domain: uploadForm.value.domain,
+      use_ssl: uploadForm.value.use_ssl ? 'true' : 'false',
     };
 
     // AI 配置
     const aiPayload: Record<string, string> = {
-      'ai.base_url': aiForm.value.base_url,
-      'ai.api_key': aiForm.value.api_key,
-      'ai.model': aiForm.value.model,
-      'ai.summary_prompt': aiForm.value.summary_prompt,
-      'ai.ai_summary_prompt': aiForm.value.ai_summary_prompt,
-      'ai.title_prompt': aiForm.value.title_prompt,
+      base_url: aiForm.value.base_url,
+      api_key: aiForm.value.api_key,
+      model: aiForm.value.model,
+      summary_prompt: aiForm.value.summary_prompt,
+      ai_summary_prompt: aiForm.value.ai_summary_prompt,
+      title_prompt: aiForm.value.title_prompt,
     };
 
     // OAuth 配置
     const oauthPayload: Record<string, string> = {
-      'oauth.github.enabled': oauthForm.value['github.enabled'],
-      'oauth.github.client_id': oauthForm.value['github.client_id'],
-      'oauth.github.client_secret': oauthForm.value['github.client_secret'],
-      'oauth.github.redirect_url': oauthForm.value['github.redirect_url'],
-      'oauth.google.enabled': oauthForm.value['google.enabled'],
-      'oauth.google.client_id': oauthForm.value['google.client_id'],
-      'oauth.google.client_secret': oauthForm.value['google.client_secret'],
-      'oauth.google.redirect_url': oauthForm.value['google.redirect_url'],
-      'oauth.qq.enabled': oauthForm.value['qq.enabled'],
-      'oauth.qq.client_id': oauthForm.value['qq.client_id'],
-      'oauth.qq.client_secret': oauthForm.value['qq.client_secret'],
-      'oauth.qq.redirect_url': oauthForm.value['qq.redirect_url'],
-      'oauth.microsoft.enabled': oauthForm.value['microsoft.enabled'],
-      'oauth.microsoft.client_id': oauthForm.value['microsoft.client_id'],
-      'oauth.microsoft.client_secret': oauthForm.value['microsoft.client_secret'],
-      'oauth.microsoft.redirect_url': oauthForm.value['microsoft.redirect_url'],
-      'oauth.oidc.enabled': oauthForm.value['oidc.enabled'],
-      'oauth.oidc.issuer_url': oauthForm.value['oidc.issuer_url'],
-      'oauth.oidc.client_id': oauthForm.value['oidc.client_id'],
-      'oauth.oidc.client_secret': oauthForm.value['oidc.client_secret'],
-      'oauth.oidc.redirect_url': oauthForm.value['oidc.redirect_url'],
-      'oauth.wechat.enabled': oauthForm.value['wechat.enabled'],
-      'oauth.wechat.appid': oauthForm.value['wechat.appid'],
-      'oauth.wechat.secret': oauthForm.value['wechat.secret'],
-      'oauth.worker_proxy': oauthForm.value['worker_proxy'],
+      'github.enabled': oauthForm.value['github.enabled'],
+      'github.client_id': oauthForm.value['github.client_id'],
+      'github.client_secret': oauthForm.value['github.client_secret'],
+      'github.redirect_url': oauthForm.value['github.redirect_url'],
+      'google.enabled': oauthForm.value['google.enabled'],
+      'google.client_id': oauthForm.value['google.client_id'],
+      'google.client_secret': oauthForm.value['google.client_secret'],
+      'google.redirect_url': oauthForm.value['google.redirect_url'],
+      'qq.enabled': oauthForm.value['qq.enabled'],
+      'qq.client_id': oauthForm.value['qq.client_id'],
+      'qq.client_secret': oauthForm.value['qq.client_secret'],
+      'qq.redirect_url': oauthForm.value['qq.redirect_url'],
+      'microsoft.enabled': oauthForm.value['microsoft.enabled'],
+      'microsoft.client_id': oauthForm.value['microsoft.client_id'],
+      'microsoft.client_secret': oauthForm.value['microsoft.client_secret'],
+      'microsoft.redirect_url': oauthForm.value['microsoft.redirect_url'],
+      'oidc.enabled': oauthForm.value['oidc.enabled'],
+      'oidc.issuer_url': oauthForm.value['oidc.issuer_url'],
+      'oidc.client_id': oauthForm.value['oidc.client_id'],
+      'oidc.client_secret': oauthForm.value['oidc.client_secret'],
+      'oidc.redirect_url': oauthForm.value['oidc.redirect_url'],
+      'wechat.enabled': oauthForm.value['wechat.enabled'],
+      'wechat.appid': oauthForm.value['wechat.appid'],
+      'wechat.secret': oauthForm.value['wechat.secret'],
+      worker_proxy: oauthForm.value['worker_proxy'],
     };
 
     // 构建需要保存的配置组列表
     const savePromises = [
       updateSettingGroup('basic', basicPayload),
-      updateSettingGroup('blog', blogPayload),
       updateSettingGroup('notification', notificationPayload),
       updateSettingGroup('upload', uploadPayload),
       updateSettingGroup('ai', aiPayload),
@@ -724,7 +482,6 @@ const handleSave = async () => {
 
 const validTabs = new Set<SettingGroupType | 'import-export'>([
   'basic',
-  'blog',
   'notification',
   'upload',
   'ai',

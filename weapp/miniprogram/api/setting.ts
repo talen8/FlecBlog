@@ -14,14 +14,6 @@ export function getSiteBasicConfig(): Promise<Record<string, string>> {
 }
 
 /**
- * 获取博客配置（公开接口）
- * @returns 博客配置
- */
-export function getBlogConfig(): Promise<Record<string, string>> {
-  return get<Record<string, string>>('/settings/blog');
-}
-
-/**
  * 获取 OAuth 配置（公开接口）
  * 只返回各提供商的启用状态
  * @returns OAuth 配置

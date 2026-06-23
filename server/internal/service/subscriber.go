@@ -110,7 +110,7 @@ func (s *SubscriberService) sendWelcomeEmail(sub *model.Subscriber) error {
 	}
 	unsubscribeURL := fmt.Sprintf("%s/subscribe?action=unsubscribe&token=%s", siteURL, sub.Token)
 
-	subject := fmt.Sprintf("订阅成功 - %s", s.config.Blog.Title)
+	subject := fmt.Sprintf("订阅成功 - %s", s.config.Basic.Title)
 	htmlBody := fmt.Sprintf(`
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2>订阅成功</h2>
@@ -121,7 +121,7 @@ func (s *SubscriberService) sendWelcomeEmail(sub *model.Subscriber) error {
 				如果这不是您本人的操作，或您想退订，请点击：<a href="%s">退订链接</a>
 			</p>
 		</div>
-	`, s.config.Blog.Title, unsubscribeURL)
+	`, s.config.Basic.Title, unsubscribeURL)
 
 	return s.emailClient.SendEmail(sub.Email, subject, htmlBody, "")
 }
@@ -183,7 +183,7 @@ func (s *SubscriberService) sendArticleEmail(sub *model.Subscriber, article *mod
 	articleURL := fmt.Sprintf("%s/posts/%s", siteURL, article.Slug)
 	unsubscribeURL := fmt.Sprintf("%s/subscribe?action=unsubscribe&token=%s", siteURL, sub.Token)
 
-	subject := fmt.Sprintf("新文章推送：%s - %s", article.Title, s.config.Blog.Title)
+	subject := fmt.Sprintf("新文章推送：%s - %s", article.Title, s.config.Basic.Title)
 	htmlBody := fmt.Sprintf(`
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #333;">%s</h2>
@@ -199,7 +199,7 @@ func (s *SubscriberService) sendArticleEmail(sub *model.Subscriber, article *mod
 				如需退订，请点击：<a href="%s">退订链接</a>
 			</p>
 		</div>
-	`, article.Title, article.Summary, articleURL, s.config.Blog.Title, unsubscribeURL)
+	`, article.Title, article.Summary, articleURL, s.config.Basic.Title, unsubscribeURL)
 
 	return s.emailClient.SendEmail(sub.Email, subject, htmlBody, "")
 }

@@ -57,6 +57,27 @@
           </el-option>
         </el-select>
 
+        <!-- 文件上传 -->
+        <el-input
+          v-else-if="field.type === 'upload'"
+          v-model="item[field.key]"
+          :placeholder="field.placeholder || '文件URL'"
+          :style="field.style"
+          :disabled="disabled"
+          @input="emitUpdate"
+        >
+          <template #append>
+            <el-upload
+              :show-file-list="false"
+              :http-request="(opts: UploadRequestOptions) => handleUpload(opts, index, field)"
+              accept="image/*"
+              :disabled="disabled"
+            >
+              <el-button :icon="Upload" :loading="uploadingKey === `${index}-${field.key}`" />
+            </el-upload>
+          </template>
+        </el-input>
+
         <!-- 颜色选择器 -->
         <el-color-picker
           v-else-if="field.type === 'color'"
@@ -121,7 +142,7 @@ import { uploadFile } from '@/api/file';
 
 export interface FieldConfig {
   key: string;
-  type: 'text' | 'select' | 'color' | 'image';
+  type: 'text' | 'select' | 'color' | 'image' | 'upload';
   placeholder?: string;
   style?: string;
   prefix?: string;
@@ -210,7 +231,7 @@ const addItem = () => {
   emitUpdate();
 };
 
-// 处理图片上传
+// 处理文件上传
 const handleUpload = async (opts: UploadRequestOptions, index: number, field: FieldConfig) => {
   const file = opts.file as File;
   if (!file.type.startsWith('image/')) {
@@ -219,10 +240,18 @@ const handleUpload = async (opts: UploadRequestOptions, index: number, field: Fi
   }
   const refKey = `${index}-${field.key}`;
   uploadingKey.value = refKey;
+
+  const blobUrl = URL.createObjectURL(file);
+  if (internalValue.value[index]) {
+    internalValue.value[index][field.key] = blobUrl;
+    emitUpdate();
+  }
+
   try {
     const result = await uploadFile(file, field.uploadType || '图片');
     if (internalValue.value[index]) {
       internalValue.value[index][field.key] = result.file_url;
+      URL.revokeObjectURL(blobUrl);
       emitUpdate();
     }
   } catch (e) {

@@ -15,16 +15,7 @@ import (
 
 var reconciledSettingImageKeys = []string{
 	KeyBasicAuthorAvatar,
-	KeyBasicAuthorPhoto,
-	KeyBlogFavicon,
-	KeyBlogBackgroundImage,
-	KeyBlogAboutExhibition,
-	KeyBlogScreenshot,
-}
-
-// jsonArrayImageKeys 需要检查 JSON 数组中图片 URL 的配置键
-var jsonArrayImageKeys = map[string]string{
-	KeyBlogDonationMethods: "qrcode", // 赞赏方式，检查 qrcode 字段
+	KeyBasicFavicon,
 }
 
 // FileUsageChecker 文件引用检查器
@@ -34,7 +25,7 @@ type FileUsageChecker struct {
 	momentRepo   *repository.MomentRepository
 	settingRepo  *repository.SettingRepository
 	userRepo     *repository.UserRepository
-	menuRepo     *repository.MenuRepository
+	themeRepo    *repository.ThemeRepository
 	feedbackRepo *repository.FeedbackRepository
 	commentRepo  *repository.CommentRepository
 }
@@ -46,7 +37,7 @@ func NewFileUsageChecker(
 	momentRepo *repository.MomentRepository,
 	settingRepo *repository.SettingRepository,
 	userRepo *repository.UserRepository,
-	menuRepo *repository.MenuRepository,
+	themeRepo *repository.ThemeRepository,
 	feedbackRepo *repository.FeedbackRepository,
 	commentRepo *repository.CommentRepository,
 ) *FileUsageChecker {
@@ -56,7 +47,7 @@ func NewFileUsageChecker(
 		momentRepo:   momentRepo,
 		settingRepo:  settingRepo,
 		userRepo:     userRepo,
-		menuRepo:     menuRepo,
+		themeRepo:    themeRepo,
 		feedbackRepo: feedbackRepo,
 		commentRepo:  commentRepo,
 	}
@@ -75,11 +66,8 @@ func (c *FileUsageChecker) IsActuallyUsed(fileURL string) (bool, string, error) 
 		{name: "设置图片", fn: func(url string) (bool, error) {
 			return c.settingRepo.ExistsByValueAndKeys(url, reconciledSettingImageKeys)
 		}},
-		{name: "赞赏图片", fn: func(url string) (bool, error) {
-			return c.settingRepo.ExistsByJSONArrayField(url, jsonArrayImageKeys)
-		}},
+		{name: "主题相关", fn: c.themeRepo.ExistsByFileURL},
 		{name: "用户头像", fn: c.userRepo.ExistsByAvatar},
-		{name: "菜单图标", fn: c.menuRepo.ExistsByIcon},
 		{name: "反馈附件", fn: c.feedbackRepo.ExistsByAttachmentURL},
 		{name: "评论内容", fn: c.commentRepo.ExistsByContentURL},
 	}

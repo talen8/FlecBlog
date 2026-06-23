@@ -316,10 +316,10 @@ const fetchSiteSettings = async () => {
 
 // 作者名称和头像（从系统设置获取）
 const authorInfo = computed(() => {
-  const authorName = basicSettings.value['basic.author'] || '';
+  const authorName = basicSettings.value['author'] || '';
   return {
     name: `@${authorName}`,
-    avatar: basicSettings.value['basic.author_avatar'] || '',
+    avatar: basicSettings.value['author_avatar'] || '',
   };
 });
 

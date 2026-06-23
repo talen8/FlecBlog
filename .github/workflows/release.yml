@@ -20,7 +20,7 @@ jobs:
             output_dir: dist
           - target: blog
             image_name: flec-blog
-            context: ./blog
+            context: ./blog/default
             output_dir: .output
           - target: server
             image_name: flec-server
@@ -156,17 +156,6 @@ jobs:
           name: server-dist
           path: server/dist/
 
-      - name: 下载 Blog 前端产物
-        uses: actions/download-artifact@v8
-        with:
-          name: blog-frontend-dist
-          path: blog-frontend/dist/
-
-      - name: 下载 Admin 前端产物
-        uses: actions/download-artifact@v8
-        with:
-          name: admin-frontend-dist
-          path: admin-frontend/dist/
 
       - name: 生成 Changelog
         id: changelog
@@ -219,5 +208,3 @@ jobs:
           generate_release_notes: false
           files: |
             server/dist/*.tar.gz
-            blog-frontend/dist/*.tar.gz
-            admin-frontend/dist/*.tar.gz

@@ -80,7 +80,7 @@ func (s *VerificationService) SendPasswordReset(req *dto.ForgotPasswordRequest) 
 	tmplMgr := email.GetGlobalTemplateManager()
 	htmlBody, err := tmplMgr.Render("password_reset", map[string]interface{}{
 		"Code":     code,
-		"SiteName": s.config.Blog.Title,
+		"SiteName": s.config.Basic.Title,
 		"SiteURL":  s.config.Basic.BlogURL,
 	})
 	if err != nil {
@@ -88,7 +88,7 @@ func (s *VerificationService) SendPasswordReset(req *dto.ForgotPasswordRequest) 
 	}
 
 	// 发送邮件
-	subject := "[" + s.config.Blog.Title + "] 重置密码"
+	subject := "[" + s.config.Basic.Title + "] 重置密码"
 	if err := s.emailClient.SendEmail(req.Email, subject, htmlBody, ""); err != nil {
 		return err
 	}

@@ -1,0 +1,34 @@
+{
+  "name": "@flecblog/theme-default",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "type-check": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@flecblog/core-nuxt": "^0.5.0",
+    "medium-zoom": "^1.1.0",
+    "nuxt": "^4.4.8",
+    "vue": "^3.5.29"
+  },
+  "devDependencies": {
+    "@nuxt/eslint-config": "^1.0.0",
+    "@nuxtjs/critters": "^0.9.0",
+    "@types/node": "^25.3.2",
+    "@vite-pwa/nuxt": "^1.1.1",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.2",
+    "sass": "^1.97.3",
+    "typescript": "^5.9.3",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vue-tsc": "^3.2.9"
+  }
+}

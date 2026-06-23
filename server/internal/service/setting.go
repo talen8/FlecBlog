@@ -1,8 +1,6 @@
 package service
 
 import (
-	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -21,133 +19,93 @@ import (
 
 // 配置键常量 - Basic 相关
 const (
-	KeyBasicAuthor       = "basic.author"        // 站长姓名
-	KeyBasicAuthorEmail  = "basic.author_email"  // 站长邮箱
-	KeyBasicAuthorDesc   = "basic.author_desc"   // 站长简介
-	KeyBasicAuthorAvatar = "basic.author_avatar" // 站长头像
-	KeyBasicAuthorPhoto  = "basic.author_photo"  // 站长形象
-	KeyBasicICP          = "basic.icp"           // ICP备案号
-	KeyBasicPoliceRecord = "basic.police_record" // 公安备案号
-	KeyBasicAdminURL     = "basic.admin_url"     // 管理地址
-	KeyBasicBlogURL      = "basic.blog_url"      // 博客地址
-	KeyBasicHomeURL      = "basic.home_url"      // 主页地址
-)
-
-// 配置键常量 - Blog 相关
-//
-//goland:noinspection ALL
-const (
-	KeyBlogTitle             = "blog.title"               // 博客标题
-	KeyBlogSubtitle          = "blog.subtitle"            // 博客副标题
-	KeyBlogSlogan            = "blog.slogan"              // 博客标语
-	KeyBlogDescription       = "blog.description"         // 博客描述
-	KeyBlogKeywords          = "blog.keywords"            // 博客关键词
-	KeyBlogEstablished       = "blog.established"         // 建站日期
-	KeyBlogFavicon           = "blog.favicon"             // 网站Favicon
-	KeyBlogBackgroundImage   = "blog.background_image"    // 背景图片
-	KeyBlogScreenshot        = "blog.screenshot"          // 站点截图
-	KeyBlogAnnouncement      = "blog.announcement"        // 公告内容
-	KeyBlogTypingTexts       = "blog.typing_texts"        // 打字机效果文本（JSON数组）
-	KeyBlogSidebarSocial     = "blog.sidebar_social"      // 侧边社交媒体（JSON数组）
-	KeyBlogFooterSocial      = "blog.footer_social"       // 页脚社交媒体（JSON数组）
-	KeyBlogFooterLinks       = "blog.footer_links"        // 页脚右侧链接（JSON数组）
-	KeyBlogAboutDescribe     = "blog.about_describe"      // 个人描述
-	KeyBlogAboutDescribeTips = "blog.about_describe_tips" // 描述提示
-	KeyBlogAboutExhibition   = "blog.about_exhibition"    // 展览图片URL
-	KeyBlogAboutProfile      = "blog.about_profile"       // 个人资料（JSON数组）
-	KeyBlogAboutPersonality  = "blog.about_personality"   // 性格类型代码（如 INFJ-A）
-	KeyBlogAboutMottoMain    = "blog.about_motto_main"    // 座右铭（JSON数组）
-	KeyBlogAboutMottoSub     = "blog.about_motto_sub"     // 一言
-	KeyBlogAboutSocialize    = "blog.about_socialize"     // 联系方式（JSON数组）
-	KeyBlogAboutCreation     = "blog.about_creation"      // 创作平台（JSON数组）
-	KeyBlogAboutVersions     = "blog.about_versions"      // 版本信息（JSON数组）
-	KeyBlogAboutUnions       = "blog.about_unions"        // 站长联盟（JSON数组）
-	KeyBlogAboutStory        = "blog.about_story"         // 心路历程
-	KeyBlogCustomHead        = "blog.custom_head"         // 自定义 Head 代码
-	KeyBlogCustomBody        = "blog.custom_body"         // 自定义 Body 代码
-	KeyBlogEmojis            = "blog.emojis"              // 表情包配置
-	KeyBlogFont              = "blog.font"                // 字体配置（URL|字体名称）
-	KeyBlogMomentsSize       = "blog.moments_size"        // 动态列表每页数量
-	KeyBlogMessageContent    = "blog.message_content"     // 留言信内容
-	KeyBlogHomeLayout        = "blog.home_layout"         // 首页布局（waterfall/single_column）
-	KeyBlogDonationMethods   = "blog.donation_methods"    // 赞赏方式（JSON数组）
-	KeyBlogThemeLightStart   = "blog.theme_light_start"   // 日间主题开始时间（HH:MM）
-	KeyBlogThemeDarkStart    = "blog.theme_dark_start"    // 夜间主题开始时间（HH:MM）
-	KeyBlogWechatQRCode      = "blog.wechat_qrcode"       // 公众号二维码图片URL
-	KeyBlogWechatName        = "blog.wechat_name"         // 公众号名称
-	KeyBlogMetingAPI         = "blog.meting_api"          // Meting-API 地址
-	KeyBlogCravatarURL       = "blog.cravatar_url"        // 头像服务 URL（%s 为邮箱哈希）
-	KeyBlogIPApiURL          = "blog.ip_api_url"          // IP 归属地查询 URL（%s 为 IP）
-	KeyBlogCoverMakerAPI     = "blog.cover_maker_api"     // 封面制作图片源 API
+	KeyBasicAuthor        = "author"          // 站长姓名
+	KeyBasicAuthorAvatar  = "author_avatar"   // 站长头像
+	KeyBasicICP           = "icp"             // ICP备案号
+	KeyBasicPoliceRecord  = "police_record"   // 公安备案号
+	KeyBasicAdminURL      = "admin_url"       // 管理地址
+	KeyBasicBlogURL       = "blog_url"        // 博客地址
+	KeyBasicTitle         = "title"           // 博客标题
+	KeyBasicSubtitle      = "subtitle"        // 博客副标题
+	KeyBasicDescription   = "description"     // 博客描述
+	KeyBasicKeywords      = "keywords"        // 博客关键词
+	KeyBasicFavicon       = "favicon"         // 网站Favicon
+	KeyBasicCustomHead    = "custom_head"     // 自定义 Head 代码
+	KeyBasicCustomBody    = "custom_body"     // 自定义 Body 代码
+	KeyBasicEmojis        = "emojis"          // 表情包配置
+	KeyBasicMetingAPI     = "meting_api"      // Meting-API 地址
+	KeyBasicCravatarURL   = "cravatar_url"    // 头像服务 URL（%s 为邮箱哈希）
+	KeyBasicIPApiURL      = "ip_api_url"      // IP 归属地查询 URL（%s 为 IP）
+	KeyBasicCoverMakerAPI = "cover_maker_api" // 封面制作图片源 API
 )
 
 // 配置键常量 - Notification 相关
 const (
-	KeyNotificationEmailHost     = "notification.email_host"
-	KeyNotificationEmailPort     = "notification.email_port"
-	KeyNotificationEmailSecure   = "notification.email_secure"
-	KeyNotificationEmailUsername = "notification.email_username"
-	KeyNotificationEmailFrom     = "notification.email_from"
-	KeyNotificationEmailPassword = "notification.email_password"
-	KeyNotificationFeishuAppID   = "notification.feishu_app_id"
-	KeyNotificationFeishuSecret  = "notification.feishu_secret"
-	KeyNotificationFeishuChatID  = "notification.feishu_chat_id"
+	KeyNotificationEmailHost     = "email_host"
+	KeyNotificationEmailPort     = "email_port"
+	KeyNotificationEmailSecure   = "email_secure"
+	KeyNotificationEmailUsername = "email_username"
+	KeyNotificationEmailFrom     = "email_from"
+	KeyNotificationEmailPassword = "email_password"
+	KeyNotificationFeishuAppID   = "feishu_app_id"
+	KeyNotificationFeishuSecret  = "feishu_secret"
+	KeyNotificationFeishuChatID  = "feishu_chat_id"
 )
 
 // 配置键常量 - Upload 相关
 const (
-	KeyUploadStorageType = "upload.storage_type"
-	KeyUploadMaxFileSize = "upload.max_file_size"
-	KeyUploadPathPattern = "upload.path_pattern"
-	KeyUploadAccessKey   = "upload.access_key"
-	KeyUploadSecretKey   = "upload.secret_key"
-	KeyUploadRegion      = "upload.region"
-	KeyUploadBucket      = "upload.bucket"
-	KeyUploadEndpoint    = "upload.endpoint"
-	KeyUploadDomain      = "upload.domain"
-	KeyUploadUseSSL      = "upload.use_ssl"
+	KeyUploadStorageType = "storage_type"
+	KeyUploadMaxFileSize = "max_file_size"
+	KeyUploadPathPattern = "path_pattern"
+	KeyUploadAccessKey   = "access_key"
+	KeyUploadSecretKey   = "secret_key"
+	KeyUploadRegion      = "region"
+	KeyUploadBucket      = "bucket"
+	KeyUploadEndpoint    = "endpoint"
+	KeyUploadDomain      = "domain"
+	KeyUploadUseSSL      = "use_ssl"
 )
 
 // 配置键常量 - AI 相关
 const (
-	KeyAIBaseURL         = "ai.base_url"
-	KeyAIAPIKey          = "ai.api_key"
-	KeyAIModel           = "ai.model"
-	KeyAISummaryPrompt   = "ai.summary_prompt"
-	KeyAIAISummaryPrompt = "ai.ai_summary_prompt"
-	KeyAITitlePrompt     = "ai.title_prompt"
-	KeyAIMCPSecret       = "ai.mcp_secret"
+	KeyAIBaseURL         = "base_url"
+	KeyAIAPIKey          = "api_key"
+	KeyAIModel           = "model"
+	KeyAISummaryPrompt   = "summary_prompt"
+	KeyAIAISummaryPrompt = "ai_summary_prompt"
+	KeyAITitlePrompt     = "title_prompt"
+	KeyAIMCPSecret       = "mcp_secret"
 )
 
 // 配置键常量 - OAuth 相关
 // #nosec G101 - 这些是配置项键名，不是实际凭证
 const (
-	KeyOAuthGithubEnabled         = "oauth.github.enabled"
-	KeyOAuthGithubClientID        = "oauth.github.client_id"
-	KeyOAuthGithubClientSecret    = "oauth.github.client_secret" // #nosec G101 - 配置键名
-	KeyOAuthGithubRedirectURL     = "oauth.github.redirect_url"
-	KeyOAuthGoogleEnabled         = "oauth.google.enabled"
-	KeyOAuthGoogleClientID        = "oauth.google.client_id"
-	KeyOAuthGoogleClientSecret    = "oauth.google.client_secret" // #nosec G101 - 配置键名
-	KeyOAuthGoogleRedirectURL     = "oauth.google.redirect_url"
-	KeyOAuthQQEnabled             = "oauth.qq.enabled"
-	KeyOAuthQQClientID            = "oauth.qq.client_id"     // QQ AppID
-	KeyOAuthQQClientSecret        = "oauth.qq.client_secret" // QQ AppKey #nosec G101 - 配置键名
-	KeyOAuthQQRedirectURL         = "oauth.qq.redirect_url"
-	KeyOAuthMicrosoftEnabled      = "oauth.microsoft.enabled"
-	KeyOAuthMicrosoftClientID     = "oauth.microsoft.client_id"
-	KeyOAuthMicrosoftClientSecret = "oauth.microsoft.client_secret"
-	KeyOAuthMicrosoftRedirectURL  = "oauth.microsoft.redirect_url"
-	KeyOAuthOIDCEnabled           = "oauth.oidc.enabled"
-	KeyOAuthOIDCIssuerURL         = "oauth.oidc.issuer_url"
-	KeyOAuthOIDCClientID          = "oauth.oidc.client_id"
-	KeyOAuthOIDCClientSecret      = "oauth.oidc.client_secret"
-	KeyOAuthOIDCRedirectURL       = "oauth.oidc.redirect_url"
-	KeyOAuthSessionSecret         = "oauth.session_secret" // Session 加密密钥
-	KeyOAuthWechatEnabled         = "oauth.wechat.enabled" // 微信小程序是否启用
-	KeyOAuthWechatAppID           = "oauth.wechat.appid"   // 微信小程序 AppID
-	KeyOAuthWechatSecret          = "oauth.wechat.secret"  // 微信小程序 AppSecret
-	KeyOAuthWorkerProxy           = "oauth.worker_proxy"   // OAuth Worker 代理地址
+	KeyOAuthGithubEnabled         = "github.enabled"
+	KeyOAuthGithubClientID        = "github.client_id"
+	KeyOAuthGithubClientSecret    = "github.client_secret" // #nosec G101 - 配置键名
+	KeyOAuthGithubRedirectURL     = "github.redirect_url"
+	KeyOAuthGoogleEnabled         = "google.enabled"
+	KeyOAuthGoogleClientID        = "google.client_id"
+	KeyOAuthGoogleClientSecret    = "google.client_secret" // #nosec G101 - 配置键名
+	KeyOAuthGoogleRedirectURL     = "google.redirect_url"
+	KeyOAuthQQEnabled             = "qq.enabled"
+	KeyOAuthQQClientID            = "qq.client_id"     // QQ AppID
+	KeyOAuthQQClientSecret        = "qq.client_secret" // QQ AppKey #nosec G101 - 配置键名
+	KeyOAuthQQRedirectURL         = "qq.redirect_url"
+	KeyOAuthMicrosoftEnabled      = "microsoft.enabled"
+	KeyOAuthMicrosoftClientID     = "microsoft.client_id"
+	KeyOAuthMicrosoftClientSecret = "microsoft.client_secret"
+	KeyOAuthMicrosoftRedirectURL  = "microsoft.redirect_url"
+	KeyOAuthOIDCEnabled           = "oidc.enabled"
+	KeyOAuthOIDCIssuerURL         = "oidc.issuer_url"
+	KeyOAuthOIDCClientID          = "oidc.client_id"
+	KeyOAuthOIDCClientSecret      = "oidc.client_secret"
+	KeyOAuthOIDCRedirectURL       = "oidc.redirect_url"
+	KeyOAuthSessionSecret         = "session_secret" // Session 加密密钥
+	KeyOAuthWechatEnabled         = "wechat.enabled" // 微信小程序是否启用
+	KeyOAuthWechatAppID           = "wechat.appid"   // 微信小程序 AppID
+	KeyOAuthWechatSecret          = "wechat.secret"  // 微信小程序 AppSecret
+	KeyOAuthWorkerProxy           = "worker_proxy"   // OAuth Worker 代理地址
 )
 
 // SettingService 配置服务
@@ -234,12 +192,8 @@ func (s *SettingService) ResetMCPSecret() (string, error) {
 
 // UpdateGroup 更新某个分组的配置（patch 方式），更新后自动重载
 func (s *SettingService) UpdateGroup(group string, updates map[string]string) error {
-	if err := validateSettingGroupUpdates(group, updates); err != nil {
-		return err
-	}
-
 	var oldSettings map[string]string
-	if s.fileService != nil && (group == model.SettingGroupBasic || group == model.SettingGroupBlog) {
+	if s.fileService != nil && group == model.SettingGroupBasic {
 		settings, err := s.repo.GetByGroup(group)
 		if err == nil {
 			oldSettings = settings
@@ -271,53 +225,7 @@ func (s *SettingService) UpdateGroup(group string, updates map[string]string) er
 
 		if group == model.SettingGroupBasic {
 			handleImageChange(KeyBasicAuthorAvatar)
-			handleImageChange(KeyBasicAuthorPhoto)
-		}
-		if group == model.SettingGroupBlog {
-			handleImageChange(KeyBlogFavicon)
-			handleImageChange(KeyBlogBackgroundImage)
-			handleImageChange(KeyBlogAboutExhibition)
-			handleImageChange(KeyBlogScreenshot)
-			// 处理公众号二维码变化（使用特定上传类型）
-			if newVal, ok := updates[KeyBlogWechatQRCode]; ok {
-				oldVal := oldSettings[KeyBlogWechatQRCode]
-				if oldVal != newVal {
-					if oldVal != "" {
-						_ = s.fileService.MarkAsUnused(oldVal)
-					}
-					if newVal != "" {
-						_ = s.fileService.MarkAsUsedWithType(newVal, "微信订阅")
-					}
-				}
-			}
-			// 处理赞赏图片变化
-			if newVal, ok := updates[KeyBlogDonationMethods]; ok {
-				oldVal := oldSettings[KeyBlogDonationMethods]
-				// 提取URL
-				extractURLs := func(jsonStr string) []string {
-					if jsonStr == "" {
-						return nil
-					}
-					var items []map[string]interface{}
-					if err := json.Unmarshal([]byte(jsonStr), &items); err != nil {
-						return nil
-					}
-					var urls []string
-					for _, item := range items {
-						if u, ok := item["qrcode"].(string); ok && u != "" {
-							urls = append(urls, u)
-						}
-					}
-					return urls
-				}
-				// 旧的标记未使用，新的标记已使用
-				for _, u := range extractURLs(oldVal) {
-					_ = s.fileService.MarkAsUnused(u)
-				}
-				for _, u := range extractURLs(newVal) {
-					_ = s.fileService.MarkAsUsed(u)
-				}
-			}
+			handleImageChange(KeyBasicFavicon)
 		}
 	}
 
@@ -328,16 +236,6 @@ func (s *SettingService) UpdateGroup(group string, updates map[string]string) er
 		return s.ApplyDatabaseConfig(s.config)
 	}
 
-	return nil
-}
-
-// validateSettingGroupUpdates 校验配置项是否都属于指定分组
-func validateSettingGroupUpdates(group string, updates map[string]string) error {
-	for key := range updates {
-		if !strings.HasPrefix(key, group+".") {
-			return fmt.Errorf("配置项 %s 不属于分组 %s", key, group)
-		}
-	}
 	return nil
 }
 
@@ -356,17 +254,8 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 		if v, ok := basicSettings[KeyBasicAuthor]; ok && v != "" {
 			cfg.Basic.Author = v
 		}
-		if v, ok := basicSettings[KeyBasicAuthorEmail]; ok && v != "" {
-			cfg.Basic.AuthorEmail = v
-		}
-		if v, ok := basicSettings[KeyBasicAuthorDesc]; ok && v != "" {
-			cfg.Basic.AuthorDesc = v
-		}
 		if v, ok := basicSettings[KeyBasicAuthorAvatar]; ok && v != "" {
 			cfg.Basic.AuthorAvatar = v
-		}
-		if v, ok := basicSettings[KeyBasicAuthorPhoto]; ok && v != "" {
-			cfg.Basic.AuthorPhoto = v
 		}
 		if v, ok := basicSettings[KeyBasicICP]; ok && v != "" {
 			cfg.Basic.ICP = v
@@ -380,99 +269,43 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 		if v, ok := basicSettings[KeyBasicBlogURL]; ok && v != "" {
 			cfg.Basic.BlogURL = strings.TrimRight(v, "/")
 		}
-		if v, ok := basicSettings[KeyBasicHomeURL]; ok && v != "" {
-			cfg.Basic.HomeURL = strings.TrimRight(v, "/")
+		if v, ok := basicSettings[KeyBasicTitle]; ok && v != "" {
+			cfg.Basic.Title = v
 		}
-	}
-
-	// 加载 Blog 配置
-	blogSettings, err := s.repo.GetByGroup(model.SettingGroupBlog)
-	if err != nil {
-		return err
-	}
-	if len(blogSettings) > 0 {
-		if v, ok := blogSettings[KeyBlogTitle]; ok && v != "" {
-			cfg.Blog.Title = v
+		if v, ok := basicSettings[KeyBasicSubtitle]; ok && v != "" {
+			cfg.Basic.Subtitle = v
 		}
-		if v, ok := blogSettings[KeyBlogSubtitle]; ok && v != "" {
-			cfg.Blog.Subtitle = v
+		if v, ok := basicSettings[KeyBasicDescription]; ok && v != "" {
+			cfg.Basic.Description = v
 		}
-		if v, ok := blogSettings[KeyBlogSlogan]; ok && v != "" {
-			cfg.Blog.Slogan = v
+		if v, ok := basicSettings[KeyBasicKeywords]; ok && v != "" {
+			cfg.Basic.Keywords = v
 		}
-		if v, ok := blogSettings[KeyBlogDescription]; ok && v != "" {
-			cfg.Blog.Description = v
+		if v, ok := basicSettings[KeyBasicFavicon]; ok && v != "" {
+			cfg.Basic.Favicon = v
 		}
-		if v, ok := blogSettings[KeyBlogKeywords]; ok && v != "" {
-			cfg.Blog.Keywords = v
+		if v, ok := basicSettings[KeyBasicCustomHead]; ok && v != "" {
+			cfg.Basic.CustomHead = v
 		}
-		if v, ok := blogSettings[KeyBlogEstablished]; ok && v != "" {
-			cfg.Blog.Established = v
+		if v, ok := basicSettings[KeyBasicCustomBody]; ok && v != "" {
+			cfg.Basic.CustomBody = v
 		}
-		if v, ok := blogSettings[KeyBlogFavicon]; ok && v != "" {
-			cfg.Blog.Favicon = v
+		if v, ok := basicSettings[KeyBasicEmojis]; ok && v != "" {
+			cfg.Basic.Emojis = v
 		}
-		if v, ok := blogSettings[KeyBlogBackgroundImage]; ok && v != "" {
-			cfg.Blog.BackgroundImage = v
+		if v, ok := basicSettings[KeyBasicMetingAPI]; ok && v != "" {
+			cfg.Basic.MetingAPI = v
 		}
-		if v, ok := blogSettings[KeyBlogScreenshot]; ok && v != "" {
-			cfg.Blog.Screenshot = v
-		}
-		if v, ok := blogSettings[KeyBlogAnnouncement]; ok {
-			cfg.Blog.Announcement = v
-		}
-		if v, ok := blogSettings[KeyBlogCustomHead]; ok && v != "" {
-			cfg.Blog.CustomHead = v
-		}
-		if v, ok := blogSettings[KeyBlogCustomBody]; ok && v != "" {
-			cfg.Blog.CustomBody = v
-		}
-		if v, ok := blogSettings[KeyBlogEmojis]; ok && v != "" {
-			cfg.Blog.Emojis = v
-		}
-		if v, ok := blogSettings[KeyBlogFont]; ok && v != "" {
-			cfg.Blog.Font = v
-		}
-		cfg.Blog.MomentsSize = 30
-		if v, ok := blogSettings[KeyBlogMomentsSize]; ok && v != "" {
-			if size, err := strconv.Atoi(v); err == nil && size > 0 {
-				cfg.Blog.MomentsSize = size
-			}
-		}
-		if v, ok := blogSettings[KeyBlogMessageContent]; ok && v != "" {
-			cfg.Blog.MessageContent = v
-		}
-		cfg.Blog.HomeLayout = "waterfall"
-		if v, ok := blogSettings[KeyBlogHomeLayout]; ok && v != "" {
-			cfg.Blog.HomeLayout = v
-		}
-		cfg.Blog.ThemeLightStart = "06:00"
-		if v, ok := blogSettings[KeyBlogThemeLightStart]; ok && v != "" {
-			cfg.Blog.ThemeLightStart = v
-		}
-		cfg.Blog.ThemeDarkStart = "18:00"
-		if v, ok := blogSettings[KeyBlogThemeDarkStart]; ok && v != "" {
-			cfg.Blog.ThemeDarkStart = v
-		}
-		if v, ok := blogSettings[KeyBlogWechatQRCode]; ok && v != "" {
-			cfg.Blog.WechatQRCode = v
-		}
-		if v, ok := blogSettings[KeyBlogWechatName]; ok && v != "" {
-			cfg.Blog.WechatName = v
-		}
-		if v, ok := blogSettings[KeyBlogMetingAPI]; ok && v != "" {
-			cfg.Blog.MetingAPI = v
-		}
-		if v, ok := blogSettings[KeyBlogCravatarURL]; ok && v != "" {
-			cfg.Blog.CravatarURL = v
+		if v, ok := basicSettings[KeyBasicCravatarURL]; ok && v != "" {
+			cfg.Basic.CravatarURL = v
 			utils.SetCravatarURL(v)
 		}
-		if v, ok := blogSettings[KeyBlogIPApiURL]; ok && v != "" {
-			cfg.Blog.IPApiURL = v
+		if v, ok := basicSettings[KeyBasicIPApiURL]; ok && v != "" {
+			cfg.Basic.IPApiURL = v
 			utils.SetIPApiURL(v)
 		}
-		if v, ok := blogSettings[KeyBlogCoverMakerAPI]; ok && v != "" {
-			cfg.Blog.CoverMakerAPI = v
+		if v, ok := basicSettings[KeyBasicCoverMakerAPI]; ok && v != "" {
+			cfg.Basic.CoverMakerAPI = v
 		}
 	}
 

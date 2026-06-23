@@ -138,12 +138,12 @@ Page({
 
     // 只显示在管理端开启了的 OAuth 提供商
     const providerConfigMap: Record<string, string> = {
-      github: 'oauth.github.enabled',
-      google: 'oauth.google.enabled',
-      qq: 'oauth.qq.enabled',
-      microsoft: 'oauth.microsoft.enabled',
-      oidc: 'oauth.oidc.enabled',
-      wechat: 'oauth.wechat.enabled',
+      github: 'github.enabled',
+      google: 'google.enabled',
+      qq: 'qq.enabled',
+      microsoft: 'microsoft.enabled',
+      oidc: 'oidc.enabled',
+      wechat: 'wechat.enabled',
     };
 
     Object.entries(providerConfigMap).forEach(([provider, configKey]) => {

@@ -1,0 +1,26 @@
+name: Publish Packages
+on:
+  push:
+    tags:
+      - 'pkg-*-v*'
+      # pkg-core-nuxt-v*
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish
+        run: |
+          TAG="${GITHUB_REF_NAME#pkg-}"
+          NAME="${TAG%-v*}"
+          VERSION="${TAG##*-v}"
+          cd "packages/${NAME}"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

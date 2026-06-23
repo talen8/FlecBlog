@@ -54,8 +54,8 @@ func (c *RSSController) GetRSSFeed(ctx *gin.Context) {
 	if baseURL != "" {
 		canonicalURL = baseURL + "/"
 	}
-	siteName := c.config.Blog.Title
-	siteDescription := c.config.Blog.Description
+	siteName := c.config.Basic.Title
+	siteDescription := c.config.Basic.Description
 	fallbackTime := time.Now().UTC().Truncate(time.Second)
 
 	sort.SliceStable(articles, func(i, j int) bool {

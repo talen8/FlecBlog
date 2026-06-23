@@ -1,0 +1,62 @@
+{
+  "name": "@flecblog/core-nuxt",
+  "version": "0.5.0",
+  "description": "FlecBlog Core - Nuxt Layer for theme development",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./types/index.ts",
+      "import": "./nuxt.config.ts"
+    },
+    "./types/*": "./types/*"
+  },
+  "main": "./nuxt.config.ts",
+  "types": "./types/index.ts",
+  "files": [
+    "app",
+    "types",
+    "plugins",
+    "server",
+    "assets",
+    "nuxt.config.ts"
+  ],
+  "keywords": [
+    "flecblog",
+    "nuxt",
+    "layer",
+    "theme"
+  ],
+  "author": "FlecBlog",
+  "license": "MIT",
+  "peerDependencies": {
+    "nuxt": "^4.0.0",
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@nuxt/image": "^2.0.0",
+    "@nuxtjs/seo": "^5.3.0",
+    "@traptitech/markdown-it-katex": "^3.6.0",
+    "@vueuse/core": "^14.3.0",
+    "@vueuse/nuxt": "^14.3.0",
+    "dayjs": "^1.11.13",
+    "dompurify": "^3.3.1",
+    "entities": "^7.0.1",
+    "highlight.js": "^11.11.1",
+    "isomorphic-dompurify": "^3.0.0",
+    "katex": "^0.16.45",
+    "markdown-it": "^14.1.1",
+    "markdown-it-anchor": "^9.2.0",
+    "markdown-it-kbd": "^3.0.2",
+    "markdown-it-link-attributes": "^4.0.1",
+    "markdown-it-mark": "^4.0.0",
+    "markdown-it-plugin-underline": "^0.0.1",
+    "markdown-it-sub": "^2.0.0",
+    "markdown-it-sup": "^2.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "mermaid": "^11.12.3",
+    "remixicon": "^4.9.1"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2"
+  }
+}

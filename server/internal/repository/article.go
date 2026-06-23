@@ -113,7 +113,7 @@ func (r *ArticleRepository) GetBySlug(slug string) (*model.Article, error) {
 	var article model.Article
 	if err := r.db.Preload("Category").
 		Preload("Tags").
-		Where("slug = ?", slug).First(&article).Error; err != nil {
+		Where("slug = ? AND is_publish = ?", slug, true).First(&article).Error; err != nil {
 		return nil, err
 	}
 	return &article, nil

@@ -83,20 +83,6 @@ export interface SiteBasicConfig {
   blog_url: string;
 }
 
-export interface BlogConfig {
-  title: string;
-  established: string;
-  about_describe: string;
-  about_describe_tips: string;
-  about_profile: string;
-  about_personality: string;
-  about_motto_main: string;
-  about_motto_sub: string;
-  about_versions: string;
-  about_unions: string;
-  about_story: string;
-}
-
 // ==================== 动态相关类型 ====================
 
 export interface MomentVideo {
@@ -136,12 +122,12 @@ export interface MomentListItem {
 // ==================== 配置相关类型 ====================
 
 export interface OAuthConfig {
-  'oauth.github.enabled': string;
-  'oauth.google.enabled': string;
-  'oauth.qq.enabled': string;
-  'oauth.microsoft.enabled': string;
-  'oauth.oidc.enabled': string;
-  'oauth.wechat.enabled': string;
+  'github.enabled': string;
+  'google.enabled': string;
+  'qq.enabled': string;
+  'microsoft.enabled': string;
+  'oidc.enabled': string;
+  'wechat.enabled': string;
 }
 
 export interface SiteStats {

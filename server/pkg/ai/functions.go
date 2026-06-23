@@ -130,13 +130,33 @@ func (c *OpenAIClient) Test() error {
 // GenerateSummary 生成文章摘要（50-100字，创作者角度）
 func (c *OpenAIClient) GenerateSummary(content string) (string, error) {
 	prompt := resolvePrompt(c.SummaryPrompt, defaultSummaryPrompt) + "\n\n文章内容：\n" + content
-	return c.callOpenAI(prompt)
+	for i := 0; i < 3; i++ {
+		result, err := c.callOpenAI(prompt)
+		if err != nil {
+			return "", err
+		}
+		summary := strings.TrimSpace(result)
+		if summary != "" && len([]rune(summary)) <= 150 {
+			return summary, nil
+		}
+	}
+	return "", fmt.Errorf("未能生成符合要求的摘要")
 }
 
 // GenerateAISummary 生成AI摘要（150-200字，旁观者角度）
 func (c *OpenAIClient) GenerateAISummary(content string) (string, error) {
 	prompt := resolvePrompt(c.AISummaryPrompt, defaultAISummaryPrompt) + "\n\n文章内容：\n" + content
-	return c.callOpenAI(prompt)
+	for i := 0; i < 3; i++ {
+		result, err := c.callOpenAI(prompt)
+		if err != nil {
+			return "", err
+		}
+		summary := strings.TrimSpace(result)
+		if summary != "" && len([]rune(summary)) <= 300 {
+			return summary, nil
+		}
+	}
+	return "", fmt.Errorf("未能生成符合要求的AI摘要")
 }
 
 // GenerateTitle 生成标题

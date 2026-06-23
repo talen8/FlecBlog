@@ -39,12 +39,12 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	statsRepo := repository.NewStatsRepository(db.DB)
 	friendRepo := repository.NewFriendRepository(db.DB)
 	momentRepo := repository.NewMomentRepository(db.DB)
-	menuRepo := repository.NewMenuRepository(db.DB)
 	notificationRepo := repository.NewNotificationRepository(db.DB)
 	feedbackRepo := repository.NewFeedbackRepository(db.DB)
 	subscriberRepo := repository.NewSubscriberRepository(db.DB)
 	rssFeedRepo := repository.NewRssFeedRepository(db.DB)
 	settingRepo := repository.NewSettingRepository(db.DB)
+	themeRepo := repository.NewThemeRepository(db.DB)
 
 	// 初始化上传系统
 	uploadManager := upload.InitializeUploadSystem(conf)
@@ -64,7 +64,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	// Swagger API文档
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	fileService := service.NewFileService(fileRepo, uploadManager)
-	fileUsageChecker := service.NewFileUsageChecker(articleRepo, friendRepo, momentRepo, settingRepo, userRepo, menuRepo, feedbackRepo, commentRepo)
+	fileUsageChecker := service.NewFileUsageChecker(articleRepo, friendRepo, momentRepo, settingRepo, userRepo, themeRepo, feedbackRepo, commentRepo)
 	fileService.SetUsageChecker(fileUsageChecker)
 
 	// 初始化服务
@@ -81,7 +81,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	statsService := service.NewStatsService(statsRepo, conf)
 	friendService := service.NewFriendService(friendRepo, fileService, notificationService)
 	momentService := service.NewMomentService(momentRepo, fileService)
-	menuService := service.NewMenuService(menuRepo, fileService)
+	themeService := service.NewThemeService(db.DB, themeRepo, fileService)
 	feedbackService := service.NewFeedbackService(feedbackRepo, notificationService, fileService)
 	subscriberService := service.NewSubscriberService(subscriberRepo, emailClient, conf)
 	rssFeedService := service.NewRssFeedService(rssFeedRepo, notificationService)
@@ -105,7 +105,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	statsHandler := v1.NewStatsHandler(statsService)
 	friendController := v1.NewFriendController(friendService)
 	momentController := v1.NewMomentController(momentService)
-	menuHandler := v1.NewMenuHandler(menuService)
+	themeHandler := v1.NewThemeHandler(themeService)
 	notificationController := v1.NewNotificationController(notificationService)
 	feedbackHandler := v1.NewFeedbackHandler(feedbackService)
 	subscriberHandler := v1.NewSubscriberHandler(subscriberService)
@@ -230,9 +230,12 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 			momentGroup.GET("", momentController.ListForWeb) // 获取动态列表
 		}
 
-		// ==================== 菜单相关 ====================
-		// 公开接口：获取菜单树（支持按类型筛选）
-		frontendAPI.GET("/menus", menuHandler.ListForWeb)
+		// ==================== 主题相关 ====================
+		themeGroup := frontendAPI.Group("/themes")
+		{
+			themeGroup.GET("", themeHandler.GetActive)       // 获取当前激活主题
+			themeGroup.POST("/_sync", themeHandler.SyncMeta) // 同步主题镜像元数据
+		}
 
 		// ==================== 评论相关 ====================
 		commentGroup := frontendAPI.Group("/comments")
@@ -401,14 +404,13 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 			statsManagement.GET("/visits", statsHandler.GetVisitLogs)                 // 获取访问日志
 		}
 
-		// ==================== 菜单管理 ====================
-		menuManagement := adminAPI.Group("/menus")
+		// ==================== 主题管理 ====================
+		themeManagement := adminAPI.Group("/themes")
 		{
-			menuManagement.GET("", menuHandler.List)          // 获取菜单树
-			menuManagement.GET("/:id", menuHandler.Get)       // 获取菜单详情
-			menuManagement.POST("", menuHandler.Create)       // 创建菜单
-			menuManagement.PUT("/:id", menuHandler.Update)    // 更新菜单
-			menuManagement.DELETE("/:id", menuHandler.Delete) // 删除菜单
+			themeManagement.GET("", themeHandler.List)                      // 获取主题列表
+			themeManagement.GET("/:slug", themeHandler.Get)                 // 获取主题详情
+			themeManagement.PUT("/:slug/config", themeHandler.UpdateConfig) // 更新主题配置
+			themeManagement.PUT("/:slug/menus", themeHandler.UpdateMenus)   // 更新主题菜单
 		}
 
 		// ==================== 反馈管理 ====================

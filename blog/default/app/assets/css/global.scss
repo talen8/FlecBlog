@@ -1,0 +1,68 @@
+// 导入可复用的 mixins 和样式类
+@use 'mixins' as *;
+
+@font-face {
+  font-family: 'LXGW WenKai Lite';
+  src: url('../font/LXGWWenKaiLite-Medium.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family:
+    'LXGW WenKai Lite',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 2;
+  color: var(--font-color);
+}
+
+// 文本选中
+::selection {
+  background: var(--theme-color);
+  color: #fff;
+}
+
+// 焦点样式
+:focus-visible {
+  outline: 2px solid var(--theme-color);
+  outline-offset: 2px;
+}
+
+// 平滑滚动
+html {
+  scroll-behavior: smooth;
+}
+
+// 自定义滚动条
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-color);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+// 主题切换按钮图标控制
+.theme-toggle .theme-icon-moon {
+  opacity: 1;
+}
+
+.theme-toggle .theme-icon-sun {
+  opacity: 0;
+}
+
+html[data-theme='dark'] .theme-toggle .theme-icon-moon {
+  opacity: 0;
+}
+
+html[data-theme='dark'] .theme-toggle .theme-icon-sun {
+  opacity: 1;
+}

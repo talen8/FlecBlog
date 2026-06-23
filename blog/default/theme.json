@@ -1,0 +1,381 @@
+{
+  "$meta": {
+    "slug": "default",
+    "name": "默认主题",
+    "version": "1.0.0",
+    "author": "Talen",
+    "description": "FlecBlog 默认主题",
+    "license": "MIT",
+    "repo": "https://github.com/talen8/FlecBlog"
+  },
+  "$menus": {
+    "aggregate": { "label": "聚合菜单", "maxDepth": 2, "defaults": [] },
+    "navigation": { "label": "导航菜单", "maxDepth": 2, "defaults": [{"title":"首页","url":"/","icon":"ri-home-line","sort":1,"is_enabled":true}] },
+    "footer": { "label": "页脚菜单", "maxDepth": 2, "defaults": [] }
+  },
+  "$features": {
+    "moments": true,
+    "feedback": true,
+    "oauth": true,
+    "site_subscribe": true
+  },
+  "站点信息": {
+    "author_email": {
+      "type": "string",
+      "title": "站长邮箱",
+      "default": ""
+    },
+    "author_desc": {
+      "type": "string",
+      "title": "站长简介",
+      "format": "textarea",
+      "default": ""
+    },
+    "home_url": {
+      "type": "string",
+      "title": "主页地址",
+      "placeholder": "例如 https://your-site.com",
+      "default": ""
+    },
+    "established": {
+      "type": "string",
+      "title": "建站日期",
+      "format": "date",
+      "default": ""
+    }
+  },
+  "外观与主题": {
+    "background_image": {
+      "type": "string",
+      "title": "背景图片",
+      "format": "upload",
+      "placeholder": "支持粘贴图片URL或上传",
+      "default": ""
+    },
+    "sidebar_social": {
+      "type": "array",
+      "title": "侧边社交",
+      "default": [],
+      "x-item-fields": [
+        { "key": "name", "type": "text", "placeholder": "平台名称" },
+        { "key": "icon", "type": "text", "placeholder": "图标类名" },
+        { "key": "url",  "type": "text", "placeholder": "链接地址" }
+      ]
+    },
+    "footer_social": {
+      "type": "array",
+      "title": "页脚社交",
+      "default": [],
+      "x-item-fields": [
+        { "key": "name", "type": "text", "placeholder": "平台名称" },
+        { "key": "icon", "type": "text", "placeholder": "图标类名", "width": 2 },
+        { "key": "url",  "type": "text", "placeholder": "链接地址", "width": 2 },
+        { "key": "position", "type": "select", "placeholder": "位置", "options": [{ "label": "左", "value": "left" }, { "label": "右", "value": "right" }] }
+      ]
+    },
+    "theme_light_start": {
+      "type": "string",
+      "title": "日间开始时间",
+      "format": "time",
+      "default": "06:00:00"
+    },
+    "theme_dark_start": {
+      "type": "string",
+      "title": "夜间开始时间",
+      "format": "time",
+      "default": "18:00:00"
+    },
+    "font": {
+      "type": "string",
+      "title": "字体配置",
+      "placeholder": "字体文件URL|字体名称（https://hanzi.bluu.pl/fonts/986/result.css|LXGW WenKai）",
+      "default": ""
+    }
+  },
+  "页面配置": {
+    "typing_texts": {
+      "type": "array",
+      "title": "打字机文本",
+      "default": [],
+      "x-item-fields": [
+        {
+          "key": "value",
+          "type": "text",
+          "placeholder": "打字机文本"
+        }
+      ]
+    },
+    "home_layout": {
+      "type": "string",
+      "title": "首页布局",
+      "enum": [
+        { "label": "瀑布流", "value": "waterfall" },
+        { "label": "单栏", "value": "single_column" }
+      ],
+      "default": "waterfall"
+    },
+    "moments_size": {
+      "type": "integer",
+      "title": "动态数量",
+      "default": 30,
+      "min": 1,
+      "max": 100
+    },
+    "announcement": {
+      "type": "string",
+      "title": "公告",
+      "format": "textarea",
+      "default": ""
+    },
+    "message_content": {
+      "type": "string",
+      "title": "留言信",
+      "format": "textarea",
+      "default": ""
+    },
+    "slogan": {
+      "type": "string",
+      "title": "友链描述",
+      "default": ""
+    },
+    "screenshot": {
+      "type": "string",
+      "title": "友链截图",
+      "format": "image",
+      "width": 213,
+      "default": ""
+    },
+    "donation_methods": {
+      "type": "array",
+      "title": "赞赏方式",
+      "default": [],
+      "max": 3,
+      "x-item-fields": [
+        {
+          "key": "name",
+          "type": "text",
+          "placeholder": "赞赏方式"
+        },
+        {
+          "key": "qrcode",
+          "type": "upload",
+          "placeholder": "赞赏二维码"
+        }
+      ]
+    },
+    "wechat_qrcode": {
+      "type": "string",
+      "title": "公众号二维码",
+      "format": "image",
+      "default": ""
+    },
+    "wechat_name": {
+      "type": "string",
+      "title": "公众号名称",
+      "default": ""
+    },
+    "footer_links": {
+      "type": "array",
+      "title": "页脚链接",
+      "default": [],
+      "x-item-fields": [
+        {
+          "key": "name",
+          "type": "text",
+          "placeholder": "名称"
+        },
+        {
+          "key": "url",
+          "type": "text",
+          "placeholder": "链接地址"
+        }
+      ]
+    }
+  },
+  "关于页面": {
+    "author_photo": {
+      "type": "string",
+      "title": "博主照片",
+      "format": "image",
+      "width": 80,
+      "default": ""
+    },
+    "about_describe": {
+      "type": "string",
+      "title": "个人描述",
+      "format": "textarea",
+      "default": ""
+    },
+    "about_describe_tips": {
+      "type": "string",
+      "title": "描述提示",
+      "default": ""
+    },
+    "about_exhibition": {
+      "type": "string",
+      "title": "展览图片",
+      "format": "image",
+      "width": 580,
+      "height": 60,
+      "default": ""
+    },
+    "about_profile": {
+      "type": "array",
+      "title": "个人资料",
+      "min": 6,
+      "max": 6,
+      "default": [],
+      "x-item-fields": [
+        {
+          "key": "label",
+          "type": "text",
+          "placeholder": "标签"
+        },
+        {
+          "key": "value",
+          "type": "text",
+          "placeholder": "值"
+        },
+        {
+          "key": "color",
+          "type": "color",
+          "placeholder": "颜色"
+        }
+      ]
+    },
+    "about_personality": {
+      "type": "string",
+      "title": "性格类型",
+      "enum": [
+        { "label": "INTJ-A (建筑师-自信型)", "value": "INTJ-A" },
+        { "label": "INTJ-T (建筑师-波动型)", "value": "INTJ-T" },
+        { "label": "INTP-A (逻辑学家-自信型)", "value": "INTP-A" },
+        { "label": "INTP-T (逻辑学家-波动型)", "value": "INTP-T" },
+        { "label": "ENTJ-A (指挥官-自信型)", "value": "ENTJ-A" },
+        { "label": "ENTJ-T (指挥官-波动型)", "value": "ENTJ-T" },
+        { "label": "ENTP-A (辩论家-自信型)", "value": "ENTP-A" },
+        { "label": "ENTP-T (辩论家-波动型)", "value": "ENTP-T" },
+        { "label": "INFJ-A (提倡者-自信型)", "value": "INFJ-A" },
+        { "label": "INFJ-T (提倡者-波动型)", "value": "INFJ-T" },
+        { "label": "INFP-A (调停者-自信型)", "value": "INFP-A" },
+        { "label": "INFP-T (调停者-波动型)", "value": "INFP-T" },
+        { "label": "ENFJ-A (主人公-自信型)", "value": "ENFJ-A" },
+        { "label": "ENFJ-T (主人公-波动型)", "value": "ENFJ-T" },
+        { "label": "ENFP-A (竞选者-自信型)", "value": "ENFP-A" },
+        { "label": "ENFP-T (竞选者-波动型)", "value": "ENFP-T" },
+        { "label": "ISTJ-A (物流师-自信型)", "value": "ISTJ-A" },
+        { "label": "ISTJ-T (物流师-波动型)", "value": "ISTJ-T" },
+        { "label": "ISFJ-A (守卫者-自信型)", "value": "ISFJ-A" },
+        { "label": "ISFJ-T (守卫者-波动型)", "value": "ISFJ-T" },
+        { "label": "ESTJ-A (总经理-自信型)", "value": "ESTJ-A" },
+        { "label": "ESTJ-T (总经理-波动型)", "value": "ESTJ-T" },
+        { "label": "ESFJ-A (执政官-自信型)", "value": "ESFJ-A" },
+        { "label": "ESFJ-T (执政官-波动型)", "value": "ESFJ-T" },
+        { "label": "ISTP-A (鉴赏家-自信型)", "value": "ISTP-A" },
+        { "label": "ISTP-T (鉴赏家-波动型)", "value": "ISTP-T" },
+        { "label": "ISFP-A (探险家-自信型)", "value": "ISFP-A" },
+        { "label": "ISFP-T (探险家-波动型)", "value": "ISFP-T" },
+        { "label": "ESTP-A (企业家-自信型)", "value": "ESTP-A" },
+        { "label": "ESTP-T (企业家-波动型)", "value": "ESTP-T" },
+        { "label": "ESFP-A (表演者-自信型)", "value": "ESFP-A" },
+        { "label": "ESFP-T (表演者-波动型)", "value": "ESFP-T" }
+      ],
+      "default": "INTJ-A"
+    },
+    "about_motto_main": {
+      "type": "array",
+      "title": "座右铭",
+      "default": [],
+      "min": 2,
+      "max": 2,
+      "x-item-fields": [
+        {
+          "key": "value",
+          "type": "text",
+          "placeholder": "座右铭内容"
+        }
+      ]
+    },
+    "about_motto_sub": {
+      "type": "string",
+      "title": "一言",
+      "default": ""
+    },
+    "about_socialize": {
+      "type": "array",
+      "title": "联系方式",
+      "default": [],
+      "x-item-fields": [
+        {
+          "key": "name",
+          "type": "text",
+          "placeholder": "平台名称"
+        },
+        {
+          "key": "url",
+          "type": "text",
+          "placeholder": "链接地址"
+        }
+      ]
+    },
+    "about_creation": {
+      "type": "array",
+      "title": "创作平台",
+      "default": [],
+      "x-item-fields": [
+        {
+          "key": "name",
+          "type": "text",
+          "placeholder": "平台名称"
+        },
+        {
+          "key": "url",
+          "type": "text",
+          "placeholder": "链接地址"
+        }
+      ]
+    },
+    "about_versions": {
+      "type": "array",
+      "title": "版本信息",
+      "min": 3,
+      "max": 3,
+      "default": [],
+      "x-item-fields": [
+        {
+          "key": "name",
+          "type": "text",
+          "placeholder": "技术名称"
+        },
+        {
+          "key": "version",
+          "type": "text",
+          "placeholder": "版本号"
+        }
+      ]
+    },
+    "about_unions": {
+      "type": "array",
+      "title": "站长联盟",
+      "default": [],
+      "x-item-fields": [
+        {
+          "key": "name",
+          "type": "text",
+          "placeholder": "联盟名称"
+        },
+        {
+          "key": "url",
+          "type": "text",
+          "placeholder": "链接地址"
+        }
+      ]
+    },
+    "about_story": {
+      "type": "string",
+      "title": "心路历程",
+      "format": "textarea",
+      "default": ""
+    }
+  }
+}

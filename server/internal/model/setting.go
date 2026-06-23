@@ -16,7 +16,6 @@ type Setting struct {
 // SettingGroup 配置分组常量
 const (
 	SettingGroupBasic        = "basic"
-	SettingGroupBlog         = "blog"
 	SettingGroupNotification = "notification"
 	SettingGroupUpload       = "upload"
 	SettingGroupAI           = "ai"

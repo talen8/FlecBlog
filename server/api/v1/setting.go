@@ -36,7 +36,7 @@ func NewSettingController(settingService *service.SettingService, db *gorm.DB, u
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			group	path		string	true	"配置分组"	Enums(basic, blog, notification, upload, ai, oauth)
+//	@Param			group	path		string	true	"配置分组"	Enums(basic, notification, upload, ai, oauth)
 //	@Success		200		{object}	response.Response{data=dto.SettingGroupResponse}
 //	@Failure		400		{object}	response.Response
 //	@Failure		401		{object}	response.Response
@@ -66,7 +66,7 @@ func (c *SettingController) GetGroup(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Param			group	path		string							true	"配置分组"	Enums(basic, blog, notification, upload, ai, oauth)
+//	@Param			group	path		string							true	"配置分组"	Enums(basic, notification, upload, ai, oauth)
 //	@Param			request	body		dto.UpdateSettingGroupRequest	true	"配置更新内容"
 //	@Success		200		{object}	response.Response
 //	@Failure		400		{object}	response.Response
@@ -135,7 +135,7 @@ func (c *SettingController) ResetMCPSecret(ctx *gin.Context) {
 //	@Tags			配置
 //	@Accept			json
 //	@Produce		json
-//	@Param			group	path		string	true	"配置分组"	Enums(basic, blog, notification, upload, ai, oauth)
+//	@Param			group	path		string	true	"配置分组"	Enums(basic, oauth, upload)
 //	@Success		200	{object}	response.Response{data=map[string]string}
 //	@Failure		400	{object}	response.Response
 //	@Failure		500	{object}	response.Response

@@ -2,18 +2,17 @@
  * 微信小程序应用入口
  */
 
-import type { SiteBasicConfig, BlogConfig, OAuthConfig } from './types';
+import type { SiteBasicConfig, OAuthConfig } from './types';
 import { APP_CONFIG } from './config';
 import { getStorage, setStorage } from './utils/storage';
 import { initInterceptors } from './utils/request';
-import { getSiteBasicConfig, getBlogConfig, getOAuthConfig } from './api/setting';
+import { getSiteBasicConfig, getOAuthConfig } from './api/setting';
 
 // ==================== 全局 App 类型 ====================
 
 export interface IAppOption {
   globalData: {
     siteConfig: Partial<SiteBasicConfig>;
-    blogConfig: Partial<BlogConfig>;
     oauthConfig: Partial<OAuthConfig>;
     version?: string;
   };
@@ -22,7 +21,6 @@ export interface IAppOption {
     events?: { tap?: (e: { target: { dataset: { href?: string } } }) => void };
   }) => { theme: 'light' | 'dark'; _e: Record<string, unknown> };
   updateSiteConfig: (config: Partial<SiteBasicConfig>) => void;
-  updateBlogConfig: (config: Partial<BlogConfig>) => void;
   updateOAuthConfig: (config: Partial<OAuthConfig>) => void;
   loadConfig: () => Promise<void>;
   checkUpdate: () => void;
@@ -36,7 +34,6 @@ App<IAppOption>({
 
   globalData: {
     siteConfig: getStorage<Partial<SiteBasicConfig>>('site_config') || {},
-    blogConfig: getStorage<Partial<BlogConfig>>('blog_config') || {},
     oauthConfig: getStorage<Partial<OAuthConfig>>('oauth_config') || {},
     version: wx.getAccountInfoSync().miniProgram.version,
   },
@@ -109,11 +106,6 @@ App<IAppOption>({
     setStorage('site_config', this.globalData.siteConfig);
   },
 
-  updateBlogConfig(config) {
-    this.globalData.blogConfig = { ...this.globalData.blogConfig, ...config };
-    setStorage('blog_config', this.globalData.blogConfig);
-  },
-
   updateOAuthConfig(config) {
     this.globalData.oauthConfig = { ...this.globalData.oauthConfig, ...config };
     setStorage('oauth_config', this.globalData.oauthConfig);
@@ -121,33 +113,16 @@ App<IAppOption>({
 
   async loadConfig() {
     try {
-      const [basicSettings, blogSettings, oauthSettings] = await Promise.all([
+      const [basicSettings, oauthSettings] = await Promise.all([
         getSiteBasicConfig().catch(() => null),
-        getBlogConfig().catch(() => null),
         getOAuthConfig().catch(() => null),
       ]);
 
       if (basicSettings) {
         this.updateSiteConfig({
-          author: basicSettings['basic.author'] || '',
-          author_avatar: basicSettings['basic.author_avatar'] || '',
-          blog_url: basicSettings['basic.blog_url'] || '',
-        });
-      }
-
-      if (blogSettings) {
-        this.updateBlogConfig({
-          title: blogSettings['blog.title'] || '',
-          established: blogSettings['blog.established'] || '',
-          about_describe: blogSettings['blog.about_describe'] || '',
-          about_describe_tips: blogSettings['blog.about_describe_tips'] || '',
-          about_profile: blogSettings['blog.about_profile'] || '[]',
-          about_personality: blogSettings['blog.about_personality'] || '',
-          about_motto_main: blogSettings['blog.about_motto_main'] || '[]',
-          about_motto_sub: blogSettings['blog.about_motto_sub'] || '',
-          about_versions: blogSettings['blog.about_versions'] || '[]',
-          about_unions: blogSettings['blog.about_unions'] || '[]',
-          about_story: blogSettings['blog.about_story'] || '',
+          author: basicSettings['basic.author'] || basicSettings['author'] || '',
+          author_avatar: basicSettings['basic.author_avatar'] || basicSettings['author_avatar'] || '',
+          blog_url: basicSettings['basic.blog_url'] || basicSettings['blog_url'] || '',
         });
       }
 

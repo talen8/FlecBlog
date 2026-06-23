@@ -13,7 +13,6 @@ type Config struct {
 	Database     DatabaseConfig
 	JWT          JWTConfig
 	Basic        BasicConfig        // 从数据库加载
-	Blog         BlogConfig         // 从数据库加载
 	Notification NotificationConfig // 从数据库加载
 	Upload       UploadConfig       // 从数据库加载
 	AI           AIConfig           // 从数据库加载
@@ -43,44 +42,23 @@ type JWTConfig struct {
 // BasicConfig 基本配置（从数据库动态加载）
 type BasicConfig struct {
 	Author       string // 站长姓名
-	AuthorEmail  string // 站长邮箱
-	AuthorDesc   string // 站长简介
 	AuthorAvatar string // 站长头像
-	AuthorPhoto  string // 站长形象
 	ICP          string // ICP备案号
 	PoliceRecord string // 公安备案号
 	AdminURL     string // 管理地址
 	BlogURL      string // 博客地址
-	HomeURL      string // 主页地址
-}
-
-// BlogConfig 博客配置（从数据库动态加载）
-type BlogConfig struct {
-	Title           string // 博客标题
-	Subtitle        string // 博客副标题
-	Slogan          string // 博客标语
-	Description     string // 博客描述
-	Keywords        string // 博客关键词
-	Established     string // 建站日期
-	Favicon         string // 网站Favicon
-	BackgroundImage string // 背景图片
-	Screenshot      string // 站点截图
-	Announcement    string // 公告内容
-	CustomHead      string // 自定义 Head 代码
-	CustomBody      string // 自定义 Body 代码
-	Emojis          string // 表情包配置
-	Font            string // 字体配置（URL|字体名称）
-	MomentsSize     int    // 动态列表每页数量
-	MessageContent  string // 留言信内容
-	HomeLayout      string // 首页布局（waterfall/single_column）
-	ThemeLightStart string // 日间主题开始时间（HH:MM）
-	ThemeDarkStart  string // 夜间主题开始时间（HH:MM）
-	WechatQRCode    string // 公众号二维码图片URL
-	WechatName      string // 公众号名称
-	MetingAPI       string // Meting-API 地址
-	CravatarURL     string // 头像服务 URL（%s 为邮箱哈希）
-	IPApiURL        string // IP 归属地查询 URL（%s 为 IP）
-	CoverMakerAPI   string // 封面制作图片源 API
+	Title        string // 博客标题
+	Subtitle     string // 博客副标题
+	Description  string // 博客描述
+	Keywords     string // 博客关键词
+	Favicon      string // 网站Favicon
+	CustomHead   string // 自定义 Head 代码
+	CustomBody   string // 自定义 Body 代码
+	Emojis       string // 表情包配置
+	MetingAPI    string // Meting-API 地址
+	CravatarURL  string // 头像服务 URL（%s 为邮箱哈希）
+	IPApiURL     string // IP 归属地查询 URL（%s 为 IP）
+	CoverMakerAPI string // 封面制作图片源 API
 }
 
 // NotificationConfig 通知配置（从数据库动态加载）
@@ -151,7 +129,6 @@ type OAuthProviderConfig struct {
 }
 
 // LoadConfig 从环境变量加载配置
-// 注意：Email 和 Upload 配置从数据库动态加载，由 SettingService 管理
 func LoadConfig() (*Config, error) {
 	config := &Config{
 		Server: ServerConfig{
@@ -168,7 +145,6 @@ func LoadConfig() (*Config, error) {
 		JWT: JWTConfig{
 			Secret: getEnv("JWT_SECRET", ""),
 		},
-		// Email 和 Upload 配置由 SettingService.ApplyDatabaseConfig() 从数据库加载
 	}
 
 	// 验证必需的配置

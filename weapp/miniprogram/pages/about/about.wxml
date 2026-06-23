@@ -19,53 +19,12 @@
       />
       <view class="header-info">
         <text class="header-name">{{author || '博主'}}</text>
-        <text wx:if="{{describe}}" class="header-desc">{{describe}}</text>
-        <text wx:if="{{describeTips}}" class="header-tips">{{describeTips}}</text>
       </view>
     </view>
 
-    <!-- 博主信息 -->
-    <view wx:if="{{profile.length > 0}}" class="block">
-      <view wx:for="{{profile}}" wx:key="label" class="row">
-        <text class="row-label">{{item.label}}</text>
-        <text class="row-value" style="color: {{item.color || '#333'}}">{{item.value}}</text>
-      </view>
-    </view>
-
-    <!-- 性格 + 座右铭 -->
-    <view wx:if="{{personality.name || mottoMain.length > 0}}" class="block">
-      <view wx:if="{{personality.name}}" class="row">
-        <text class="row-label">性格</text>
-        <view class="row-right">
-          <text class="row-value">{{personality.name}}</text>
-          <text class="personality-code" style="color: {{personality.color}}">{{personality.code}}</text>
-        </view>
-      </view>
-      <view wx:if="{{mottoMain.length > 0}}" class="row">
-        <text class="row-label">座右铭</text>
-        <view class="row-right">
-          <view class="motto-wrap">
-            <text
-              wx:for="{{mottoMain}}"
-              wx:key="*this"
-              class="motto-line {{index === mottoMain.length - 1 ? '' : 'motto-dim'}}"
-            >{{item}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 本站信息 -->
-    <view class="block">
-      <view wx:if="{{runningDays > 0}}" class="row">
-        <text class="row-label">运行</text>
-        <text class="row-value">{{runningDays}} 天</text>
-      </view>
-      <view wx:for="{{versions}}" wx:key="name" class="row">
-        <text class="row-label">{{item.name}}</text>
-        <text class="row-value">V{{item.version}}</text>
-      </view>
-      <view wx:if="{{stats}}" class="row stats-row">
+    <!-- 站点统计 -->
+    <view wx:if="{{stats}}" class="block">
+      <view class="row stats-row">
         <view class="stat-item">
           <text class="stat-num">{{stats.total_articles}}</text>
           <text class="stat-label">文章</text>
@@ -100,12 +59,6 @@
         <text class="row-value">{{stats.month_pageviews}} 次访问</text>
       </view>
     </view>
-
-    <!-- 心路历程 -->
-    <view wx:if="{{story}}" class="block">
-      <text class="block-title">关于本站</text>
-      <text class="story-text">{{story}}</text>
-    </view>
-  </block>
+    </block>
   </view>
 </view>
