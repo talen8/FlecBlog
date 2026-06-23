@@ -3295,7 +3295,6 @@ const docTemplate = `{
                     {
                         "enum": [
                             "basic",
-                            "blog",
                             "notification",
                             "upload",
                             "ai",
@@ -3362,7 +3361,6 @@ const docTemplate = `{
                     {
                         "enum": [
                             "basic",
-                            "blog",
                             "notification",
                             "upload",
                             "ai",
@@ -4280,7 +4278,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ThemeResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -4326,19 +4336,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.ThemeResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -6991,11 +6989,8 @@ const docTemplate = `{
                     {
                         "enum": [
                             "basic",
-                            "blog",
-                            "notification",
-                            "upload",
-                            "ai",
-                            "oauth"
+                            "oauth",
+                            "upload"
                         ],
                         "type": "string",
                         "description": "配置分组",
@@ -7220,7 +7215,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.ThemeResponse"
+                                            "$ref": "#/definitions/dto.ThemePublicResponse"
                                         }
                                     }
                                 }
@@ -9559,6 +9554,41 @@ const docTemplate = `{
                 },
                 "schema": {
                     "type": "object"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ThemePublicResponse": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "config": {
+                    "type": "object"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "license": {
+                    "type": "string"
+                },
+                "menus": {
+                    "type": "object"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repo": {
+                    "type": "string"
                 },
                 "slug": {
                     "type": "string"

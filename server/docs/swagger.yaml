@@ -1324,6 +1324,29 @@ definitions:
     required:
     - slug
     type: object
+  dto.ThemePublicResponse:
+    properties:
+      author:
+        type: string
+      config:
+        type: object
+      description:
+        type: string
+      is_active:
+        type: boolean
+      license:
+        type: string
+      menus:
+        type: object
+      name:
+        type: string
+      repo:
+        type: string
+      slug:
+        type: string
+      version:
+        type: string
+    type: object
   dto.ThemeResponse:
     properties:
       author:
@@ -3733,7 +3756,6 @@ paths:
       - description: 配置分组
         enum:
         - basic
-        - blog
         - notification
         - upload
         - ai
@@ -3775,7 +3797,6 @@ paths:
       - description: 配置分组
         enum:
         - basic
-        - blog
         - notification
         - upload
         - ai
@@ -4364,7 +4385,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ThemeResponse'
+              type: object
       security:
       - BearerAuth: []
       summary: 主题详情
@@ -4393,12 +4419,7 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.ThemeResponse'
-              type: object
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: 更新主题配置
@@ -6028,11 +6049,8 @@ paths:
       - description: 配置分组
         enum:
         - basic
-        - blog
-        - notification
-        - upload
-        - ai
         - oauth
+        - upload
         in: path
         name: group
         required: true
@@ -6169,7 +6187,7 @@ paths:
             - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.ThemeResponse'
+                  $ref: '#/definitions/dto.ThemePublicResponse'
               type: object
       summary: 获取激活主题
       tags:

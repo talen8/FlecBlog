@@ -41,23 +41,23 @@ type JWTConfig struct {
 
 // BasicConfig 基本配置（从数据库动态加载）
 type BasicConfig struct {
-	Author       string // 站长姓名
-	AuthorAvatar string // 站长头像
-	ICP          string // ICP备案号
-	PoliceRecord string // 公安备案号
-	AdminURL     string // 管理地址
-	BlogURL      string // 博客地址
-	Title        string // 博客标题
-	Subtitle     string // 博客副标题
-	Description  string // 博客描述
-	Keywords     string // 博客关键词
-	Favicon      string // 网站Favicon
-	CustomHead   string // 自定义 Head 代码
-	CustomBody   string // 自定义 Body 代码
-	Emojis       string // 表情包配置
-	MetingAPI    string // Meting-API 地址
-	CravatarURL  string // 头像服务 URL（%s 为邮箱哈希）
-	IPApiURL     string // IP 归属地查询 URL（%s 为 IP）
+	Author        string // 站长姓名
+	AuthorAvatar  string // 站长头像
+	ICP           string // ICP备案号
+	PoliceRecord  string // 公安备案号
+	AdminURL      string // 管理地址
+	BlogURL       string // 博客地址
+	Title         string // 博客标题
+	Subtitle      string // 博客副标题
+	Description   string // 博客描述
+	Keywords      string // 博客关键词
+	Favicon       string // 网站Favicon
+	CustomHead    string // 自定义 Head 代码
+	CustomBody    string // 自定义 Body 代码
+	Emojis        string // 表情包配置
+	MetingAPI     string // Meting-API 地址
+	CravatarURL   string // 头像服务 URL（%s 为邮箱哈希）
+	IPApiURL      string // IP 归属地查询 URL（%s 为 IP）
 	CoverMakerAPI string // 封面制作图片源 API
 }
 

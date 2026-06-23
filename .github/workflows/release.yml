@@ -58,14 +58,12 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "22"
-          cache: "npm"
-          cache-dependency-path: ${{ matrix.context }}/package-lock.json
 
       - name: 构建前端项目
         if: matrix.target != 'server'
         working-directory: ${{ matrix.context }}
         run: |
-          npm ci
+          npm install
           if [ "${{ matrix.target }}" = "blog" ]; then
             NUXT_PUBLIC_API_URL= npm run build
           else

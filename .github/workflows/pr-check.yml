@@ -82,7 +82,7 @@ jobs:
           cache-dependency-path: admin/package-lock.json
 
       - name: 安装依赖
-        run: npm ci
+        run: npm install
 
       - name: 类型检查
         id: typecheck
@@ -119,7 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: blog
+        working-directory: blog/default
 
     steps:
       - uses: actions/checkout@v4
@@ -128,11 +128,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: blog/package-lock.json
 
       - name: 安装依赖
-        run: npm ci
+        run: npm install
 
       - name: 类型检查
         id: typecheck
