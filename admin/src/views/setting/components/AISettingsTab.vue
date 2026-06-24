@@ -2,7 +2,10 @@
   <el-form :model="form" label-width="120px" class="setting-form">
     <el-divider content-position="left">基础配置</el-divider>
 
-    <el-form-item label="API 端点">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('base_url') }">API 端点</span>
+      </template>
       <el-input
         v-model="form.base_url"
         placeholder="例如 https://api.deepseek.com"
@@ -10,7 +13,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="API 密钥">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('api_key') }">API 密钥</span>
+      </template>
       <el-input
         v-model="form.api_key"
         type="password"
@@ -21,7 +27,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="模型名称">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('model') }">模型名称</span>
+      </template>
       <el-input v-model="form.model" placeholder="例如 deepseek-chat" :disabled="loading" />
     </el-form-item>
 
@@ -31,7 +40,10 @@
 
     <el-divider content-position="left">提示词配置</el-divider>
 
-    <el-form-item label="文章摘要提示词">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('summary_prompt') }">文章摘要提示词</span>
+      </template>
       <el-input
         v-model="form.summary_prompt"
         type="textarea"
@@ -41,7 +53,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="AI 总结提示词">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('ai_summary_prompt') }">AI 总结提示词</span>
+      </template>
       <el-input
         v-model="form.ai_summary_prompt"
         type="textarea"
@@ -51,7 +66,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="标题提示词">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('title_prompt') }">标题提示词</span>
+      </template>
       <el-input
         v-model="form.title_prompt"
         type="textarea"
@@ -63,7 +81,10 @@
 
     <el-divider content-position="left">MCP</el-divider>
 
-    <el-form-item label="Secret">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('mcp_secret') }">Secret</span>
+      </template>
       <el-input
         v-model="form.mcp_secret"
         type="password"
@@ -106,6 +127,7 @@ const form = defineModel<AIForm>('form', { required: true });
 
 defineProps<{
   loading?: boolean;
+  isFieldModified: (key: string) => boolean;
 }>();
 
 const testing = ref(false);

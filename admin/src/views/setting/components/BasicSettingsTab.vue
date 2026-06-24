@@ -2,15 +2,24 @@
   <el-form :model="form" label-width="120px" class="setting-form">
     <el-divider content-position="left">基础信息</el-divider>
 
-    <el-form-item label="博客标题">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('title') }">博客标题</span>
+      </template>
       <el-input v-model="form.title" placeholder="博客标题" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="博客副标题">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('subtitle') }">博客副标题</span>
+      </template>
       <el-input v-model="form.subtitle" placeholder="博客副标题" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="博客描述">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('description') }">博客描述</span>
+      </template>
       <el-input
         v-model="form.description"
         type="textarea"
@@ -20,12 +29,18 @@
       />
     </el-form-item>
 
-    <el-form-item label="博客关键词">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('keywords') }">博客关键词</span>
+      </template>
       <el-input v-model="form.keywords" placeholder="关键词，用逗号分隔" :disabled="loading" />
     </el-form-item>
 
     <div class="image-row">
-      <el-form-item label="网站 Favicon">
+      <el-form-item>
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('favicon') }">网站 Favicon</span>
+        </template>
         <ImageUploader
           ref="faviconUploaderRef"
           v-model="form.favicon"
@@ -39,12 +54,18 @@
 
     <el-divider content-position="left">站长信息</el-divider>
 
-    <el-form-item label="站长姓名">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('author') }">站长姓名</span>
+      </template>
       <el-input v-model="form.author" placeholder="站长姓名" :disabled="loading" />
     </el-form-item>
 
     <div class="image-row">
-      <el-form-item label="站长头像">
+      <el-form-item>
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('author_avatar') }">站长头像</span>
+        </template>
         <ImageUploader
           ref="authorAvatarUploaderRef"
           v-model="form.author_avatar"
@@ -58,25 +79,40 @@
 
     <el-divider content-position="left">备案信息</el-divider>
 
-    <el-form-item label="ICP备案号">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('icp') }">ICP备案号</span>
+      </template>
       <el-input v-model="form.icp" placeholder="ICP备案号" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="公安备案号">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('police_record') }">公安备案号</span>
+      </template>
       <el-input v-model="form.police_record" placeholder="公安备案号" :disabled="loading" />
     </el-form-item>
 
     <el-divider content-position="left">扩展功能</el-divider>
 
-    <el-form-item label="表情包配置">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('emojis') }">表情包配置</span>
+      </template>
       <el-input v-model="form.emojis" placeholder="表情包 URL" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="Meting-API">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('meting_api') }">Meting-API</span>
+      </template>
       <el-input v-model="form.meting_api" placeholder="Meting-API 地址" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="Cravatar URL">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('cravatar_url') }">Cravatar URL</span>
+      </template>
       <el-input
         v-model="form.cravatar_url"
         placeholder="头像服务 URL（%s 为邮箱哈希）"
@@ -84,7 +120,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="IP 归属地 API">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('ip_api_url') }">IP 归属地 API</span>
+      </template>
       <el-input
         v-model="form.ip_api_url"
         placeholder="IP 归属地查询 URL（%s 为 IP）"
@@ -92,7 +131,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="封面制作 API">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('cover_maker_api') }">封面制作 API</span>
+      </template>
       <el-input
         v-model="form.cover_maker_api"
         placeholder="封面制作图片源 API"
@@ -102,7 +144,10 @@
 
     <el-divider content-position="left">系统地址</el-divider>
 
-    <el-form-item label="管理地址">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('admin_url') }">管理地址</span>
+      </template>
       <el-input
         v-model="form.admin_url"
         placeholder="例如 https://admin.your-site.com"
@@ -110,7 +155,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="博客地址">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('blog_url') }">博客地址</span>
+      </template>
       <el-input
         v-model="form.blog_url"
         placeholder="例如 https://blog.your-site.com"
@@ -120,7 +168,10 @@
 
     <el-divider content-position="left">自定义代码</el-divider>
 
-    <el-form-item label="自定义 Head">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('custom_head') }">自定义 Head</span>
+      </template>
       <el-input
         v-model="form.custom_head"
         type="textarea"
@@ -130,7 +181,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="自定义 Body">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('custom_body') }">自定义 Body</span>
+      </template>
       <el-input
         v-model="form.custom_body"
         type="textarea"
@@ -171,6 +225,7 @@ const form = defineModel<BasicForm>('form', { required: true });
 
 defineProps<{
   loading?: boolean;
+  isFieldModified: (key: string) => boolean;
 }>();
 
 // 图片上传器引用

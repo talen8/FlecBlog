@@ -45,7 +45,7 @@
               <el-form label-position="top" :disabled="formDisabled">
                 <el-form-item v-for="(field, key) in group.fields" :key="key">
                   <template #label>
-                    <span>{{ field.title || String(key) }}</span>
+                    <span :class="{ 'field-modified': isFieldModified(String(key)) }">{{ field.title || String(key) }}</span>
                     <div v-if="field.description" class="field-desc">
                       {{ field.description }}
                     </div>
@@ -225,6 +225,8 @@ const setImageUploaderRef = (key: string, el: unknown) => {
 const canEditTheme = computed(() => isSuperAdmin());
 const formDisabled = computed(() => loading.value || saving.value || !canEditTheme.value);
 
+const originalConfigValues = ref<Record<string, unknown>>({});
+
 const schema = computed<Record<string, unknown>>(() => {
   const raw = (currentTheme.value?.schema || {}) as Record<string, unknown>;
   const nested = raw.config as Record<string, unknown> | undefined;
@@ -257,6 +259,16 @@ const schemaGroups = computed<SchemaGroup[]>(() => {
 });
 
 const groupTabName = (group: SchemaGroup) => `config:${group.name}`;
+
+const isFieldModified = (key: string): boolean => {
+  if (loading.value) return false;
+  const current = configValues.value[key];
+  const original = originalConfigValues.value[key];
+  if (current === original) return false;
+  if (current === undefined && original === undefined) return false;
+  if (current === null && original === null) return false;
+  return JSON.stringify(current) !== JSON.stringify(original);
+};
 
 const buildItemFields = (itemFields: Array<string | Record<string, unknown>>): FieldConfig[] => {
   if (!itemFields || itemFields.length === 0) return [];
@@ -335,7 +347,9 @@ const loadCurrentTheme = async (slug = currentTheme.value?.slug) => {
     }
     pendingUploadFiles.value = {};
     pendingPreviews.value = {};
-    configValues.value = { ...defaults, ...rawConfig };
+    const mergedConfig = { ...defaults, ...rawConfig };
+    configValues.value = mergedConfig;
+    originalConfigValues.value = { ...mergedConfig };
   } catch (error) {
     ElMessage.error((error as Error)?.message || '获取主题配置失败');
   } finally {
@@ -390,6 +404,7 @@ const handleSave = async () => {
       config: updatedConfig as Record<string, unknown>,
     };
     configValues.value = { ...(updatedConfig as Record<string, unknown>) };
+    originalConfigValues.value = { ...(updatedConfig as Record<string, unknown>) };
     ElMessage.success('主题配置保存成功');
   } catch (error) {
     ElMessage.error((error as Error)?.message || '主题配置保存失败');
@@ -508,6 +523,11 @@ onMounted(async () => {
     font-weight: normal;
     line-height: 1.4;
     margin-top: 2px;
+  }
+
+  .field-modified {
+    color: #e6a23c;
+    font-weight: 600;
   }
 
   :deep(.el-form-item__content) {

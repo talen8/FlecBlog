@@ -2,11 +2,17 @@
   <el-form :model="form" label-width="120px" class="setting-form">
     <el-divider content-position="left">邮件通知配置</el-divider>
 
-    <el-form-item label="主机名">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('email_host') }">主机名</span>
+      </template>
       <el-input v-model="form.email_host" placeholder="例如 smtp.163.com" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="端口">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('email_port') }">端口</span>
+      </template>
       <el-input
         v-model="form.email_port"
         type="number"
@@ -15,7 +21,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="安全性">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('email_secure') }">安全性</span>
+      </template>
       <el-select
         v-model="form.email_secure"
         placeholder="选择加密方式"
@@ -28,11 +37,17 @@
       </el-select>
     </el-form-item>
 
-    <el-form-item label="用户名">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('email_username') }">用户名</span>
+      </template>
       <el-input v-model="form.email_username" placeholder="SMTP登录账号" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="密码">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('email_password') }">密码</span>
+      </template>
       <el-input
         v-model="form.email_password"
         type="password"
@@ -43,7 +58,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="发信人">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('email_from') }">发信人</span>
+      </template>
       <el-input
         v-model="form.email_from"
         placeholder="收件人看到的发件人地址，为空则使用用户名"
@@ -53,11 +71,17 @@
 
     <el-divider content-position="left">飞书通知配置</el-divider>
 
-    <el-form-item label="App ID">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('feishu_app_id') }">App ID</span>
+      </template>
       <el-input v-model="form.feishu_app_id" placeholder="飞书应用ID" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="App Secret">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('feishu_secret') }">App Secret</span>
+      </template>
       <el-input
         v-model="form.feishu_secret"
         type="password"
@@ -68,7 +92,10 @@
       />
     </el-form-item>
 
-    <el-form-item label="群聊 ID">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('feishu_chat_id') }">群聊 ID</span>
+      </template>
       <el-input v-model="form.feishu_chat_id" placeholder="接收通知的群聊ID" :disabled="loading" />
     </el-form-item>
   </el-form>
@@ -87,10 +114,11 @@ export interface NotificationForm {
   feishu_chat_id: string;
 }
 
-const form = defineModel<NotificationForm>('form', { required: true });
+defineModel<NotificationForm>('form', { required: true });
 
 defineProps<{
   loading?: boolean;
+  isFieldModified: (key: string) => boolean;
 }>();
 </script>
 

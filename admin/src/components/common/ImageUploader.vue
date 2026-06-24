@@ -83,6 +83,9 @@ const handleUpload = async (options: UploadRequestOptions): Promise<void> => {
   pendingFile.value = file;
   previewUrl.value = URL.createObjectURL(file);
 
+  // 立即更新 modelValue 为 blob URL，以便父组件检测到变化
+  emit('update:modelValue', previewUrl.value);
+
   return Promise.resolve();
 };
 

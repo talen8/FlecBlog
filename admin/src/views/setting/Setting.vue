@@ -24,6 +24,7 @@
           <BasicSettingsTab
             ref="basicTabRef"
             v-model:form="basicForm"
+            :is-field-modified="basicIsFieldModified"
             :loading="loading || !canEditSettings"
           />
         </el-tab-pane>
@@ -32,23 +33,36 @@
         <el-tab-pane label="通知配置" name="notification">
           <NotificationSettingsTab
             v-model:form="notificationForm"
+            :is-field-modified="notificationIsFieldModified"
             :loading="loading || !canEditSettings"
           />
         </el-tab-pane>
 
         <!-- 上传配置标签页 -->
         <el-tab-pane label="上传配置" name="upload">
-          <UploadSettingsTab v-model:form="uploadForm" :loading="loading || !canEditSettings" />
+          <UploadSettingsTab
+            v-model:form="uploadForm"
+            :is-field-modified="uploadIsFieldModified"
+            :loading="loading || !canEditSettings"
+          />
         </el-tab-pane>
 
         <!-- AI 配置标签页 -->
         <el-tab-pane label="AI 配置" name="ai">
-          <AISettingsTab v-model:form="aiForm" :loading="loading || !canEditSettings" />
+          <AISettingsTab
+            v-model:form="aiForm"
+            :is-field-modified="aiIsFieldModified"
+            :loading="loading || !canEditSettings"
+          />
         </el-tab-pane>
 
         <!-- OAuth 配置标签页 -->
         <el-tab-pane label="OAuth 配置" name="oauth">
-          <OAuthSettingsTab v-model:form="oauthForm" :loading="loading || !canEditSettings" />
+          <OAuthSettingsTab
+            v-model:form="oauthForm"
+            :is-field-modified="oauthIsFieldModified"
+            :loading="loading || !canEditSettings"
+          />
         </el-tab-pane>
 
         <!-- 导入导出标签页 -->
@@ -85,6 +99,13 @@ const canEditSettings = computed(() => isSuperAdmin());
 
 // 标签页引用
 const basicTabRef = ref<InstanceType<typeof BasicSettingsTab>>();
+
+// 原始配置快照（用于比较修改）
+const originalBasicForm = ref<Record<string, string>>({});
+const originalNotificationForm = ref<Record<string, string>>({});
+const originalUploadForm = ref<Record<string, string | number | boolean>>({});
+const originalAiForm = ref<Record<string, string>>({});
+const originalOAuthForm = ref<Record<string, string>>({});
 
 // 基本配置表单
 const basicForm = ref({
@@ -194,7 +215,7 @@ const loadConfigs = async (group: SettingGroupType) => {
 const loadBasicConfigs = async () => {
   try {
     const configs = await loadConfigs('basic');
-    Object.assign(basicForm.value, {
+    const data = {
       author: configs.author || '',
       author_avatar: configs.author_avatar || '',
       icp: configs.icp || '',
@@ -213,7 +234,9 @@ const loadBasicConfigs = async () => {
       cravatar_url: configs.cravatar_url || '',
       ip_api_url: configs.ip_api_url || '',
       cover_maker_api: configs.cover_maker_api || '',
-    });
+    };
+    Object.assign(basicForm.value, data);
+    originalBasicForm.value = { ...data };
   } catch {
     ElMessage.error('获取基本配置失败');
   }
@@ -223,7 +246,7 @@ const loadBasicConfigs = async () => {
 const loadNotificationConfigs = async () => {
   try {
     const configs = await loadConfigs('notification');
-    Object.assign(notificationForm.value, {
+    const data = {
       email_host: configs.email_host || '',
       email_port: configs.email_port || '465',
       email_secure: configs.email_secure || 'ssl',
@@ -233,7 +256,9 @@ const loadNotificationConfigs = async () => {
       feishu_app_id: configs.feishu_app_id || '',
       feishu_secret: configs.feishu_secret || '',
       feishu_chat_id: configs.feishu_chat_id || '',
-    });
+    };
+    Object.assign(notificationForm.value, data);
+    originalNotificationForm.value = { ...data };
   } catch {
     ElMessage.error('获取通知配置失败');
   }
@@ -243,7 +268,7 @@ const loadNotificationConfigs = async () => {
 const loadUploadConfigs = async () => {
   try {
     const configs = await loadConfigs('upload');
-    Object.assign(uploadForm.value, {
+    const data = {
       storage_type: configs.storage_type || 'local',
       max_file_size: Number(configs.max_file_size || 10),
       path_pattern: configs.path_pattern || '{timestamp}_{random}{ext}',
@@ -254,7 +279,9 @@ const loadUploadConfigs = async () => {
       endpoint: configs.endpoint || '',
       domain: configs.domain || '',
       use_ssl: (configs.use_ssl || 'true') === 'true',
-    });
+    };
+    Object.assign(uploadForm.value, data);
+    originalUploadForm.value = { ...data };
   } catch {
     ElMessage.error('获取上传配置失败');
   }
@@ -264,7 +291,7 @@ const loadUploadConfigs = async () => {
 const loadAIConfigs = async () => {
   try {
     const configs = await loadConfigs('ai');
-    Object.assign(aiForm.value, {
+    const data = {
       base_url: configs.base_url || '',
       api_key: configs.api_key || '',
       model: configs.model || '',
@@ -272,7 +299,9 @@ const loadAIConfigs = async () => {
       ai_summary_prompt: configs.ai_summary_prompt || '',
       title_prompt: configs.title_prompt || '',
       mcp_secret: configs.mcp_secret || '',
-    });
+    };
+    Object.assign(aiForm.value, data);
+    originalAiForm.value = { ...data };
   } catch {
     ElMessage.error('获取 AI 配置失败');
   }
@@ -282,7 +311,7 @@ const loadAIConfigs = async () => {
 const loadOAuthConfigs = async () => {
   try {
     const configs = await loadConfigs('oauth');
-    Object.assign(oauthForm.value, {
+    const data = {
       'github.enabled': configs['github.enabled'] || 'false',
       'github.client_id': configs['github.client_id'] || '',
       'github.client_secret': configs['github.client_secret'] || '',
@@ -308,7 +337,9 @@ const loadOAuthConfigs = async () => {
       'wechat.appid': configs['wechat.appid'] || '',
       'wechat.secret': configs['wechat.secret'] || '',
       worker_proxy: configs['worker_proxy'] || '',
-    });
+    };
+    Object.assign(oauthForm.value, data);
+    originalOAuthForm.value = { ...data };
   } catch {
     ElMessage.error('获取 OAuth 配置失败');
   }
@@ -329,6 +360,27 @@ const loadAllConfigs = async () => {
     loading.value = false;
   }
 };
+
+const makeIsFieldModified = (
+  form: Record<string, unknown>,
+  original: Record<string, unknown>
+) => {
+  return (key: string): boolean => {
+    if (loading.value) return false;
+    const current = form[key];
+    const orig = original[key];
+    if (current === orig) return false;
+    if (current === undefined && orig === undefined) return false;
+    if (current === null && orig === null) return false;
+    return JSON.stringify(current) !== JSON.stringify(orig);
+  };
+};
+
+const basicIsFieldModified = computed(() => makeIsFieldModified(basicForm.value, originalBasicForm.value));
+const notificationIsFieldModified = computed(() => makeIsFieldModified(notificationForm.value, originalNotificationForm.value));
+const uploadIsFieldModified = computed(() => makeIsFieldModified(uploadForm.value, originalUploadForm.value));
+const aiIsFieldModified = computed(() => makeIsFieldModified(aiForm.value, originalAiForm.value));
+const oauthIsFieldModified = computed(() => makeIsFieldModified(oauthForm.value, originalOAuthForm.value));
 
 // 统一保存配置
 const handleSave = async () => {
@@ -471,6 +523,13 @@ const handleSave = async () => {
     // 并行保存所有配置组
     await Promise.all(savePromises);
 
+    // 更新原始值快照
+    originalBasicForm.value = { ...basicForm.value };
+    originalNotificationForm.value = { ...notificationForm.value };
+    originalUploadForm.value = { ...uploadForm.value };
+    originalAiForm.value = { ...aiForm.value };
+    originalOAuthForm.value = { ...oauthForm.value };
+
     ElMessage.success('配置保存成功');
   } catch (e) {
     if (e instanceof Error) ElMessage.error(e.message);
@@ -586,6 +645,11 @@ onMounted(() => {
       max-width: 95%;
       margin: 0 auto;
     }
+  }
+
+  :deep(.field-modified) {
+    color: #e6a23c;
+    font-weight: 600;
   }
 }
 

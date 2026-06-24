@@ -2,7 +2,10 @@
   <el-form :model="form" label-width="120px" class="setting-form">
     <el-divider content-position="left">基础配置</el-divider>
 
-    <el-form-item label="存储类型">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('storage_type') }">存储类型</span>
+      </template>
       <el-select
         v-model="form.storage_type"
         placeholder="选择存储类型"
@@ -19,12 +22,18 @@
       </el-select>
     </el-form-item>
 
-    <el-form-item label="最大文件大小">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('max_file_size') }">最大文件大小</span>
+      </template>
       <el-input-number v-model="form.max_file_size" :min="0" :step="1" :disabled="loading" />
       <span class="unit-tip">MB</span>
     </el-form-item>
 
-    <el-form-item label="文件命名">
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('path_pattern') }">文件命名</span>
+      </template>
       <el-input
         v-model="form.path_pattern"
         placeholder="{timestamp}_{random}{ext}"
@@ -33,7 +42,10 @@
     </el-form-item>
 
     <template v-if="form.storage_type !== 'local'">
-      <el-form-item :label="accessLabel">
+      <el-form-item>
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('access_key') }">{{ accessLabel }}</span>
+        </template>
         <el-input
           v-model="form.access_key"
           :placeholder="accessPlaceholder"
@@ -42,7 +54,10 @@
         />
       </el-form-item>
 
-      <el-form-item :label="secretLabel">
+      <el-form-item>
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('secret_key') }">{{ secretLabel }}</span>
+        </template>
         <el-input
           v-model="form.secret_key"
           type="password"
@@ -54,7 +69,10 @@
         />
       </el-form-item>
 
-      <el-form-item v-if="showRegion" label="地域">
+      <el-form-item v-if="showRegion">
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('region') }">地域</span>
+        </template>
         <el-input
           v-model="form.region"
           :placeholder="regionPlaceholder"
@@ -63,7 +81,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="存储桶">
+      <el-form-item>
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('bucket') }">存储桶</span>
+        </template>
         <el-input
           v-model="form.bucket"
           :placeholder="bucketPlaceholder"
@@ -72,7 +93,10 @@
         />
       </el-form-item>
 
-      <el-form-item v-if="showEndpoint" label="服务端点">
+      <el-form-item v-if="showEndpoint">
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('endpoint') }">服务端点</span>
+        </template>
         <el-input
           v-model="form.endpoint"
           :placeholder="endpointPlaceholder"
@@ -81,7 +105,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="自定义域名">
+      <el-form-item>
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('domain') }">自定义域名</span>
+        </template>
         <el-input
           v-model="form.domain"
           :placeholder="domainPlaceholder"
@@ -90,7 +117,10 @@
         />
       </el-form-item>
 
-      <el-form-item v-if="showUseSSL" label="启用 HTTPS">
+      <el-form-item v-if="showUseSSL">
+        <template #label>
+          <span :class="{ 'field-modified': isFieldModified('use_ssl') }">启用 HTTPS</span>
+        </template>
         <el-switch
           v-model="form.use_ssl"
           :active-value="true"
@@ -122,6 +152,7 @@ const form = defineModel<UploadForm>('form', { required: true });
 
 defineProps<{
   loading?: boolean;
+  isFieldModified: (key: string) => boolean;
 }>();
 
 const accessLabel = computed(() => {
