@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -95,14 +96,14 @@ func (s *ArticleService) ListForWeb(ctx context.Context, req *dto.ListArticlesFo
 	}
 
 	// 批量获取文章评论数
-	articleSlugs := make([]string, len(articles))
+	articleIDs := make([]string, len(articles))
 	for i, article := range articles {
-		articleSlugs[i] = article.Slug
+		articleIDs[i] = strconv.FormatUint(uint64(article.ID), 10)
 	}
 
 	commentCounts := make(map[string]int64)
-	if len(articleSlugs) > 0 && s.commentRepo != nil {
-		commentCounts, err = s.commentRepo.CountByTargetKeys(ctx, "article", articleSlugs)
+	if len(articleIDs) > 0 && s.commentRepo != nil {
+		commentCounts, err = s.commentRepo.CountByTargetKeys(ctx, "article", articleIDs)
 		if err != nil {
 			// 如果获取评论数失败，不影响主流程，只记录错误
 			commentCounts = make(map[string]int64)
@@ -122,7 +123,7 @@ func (s *ArticleService) ListForWeb(ctx context.Context, req *dto.ListArticlesFo
 			IsEssence:    article.IsEssence,
 			IsOutdated:   article.IsOutdated,
 			URL:          fmt.Sprintf("/posts/%s", article.Slug),
-			CommentCount: commentCounts[article.Slug],
+			CommentCount: commentCounts[strconv.FormatUint(uint64(article.ID), 10)],
 			PublishTime:  utils.ToJSONTime(article.PublishTime),
 			UpdateTime:   utils.ToJSONTime(article.UpdateTime),
 		}
@@ -167,14 +168,14 @@ func (s *ArticleService) Search(ctx context.Context, req *dto.SearchArticlesRequ
 	}
 
 	// 批量获取文章评论数
-	articleSlugs := make([]string, len(articles))
+	articleIDs := make([]string, len(articles))
 	for i, article := range articles {
-		articleSlugs[i] = article.Slug
+		articleIDs[i] = strconv.FormatUint(uint64(article.ID), 10)
 	}
 
 	commentCounts := make(map[string]int64)
-	if len(articleSlugs) > 0 && s.commentRepo != nil {
-		commentCounts, err = s.commentRepo.CountByTargetKeys(ctx, "article", articleSlugs)
+	if len(articleIDs) > 0 && s.commentRepo != nil {
+		commentCounts, err = s.commentRepo.CountByTargetKeys(ctx, "article", articleIDs)
 		if err != nil {
 			// 如果获取评论数失败，不影响主流程，只记录错误
 			commentCounts = make(map[string]int64)
@@ -193,7 +194,7 @@ func (s *ArticleService) Search(ctx context.Context, req *dto.SearchArticlesRequ
 			IsEssence:    article.IsEssence,
 			URL:          fmt.Sprintf("/posts/%s", article.Slug),
 			Excerpt:      utils.GenerateExcerpt(article.Content, req.Keyword, 40), // 生成包含关键词的摘录
-			CommentCount: commentCounts[article.Slug],
+			CommentCount: commentCounts[strconv.FormatUint(uint64(article.ID), 10)],
 			PublishTime:  utils.ToJSONTime(article.PublishTime),
 			UpdateTime:   utils.ToJSONTime(article.UpdateTime),
 		}
@@ -237,9 +238,9 @@ func (s *ArticleService) GetBySlug(ctx context.Context, slug string) (*dto.Artic
 	// 获取文章评论数
 	var commentCount int64
 	if s.commentRepo != nil {
-		commentCounts, err := s.commentRepo.CountByTargetKeys(ctx, "article", []string{article.Slug})
+		commentCounts, err := s.commentRepo.CountByTargetKeys(ctx, "article", []string{strconv.FormatUint(uint64(article.ID), 10)})
 		if err == nil {
-			commentCount = commentCounts[article.Slug]
+			commentCount = commentCounts[strconv.FormatUint(uint64(article.ID), 10)]
 		}
 	}
 
@@ -324,14 +325,14 @@ func (s *ArticleService) List(ctx context.Context, req *dto.ListArticlesRequest)
 	}
 
 	// 批量获取文章评论数
-	articleSlugs := make([]string, len(articles))
+	articleIDs := make([]string, len(articles))
 	for i, article := range articles {
-		articleSlugs[i] = article.Slug
+		articleIDs[i] = strconv.FormatUint(uint64(article.ID), 10)
 	}
 
 	commentCounts := make(map[string]int64)
-	if len(articleSlugs) > 0 && s.commentRepo != nil {
-		commentCounts, err = s.commentRepo.CountByTargetKeys(ctx, "article", articleSlugs)
+	if len(articleIDs) > 0 && s.commentRepo != nil {
+		commentCounts, err = s.commentRepo.CountByTargetKeys(ctx, "article", articleIDs)
 		if err != nil {
 			// 如果获取评论数失败，不影响主流程
 			commentCounts = make(map[string]int64)
@@ -352,7 +353,7 @@ func (s *ArticleService) List(ctx context.Context, req *dto.ListArticlesRequest)
 			IsEssence:    article.IsEssence,
 			IsOutdated:   article.IsOutdated,
 			ViewCount:    article.ViewCount,
-			CommentCount: commentCounts[article.Slug],
+			CommentCount: commentCounts[strconv.FormatUint(uint64(article.ID), 10)],
 			PublishTime:  utils.ToJSONTime(article.PublishTime),
 			UpdateTime:   utils.ToJSONTime(article.UpdateTime),
 		}

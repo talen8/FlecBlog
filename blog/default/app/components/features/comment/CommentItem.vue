@@ -167,7 +167,7 @@ const handleReplyClick = () => {
 
       <!-- 回复输入框 -->
       <div v-if="isReplying" :id="`reply-input-${comment.id}`" class="reply-input-wrapper">
-        <FeaturesCommentCommentInput
+        <FeaturesCommentInput
           :comment-id="comment.id"
           :reply-to="context.replyState.replyingToNickname.value"
         />

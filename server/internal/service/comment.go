@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -316,8 +317,12 @@ func (s *CommentService) createComment(ctx context.Context, req *dto.CreateComme
 	// 验证目标类型
 	switch req.TargetType {
 	case "article":
-		// 文章评论：验证 slug 是否存在
-		if _, err := s.articleRepo.GetBySlug(req.TargetKey); err != nil {
+		articleID, err := strconv.ParseUint(req.TargetKey, 10, 64)
+		if err != nil {
+			return nil, errors.New("无效的文章ID")
+		}
+		article, err := s.articleRepo.Get(uint(articleID))
+		if err != nil || !article.IsPublish {
 			return nil, errors.New("文章不存在")
 		}
 	case "page":
@@ -548,8 +553,11 @@ func (s *CommentService) toDTO(comment *model.Comment) *dto.CommentListResponse 
 func (s *CommentService) getTargetTitle(targetType, targetKey string) string {
 	switch targetType {
 	case "article":
-		// 文章：通过 slug 查询数据库获取标题
-		article, err := s.articleRepo.GetBySlug(targetKey)
+		articleID, err := strconv.ParseUint(targetKey, 10, 64)
+		if err != nil {
+			return "文章已删除"
+		}
+		article, err := s.articleRepo.Get(uint(articleID))
 		if err != nil {
 			return "文章已删除"
 		}
@@ -573,19 +581,24 @@ func (s *CommentService) sendNotifications(comment *model.Comment, senderID uint
 		return
 	}
 
-	// 使用独立的 background context，避免原请求上下文取消影响通知发送
 	notifyCtx := context.Background()
-
-	// 获取目标标题
 	targetTitle := s.getTargetTitle(comment.TargetType, comment.TargetKey)
 
-	// 1. 如果是回复评论，通知被回复者
-	if comment.ReplyTo != nil {
-		_ = s.notificationService.NotifyCommentReply(notifyCtx, senderID, *comment.ReplyTo, comment, targetTitle)
+	// 构建通知链接（文章类型需要将 ID 转为 slug）
+	targetKeyForLink := comment.TargetKey
+	if comment.TargetType == "article" {
+		if id, err := strconv.ParseUint(comment.TargetKey, 10, 64); err == nil {
+			if article, err := s.articleRepo.Get(uint(id)); err == nil {
+				targetKeyForLink = article.Slug
+			}
+		}
 	}
+	pageLink := fmt.Sprintf("/posts/%s#comment-%d", targetKeyForLink, comment.ID)
 
-	// 2. 通知所有管理员（有新评论），排除发送者自己避免自通知
-	_ = s.notificationService.NotifyCommentToAdmins(notifyCtx, senderID, comment, targetTitle, &senderID)
+	if comment.ReplyTo != nil {
+		_ = s.notificationService.NotifyCommentReply(notifyCtx, senderID, *comment.ReplyTo, comment, targetTitle, pageLink)
+	}
+	_ = s.notificationService.NotifyCommentToAdmins(notifyCtx, senderID, comment, targetTitle, &senderID, pageLink)
 }
 
 // markImagesAsUsed 标记评论内容中的图片为已使用
@@ -840,7 +853,12 @@ func (s *CommentService) parseArtalkComment(artalk *dto.ArtalkCommentData) (*par
 	// 判断类型
 	if isArticlePath(pageKey) {
 		parsed.TargetType = "article"
-		parsed.TargetKey = extractArticleSlug(pageKey)
+		slug := extractArticleSlug(pageKey)
+		article, err := s.articleRepo.GetBySlug(slug)
+		if err != nil {
+			return nil, errors.New("文章不存在: " + slug)
+		}
+		parsed.TargetKey = strconv.FormatUint(uint64(article.ID), 10)
 	} else {
 		parsed.TargetType = "page"
 		parsed.TargetKey = normalizePageKey(pageKey)

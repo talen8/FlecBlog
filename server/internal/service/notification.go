@@ -33,14 +33,13 @@ func NewNotificationService(repo *repository.NotificationRepository, notificatio
 // ============ 对外通知方法 ============
 
 // NotifyCommentReply 评论回复通知（发送给被回复者）
-func (s *NotificationService) NotifyCommentReply(ctx context.Context, senderID, receiverID uint, comment *model.Comment, pageTitle string) error {
+func (s *NotificationService) NotifyCommentReply(ctx context.Context, senderID, receiverID uint, comment *model.Comment, pageTitle string, pageLink string) error {
 	if senderID == receiverID {
 		return nil
 	}
 
 	senderName := s.getUserNickname(ctx, senderID)
 	receiverName := s.getUserNickname(ctx, receiverID)
-	pageLink := buildCommentLink(comment.TargetType, comment.TargetKey, comment.ID)
 
 	title := fmt.Sprintf("在《%s》收到了来自 @%s 的评论回复", pageTitle, senderName)
 	data := map[string]interface{}{
@@ -57,9 +56,8 @@ func (s *NotificationService) NotifyCommentReply(ctx context.Context, senderID, 
 }
 
 // NotifyCommentToAdmins 新评论通知管理员
-func (s *NotificationService) NotifyCommentToAdmins(ctx context.Context, senderID uint, comment *model.Comment, pageTitle string, excludeUserID *uint) error {
+func (s *NotificationService) NotifyCommentToAdmins(ctx context.Context, senderID uint, comment *model.Comment, pageTitle string, excludeUserID *uint, pageLink string) error {
 	senderName := s.getUserNickname(ctx, senderID)
-	pageLink := buildCommentLink(comment.TargetType, comment.TargetKey, comment.ID)
 
 	title := "收到了新的评论通知"
 	content := fmt.Sprintf("%s：%s", senderName, comment.Content)
@@ -553,25 +551,4 @@ func getNotificationTypeText(notifType string) string {
 		return text
 	}
 	return "通知"
-}
-
-func buildCommentLink(targetType, targetKey string, commentID uint) string {
-	return fmt.Sprintf("%s#comment-%d", buildCommentTargetPath(targetType, targetKey), commentID)
-}
-
-func buildCommentTargetPath(targetType, targetKey string) string {
-	switch targetType {
-	case "article":
-		return fmt.Sprintf("/posts/%s", targetKey)
-	case "page":
-		if targetKey == "" {
-			return "/"
-		}
-		return fmt.Sprintf("/%s", targetKey)
-	default:
-		if targetKey == "" {
-			return "/"
-		}
-		return fmt.Sprintf("/%s", targetKey)
-	}
 }
