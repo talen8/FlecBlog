@@ -1,5 +1,5 @@
-import type { Article, ArticleQuery } from '@@/types/article';
-import type { PaginationData } from '@@/types/request';
+import type { Article, ArticleQuery } from '../../../types/article';
+import type { PaginationData } from '../../../types/request';
 import { createApi } from './createApi';
 
 const articleApi = createApi<Article>('/articles');

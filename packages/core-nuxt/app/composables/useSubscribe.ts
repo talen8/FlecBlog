@@ -1,4 +1,4 @@
-import { subscribe, unsubscribe } from '@/composables/api/subscribe';
+import { subscribe, unsubscribe } from './api/subscribe';
 
 /**
  * 邮箱订阅管理

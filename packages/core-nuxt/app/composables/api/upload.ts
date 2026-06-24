@@ -1,5 +1,5 @@
-import type { ApiResponse } from '@@/types/request';
-import type { UploadType, UploadResponse } from '@@/types/upload';
+import type { ApiResponse } from '../../../types/request';
+import type { UploadType, UploadResponse } from '../../../types/upload';
 import { post } from './http';
 
 /** 上传文件 */

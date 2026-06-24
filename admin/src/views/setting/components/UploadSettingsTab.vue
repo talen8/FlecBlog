@@ -44,7 +44,9 @@
     <template v-if="form.storage_type !== 'local'">
       <el-form-item>
         <template #label>
-          <span :class="{ 'field-modified': isFieldModified('access_key') }">{{ accessLabel }}</span>
+          <span :class="{ 'field-modified': isFieldModified('access_key') }">{{
+            accessLabel
+          }}</span>
         </template>
         <el-input
           v-model="form.access_key"
@@ -56,7 +58,9 @@
 
       <el-form-item>
         <template #label>
-          <span :class="{ 'field-modified': isFieldModified('secret_key') }">{{ secretLabel }}</span>
+          <span :class="{ 'field-modified': isFieldModified('secret_key') }">{{
+            secretLabel
+          }}</span>
         </template>
         <el-input
           v-model="form.secret_key"

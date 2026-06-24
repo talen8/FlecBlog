@@ -6,7 +6,7 @@ import type {
   ForgotPasswordParams,
   ResetPasswordParams,
   RefreshTokenResponse,
-} from '@@/types/auth';
+} from '../../../types/auth';
 import { createApi } from './createApi';
 
 const authApi = createApi<LoginResponse>('/auth');

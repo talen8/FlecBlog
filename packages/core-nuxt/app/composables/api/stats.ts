@@ -1,4 +1,4 @@
-import type { SiteStats, ArchiveStats } from '@@/types/stats';
+import type { SiteStats, ArchiveStats } from '../../../types/stats';
 import { createApi } from './createApi';
 
 const statsApi = createApi<SiteStats>('/stats');

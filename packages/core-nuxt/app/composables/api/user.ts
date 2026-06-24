@@ -3,7 +3,7 @@ import type {
   UpdateProfileParams,
   ChangePasswordParams,
   DeactivateAccountParams,
-} from '@@/types/user';
+} from '../../../types/user';
 import { createApi } from './createApi';
 
 const userApi = createApi<UserInfo>('/user');

@@ -1372,6 +1372,17 @@ definitions:
       version:
         type: string
     type: object
+  dto.ThemeUpdateCheckResponse:
+    properties:
+      current_version:
+        type: string
+      has_update:
+        type: boolean
+      latest_version:
+        type: string
+      release_url:
+        type: string
+    type: object
   dto.TrendData:
     properties:
       date:
@@ -4394,6 +4405,32 @@ paths:
       security:
       - BearerAuth: []
       summary: 主题详情
+      tags:
+      - 主题管理
+  /admin/themes/{slug}/check:
+    post:
+      description: 检查指定主题是否有新版本
+      parameters:
+      - description: 主题 slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ThemeUpdateCheckResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 检查主题版本更新
       tags:
       - 主题管理
   /admin/themes/{slug}/config:

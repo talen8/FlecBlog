@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CommentTargetType } from '@@/types/comment';
+import type { CommentTargetType } from '@flecblog/core-nuxt';
 
 // 组件属性
 const props = defineProps<{

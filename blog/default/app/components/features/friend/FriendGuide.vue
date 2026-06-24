@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { FriendApplyRequest } from '@@/types/friend';
+import type { FriendApplyRequest } from '@flecblog/core-nuxt';
 const activeTab = ref<'yaml' | 'json' | 'html' | 'table'>('yaml');
 const activeApplyTab = ref<'form' | 'format1' | 'format2'>('format1');
 const { success } = useToast();

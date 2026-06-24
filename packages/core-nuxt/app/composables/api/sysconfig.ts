@@ -1,4 +1,4 @@
-import type { SettingGroupType } from '@@/types/sysconfig';
+import type { SettingGroupType } from '../../../types/sysconfig';
 import { createApi } from './createApi';
 
 const settingApi = createApi<Record<string, string>>('/settings');

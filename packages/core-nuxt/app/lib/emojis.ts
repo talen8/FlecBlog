@@ -1,4 +1,4 @@
-import type { EmojiGroup } from '@@/types/comment';
+import type { EmojiGroup } from '../../types/comment';
 
 // 全局缓存
 let groupsCache: EmojiGroup[] | null = null;

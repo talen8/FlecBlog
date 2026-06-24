@@ -1,4 +1,4 @@
-import type { ApiResponse, PaginationData, PaginationQuery } from '@@/types/request';
+import type { ApiResponse, PaginationData, PaginationQuery } from '../../../types/request';
 import { get, post, put, patch, del } from './http';
 
 interface ApiFactoryOptions {

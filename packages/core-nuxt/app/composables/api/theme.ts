@@ -1,4 +1,4 @@
-import type { ActiveTheme } from '@@/types/theme';
+import type { ActiveTheme } from '../../../types/theme';
 import { createApi } from './createApi';
 
 const themeApi = createApi<ActiveTheme>('/themes');

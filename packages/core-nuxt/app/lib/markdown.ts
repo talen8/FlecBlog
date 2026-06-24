@@ -16,7 +16,7 @@ import underline from 'markdown-it-plugin-underline';
 import katex from '@traptitech/markdown-it-katex';
 
 import DOMPurify from 'isomorphic-dompurify';
-import { useSysConfig } from '@/composables/useSysConfig';
+import { useSysConfig } from '../composables/useSysConfig';
 
 // highlight.js 按需加载
 import hljs from 'highlight.js/lib/core';

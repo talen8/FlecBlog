@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Moment } from '@@/types/moment';
+import type { Moment } from '@flecblog/core-nuxt';
 
 // 动态列表（最近 10 条，SSR）
 const { data: moments } = await useMomentList(() => 10);

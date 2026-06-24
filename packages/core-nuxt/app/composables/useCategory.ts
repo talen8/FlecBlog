@@ -1,5 +1,5 @@
-import type { Category } from '@@/types/category';
-import { getCategories, getCategoryBySlug } from '@/composables/api/category';
+import type { Category } from '../../types/category';
+import { getCategories, getCategoryBySlug } from './api/category';
 
 /**
  * 按 slug 获取分类详情（支持 SSR）

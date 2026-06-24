@@ -1,5 +1,5 @@
-import type { UploadType, UploadResponse } from '@@/types/upload';
-import { uploadFile } from '@/composables/api/upload';
+import type { UploadType, UploadResponse } from '../../types/upload';
+import { uploadFile } from './api/upload';
 
 export type { UploadType, UploadResponse };
 

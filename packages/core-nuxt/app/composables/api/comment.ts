@@ -1,4 +1,4 @@
-import type { Comment, CreateCommentParams, GetCommentsParams } from '@@/types/comment';
+import type { Comment, CreateCommentParams, GetCommentsParams } from '../../../types/comment';
 import { createApi } from './createApi';
 
 const commentApi = createApi<Comment>('/comments', { stringifyTargetKey: true });

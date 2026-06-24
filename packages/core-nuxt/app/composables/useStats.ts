@@ -1,5 +1,5 @@
-import type { SiteStats } from '@@/types/stats';
-import { getSiteStats, getArchiveStats } from '@/composables/api/stats';
+import type { SiteStats } from '../../types/stats';
+import { getSiteStats, getArchiveStats } from './api/stats';
 
 const defaultSiteStats: SiteStats = {
   total_words: '0',

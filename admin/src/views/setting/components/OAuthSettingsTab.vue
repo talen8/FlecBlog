@@ -24,7 +24,9 @@
     </el-form-item>
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('github.client_secret') }">Client Secret</span>
+        <span :class="{ 'field-modified': isFieldModified('github.client_secret') }"
+          >Client Secret</span
+        >
       </template>
       <el-input
         v-model="form['github.client_secret']"
@@ -70,7 +72,9 @@
     </el-form-item>
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('google.client_secret') }">Client Secret</span>
+        <span :class="{ 'field-modified': isFieldModified('google.client_secret') }"
+          >Client Secret</span
+        >
       </template>
       <el-input
         v-model="form['google.client_secret']"
@@ -137,7 +141,9 @@
     <el-divider content-position="left">Microsoft 登录</el-divider>
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('microsoft.enabled') }">启用 Microsoft</span>
+        <span :class="{ 'field-modified': isFieldModified('microsoft.enabled') }"
+          >启用 Microsoft</span
+        >
       </template>
       <el-switch
         v-model="form['microsoft.enabled']"
@@ -158,7 +164,9 @@
     </el-form-item>
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('microsoft.client_secret') }">Client Secret</span>
+        <span :class="{ 'field-modified': isFieldModified('microsoft.client_secret') }"
+          >Client Secret</span
+        >
       </template>
       <el-input
         v-model="form['microsoft.client_secret']"
@@ -171,7 +179,9 @@
     </el-form-item>
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('microsoft.redirect_url') }">回调地址</span>
+        <span :class="{ 'field-modified': isFieldModified('microsoft.redirect_url') }"
+          >回调地址</span
+        >
       </template>
       <el-input
         v-model="form['microsoft.redirect_url']"
@@ -242,7 +252,9 @@
     </el-form-item>
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('oidc.client_secret') }">Client Secret</span>
+        <span :class="{ 'field-modified': isFieldModified('oidc.client_secret') }"
+          >Client Secret</span
+        >
       </template>
       <el-input
         v-model="form['oidc.client_secret']"

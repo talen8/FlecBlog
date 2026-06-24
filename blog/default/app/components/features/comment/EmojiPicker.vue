@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EmojiItem, EmojiGroup } from '@@/types/comment';
+import type { EmojiItem, EmojiGroup } from '@flecblog/core-nuxt';
 
 const emit = defineEmits<{
   select: [emoji: string];

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import mediumZoom from 'medium-zoom';
-import type { Moment } from '@@/types/moment';
+import type { Moment } from '@flecblog/core-nuxt';
 
 const { basicConfig } = useSysConfig();
 const { themeConfig } = useTheme();

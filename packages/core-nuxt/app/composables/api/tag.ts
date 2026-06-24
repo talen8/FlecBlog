@@ -1,4 +1,4 @@
-import type { Tag } from '@@/types/tag';
+import type { Tag } from '../../../types/tag';
 import { createApi } from './createApi';
 
 const tagApi = createApi<Tag>('/tags');

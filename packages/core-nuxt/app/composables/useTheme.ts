@@ -1,5 +1,5 @@
-import type { ThemeMenuItem } from '@@/types/theme';
-import { getActiveTheme } from '@/composables/api/theme';
+import type { ThemeMenuItem } from '../../types/theme';
+import { getActiveTheme } from './api/theme';
 
 /**
  * 获取当前激活主题及其菜单（支持 SSR）

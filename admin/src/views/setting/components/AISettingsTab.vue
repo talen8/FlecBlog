@@ -55,7 +55,9 @@
 
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('ai_summary_prompt') }">AI 总结提示词</span>
+        <span :class="{ 'field-modified': isFieldModified('ai_summary_prompt') }"
+          >AI 总结提示词</span
+        >
       </template>
       <el-input
         v-model="form.ai_summary_prompt"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Notification } from '@@/types/notification';
+import type { Notification } from '@flecblog/core-nuxt';
 
 const {
   notifications,

@@ -1,5 +1,5 @@
-import { getSettingGroup } from '@/composables/api/sysconfig';
-import type { SysConfigData } from '@@/types/sysconfig';
+import { getSettingGroup } from './api/sysconfig';
+import type { SysConfigData } from '../../types/sysconfig';
 
 // 去掉 key 的指定前缀
 const stripPrefix = (config: Record<string, string>, prefix: string) => {

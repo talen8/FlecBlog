@@ -1,6 +1,6 @@
 import { $fetch } from 'ofetch';
 import type { FetchOptions } from 'ofetch';
-import type { ApiResponse } from '@@/types/request';
+import type { ApiResponse } from '../../../types/request';
 
 type HttpMethod =
   | 'GET'

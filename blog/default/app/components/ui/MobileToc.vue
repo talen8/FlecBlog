@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TocItem } from '@/lib/markdown';
+import type { TocItem } from '@flecblog/core-nuxt';
 
 interface Props {
   visible: boolean;

@@ -1,4 +1,4 @@
-import { useSysConfig } from '@/composables/useSysConfig';
+import { useSysConfig } from './useSysConfig';
 
 const DEFAULT_CRAVATAR_URL = 'https://cravatar.cn/avatar/%s?s=200&d=robohash';
 

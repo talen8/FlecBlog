@@ -1,4 +1,4 @@
-import type { Feedback, SubmitFeedbackParams } from '@@/types/feedback';
+import type { Feedback, SubmitFeedbackParams } from '../../../types/feedback';
 import { createApi } from './createApi';
 
 const feedbackApi = createApi<Feedback>('/feedback');

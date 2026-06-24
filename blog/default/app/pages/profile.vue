@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserInfo, UserRole } from '@@/types/user';
+import type { UserInfo, UserRole } from '@flecblog/core-nuxt';
 
 definePageMeta({});
 

@@ -1,5 +1,5 @@
-import type { FriendApplyRequest } from '@@/types/friend';
-import { getFriends, applyFriend } from '@/composables/api/friend';
+import type { FriendApplyRequest } from '../../types/friend';
+import { getFriends, applyFriend } from './api/friend';
 
 /**
  * 获取友链分组列表（支持 SSR）

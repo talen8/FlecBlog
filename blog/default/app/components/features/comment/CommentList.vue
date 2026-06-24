@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FlatComment } from '@@/types/comment';
+import type { FlatComment } from '@flecblog/core-nuxt';
 
 interface Props {
   comments: FlatComment[];

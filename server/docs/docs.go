@@ -4296,6 +4296,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/themes/{slug}/check": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "检查指定主题是否有新版本",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "主题管理"
+                ],
+                "summary": "检查主题版本更新",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主题 slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ThemeUpdateCheckResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/admin/themes/{slug}/config": {
             "put": {
                 "security": [
@@ -9632,6 +9678,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ThemeUpdateCheckResponse": {
+            "type": "object",
+            "properties": {
+                "current_version": {
+                    "type": "string"
+                },
+                "has_update": {
+                    "type": "boolean"
+                },
+                "latest_version": {
+                    "type": "string"
+                },
+                "release_url": {
                     "type": "string"
                 }
             }

@@ -1,4 +1,4 @@
-import type { NotificationListResponse, GetNotificationsParams } from '@@/types/notification';
+import type { NotificationListResponse, GetNotificationsParams } from '../../../types/notification';
 import { createApi } from './createApi';
 
 const notificationApi = createApi<NotificationListResponse>('/notifications');

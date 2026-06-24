@@ -232,30 +232,32 @@ export default defineNuxtConfig({
 
 ## 类型
 
-TypeScript 类型需要显式 import。
-
-| 模块 | 导入路径 | 类型 |
-|---|---|---|
-| 文章 | `types/article` | `Article` `ArticleNav` `ArticleQuery` |
-| 认证 | `types/auth` | `LoginParams` `LoginResponse` `RegisterParams` `RegisterResponse` `ForgotPasswordParams` `ResetPasswordParams` `RefreshTokenResponse` |
-| 分类 | `types/category` | `Category` |
-| 评论 | `types/comment` | `Comment` `CreateCommentParams` `GetCommentsParams` `FlatComment` `EmojiItem` `EmojiGroup` `CommentTargetType` |
-| 反馈 | `types/feedback` | `Feedback` `SubmitFeedbackParams` `ReportType` `FeedbackStatus` |
-| 友链 | `types/friend` | `Friend` `FriendGroup` `FriendGroupedResponse` `FriendApplyRequest` |
-| 动态 | `types/moment` | `Moment` `MomentContent` `MomentMusic` `AudioTrack` `LyricLine` `MomentListResponse` |
-| 通知 | `types/notification` | `Notification` `NotificationType` `GetNotificationsParams` |
-| 请求 | `types/request` | `ApiResponse<T>` `PaginationQuery` `PaginationData<T>` |
-| 统计 | `types/stats` | `SiteStats` `ArchiveItem` `ArchiveStats` |
-| 配置 | `types/sysconfig` | `SysConfigData` `SettingGroupType` |
-| 标签 | `types/tag` | `Tag` |
-| 主题 | `types/theme` | `ThemeMenuItem` `ActiveTheme` |
-| 上传 | `types/upload` | `UploadResponse` `UploadType` |
-| 用户 | `types/user` | `UserInfo` `UpdateProfileParams` `ChangePasswordParams` `UserRole` |
+TypeScript 类型需要显式 import。统一从 `@flecblog/core-nuxt` 导入，自动索引所有类型。
 
 ```ts
-import type { Article, ArticleQuery } from '@flecblog/core-nuxt/types/article';
-import type { ApiResponse, PaginationData } from '@flecblog/core-nuxt/types/request';
+import type { Article, ArticleQuery, ApiResponse, PaginationData, UserInfo, Comment } from '@flecblog/core-nuxt';
 ```
+
+可用类型：
+
+| 模块 | 类型 |
+|---|---|
+| 文章 | `Article` `ArticleNav` `ArticleQuery` |
+| 认证 | `LoginParams` `LoginResponse` `RegisterParams` `RegisterResponse` `ForgotPasswordParams` `ResetPasswordParams` `RefreshTokenResponse` |
+| 分类 | `Category` |
+| 评论 | `Comment` `CreateCommentParams` `GetCommentsParams` `FlatComment` `EmojiItem` `EmojiGroup` `CommentTargetType` |
+| 反馈 | `Feedback` `SubmitFeedbackParams` `ReportType` `FeedbackStatus` |
+| 友链 | `Friend` `FriendGroup` `FriendGroupedResponse` `FriendApplyRequest` |
+| 动态 | `Moment` `MomentContent` `MomentMusic` `AudioTrack` `LyricLine` `MomentListResponse` |
+| 通知 | `Notification` `NotificationType` `GetNotificationsParams` |
+| 请求 | `ApiResponse<T>` `PaginationQuery` `PaginationData<T>` |
+| 统计 | `SiteStats` `ArchiveItem` `ArchiveStats` |
+| 配置 | `SysConfigData` `SettingGroupType` |
+| 标签 | `Tag` |
+| 主题 | `ThemeMenuItem` `ActiveTheme` |
+| 上传 | `UploadResponse` `UploadType` |
+| 用户 | `UserInfo` `UpdateProfileParams` `ChangePasswordParams` `UserRole` |
+| Markdown | `TocItem` |
 
 ## 样式
 

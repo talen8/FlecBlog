@@ -4,8 +4,8 @@ import type {
   FlatComment,
   CreateCommentParams,
   GuestInfo,
-} from '@@/types/comment';
-import { getComments, createComment, deleteComment } from '@/composables/api/comment';
+} from '../../types/comment';
+import { getComments, createComment, deleteComment } from './api/comment';
 
 /**
  * 将嵌套评论扁平化为带深度的列表（用于列表渲染）

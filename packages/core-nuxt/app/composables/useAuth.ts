@@ -1,4 +1,4 @@
-import type { UserInfo } from '@@/types/user';
+import type { UserInfo } from '../../types/user';
 import { ref, computed } from 'vue';
 import {
   login,
@@ -10,8 +10,8 @@ import {
   logout,
   getOAuthUrl,
   getOAuthBindUrl,
-} from '@/composables/api/auth';
-import { getUserProfile } from '@/composables/api/user';
+} from './api/auth';
+import { getUserProfile } from './api/user';
 
 // ============ Token 管理 ============
 

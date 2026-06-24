@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { ArticleNav } from '@@/types/article';
+import type { ArticleNav } from '@flecblog/core-nuxt';
 
 defineProps<{
   prev?: ArticleNav;

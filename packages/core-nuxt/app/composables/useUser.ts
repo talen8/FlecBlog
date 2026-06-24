@@ -1,4 +1,4 @@
-import type { UserInfo } from '@@/types/user';
+import type { UserInfo } from '../../types/user';
 import {
   getUserProfile,
   updateUserProfile,
@@ -6,7 +6,7 @@ import {
   setPassword,
   deactivateAccount,
   unbindOAuth,
-} from '@/composables/api/user';
+} from './api/user';
 
 // 用户信息状态
 const userInfo = ref<UserInfo | null>(null);

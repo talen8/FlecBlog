@@ -1,5 +1,5 @@
-import type { MomentMusic, AudioTrack, MusicApiResponse, LyricLine } from '@@/types/moment';
-import { getMoments } from '@/composables/api/moment';
+import type { MomentMusic, AudioTrack, MusicApiResponse, LyricLine } from '../../types/moment';
+import { getMoments } from './api/moment';
 
 /**
  * 获取动态列表（支持 SSR）

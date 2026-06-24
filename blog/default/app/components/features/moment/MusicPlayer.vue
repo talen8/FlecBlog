@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { MomentMusic, AudioTrack, LyricLine } from '@@/types/moment';
+import type { MomentMusic, AudioTrack, LyricLine } from '@flecblog/core-nuxt';
 
 const props = defineProps<{
   music: MomentMusic;

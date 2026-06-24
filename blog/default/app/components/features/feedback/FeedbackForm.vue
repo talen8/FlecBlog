@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SubmitFeedbackParams, ReportType, Feedback } from '@@/types/feedback';
+import type { SubmitFeedbackParams, ReportType, Feedback } from '@flecblog/core-nuxt';
 
 const { validate, upload } = useUpload();
 

@@ -1,5 +1,5 @@
-import type { Tag } from '@@/types/tag';
-import { getTags, getTagBySlug } from '@/composables/api/tag';
+import type { Tag } from '../../types/tag';
+import { getTags, getTagBySlug } from './api/tag';
 
 /**
  * 按 slug 获取标签详情（支持 SSR）

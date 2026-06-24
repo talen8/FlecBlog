@@ -1,5 +1,5 @@
-import type { SubmitFeedbackParams } from '@@/types/feedback';
-import { submitFeedback, getFeedbackByTicketNo } from '@/composables/api/feedback';
+import type { SubmitFeedbackParams } from '../../types/feedback';
+import { submitFeedback, getFeedbackByTicketNo } from './api/feedback';
 
 /**
  * 反馈管理（提交反馈 + 按工单号查询反馈状态）

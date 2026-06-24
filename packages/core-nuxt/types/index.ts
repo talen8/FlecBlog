@@ -1,6 +1,7 @@
 // FlecBlog Core Types
 // Auto-exported types for theme development
 
+export type { TocItem } from '../app/lib/markdown';
 export * from './article';
 export * from './auth';
 export * from './category';

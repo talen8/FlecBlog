@@ -1,10 +1,10 @@
-import type { Article, ArticleQuery } from '@@/types/article';
+import type { Article, ArticleQuery } from '../../types/article';
 import {
   getArticleList,
   getArticleBySlug,
   searchArticles,
   getRandomArticleSlug,
-} from '@/composables/api/article';
+} from './api/article';
 
 /**
  * 获取当前正在浏览的文章（跨页面共享状态）

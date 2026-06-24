@@ -1,5 +1,5 @@
-import type { Notification, GetNotificationsParams } from '@@/types/notification';
-import { getNotifications, markAsRead, markAllAsRead } from '@/composables/api/notification';
+import type { Notification, GetNotificationsParams } from '../../types/notification';
+import { getNotifications, markAsRead, markAllAsRead } from './api/notification';
 
 /**
  * 通知管理（列表 + 未读数 + 已读/全部已读 + 分页）

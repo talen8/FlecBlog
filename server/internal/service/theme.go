@@ -509,7 +509,7 @@ func fetchLatestRelease(ctx context.Context, owner, repo string) (tagName, htmlU
 	if err != nil {
 		return "", "", fmt.Errorf("请求 GitHub API 失败: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return "", "", errors.New("仓库不存在或没有 release")

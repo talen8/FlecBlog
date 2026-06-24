@@ -1,4 +1,4 @@
-import type { FriendGroupedResponse, FriendQueryParams, FriendApplyRequest } from '@@/types/friend';
+import type { FriendGroupedResponse, FriendQueryParams, FriendApplyRequest } from '../../../types/friend';
 import { createApi } from './createApi';
 
 const friendApi = createApi<FriendGroupedResponse>('/friends');

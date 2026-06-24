@@ -45,7 +45,9 @@
               <el-form label-position="top" :disabled="formDisabled">
                 <el-form-item v-for="(field, key) in group.fields" :key="key">
                   <template #label>
-                    <span :class="{ 'field-modified': isFieldModified(String(key)) }">{{ field.title || String(key) }}</span>
+                    <span :class="{ 'field-modified': isFieldModified(String(key)) }">{{
+                      field.title || String(key)
+                    }}</span>
                     <div v-if="field.description" class="field-desc">
                       {{ field.description }}
                     </div>

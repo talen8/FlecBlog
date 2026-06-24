@@ -361,10 +361,7 @@ const loadAllConfigs = async () => {
   }
 };
 
-const makeIsFieldModified = (
-  form: Record<string, unknown>,
-  original: Record<string, unknown>
-) => {
+const makeIsFieldModified = (form: Record<string, unknown>, original: Record<string, unknown>) => {
   return (key: string): boolean => {
     if (loading.value) return false;
     const current = form[key];
@@ -376,11 +373,19 @@ const makeIsFieldModified = (
   };
 };
 
-const basicIsFieldModified = computed(() => makeIsFieldModified(basicForm.value, originalBasicForm.value));
-const notificationIsFieldModified = computed(() => makeIsFieldModified(notificationForm.value, originalNotificationForm.value));
-const uploadIsFieldModified = computed(() => makeIsFieldModified(uploadForm.value, originalUploadForm.value));
+const basicIsFieldModified = computed(() =>
+  makeIsFieldModified(basicForm.value, originalBasicForm.value)
+);
+const notificationIsFieldModified = computed(() =>
+  makeIsFieldModified(notificationForm.value, originalNotificationForm.value)
+);
+const uploadIsFieldModified = computed(() =>
+  makeIsFieldModified(uploadForm.value, originalUploadForm.value)
+);
 const aiIsFieldModified = computed(() => makeIsFieldModified(aiForm.value, originalAiForm.value));
-const oauthIsFieldModified = computed(() => makeIsFieldModified(oauthForm.value, originalOAuthForm.value));
+const oauthIsFieldModified = computed(() =>
+  makeIsFieldModified(oauthForm.value, originalOAuthForm.value)
+);
 
 // 统一保存配置
 const handleSave = async () => {
