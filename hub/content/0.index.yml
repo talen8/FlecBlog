@@ -6,7 +6,7 @@ seo:
 navigation: false
 hero:
   headline: Where content finds its calm.
-  command: curl -fsSL https://get.flec.top | sudo bash
+  command: curl -fsSL https://get.flec.top | bash
   links:
     - label: 立即开始
       icon: i-lucide-rocket
