@@ -14,5 +14,10 @@ database_id = "b39b8f3d-1734-498a-a3aa-ad05b1356ea7"
 [triggers]
 crons = ["0 * * * *"]
 
+[[routes]]
+pattern = "panel.flec.top"
+zone_name = "flec.top"
+custom_domain = true
+
 [observability]
 enabled = true

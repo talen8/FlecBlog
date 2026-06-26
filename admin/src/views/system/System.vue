@@ -426,6 +426,10 @@ const handleCheckUpdate = async () => {
   checking.value = true;
   try {
     const result = await checkUpdate();
+    if (result.last_check_error) {
+      ElMessage.error(result.last_check_error);
+      return;
+    }
     panelVersions.value = result.versions;
     await fetchDynamicInfo();
     if (result.has_update) {

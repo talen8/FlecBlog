@@ -26,6 +26,7 @@ export interface Announcement {
 export interface Env {
   DB: D1Database;
   ASSETS?: Fetcher;
+  PANEL_API_KEY?: string;
 }
 
 /** 设置项 */

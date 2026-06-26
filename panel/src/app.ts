@@ -21,6 +21,18 @@ app.use(
 );
 app.use('*', logger());
 
+// 校验客户端密钥，保护 /api 路由
+app.use('/api/*', async (c, next) => {
+  if (c.req.path === '/api/announcements') {
+    return next();
+  }
+  const apiKey = c.env.PANEL_API_KEY;
+  if (apiKey && c.req.header('X-Api-Key') !== apiKey) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+  await next();
+});
+
 app.route('/api', publicRoutes);
 app.route('/admin/versions', versionRoutes);
 app.route('/admin/announcements', announcementRoutes);

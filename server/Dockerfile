@@ -14,7 +14,8 @@ RUN go mod download
 COPY . .
 # -ldflags="-s -w": 去除调试信息和符号表，减小二进制体积
 ARG APP_VERSION=dev
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${APP_VERSION}'" -o flec_blog ./cmd/main.go
+ARG PANEL_API_KEY
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${APP_VERSION}' -X 'flec_blog/pkg/panel.apiKey=${PANEL_API_KEY}'" -o flec_blog ./cmd/main.go
 
 # 运行阶段
 FROM alpine:latest

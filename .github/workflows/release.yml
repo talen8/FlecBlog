@@ -108,13 +108,15 @@ jobs:
             echo "请将 .env.example 复制为 .env 并配置相关参数" > ${pkg_dir}/README.txt
           }
 
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}'" -o flec-server ./cmd/main.go
+          PANEL_KEY="${{ secrets.PANEL_API_KEY }}"
+
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}' -X 'flec_blog/pkg/panel.apiKey=${PANEL_KEY}'" -o flec-server ./cmd/main.go
           prepare_package "dist/linux_amd64"
           mv flec-server dist/linux_amd64/
           tar -czf dist/flec-server_linux_amd64.tar.gz -C dist linux_amd64
           rm -rf dist/linux_amd64
 
-          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}'" -o flec-server ./cmd/main.go
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X 'flec_blog/internal/service.AppVersion=${VERSION}' -X 'flec_blog/pkg/panel.apiKey=${PANEL_KEY}'" -o flec-server ./cmd/main.go
           prepare_package "dist/linux_arm64"
           mv flec-server dist/linux_arm64/
           tar -czf dist/flec-server_linux_arm64.tar.gz -C dist linux_arm64
@@ -128,6 +130,7 @@ jobs:
           tags: ${{ steps.tags.outputs.tags }}
           build-args: |
             APP_VERSION=${{ github.ref_name }}
+            PANEL_API_KEY=${{ secrets.PANEL_API_KEY }}
 
       - name: 上传 Server 构建产物
         if: matrix.target == 'server'
