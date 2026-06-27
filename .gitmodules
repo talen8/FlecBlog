@@ -1,0 +1,3 @@
+[submodule "template/flec-theme-tmpl-nuxt"]
+	path = template/flec-theme-tmpl-nuxt
+	url = https://github.com/talen8/flec-theme-tmpl-nuxt.git
