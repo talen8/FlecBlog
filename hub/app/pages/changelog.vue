@@ -13,6 +13,11 @@ useSeoMeta({
   description,
   ogDescription: description
 })
+
+function formatDate(date: string | Date) {
+  const d = new Date(date)
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
+}
 </script>
 
 <template>
@@ -29,6 +34,9 @@ useSeoMeta({
           :key="index"
           v-bind="version"
         >
+          <template #date>
+            {{ formatDate(version.date) }}
+          </template>
           <template #body>
             <ContentRenderer :value="version.body" />
           </template>

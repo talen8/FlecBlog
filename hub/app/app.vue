@@ -18,7 +18,7 @@ useHead({
 })
 
 useSeoMeta({
-  titleTemplate: '%s - FlecBlog',
+  titleTemplate: '%s - FlecHub',
   ogImage: 'https://ui.nuxt.com/assets/templates/nuxt/saas-light.png',
   twitterCard: 'summary_large_image'
 })

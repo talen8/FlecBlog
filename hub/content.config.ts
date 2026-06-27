@@ -122,6 +122,7 @@ export const collections = {
         z.object({
           name: z.string().nonempty(),
           display_name: z.string().nonempty(),
+          slug: z.string().nonempty(),
           author: z.string().nonempty(),
           description: z.string().optional(),
           image: z.string().nonempty(),

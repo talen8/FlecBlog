@@ -2,7 +2,8 @@ title: 主题
 description: 选择你喜欢的主题，打造独特的博客风格
 items:
   - name: talen8/flec-blog
-    display_name: Default
+    display_name: 默认主题
+    slug: default
     author: Talen
     description: 官方默认主题，简约优雅，功能完备。深色模式自动切换，响应式多端适配，适合大多数博客场景。
     image: /images/preview.png

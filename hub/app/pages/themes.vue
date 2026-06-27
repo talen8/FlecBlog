@@ -51,6 +51,7 @@ function copyThemeName(name: string) {
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-base font-semibold text-highlighted">
                 {{ theme.display_name }}
+                <span class="text-xs font-normal text-muted ml-1">{{ theme.slug }}</span>
               </h3>
             </div>
 

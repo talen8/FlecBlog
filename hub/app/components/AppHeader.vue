@@ -27,7 +27,7 @@ const items = computed(() => [{
         to="/"
         class="text-lg font-bold"
       >
-        FlecBlog
+        FlecHub
       </NuxtLink>
     </template>
 
