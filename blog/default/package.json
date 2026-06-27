@@ -12,7 +12,7 @@
     "type-check": "nuxt typecheck"
   },
   "dependencies": {
-    "@flecblog/core-nuxt": "^0.6.5",
+    "@flecblog/core-nuxt": "^1.0.0",
     "medium-zoom": "^1.1.0",
     "nuxt": "^4.4.8",
     "vue": "^3.5.29"

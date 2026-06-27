@@ -2,7 +2,6 @@
   <div class="theme-menu-panel">
     <div class="menu-toolbar">
       <el-segmented
-        v-if="menuTypeOptions.length > 1"
         v-model="selectedType"
         :options="menuTypeOptions"
         class="menu-type-segmented"

@@ -54,7 +54,11 @@
             <el-option label="未读" :value="false" />
           </el-select>
         </template>
-        <el-button class="icon-btn" @click="openSubscriberDialog">
+        <el-button
+          v-if="isFeatureEnabled('site_subscribe')"
+          class="icon-btn"
+          @click="openSubscriberDialog"
+        >
           <el-icon><Bell /></el-icon><span class="btn-text">本站订阅</span>
         </el-button>
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="unread-badge">
@@ -193,8 +197,10 @@ import { getSubscribers, deleteSubscriber } from '@/api/subscriber';
 import { getFriends } from '@/api/friend';
 import { formatDateTime } from '@/utils/date';
 import { isSuperAdmin as checkSuperAdmin } from '@/utils/auth';
+import { useThemeFeatures } from '@/utils/visibility';
 
 const isSuperAdmin = computed(() => checkSuperAdmin());
+const { isFeatureEnabled } = useThemeFeatures();
 
 const loading = ref(false);
 const articleList = ref<RssArticle[]>([]);

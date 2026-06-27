@@ -50,7 +50,7 @@ export const useThemeFeatures = () => {
   }
 
   return {
-    isFeatureEnabled: (key: string) => state.features[key] ?? true,
+    isFeatureEnabled: (key: string) => state.features[key] ?? false,
     loadThemeFeatures,
   };
 };

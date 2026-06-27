@@ -30,7 +30,7 @@
       </el-descriptions-item>
     </el-descriptions>
 
-    <div v-if="featureList.length > 0" class="features-section">
+    <div class="features-section">
       <h3>功能支持</h3>
       <div class="features-grid">
         <div
@@ -109,13 +109,14 @@ const schemaText = computed(() => JSON.stringify(props.theme.schema || {}, null,
 
 const featureList = computed(() => {
   const raw = (props.theme.schema || {}).$features;
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
+  const features =
+    raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
 
-  return Object.entries(raw as Record<string, unknown>).map(([key, value]) => ({
+  return Object.entries(featureLabels).map(([key, meta]) => ({
     key,
-    label: featureLabels[key]?.label || key,
-    icon: featureLabels[key]?.icon || 'ri-checkbox-circle-line',
-    enabled: value !== false,
+    label: meta.label,
+    icon: meta.icon,
+    enabled: features[key] !== false && features[key] !== undefined,
   }));
 });
 </script>

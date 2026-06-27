@@ -57,7 +57,7 @@
         </el-tab-pane>
 
         <!-- OAuth 配置标签页 -->
-        <el-tab-pane label="OAuth 配置" name="oauth">
+        <el-tab-pane v-if="isFeatureEnabled('oauth')" label="OAuth 配置" name="oauth">
           <OAuthSettingsTab
             v-model:form="oauthForm"
             :is-field-modified="oauthIsFieldModified"
@@ -80,6 +80,7 @@ import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { getSettingGroup, updateSettingGroup } from '@/api/sysconfig';
 import { isSuperAdmin } from '@/utils/auth';
+import { useThemeFeatures } from '@/utils/visibility';
 import BasicSettingsTab from './components/BasicSettingsTab.vue';
 import NotificationSettingsTab from './components/NotificationSettingsTab.vue';
 import UploadSettingsTab from './components/UploadSettingsTab.vue';
@@ -96,6 +97,7 @@ const route = useRoute();
 const loading = ref(false);
 const saving = ref(false);
 const canEditSettings = computed(() => isSuperAdmin());
+const { isFeatureEnabled } = useThemeFeatures();
 
 // 标签页引用
 const basicTabRef = ref<InstanceType<typeof BasicSettingsTab>>();

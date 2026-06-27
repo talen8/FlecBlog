@@ -1,6 +1,6 @@
 {
   "name": "@flecblog/core-nuxt",
-  "version": "0.6.5",
+  "version": "1.0.0",
   "description": "FlecBlog Core - Nuxt Layer for theme development",
   "type": "module",
   "exports": {
