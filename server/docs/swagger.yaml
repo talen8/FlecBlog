@@ -36,10 +36,6 @@ definitions:
         type: string
       model:
         type: string
-    required:
-    - api_key
-    - base_url
-    - model
     type: object
   dto.AITitleRequest:
     properties:

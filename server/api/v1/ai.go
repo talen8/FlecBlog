@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"flec_blog/config"
 	"flec_blog/internal/dto"
 	"flec_blog/internal/service"
 	"flec_blog/pkg/ai"
@@ -56,12 +57,20 @@ func (c *AIController) TestConfig(ctx *gin.Context) {
 		return
 	}
 
-	provider := ai.NewOpenAIClient(req.BaseURL, req.APIKey, req.Model)
+	cfg := &config.AIConfig{
+		BaseURL: req.BaseURL,
+		APIKey:  req.APIKey,
+		Model:   req.Model,
+	}
+	provider, err := ai.GetProvider(cfg)
+	if err != nil {
+		response.Failed(ctx, err.Error())
+		return
+	}
 	if err := provider.Test(); err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}
-
 	response.Success(ctx, nil)
 }
 
@@ -88,7 +97,7 @@ func (c *AIController) Summary(ctx *gin.Context) {
 
 	provider, err := c.getAIProvider()
 	if err != nil {
-		response.Failed(ctx, "AI配置未设置或配置错误")
+		response.Failed(ctx, err.Error())
 		return
 	}
 
@@ -124,7 +133,7 @@ func (c *AIController) AISummary(ctx *gin.Context) {
 
 	provider, err := c.getAIProvider()
 	if err != nil {
-		response.Failed(ctx, "AI配置未设置或配置错误")
+		response.Failed(ctx, err.Error())
 		return
 	}
 
@@ -160,7 +169,7 @@ func (c *AIController) Title(ctx *gin.Context) {
 
 	provider, err := c.getAIProvider()
 	if err != nil {
-		response.Failed(ctx, "AI配置未设置或配置错误")
+		response.Failed(ctx, err.Error())
 		return
 	}
 

@@ -66,6 +66,38 @@ func NewSystemService(db *gorm.DB, uploadManager *upload.Manager, emailClient *e
 	}
 }
 
+// StartRegistration 启动时注册到 Panel（非阻塞）
+func (s *SystemService) StartRegistration() {
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		siteURL := os.Getenv("API_URL")
+		if siteURL == "" {
+			return
+		}
+
+		// 从 settings 表读取 client_key
+		var setting struct{ Value string }
+		if err := s.db.Raw("SELECT value FROM settings WHERE \"group\" = ? AND \"key\" = ?", "panel", "client_key").Scan(&setting).Error; err == nil && setting.Value != "" {
+			s.panelClient.SetClientKey(setting.Value)
+		}
+
+		if err := s.panelClient.Register(ctx, siteURL, AppVersion); err != nil {
+			return
+		}
+
+		// 首次注册成功，保存 client_key
+		newKey := s.panelClient.ClientKey()
+		if newKey != "" && setting.Value == "" {
+			s.db.Exec(
+				"INSERT INTO settings (\"group\", \"key\", value, is_public) VALUES (?, ?, ?, false)",
+				"panel", "client_key", newKey,
+			)
+		}
+	}()
+}
+
 // GetStaticInfo 获取系统静态信息
 func (s *SystemService) GetStaticInfo() *dto.SystemStaticInfo {
 	info := &dto.SystemStaticInfo{

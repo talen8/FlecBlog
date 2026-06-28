@@ -31,7 +31,11 @@
       <template #label>
         <span :class="{ 'field-modified': isFieldModified('model') }">模型名称</span>
       </template>
-      <el-input v-model="form.model" placeholder="例如 deepseek-chat" :disabled="loading" />
+      <el-input
+        v-model="form.model"
+        placeholder="例如 deepseek-chat，留空使用内置模型"
+        :disabled="loading"
+      />
     </el-form-item>
 
     <el-form-item label=" ">
@@ -136,10 +140,6 @@ const testing = ref(false);
 const resetting = ref(false);
 
 async function handleTest() {
-  if (!form.value.base_url || !form.value.api_key || !form.value.model) {
-    ElMessage.warning('请先填写完整的 API 端点、密钥和模型名称');
-    return;
-  }
   testing.value = true;
   try {
     await testAIConfig({

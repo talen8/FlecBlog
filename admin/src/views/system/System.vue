@@ -27,15 +27,7 @@
                   </span>
                   <span v-else class="value">{{ latestVersion }}</span>
                 </template>
-                <el-button
-                  type="primary"
-                  size="small"
-                  link
-                  :loading="checking"
-                  @click="handleCheckUpdate"
-                >
-                  {{ checking ? '检查中...' : '检查更新' }}
-                </el-button>
+                <span v-else class="value" style="color: #999">检查中...</span>
               </span>
             </div>
           </div>
@@ -354,7 +346,6 @@ const dynamicInfo = ref<SystemDynamic>({
   version_last_check_error: '',
 });
 
-const checking = ref(false);
 const updateDialogVisible = ref(false);
 const panelVersions = ref<VersionInfo[]>([]);
 const updatingVersions = ref<VersionInfo[]>([]);
@@ -422,25 +413,18 @@ const fetchDynamicInfo = async () => {
   }
 };
 
-const handleCheckUpdate = async () => {
-  checking.value = true;
+let lastCheckTime = 0;
+
+const autoCheckUpdate = async () => {
+  const now = Date.now();
+  if (now - lastCheckTime < 5 * 60 * 1000) return;
+  lastCheckTime = now;
   try {
     const result = await checkUpdate();
-    if (result.last_check_error) {
-      ElMessage.error(result.last_check_error);
-      return;
-    }
     panelVersions.value = result.versions;
     await fetchDynamicInfo();
-    if (result.has_update) {
-      ElMessage.success('发现新版本');
-    } else {
-      ElMessage.success('已是最新版本');
-    }
   } catch (_error) {
-    ElMessage.error('检查更新失败');
-  } finally {
-    checking.value = false;
+    // 静默失败，不干扰用户
   }
 };
 
@@ -471,6 +455,7 @@ const getProgressColor = (percentage: number): string => {
 onMounted(() => {
   fetchStaticInfo();
   fetchDynamicInfo();
+  autoCheckUpdate();
   refreshTimer = setInterval(fetchDynamicInfo, 10000);
 });
 

@@ -22,6 +22,8 @@ FROM alpine:latest
 RUN apk add --no-cache ca-certificates tzdata su-exec
 
 ENV TZ=Asia/Shanghai
+ARG PANEL_API_KEY
+ENV PANEL_API_KEY=${PANEL_API_KEY}
 
 RUN addgroup -g 1000 appuser && \
     adduser -D -u 1000 -G appuser appuser

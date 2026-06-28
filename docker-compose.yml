@@ -28,6 +28,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      API_URL: ${API_URL}
     ports:
       - "8080:8080"
     volumes:

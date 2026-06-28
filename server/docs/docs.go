@@ -7715,11 +7715,6 @@ const docTemplate = `{
         },
         "dto.AITestRequest": {
             "type": "object",
-            "required": [
-                "api_key",
-                "base_url",
-                "model"
-            ],
             "properties": {
                 "api_key": {
                     "type": "string"

@@ -37,4 +37,8 @@ routes.delete('/:version{.+}', async (c) => {
   return c.json({ success: true });
 });
 
-export { routes as versionRoutes };
+// /api/versions
+const versionsApi = new Hono<{ Bindings: Env }>();
+versionsApi.get('/', async (c) => c.json(await db.getEnabledVersions(c.env, 10)));
+
+export { routes as versionRoutes, versionsApi };

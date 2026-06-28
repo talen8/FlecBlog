@@ -36,7 +36,7 @@ type AITitleResponse struct {
 
 // AITestRequest 测试AI配置请求
 type AITestRequest struct {
-	BaseURL string `json:"base_url" binding:"required"`
-	APIKey  string `json:"api_key" binding:"required"`
-	Model   string `json:"model" binding:"required"`
+	BaseURL string `json:"base_url"`
+	APIKey  string `json:"api_key"`
+	Model   string `json:"model"`
 }

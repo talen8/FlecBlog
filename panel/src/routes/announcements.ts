@@ -21,4 +21,8 @@ routes.delete('/:id', async (c) => {
   return c.json({ success: true });
 });
 
-export { routes as announcementRoutes };
+// /api/announcements
+const announcementsApi = new Hono<{ Bindings: Env }>();
+announcementsApi.get('/', async (c) => c.json(await db.getPublicAnnouncements(c.env)));
+
+export { routes as announcementRoutes, announcementsApi };

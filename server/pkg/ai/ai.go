@@ -3,6 +3,7 @@ package ai
 import (
 	"flec_blog/config"
 	"fmt"
+	"os"
 )
 
 // Provider AI服务提供商接口
@@ -15,21 +16,15 @@ type Provider interface {
 
 // GetProvider 根据配置获取AI服务提供商
 func GetProvider(cfg *config.AIConfig) (Provider, error) {
-	if cfg == nil {
-		return nil, fmt.Errorf("AI配置未设置")
+	hasLocalCfg := cfg != nil && cfg.BaseURL != "" && cfg.APIKey != "" && cfg.Model != ""
+
+	if hasLocalCfg {
+		return NewOpenAIClientWithConfig(cfg), nil
 	}
 
-	if cfg.BaseURL == "" {
-		return nil, fmt.Errorf("AI BaseURL 未配置")
+	if os.Getenv("PANEL_API_KEY") != "" {
+		return NewPanelProvider(), nil
 	}
 
-	if cfg.APIKey == "" {
-		return nil, fmt.Errorf("AI API Key 未配置")
-	}
-
-	if cfg.Model == "" {
-		return nil, fmt.Errorf("AI Model 未配置")
-	}
-
-	return NewOpenAIClientWithConfig(cfg), nil
+	return nil, fmt.Errorf("AI配置不完整或非官方版本")
 }

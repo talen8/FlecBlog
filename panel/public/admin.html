@@ -104,7 +104,7 @@
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -344,6 +344,8 @@
         <div class="nav-item active" onclick="showPage('dashboard')">仪表盘</div>
         <div class="nav-item" onclick="showPage('versions')">版本管理</div>
         <div class="nav-item" onclick="showPage('announcements')">公告管理</div>
+        <div class="nav-item" onclick="showPage('providers')">AI 服务</div>
+        <div class="nav-item" onclick="showPage('registrations')">部署管理</div>
         <div class="nav-item" onclick="showPage('settings')">系统设置</div>
       </nav>
     </aside>
@@ -368,6 +370,10 @@
             <div class="stat-item">
               <div class="stat-value" id="statAnnouncements">-</div>
               <div class="stat-label">公告</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statRegistrations">-</div>
+              <div class="stat-label">部署总数</div>
             </div>
           </div>
           <div class="card" style="margin-bottom: 24px;">
@@ -437,6 +443,29 @@
             </div>
           </div>
         </div>
+
+        <!-- AI Providers -->
+        <div id="providersPage" class="hidden">
+          <div style="margin-bottom: 16px;">
+            <button class="btn btn-primary" onclick="openProviderModal()">添加提供商</button>
+          </div>
+          <div class="card">
+            <table>
+              <thead><tr><th>名称</th><th>模型</th><th>即时优先</th><th>非即时优先</th><th>调用/失败</th><th>操作</th></tr></thead>
+              <tbody id="providerList"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Registrations -->
+        <div id="registrationsPage" class="hidden">
+          <div class="card">
+            <table>
+              <thead><tr><th>client_key</th><th>当前站点</th><th>版本</th><th>首次上线</th><th>最后活跃</th><th>历史域名</th><th>今日调用</th><th>备注</th><th>操作</th></tr></thead>
+              <tbody id="registrationList"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -498,6 +527,91 @@
     </div>
   </div>
 
+  <!-- AI Provider Modal -->
+  <div id="providerModal" class="modal-mask hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="providerModalTitle">添加提供商</h3>
+        <button class="modal-close" onclick="closeModal('providerModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editProviderId">
+        <div class="form-item">
+          <label class="form-label">名称</label>
+          <input type="text" id="providerName" class="form-input" placeholder="如：我的 OpenAI">
+        </div>
+        <div class="form-item">
+          <label class="form-label">接口地址</label>
+          <input type="text" id="providerBaseUrl" class="form-input" placeholder="https://api.openai.com/v1">
+        </div>
+        <div class="form-item">
+          <label class="form-label">密钥</label>
+          <input type="password" id="providerApiKey" class="form-input" placeholder="sk-xxxx">
+        </div>
+        <div class="form-item">
+          <label class="form-label">模型</label>
+          <input type="text" id="providerModel" class="form-input" placeholder="gpt-4o-mini">
+        </div>
+        <div class="form-item" style="display:flex;gap:12px;">
+          <div style="flex:1;">
+            <label class="form-label">即时优先级</label>
+            <input type="number" id="providerPriorityImmediate" class="form-input" value="999" min="0">
+            <div class="form-hint">越小越优先</div>
+          </div>
+          <div style="flex:1;">
+            <label class="form-label">非即时优先级</label>
+            <input type="number" id="providerPriorityDeferred" class="form-input" value="999" min="0">
+            <div class="form-hint">越小越优先</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('providerModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveProvider()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registration Detail Modal -->
+  <div id="regDetailModal" class="modal-mask hidden">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-head">
+        <h3>部署详情</h3>
+        <button class="modal-close" onclick="closeModal('regDetailModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="regDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- Registration Edit Modal -->
+  <div id="regEditModal" class="modal-mask hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>编辑部署</h3>
+        <button class="modal-close" onclick="closeModal('regEditModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editRegId">
+        <div class="form-item">
+          <label class="form-label">状态</label>
+          <select id="editRegBanned" class="form-input">
+            <option value="0">正常</option>
+            <option value="1">封禁</option>
+            <option value="2">已解封</option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label class="form-label">备注</label>
+          <textarea id="editRegRemark" class="form-input" style="min-height: 80px; resize: vertical;"></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('regEditModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveRegistration()">保存</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
@@ -533,8 +647,8 @@
       document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
       event.target.classList.add('active');
 
-      const pages = ['dashboard', 'versions', 'announcements', 'settings'];
-      const titles = { dashboard: '仪表盘', versions: '版本管理', announcements: '公告管理', settings: '系统设置' };
+      const pages = ['dashboard', 'versions', 'announcements', 'settings', 'providers', 'registrations'];
+      const titles = { dashboard: '仪表盘', versions: '版本管理', announcements: '公告管理', settings: '系统设置', providers: 'AI 服务', registrations: '部署管理' };
 
       pages.forEach(p => document.getElementById(p + 'Page').classList.toggle('hidden', p !== page));
       document.getElementById('pageTitle').textContent = titles[page];
@@ -542,7 +656,9 @@
       if (page === 'versions') loadVersions();
       if (page === 'announcements') loadAnnouncements();
       if (page === 'settings') loadSettings();
+      if (page === 'providers') loadProviders();
       if (page === 'dashboard') loadDashboard();
+      if (page === 'registrations') loadRegistrations();
     }
 
     /**
@@ -550,17 +666,21 @@
      */
     async function loadDashboard() {
       try {
-        const [vRes, aRes] = await Promise.all([
+        const [vRes, aRes, rRes] = await Promise.all([
           fetch('/admin/versions?all=true'),
-          fetch('/admin/announcements')
+          fetch('/admin/announcements'),
+          fetch('/admin/registrations')
         ]);
 
         const versions = (await vRes.json()).versions || [];
         const announcements = (await aRes.json()).announcements || [];
+        const registrations = await rRes.json();
 
+        const regCount = Array.isArray(registrations) ? registrations.length : 0;
         document.getElementById('statVersions').textContent = versions.length;
         document.getElementById('statEnabled').textContent = versions.filter(v => v.enabled).length;
         document.getElementById('statAnnouncements').textContent = announcements.length;
+        document.getElementById('statRegistrations').textContent = regCount;
 
         const tbody = document.getElementById('dashboardVersionList');
         tbody.innerHTML = versions.slice(0, 5).map(v =>
@@ -576,6 +696,7 @@
         document.getElementById('statVersions').textContent = '-';
         document.getElementById('statEnabled').textContent = '-';
         document.getElementById('statAnnouncements').textContent = '-';
+        document.getElementById('statRegistrations').textContent = '-';
         document.getElementById('dashboardVersionList').innerHTML = '<tr><td colspan="3" class="empty">加载失败</td></tr>';
         document.getElementById('dashboardAnnouncementList').innerHTML = '<tr><td colspan="3" class="empty">加载失败</td></tr>';
       }
@@ -799,6 +920,262 @@
         showToast('同步成功');
       } else {
         showToast(data.error || '同步失败');
+      }
+    }
+
+    /**
+     * 加载 AI 提供商列表
+     */
+    async function loadProviders() {
+      const res = await fetch('/admin/ai/providers');
+      const data = await res.json();
+      const tbody = document.getElementById('providerList');
+
+      if (!data.providers || !data.providers.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">暂无提供商，点击上方"添加提供商"开始</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.providers.map(p => {
+        return '<tr>' +
+          '<td>' + escapeHtml(p.name) + '</td>' +
+          '<td><code style="background:#f5f5f5;padding:2px 6px;border-radius:3px;">' + escapeHtml(p.model) + '</code></td>' +
+          '<td>' + p.priority_immediate + '</td>' +
+          '<td>' + p.priority_deferred + '</td>' +
+          '<td>' + p.call_count + ' / ' + p.fail_count + '</td>' +
+          '<td>' +
+            '<button class="btn btn-sm" onclick="editProvider(' + p.id + ')">编辑</button> ' +
+            '<button class="btn btn-sm btn-danger" onclick="deleteProvider(' + p.id + ')">删除</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    /**
+     * 打开添加提供商模态框
+     */
+    function openProviderModal() {
+      document.getElementById('providerModalTitle').textContent = '添加提供商';
+      document.getElementById('editProviderId').value = '';
+      document.getElementById('providerName').value = '';
+      document.getElementById('providerBaseUrl').value = '';
+      document.getElementById('providerApiKey').value = '';
+      document.getElementById('providerModel').value = '';
+      document.getElementById('providerPriorityImmediate').value = '999';
+      document.getElementById('providerPriorityDeferred').value = '999';
+      openModal('providerModal');
+    }
+
+    /**
+     * 编辑提供商
+     */
+    async function editProvider(id) {
+      const res = await fetch('/admin/ai/providers');
+      const data = await res.json();
+      const p = data.providers.find(x => x.id === id);
+      if (!p) { showToast('未找到'); return; }
+
+      document.getElementById('providerModalTitle').textContent = '编辑提供商';
+      document.getElementById('editProviderId').value = p.id;
+      document.getElementById('providerName').value = p.name;
+      document.getElementById('providerBaseUrl').value = p.base_url;
+      document.getElementById('providerApiKey').value = p.api_key;
+      document.getElementById('providerModel').value = p.model;
+      document.getElementById('providerPriorityImmediate').value = p.priority_immediate;
+      document.getElementById('providerPriorityDeferred').value = p.priority_deferred;
+      openModal('providerModal');
+    }
+
+    /**
+     * 保存提供商
+     */
+    async function saveProvider() {
+      const id = document.getElementById('editProviderId').value;
+      const body = {
+        name: document.getElementById('providerName').value,
+        base_url: document.getElementById('providerBaseUrl').value,
+        api_key: document.getElementById('providerApiKey').value,
+        model: document.getElementById('providerModel').value,
+        priority_immediate: parseInt(document.getElementById('providerPriorityImmediate').value) || 999,
+        priority_deferred: parseInt(document.getElementById('providerPriorityDeferred').value) || 999,
+      };
+
+      if (!body.name || !body.base_url || !body.api_key || !body.model) {
+        showToast('请填写完整信息');
+        return;
+      }
+
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? '/admin/ai/providers/' + id : '/admin/ai/providers';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeModal('providerModal');
+        loadProviders();
+        showToast(id ? '已更新' : '已添加');
+      } else {
+        showToast(data.error || '保存失败');
+      }
+    }
+
+    /**
+     * 删除提供商
+     */
+    async function deleteProvider(id) {
+      const res = await fetch('/admin/ai/providers');
+      const data = await res.json();
+      const p = data.providers.find(x => x.id === id);
+      if (!confirm('确定删除 ' + (p ? p.name : '此提供商') + '?')) return;
+
+      const delRes = await fetch('/admin/ai/providers/' + id, { method: 'DELETE' });
+      const delData = await delRes.json();
+      if (delData.success) {
+        loadProviders();
+        showToast('已删除');
+      } else {
+        showToast(delData.error || '删除失败');
+      }
+    }
+
+    /**
+     * 加载部署列表
+     */
+    async function loadRegistrations() {
+      const res = await fetch('/admin/registrations');
+      const data = await res.json();
+      const tbody = document.getElementById('registrationList');
+
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty">暂无部署</td></tr>';
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+
+      tbody.innerHTML = data.map(r => {
+        const history = JSON.parse(r.site_url_history || '[]');
+        const callCounts = JSON.parse(r.call_counts || '{}');
+        const todayCounts = callCounts[today] || {};
+        const todayTotal = (todayCounts.ai || 0) + (todayCounts.versions || 0);
+
+        const banStatus = r.banned === 1 ? '<span style="color:#ff4d4f;">已封禁</span>' : (r.banned === 2 ? '<span style="color:#faad14;">已解封</span>' : '');
+        const maskedKey = r.client_key.slice(0, 12) + '...';
+
+        return '<tr>' +
+          '<td title="' + escapeHtml(r.client_key) + '" style="font-family:monospace;">' + escapeHtml(maskedKey) + '</td>' +
+          '<td>' + escapeHtml(r.site_url) + '</td>' +
+          '<td>' + escapeHtml(r.version) + '</td>' +
+          '<td>' + r.first_seen_at + '</td>' +
+          '<td>' + r.last_seen_at + '</td>' +
+          '<td>' + history.length + '</td>' +
+          '<td>' + todayTotal + '</td>' +
+          '<td>' + escapeHtml(r.remark) + '</td>' +
+          '<td>' +
+            '<button class="btn btn-sm" onclick="viewRegistration(' + r.id + ')">查看</button> ' +
+            '<button class="btn btn-sm" onclick="editRegistration(' + r.id + ')">编辑</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    /**
+     * 查看部署详情
+     */
+    async function viewRegistration(id) {
+      const res = await fetch('/admin/registrations/' + id);
+      const r = await res.json();
+
+      const history = JSON.parse(r.site_url_history || '[]');
+      const callCounts = JSON.parse(r.call_counts || '{}');
+
+      let historyHtml = '';
+      if (r.site_url) {
+        historyHtml += '<tr><td><strong>' + escapeHtml(r.site_url) + '</strong></td><td>' + r.first_seen_at + '</td><td>至今</td></tr>';
+      }
+      history.forEach(h => {
+        historyHtml += '<tr><td>' + escapeHtml(h.url) + '</td><td>' + h.first_seen + '</td><td>' + h.last_seen + '</td></tr>';
+      });
+
+      let callHtml = '';
+      let grandTotal = 0;
+      const dates = Object.keys(callCounts).sort().reverse();
+      dates.forEach(d => {
+        const day = callCounts[d];
+        const total = (day.ai || 0) + (day.versions || 0);
+        grandTotal += total;
+        callHtml += '<tr><td>' + d + '</td><td>' + (day.ai || 0) + '</td><td>' + (day.versions || 0) + '</td></tr>';
+      });
+      if (dates.length > 1) {
+        callHtml += '<tr style="font-weight:600;"><td>合计</td><td>-</td><td>-</td></tr>';
+      }
+
+      const banLabel = r.banned === 1 ? '已封禁' : (r.banned === 2 ? '已解封' : '正常');
+      const banColor = r.banned === 1 ? '#ff4d4f' : (r.banned === 2 ? '#faad14' : '#52c41a');
+
+      const html = '<div style="margin-bottom:20px;">' +
+        '<div style="margin-bottom:8px;font-size:13px;color:#999;">client_key</div>' +
+        '<div style="font-family:monospace;word-break:break-all;">' + escapeHtml(r.client_key) + '</div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">' +
+        '<div><div style="font-size:13px;color:#999;">当前站点</div><div>' + escapeHtml(r.site_url) + '</div></div>' +
+        '<div><div style="font-size:13px;color:#999;">版本</div><div>' + escapeHtml(r.version) + '</div></div>' +
+        '<div><div style="font-size:13px;color:#999;">首次上线</div><div>' + r.first_seen_at + '</div></div>' +
+        '<div><div style="font-size:13px;color:#999;">最后活跃</div><div>' + r.last_seen_at + '</div></div>' +
+        '<div><div style="font-size:13px;color:#999;">状态</div><div style="color:' + banColor + ';">' + banLabel + '</div></div>' +
+        '<div><div style="font-size:13px;color:#999;">备注</div><div>' + escapeHtml(r.remark || '-') + '</div></div>' +
+      '</div>' +
+      (history.length > 0 || r.site_url ? '<div style="margin-bottom:20px;">' +
+        '<div style="font-weight:600;margin-bottom:8px;">域名更换历史</div>' +
+        '<table><thead><tr><th>域名</th><th>首次出现</th><th>最后出现</th></tr></thead>' +
+        '<tbody>' + historyHtml + '</tbody></table></div>' : '') +
+      '<div>' +
+        '<div style="font-weight:600;margin-bottom:8px;">调用次数（逐日）</div>' +
+        '<table><thead><tr><th>日期</th><th>/api/ai</th><th>/api/versions</th></tr></thead>' +
+        '<tbody>' + (callHtml || '<tr><td colspan="3" class="empty">暂无调用</td></tr>') + '</tbody></table>' +
+      '</div>';
+
+      document.getElementById('regDetailBody').innerHTML = html;
+      openModal('regDetailModal');
+    }
+
+    /**
+     * 编辑部署
+     */
+    async function editRegistration(id) {
+      const res = await fetch('/admin/registrations/' + id);
+      const r = await res.json();
+      document.getElementById('editRegId').value = r.id;
+      document.getElementById('editRegBanned').value = String(r.banned);
+      document.getElementById('editRegRemark').value = r.remark || '';
+      openModal('regEditModal');
+    }
+
+    /**
+     * 保存部署编辑
+     */
+    async function saveRegistration() {
+      const id = document.getElementById('editRegId').value;
+      const body = {
+        banned: parseInt(document.getElementById('editRegBanned').value),
+        remark: document.getElementById('editRegRemark').value
+      };
+      const res = await fetch('/admin/registrations/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (data.status === 'ok') {
+        closeModal('regEditModal');
+        loadRegistrations();
+        showToast('已保存');
+      } else {
+        showToast(data.error || '保存失败');
       }
     }
 

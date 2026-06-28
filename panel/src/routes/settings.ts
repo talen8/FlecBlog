@@ -4,7 +4,7 @@ import { getSetting } from '../services/db';
 
 const routes = new Hono<{ Bindings: Env }>();
 
-routes.get('/settings', async (c) => {
+routes.get('/', async (c) => {
   const [repo, token] = await Promise.all([
     getSetting(c.env, 'github_repo'),
     getSetting(c.env, 'github_token'),
@@ -17,7 +17,7 @@ routes.get('/settings', async (c) => {
   });
 });
 
-routes.put('/settings', async (c) => {
+routes.put('/', async (c) => {
   const body = await c.req.json();
   const settings = [
     { key: 'github_repo', value: body.github_repo },

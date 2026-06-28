@@ -96,6 +96,7 @@ const INSTALL_SCRIPT =
   '      DB_USER: postgres\n' +
   '      DB_PASSWORD: ${DB_PASSWORD}\n' +
   '      JWT_SECRET: ${JWT_SECRET}\n' +
+  '      API_URL: ${API_URL}\n' +
   '    ports:\n' +
   '      - "${SERVER_PORT}:8080"\n' +
   '    volumes:\n' +

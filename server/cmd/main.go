@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/subosito/gotenv"
 
@@ -61,6 +62,11 @@ func main() {
 		logger.Close()
 		_ = db.Close()
 		log.Fatalf("Failed to run migrations: %v", err) //nolint:gocritic // 已手动关闭资源
+	}
+
+	// 检查 API_URL 环境变量
+	if os.Getenv("API_URL") == "" {
+		log.Fatal("API_URL 环境变量未设置")
 	}
 
 	// 从数据库加载运行时配置（邮箱、上传等）

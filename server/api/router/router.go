@@ -91,6 +91,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	settingService.SetConfig(conf)                         // 设置全局配置对象，用于热重载
 	settingService.SetFileService(fileService)             // 设置文件服务，用于文件状态管理
 	articleService.SetSubscriberService(subscriberService) // 设置订阅服务，用于文章推送
+	systemService.StartRegistration()
 
 	// 初始化并启动定时任务调度器
 	initScheduler(fileService, userService, verificationService, rssFeedService, friendService)
