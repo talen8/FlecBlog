@@ -88,18 +88,18 @@ type ArticleManagePayload struct {
 	ID uint `json:"id"`
 
 	// 用于 create/update
-	Title      string `json:"title"`
-	Content    string `json:"content"`
-	Summary    string `json:"summary"`
-	AISummary  string `json:"ai_summary"`
-	Cover      string `json:"cover"`
-	Location   string `json:"location"`
-	IsPublish  *bool  `json:"is_publish"`
-	IsTop      *bool  `json:"is_top"`
-	IsEssence  *bool  `json:"is_essence"`
-	IsOutdated *bool  `json:"is_outdated"`
-	CategoryID *uint  `json:"category_id"`
-	TagIDs     []uint `json:"tag_ids"`
+	Title      string  `json:"title"`
+	Content    string  `json:"content"`
+	Summary    *string `json:"summary"`
+	AISummary  *string `json:"ai_summary"`
+	Cover      *string `json:"cover"`
+	Location   *string `json:"location"`
+	IsPublish  *bool   `json:"is_publish"`
+	IsTop      *bool   `json:"is_top"`
+	IsEssence  *bool   `json:"is_essence"`
+	IsOutdated *bool   `json:"is_outdated"`
+	CategoryID *uint   `json:"category_id"`
+	TagIDs     []uint  `json:"tag_ids"`
 }
 
 // ArticleManageOutput article_manage 聚合 tool 输出
@@ -137,32 +137,32 @@ func NewArticleWrapper(articleService *service.ArticleService) *ArticleWrapper {
 
 // ManageArticle 文章管理聚合入口
 func (w *ArticleWrapper) ManageArticle(
-	_ context.Context,
+	ctx context.Context,
 	_ *sdkmcp.CallToolRequest,
 	input ArticleManageInput,
 ) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	switch input.Action {
 	case articleActionList:
-		return w.listArticles(input.Payload)
+		return w.listArticles(ctx, input.Payload)
 	case articleActionGet:
-		return w.getArticle(input.Payload)
+		return w.getArticle(ctx, input.Payload)
 	case articleActionCreate:
-		return w.createArticle(input.Payload)
+		return w.createArticle(ctx, input.Payload)
 	case articleActionUpdate:
-		return w.updateArticle(input.Payload)
+		return w.updateArticle(ctx, input.Payload)
 	case articleActionDelete:
-		return w.deleteArticle(input.Payload)
+		return w.deleteArticle(ctx, input.Payload)
 	default:
 		return nil, ArticleManageOutput{}, fmt.Errorf("不支持的操作: %s", input.Action)
 	}
 }
 
 // listArticles 获取文章列表
-func (w *ArticleWrapper) listArticles(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
+func (w *ArticleWrapper) listArticles(ctx context.Context, payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	page, pageSize := NormalizePage(payload.Page, payload.PageSize)
 
 	req := &dto.ListArticlesRequest{Page: page, PageSize: pageSize}
-	articles, total, err := w.articleService.List(context.Background(), req)
+	articles, total, err := w.articleService.List(ctx, req)
 	if err != nil {
 		return nil, ArticleManageOutput{Error: fmt.Sprintf("获取文章列表失败: %v", err)}, nil
 	}
@@ -181,12 +181,12 @@ func (w *ArticleWrapper) listArticles(payload ArticleManagePayload) (*sdkmcp.Cal
 }
 
 // getArticle 获取文章详情
-func (w *ArticleWrapper) getArticle(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
+func (w *ArticleWrapper) getArticle(ctx context.Context, payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, ArticleManageOutput{Error: "文章 ID 不能为空"}, nil
 	}
 
-	article, err := w.articleService.Get(context.Background(), payload.ID)
+	article, err := w.articleService.Get(ctx, payload.ID)
 	if err != nil {
 		return nil, ArticleManageOutput{Error: fmt.Sprintf("获取文章失败: %v", err)}, nil
 	}
@@ -196,7 +196,7 @@ func (w *ArticleWrapper) getArticle(payload ArticleManagePayload) (*sdkmcp.CallT
 }
 
 // createArticle 创建文章
-func (w *ArticleWrapper) createArticle(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
+func (w *ArticleWrapper) createArticle(ctx context.Context, payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	if payload.Title == "" {
 		return nil, ArticleManageOutput{Error: "文章标题不能为空"}, nil
 	}
@@ -208,9 +208,9 @@ func (w *ArticleWrapper) createArticle(payload ArticleManagePayload) (*sdkmcp.Ca
 	req := &dto.CreateArticleRequest{
 		Title:      payload.Title,
 		Content:    payload.Content,
-		Summary:    payload.Summary,
-		Cover:      payload.Cover,
-		Location:   payload.Location,
+		Summary:    stringValue(payload.Summary),
+		Cover:      stringValue(payload.Cover),
+		Location:   stringValue(payload.Location),
 		IsPublish:  &isPublish,
 		IsTop:      payload.IsTop,
 		IsEssence:  payload.IsEssence,
@@ -219,7 +219,7 @@ func (w *ArticleWrapper) createArticle(payload ArticleManagePayload) (*sdkmcp.Ca
 		TagIDs:     payload.TagIDs,
 	}
 
-	article, err := w.articleService.Create(context.Background(), req)
+	article, err := w.articleService.Create(ctx, req)
 	if err != nil {
 		return nil, ArticleManageOutput{Error: fmt.Sprintf("创建文章失败: %v", err)}, nil
 	}
@@ -229,14 +229,14 @@ func (w *ArticleWrapper) createArticle(payload ArticleManagePayload) (*sdkmcp.Ca
 }
 
 // updateArticle 更新文章
-func (w *ArticleWrapper) updateArticle(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
+func (w *ArticleWrapper) updateArticle(ctx context.Context, payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, ArticleManageOutput{Error: "文章 ID 不能为空"}, nil
 	}
 
-	req := &dto.UpdateArticleRequest{
-		Title:      payload.Title,
-		Content:    payload.Content,
+	req := &dto.PatchArticleRequest{
+		Title:      nonEmptyStringPtr(payload.Title),
+		Content:    nonEmptyStringPtr(payload.Content),
 		Summary:    payload.Summary,
 		AISummary:  payload.AISummary,
 		Cover:      payload.Cover,
@@ -249,7 +249,7 @@ func (w *ArticleWrapper) updateArticle(payload ArticleManagePayload) (*sdkmcp.Ca
 		TagIDs:     payload.TagIDs,
 	}
 
-	article, err := w.articleService.Update(context.Background(), payload.ID, req)
+	article, err := w.articleService.Patch(ctx, payload.ID, req)
 	if err != nil {
 		return nil, ArticleManageOutput{Error: fmt.Sprintf("更新文章失败: %v", err)}, nil
 	}
@@ -259,12 +259,12 @@ func (w *ArticleWrapper) updateArticle(payload ArticleManagePayload) (*sdkmcp.Ca
 }
 
 // deleteArticle 删除文章
-func (w *ArticleWrapper) deleteArticle(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
+func (w *ArticleWrapper) deleteArticle(ctx context.Context, payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, ArticleManageOutput{Error: "文章 ID 不能为空"}, nil
 	}
 
-	err := w.articleService.Delete(context.Background(), payload.ID)
+	err := w.articleService.Delete(ctx, payload.ID)
 	if err != nil {
 		return nil, ArticleManageOutput{Error: fmt.Sprintf("删除文章失败: %v", err)}, nil
 	}
@@ -350,6 +350,20 @@ func ArticleManageInputSchema() *jsonschema.Schema {
 			BuildActionSchema(articleActionDelete, "删除文章。风险操作，谨慎使用，不可恢复", idPayload),
 		},
 	}
+}
+
+func stringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
+func nonEmptyStringPtr(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
 }
 
 func convertArticleCategory(category struct {
