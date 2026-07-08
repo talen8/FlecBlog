@@ -87,7 +87,15 @@
 
     <el-divider content-position="left">MCP</el-divider>
 
-    <el-form-item>
+    <el-form-item label="认证方式">
+      <span>{{ mcpAuthModeLabel }}</span>
+    </el-form-item>
+
+    <el-form-item label="OAuth">
+      <span>{{ mcpOAuthLabel }}</span>
+    </el-form-item>
+
+    <el-form-item v-if="mcpAuthStatus?.mode !== 'oauth'">
       <template #label>
         <span :class="{ 'field-modified': isFieldModified('mcp_secret') }">Secret</span>
       </template>
@@ -110,14 +118,70 @@
         </template>
       </el-input>
     </el-form-item>
+
+    <el-form-item v-if="mcpAuthStatus?.mode !== 'oauth'">
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('mcp_static_operator_user_id') }"
+          >管理身份</span
+        >
+      </template>
+      <div class="mcp-operator-field">
+        <el-select
+          v-model="form.mcp_static_operator_user_id"
+          filterable
+          :loading="loadingOperators"
+          :disabled="loading"
+          placeholder="自动选择"
+        >
+          <el-option label="自动选择" value="" />
+          <el-option
+            v-if="missingConfiguredOperator"
+            :label="'当前配置 ID ' + form.mcp_static_operator_user_id + '（不可用或未加载）'"
+            :value="form.mcp_static_operator_user_id"
+            disabled
+          />
+          <el-option
+            v-for="user in operatorOptions"
+            :key="user.id"
+            :label="formatOperatorLabel(user)"
+            :value="String(user.id)"
+          />
+        </el-select>
+        <div v-if="operatorLoadError" class="mcp-operator-warning">
+          管理员列表加载失败；当前保存值不会被自动清空。
+        </div>
+      </div>
+    </el-form-item>
+
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('mcp_admin_tools_enabled') }"
+          >管理员工具</span
+        >
+      </template>
+      <div class="mcp-admin-tools-field">
+        <el-switch
+          v-model="form.mcp_admin_tools_enabled"
+          active-value="true"
+          inactive-value="false"
+          :disabled="loading"
+        />
+        <div class="mcp-admin-tools-hint">
+          启用后允许调用用户管理工具；OAuth 连接需重新授权后生效。
+        </div>
+      </div>
+    </el-form-item>
   </el-form>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { testAIConfig } from '@/api/ai';
-import { resetMCPSecret } from '@/api/sysconfig';
+import { getMCPAuthStatus, resetMCPSecret } from '@/api/sysconfig';
+import type { MCPAuthStatusResponse } from '@/api/sysconfig';
+import { getUsers } from '@/api/user';
+import type { User } from '@/types/user';
 
 interface AIForm {
   base_url: string;
@@ -127,6 +191,8 @@ interface AIForm {
   ai_summary_prompt: string;
   title_prompt: string;
   mcp_secret: string;
+  mcp_static_operator_user_id: string;
+  mcp_admin_tools_enabled: string;
 }
 
 const form = defineModel<AIForm>('form', { required: true });
@@ -138,6 +204,78 @@ defineProps<{
 
 const testing = ref(false);
 const resetting = ref(false);
+const loadingOperators = ref(false);
+const operatorLoadError = ref(false);
+const operatorOptions = ref<User[]>([]);
+const mcpAuthStatus = ref<MCPAuthStatusResponse | null>(null);
+const mcpAuthStatusFailed = ref(false);
+
+const mcpAuthModeLabel = computed(() => {
+  if (mcpAuthStatusFailed.value) return '未知';
+  if (!mcpAuthStatus.value) return '加载中';
+  return { static: '密钥', oauth: 'OAuth', hybrid: '兼容' }[mcpAuthStatus.value.mode];
+});
+
+const mcpOAuthLabel = computed(() => {
+  if (mcpAuthStatusFailed.value) return '未知';
+  if (!mcpAuthStatus.value) return '加载中';
+  return { disabled: '未启用', embedded: '内置', external: '外部' }[mcpAuthStatus.value.oauth];
+});
+
+const missingConfiguredOperator = computed(() => {
+  const configuredID = form.value.mcp_static_operator_user_id;
+  if (!configuredID || configuredID === '0') return false;
+  return !operatorOptions.value.some(user => String(user.id) === configuredID);
+});
+
+function formatOperatorLabel(user: User): string {
+  const displayName = user.nickname || user.email;
+  return displayName + ' · ' + user.email + ' · ' + user.role + ' · ID ' + user.id;
+}
+
+async function loadMCPAuthStatus() {
+  mcpAuthStatusFailed.value = false;
+  try {
+    mcpAuthStatus.value = await getMCPAuthStatus();
+  } catch {
+    mcpAuthStatus.value = null;
+    mcpAuthStatusFailed.value = true;
+  }
+}
+
+async function loadOperatorOptions() {
+  loadingOperators.value = true;
+  operatorLoadError.value = false;
+  try {
+    const [superAdmins, admins] = await Promise.all([
+      getUsers({
+        page: 1,
+        page_size: 100,
+        role: 'super_admin',
+        is_enabled: true,
+        is_deleted: false,
+      }),
+      getUsers({ page: 1, page_size: 100, role: 'admin', is_enabled: true, is_deleted: false }),
+    ]);
+    const uniqueUsers = new Map<number, User>();
+    for (const user of [...superAdmins.list, ...admins.list]) {
+      if (user.is_enabled && !user.deleted_at) uniqueUsers.set(user.id, user);
+    }
+    operatorOptions.value = Array.from(uniqueUsers.values()).sort((a, b) => {
+      if (a.role !== b.role) return a.role === 'super_admin' ? -1 : 1;
+      return a.id - b.id;
+    });
+  } catch {
+    operatorLoadError.value = true;
+  } finally {
+    loadingOperators.value = false;
+  }
+}
+
+onMounted(() => {
+  void loadOperatorOptions();
+  void loadMCPAuthStatus();
+});
 
 async function handleTest() {
   testing.value = true;
@@ -180,6 +318,27 @@ async function resetSecret() {
 </script>
 
 <style lang="scss" scoped>
+.mcp-operator-field,
+.mcp-admin-tools-field {
+  width: 100%;
+}
+
+.mcp-operator-field :deep(.el-select) {
+  width: 100%;
+}
+
+.mcp-operator-warning,
+.mcp-admin-tools-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--el-text-color-secondary);
+}
+
+.mcp-operator-warning {
+  color: var(--el-color-warning);
+}
+
 // 移动端适配
 @media (max-width: 768px) {
   :deep(.el-form-item__label) {

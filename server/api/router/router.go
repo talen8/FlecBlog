@@ -1,6 +1,8 @@
 package router
 
 import (
+	"os"
+
 	"flec_blog/api/middleware"
 	v1 "flec_blog/api/v1"
 	"flec_blog/api/v1/feeds"
@@ -11,11 +13,15 @@ import (
 	"flec_blog/pkg/email"
 	"flec_blog/pkg/feishu"
 	mcpserver "flec_blog/pkg/mcp"
+	mcpauth "flec_blog/pkg/mcp/auth"
+	mcpadapters "flec_blog/pkg/mcp/adapters"
+	oauthserver "flec_blog/pkg/mcp/oauthserver"
 	"flec_blog/pkg/notification"
 	"flec_blog/pkg/scheduler"
 	"flec_blog/pkg/upload"
 
 	"github.com/gin-gonic/gin"
+	sdkauth "github.com/modelcontextprotocol/go-sdk/auth"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -50,10 +56,10 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	uploadManager := upload.InitializeUploadSystem(conf)
 
 	// 使用中间件
-	r.Use(middleware.CORS(conf))              // CORS跨域
-	r.Use(middleware.Logger())                // 日志记录
-	r.Use(middleware.RateLimit(500, 1, "ip")) // 全局IP限流: 500次/分钟
-	r.Use(middleware.Recovery())              // 错误恢复
+	r.Use(middleware.CORSWithNavigationPaths(conf, "/authorize")) // CORS跨域；OAuth GET 授权页允许跨站导航但不授予跨域读取
+	r.Use(middleware.Logger())                                    // 日志记录
+	r.Use(middleware.RateLimit(500, 1, "ip"))                     // 全局IP限流: 500次/分钟
+	r.Use(middleware.Recovery())                                  // 错误恢复
 
 	// 注册本地静态文件服务
 	r.Static("/uploads", "/app/data/uploads")
@@ -119,11 +125,71 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	rssFeedController := v1.NewRssFeedController(rssFeedService)
 
 	// MCP 接口
-	mcpHandler := gin.WrapH(mcpserver.NewPublicHandler(
+	articleImageUploader, imageUploaderErr := mcpadapters.NewFileServiceArticleImageUploader(fileService, os.Getenv("API_URL"))
+	if imageUploaderErr != nil {
+		panic("initialize MCP article image uploader: " + imageUploaderErr.Error())
+	}
+	mcpHTTPHandler := mcpserver.NewPublicHandlerWithOptions(
 		articleService, categoryService, tagService, commentService, friendService, rssFeedService, momentService,
-		userService, statsService,
-	))
-	r.Any("/mcp", middleware.MCPAuth(conf), mcpHandler)
+		userService, statsService, mcpserver.PublicHandlerOptions{
+			StaticOperatorUserIDProvider: settingService.MCPStaticOperatorUserID,
+			AdminToolsEnabledProvider:    settingService.MCPAdminToolsEnabled,
+			ArticleImageUploader:         articleImageUploader,
+		},
+	)
+	mcpHTTPHandler = sdkauth.RequireBearerToken(mcpauth.SDKTokenVerifierFromPrincipalContext, nil)(mcpHTTPHandler)
+	mcpHandler := gin.WrapH(mcpHTTPHandler)
+	mcpAuthConfig, err := mcpauth.LoadConfigFromEnv()
+	if err != nil {
+		panic("invalid MCP auth configuration: " + err.Error())
+	}
+	if mcpAuthConfig.Mode == mcpauth.ModeStatic {
+		r.Any("/mcp", middleware.MCPAuthWithSecretProvider(settingService.MCPSecret), mcpHandler)
+	} else {
+		embeddedOAuthConfig, err := oauthserver.LoadConfigFromEnv(mcpAuthConfig)
+		if err != nil {
+			panic("invalid embedded MCP OAuth configuration: " + err.Error())
+		}
+
+		var embeddedOAuth *oauthserver.Server
+		authOptions := mcpauth.AuthenticatorOptions{
+			AdminToolsEnabledProvider: settingService.MCPAdminToolsEnabled,
+		}
+		if embeddedOAuthConfig.Enabled {
+			embeddedOAuth, err = oauthserver.NewWithOptions(
+				embeddedOAuthConfig,
+				db.DB,
+				userService,
+				oauthserver.ServerOptions{AdminToolsEnabledProvider: settingService.MCPAdminToolsEnabled},
+			)
+			if err != nil {
+				panic("initialize embedded MCP OAuth server: " + err.Error())
+			}
+			authOptions.OAuthKeyResolver = embeddedOAuth.OAuthKeyResolver()
+			authOptions.OAuthPrincipalValidator = embeddedOAuth.OAuthPrincipalValidator()
+		}
+
+		mcpAuthenticator, err := mcpauth.NewAuthenticatorWithOptions(
+			mcpAuthConfig,
+			settingService.MCPSecret,
+			authOptions,
+		)
+		if err != nil {
+			panic("initialize MCP authenticator: " + err.Error())
+		}
+		r.GET(mcpAuthConfig.MetadataPath, gin.WrapH(mcpAuthenticator.MetadataHandler()))
+
+		if embeddedOAuth != nil {
+			r.GET("/.well-known/oauth-authorization-server", gin.WrapH(embeddedOAuth.AuthorizationServerMetadataHandler()))
+			r.GET("/.well-known/jwks.json", gin.WrapH(embeddedOAuth.JWKSHandler()))
+			r.POST("/register", gin.WrapH(embeddedOAuth.RegistrationHandler()))
+			r.GET("/authorize", gin.WrapH(embeddedOAuth.AuthorizationHandler()))
+			r.POST("/authorize", gin.WrapH(embeddedOAuth.AuthorizationHandler()))
+			r.POST("/token", gin.WrapH(embeddedOAuth.TokenHandler()))
+		}
+
+		r.Any("/mcp", middleware.MCPResourceAuth(mcpAuthenticator), mcpHandler)
+	}
 
 	// Atom 订阅
 	r.GET("/atom.xml", atomController.GetAtomFeed)
@@ -435,6 +501,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 		// ==================== 配置管理 ====================
 		settingManagement := adminAPI.Group("/settings")
 		{
+			settingManagement.GET("/ai/mcp-auth-status", settingController.GetMCPAuthStatus)                           // 获取 MCP 运行时认证状态
 			settingManagement.GET("/:group", settingController.GetGroup)                                               // 获取指定分组的配置
 			settingManagement.PATCH("/:group", middleware.IsSuperAdmin(), settingController.UpdateGroup)               // 更新指定分组的配置（仅超级管理员）
 			settingManagement.PUT("/ai/mcp-secret/reset", middleware.IsSuperAdmin(), settingController.ResetMCPSecret) // 重置 MCP Secret（仅超级管理员）

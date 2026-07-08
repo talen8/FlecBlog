@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -28,6 +29,8 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"gorm.io/gorm"
 )
+
+var ErrArticleUpdateConflict = errors.New("文章已被其他请求修改，请重新加载后重试")
 
 // ArticleService 文章服务
 type ArticleService struct {
@@ -396,6 +399,7 @@ func (s *ArticleService) Get(_ context.Context, id uint) (*dto.ArticleAdminDetai
 		IsOutdated:  article.IsOutdated,
 		PublishTime: utils.ToJSONTime(article.PublishTime),
 		UpdateTime:  utils.ToJSONTime(article.UpdateTime),
+		Revision:    article.UpdatedAt,
 	}
 
 	// 填充分类信息
@@ -505,6 +509,10 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 	if err != nil {
 		return nil, err
 	}
+	expectedUpdatedAt := article.UpdatedAt
+	if req.ExpectedUpdatedAt != nil {
+		expectedUpdatedAt = *req.ExpectedUpdatedAt
+	}
 
 	// 验证新分类是否存在
 	if req.CategoryID != nil && *req.CategoryID > 0 {
@@ -571,7 +579,10 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 		article.UpdateTime = utils.FromJSONTime(req.UpdateTime)
 	}
 
-	if err := s.articleRepo.Update(article, req.TagIDs); err != nil {
+	if err := s.articleRepo.Update(article, req.TagIDs, expectedUpdatedAt); err != nil {
+		if errors.Is(err, repository.ErrArticleUpdateConflict) {
+			return nil, ErrArticleUpdateConflict
+		}
 		return nil, err
 	}
 

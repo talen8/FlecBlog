@@ -50,8 +50,8 @@ type TaxonomyManagePayload struct {
 // TaxonomyManageOutput taxonomy_manage 聚合 tool 输出
 type TaxonomyManageOutput struct {
 	// list 结果
-	List     []TaxonomyItem `json:"list,omitempty"`
-	Total    int64          `json:"total,omitempty"`
+	List     *[]TaxonomyItem `json:"list,omitempty"`
+	Total    *int64          `json:"total,omitempty"`
 	Page     int            `json:"page,omitempty"`
 	PageSize int            `json:"page_size,omitempty"`
 
@@ -178,9 +178,11 @@ func (w *TaxonomyWrapper) listCategories(payload TaxonomyManagePayload) (*sdkmcp
 		list[i] = convertCategoryToItem(category)
 	}
 
+	listField, totalField := ExplicitListFields(list, total)
+
 	return nil, TaxonomyManageOutput{
-		List:     list,
-		Total:    total,
+		List:     listField,
+		Total:    totalField,
 		Page:     page,
 		PageSize: pageSize,
 	}, nil
@@ -292,9 +294,11 @@ func (w *TaxonomyWrapper) listTags(payload TaxonomyManagePayload) (*sdkmcp.CallT
 		list[i] = convertTagToItem(tag)
 	}
 
+	listField, totalField := ExplicitListFields(list, total)
+
 	return nil, TaxonomyManageOutput{
-		List:     list,
-		Total:    total,
+		List:     listField,
+		Total:    totalField,
 		Page:     page,
 		PageSize: pageSize,
 	}, nil

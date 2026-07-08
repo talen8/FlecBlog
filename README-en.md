@@ -130,6 +130,14 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       API_URL: ${API_URL}
+      MCP_AUTH_MODE: ${MCP_AUTH_MODE:-static}
+      MCP_OAUTH_RESOURCE_URI: ${MCP_OAUTH_RESOURCE_URI:-}
+      MCP_OAUTH_ISSUER: ${MCP_OAUTH_ISSUER:-}
+      MCP_OAUTH_JWKS_URL: ${MCP_OAUTH_JWKS_URL:-}
+      MCP_OAUTH_AUDIENCE: ${MCP_OAUTH_AUDIENCE:-}
+      MCP_OAUTH_EMBEDDED_SERVER: ${MCP_OAUTH_EMBEDDED_SERVER:-false}
+      MCP_OAUTH_SIGNING_KEY_FILE: ${MCP_OAUTH_SIGNING_KEY_FILE:-}
+      MCP_OAUTH_CHALLENGE_SCOPES: ${MCP_OAUTH_CHALLENGE_SCOPES:-}
     ports:
       - "8080:8080"
     volumes:
@@ -335,6 +343,29 @@ DB_NAME=postgres
 DB_USER=postgres
 DB_PASSWORD=your_database_password
 ```
+
+**MCP authentication (optional)**
+
+`MCP_AUTH_MODE` supports `static` (default), `oauth`, and `hybrid`. `hybrid` accepts both the MCP Secret and OAuth access tokens on the same `/mcp` endpoint.
+
+Embedded OAuth (Docker Compose) example:
+
+```env
+MCP_AUTH_MODE=hybrid
+MCP_OAUTH_RESOURCE_URI=https://mcp.example.com/mcp
+MCP_OAUTH_ISSUER=https://mcp.example.com
+MCP_OAUTH_EMBEDDED_SERVER=true
+MCP_OAUTH_SIGNING_KEY_FILE=/app/data/mcp-oauth-ed25519.pem
+```
+
+For Docker Compose, generate the signing key first:
+
+```bash
+openssl genpkey -algorithm Ed25519 -out /srv/flecblog/mcp-oauth-ed25519.pem
+chmod 600 /srv/flecblog/mcp-oauth-ed25519.pem
+```
+
+External OAuth issuers require `MCP_OAUTH_JWKS_URL`. `MCP_OAUTH_AUDIENCE` and `MCP_OAUTH_CHALLENGE_SCOPES` may be overridden when needed.
 
 **Admin environment variables**
 

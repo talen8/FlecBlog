@@ -52,8 +52,8 @@ type MomentManagePayload struct {
 // MomentManageOutput moment_manage 聚合 tool 输出
 type MomentManageOutput struct {
 	// list 结果
-	List     []MomentItem `json:"list,omitempty"`
-	Total    int64        `json:"total,omitempty"`
+	List     *[]MomentItem `json:"list,omitempty"`
+	Total    *int64        `json:"total,omitempty"`
 	Page     int          `json:"page,omitempty"`
 	PageSize int          `json:"page_size,omitempty"`
 
@@ -117,9 +117,11 @@ func (w *MomentWrapper) listMoments(payload MomentManagePayload) (*sdkmcp.CallTo
 		list[i] = convertToMomentItem(moment)
 	}
 
+	listField, totalField := ExplicitListFields(list, total)
+
 	return nil, MomentManageOutput{
-		List:     list,
-		Total:    total,
+		List:     listField,
+		Total:    totalField,
 		Page:     page,
 		PageSize: pageSize,
 	}, nil
@@ -149,7 +151,7 @@ func (w *MomentWrapper) createMoment(payload MomentManagePayload) (*sdkmcp.CallT
 
 	req := &dto.CreateMomentRequest{
 		Content:   *payload.Content,
-		IsPublish: *payload.IsPublish,
+		IsPublish: payload.IsPublish,
 	}
 	if payload.PublishTime != nil && *payload.PublishTime != "" {
 		publishTime, err := parseJSONTime(*payload.PublishTime)

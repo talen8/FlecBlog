@@ -34,6 +34,14 @@ func NewUserService(repo *repository.UserRepository, fileService *FileService, c
 	}
 }
 
+// PasswordIdentity 密码认证后的最小身份快照，不暴露密码哈希或完整用户模型。
+type PasswordIdentity struct {
+	ID           uint
+	Email        string
+	Role         model.UserRole
+	TokenVersion uint
+}
+
 // ============ 通用服务 ============
 
 // Get 获取用户信息
@@ -413,29 +421,52 @@ func (s *UserService) downloadAndSaveRemoteAvatar(avatarURL string, userID uint,
 	)
 }
 
-// Login 用户登录
-func (s *UserService) Login(req *dto.LoginRequest) (*dto.LoginResponse, string, error) {
-	user, err := s.repo.GetByEmail(req.Email)
+func (s *UserService) authenticatePasswordUser(email, password string) (*model.User, error) {
+	user, err := s.repo.GetByEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, "", errors.New("邮箱未注册")
+			return nil, errors.New("邮箱未注册")
 		}
-		return nil, "", err
+		return nil, err
 	}
-
-	// 禁止游客用户登录（游客没有密码）
 	if user.Role == model.RoleGuest {
-		return nil, "", errors.New("游客账户无法登录，请先注册成为正式用户")
+		return nil, errors.New("游客账户无法登录，请先注册成为正式用户")
 	}
-
-	// 检查用户状态
 	if !user.IsEnabled {
-		return nil, "", errors.New("该账号已被禁用，请联系管理员")
+		return nil, errors.New("该账号已被禁用，请联系管理员")
 	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, errors.New("密码错误")
+	}
+	return user, nil
+}
 
-	// 验证密码
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return nil, "", errors.New("密码错误")
+// AuthenticatePassword 验证密码并返回最小身份快照。
+func (s *UserService) AuthenticatePassword(email, password string) (*PasswordIdentity, error) {
+	user, err := s.authenticatePasswordUser(email, password)
+	if err != nil {
+		return nil, err
+	}
+	return &PasswordIdentity{ID: user.ID, Email: user.Email, Role: user.Role, TokenVersion: user.TokenVersion}, nil
+}
+
+// GetEnabledIdentity 重新读取当前本地用户状态，用于短期凭据续签前的失效检查。
+func (s *UserService) GetEnabledIdentity(id uint) (*PasswordIdentity, error) {
+	user, err := s.repo.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if !user.IsEnabled {
+		return nil, errors.New("该账号已被禁用，请联系管理员")
+	}
+	return &PasswordIdentity{ID: user.ID, Email: user.Email, Role: user.Role, TokenVersion: user.TokenVersion}, nil
+}
+
+// Login 用户登录
+func (s *UserService) Login(req *dto.LoginRequest) (*dto.LoginResponse, string, error) {
+	user, err := s.authenticatePasswordUser(req.Email, req.Password)
+	if err != nil {
+		return nil, "", err
 	}
 
 	// 更新最后登录时间
@@ -730,14 +761,15 @@ func (s *UserService) Create(operator *model.User, req *dto.AdminCreateUserReque
 
 	// 创建用户
 	user := &model.User{
-		Email:     req.Email,
-		Password:  string(hashedPassword),
-		Nickname:  req.Nickname,
-		Avatar:    req.Avatar,
-		Badge:     req.Badge,
-		Website:   req.Website,
-		Role:      req.Role,
-		IsEnabled: true,
+		Email:       req.Email,
+		Password:    string(hashedPassword),
+		HasPassword: true,
+		Nickname:    req.Nickname,
+		Avatar:      req.Avatar,
+		Badge:       req.Badge,
+		Website:     req.Website,
+		Role:        req.Role,
+		IsEnabled:   true,
 	}
 
 	if err := s.repo.Create(user); err != nil {
@@ -828,6 +860,7 @@ func (s *UserService) Update(operator *model.User, id uint, req *dto.AdminUpdate
 			return err
 		}
 		user.Password = string(hashedPassword)
+		user.HasPassword = true
 		if err := s.repo.Update(user); err != nil {
 			return err
 		}

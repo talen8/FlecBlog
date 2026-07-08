@@ -104,7 +104,7 @@ type ListMomentsRequest struct {
 // CreateMomentRequest 创建动态请求
 type CreateMomentRequest struct {
 	Content     MomentContent   `json:"content" binding:"required"`
-	IsPublish   bool            `json:"is_publish"`   // 是否发布，默认true
+	IsPublish   *bool           `json:"is_publish"`   // 是否发布；省略时默认 true
 	PublishTime *utils.JSONTime `json:"publish_time"` // 发布时间（可选，不填则使用创建时间）
 }
 

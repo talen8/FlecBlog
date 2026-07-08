@@ -7,6 +7,7 @@ import (
 	"flec_blog/config"
 	"flec_blog/internal/service"
 	"flec_blog/pkg/errcode"
+	mcpauth "flec_blog/pkg/mcp/auth"
 	"flec_blog/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -91,17 +92,62 @@ func OptionalAuth(userService *service.UserService) gin.HandlerFunc {
 	}
 }
 
-// MCPAuth MCP 专用 Bearer 鉴权中间件
+// MCPAuth MCP 专用 Bearer 鉴权中间件。
 func MCPAuth(conf *config.Config) gin.HandlerFunc {
+	return MCPAuthWithSecretProvider(func() string {
+		if conf == nil {
+			return ""
+		}
+		return conf.AI.MCPSecret
+	})
+}
+
+// MCPAuthWithSecretProvider 使用动态 SecretProvider 验证旧版 MCP Secret。
+func MCPAuthWithSecretProvider(secretProvider mcpauth.SecretProvider) gin.HandlerFunc {
+	if secretProvider == nil {
+		secretProvider = func() string { return "" }
+	}
 	return func(c *gin.Context) {
 		token, ok := strings.CutPrefix(c.GetHeader("Authorization"), "Bearer ")
-		if ok && token != "" && conf != nil && conf.AI.MCPSecret != "" &&
-			subtle.ConstantTimeCompare([]byte(token), []byte(conf.AI.MCPSecret)) == 1 {
+		secret := secretProvider()
+		if ok && token != "" && secret != "" &&
+			subtle.ConstantTimeCompare([]byte(token), []byte(secret)) == 1 {
+			principal := mcpauth.StaticPrincipal()
+			c.Request = c.Request.WithContext(mcpauth.ContextWithPrincipal(c.Request.Context(), principal))
+			c.Set("mcp_principal", principal)
 			c.Next()
 			return
 		}
 
 		response.Error(c, errcode.Unauthorized.WithDetails("MCP 认证失败"))
 		c.Abort()
+	}
+}
+
+// MCPResourceAuth validates OAuth/hybrid bearer tokens for the MCP resource server.
+func MCPResourceAuth(authenticator *mcpauth.Authenticator) gin.HandlerFunc {
+	if authenticator == nil {
+		panic("MCPResourceAuth requires a non-nil authenticator")
+	}
+	return func(c *gin.Context) {
+		token, ok := mcpauth.ExtractBearerToken(c.GetHeader("Authorization"))
+		if !ok {
+			c.Header("WWW-Authenticate", authenticator.UnauthorizedChallenge())
+			response.Error(c, errcode.Unauthorized.WithDetails("MCP 认证失败"))
+			c.Abort()
+			return
+		}
+
+		principal, err := authenticator.AuthenticateBearer(c.Request.Context(), token)
+		if err != nil {
+			c.Header("WWW-Authenticate", authenticator.UnauthorizedChallenge())
+			response.Error(c, errcode.Unauthorized.WithDetails("MCP 认证失败"))
+			c.Abort()
+			return
+		}
+
+		c.Request = c.Request.WithContext(mcpauth.ContextWithPrincipal(c.Request.Context(), principal))
+		c.Set("mcp_principal", principal)
+		c.Next()
 	}
 }

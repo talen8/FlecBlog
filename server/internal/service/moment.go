@@ -150,9 +150,14 @@ func (s *MomentService) Create(ctx context.Context, req *dto.CreateMomentRequest
 		return nil, err
 	}
 
+	isPublish := true
+	if req.IsPublish != nil {
+		isPublish = *req.IsPublish
+	}
+
 	moment := &model.Moment{
 		Content:     string(contentBytes),
-		IsPublish:   req.IsPublish,
+		IsPublish:   isPublish,
 		PublishTime: utils.FromJSONTime(req.PublishTime),
 	}
 

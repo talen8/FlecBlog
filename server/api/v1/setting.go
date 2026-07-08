@@ -3,6 +3,8 @@ package v1
 import (
 	"flec_blog/internal/model"
 	"flec_blog/internal/service"
+	mcpauth "flec_blog/pkg/mcp/auth"
+	oauthserver "flec_blog/pkg/mcp/oauthserver"
 	"flec_blog/pkg/response"
 	"flec_blog/pkg/upload"
 
@@ -55,7 +57,27 @@ func (c *SettingController) GetGroup(ctx *gin.Context) {
 		return
 	}
 
-	response.Success(ctx, settingsMap)
+	response.Success(ctx, redactMCPSecretForCaller(ctx, group, settingsMap))
+}
+
+func redactMCPSecretForCaller(ctx *gin.Context, group string, settings map[string]string) map[string]string {
+	if group != model.SettingGroupAI || settings == nil {
+		return settings
+	}
+	if current, ok := ctx.Get("user"); ok {
+		if user, ok := current.(*model.User); ok && user.Role == model.RoleSuperAdmin {
+			return settings
+		}
+	}
+
+	redacted := make(map[string]string, len(settings))
+	for key, value := range settings {
+		if key == service.KeyAIMCPSecret {
+			continue
+		}
+		redacted[key] = value
+	}
+	return redacted
 }
 
 // UpdateGroup 更新某个分组的配置
@@ -124,6 +146,46 @@ func (c *SettingController) ResetMCPSecret(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, gin.H{"secret": secret}, "MCP Secret 重置成功")
+}
+
+// MCPAuthStatusResponse MCP 运行时认证状态。
+type MCPAuthStatusResponse struct {
+	Mode  string `json:"mode"`
+	OAuth string `json:"oauth"`
+}
+
+func loadMCPAuthStatusFromEnv() (MCPAuthStatusResponse, error) {
+	authConfig, err := mcpauth.LoadConfigFromEnv()
+	if err != nil {
+		return MCPAuthStatusResponse{}, err
+	}
+
+	status := MCPAuthStatusResponse{Mode: string(authConfig.Mode), OAuth: "disabled"}
+	if authConfig.Mode == mcpauth.ModeStatic {
+		return status, nil
+	}
+
+	embeddedConfig, err := oauthserver.LoadConfigFromEnv(authConfig)
+	if err != nil {
+		return MCPAuthStatusResponse{}, err
+	}
+	if embeddedConfig.Enabled {
+		status.OAuth = "embedded"
+	} else {
+		status.OAuth = "external"
+	}
+	return status, nil
+}
+
+// GetMCPAuthStatus 获取 MCP 运行时认证状态。
+func (c *SettingController) GetMCPAuthStatus(ctx *gin.Context) {
+	status, err := loadMCPAuthStatusFromEnv()
+	if err != nil {
+		response.Failed(ctx, "获取 MCP 认证状态失败: "+err.Error())
+		return
+	}
+
+	response.Success(ctx, status)
 }
 
 // ============ 前台公开接口 ============

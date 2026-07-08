@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"time"
+
 	"flec_blog/pkg/utils"
 )
 
@@ -128,21 +130,22 @@ type CreateArticleRequest struct {
 
 // UpdateArticleRequest 更新文章请求
 type UpdateArticleRequest struct {
-	Title       string          `json:"title"`
-	Slug        string          `json:"slug"` // 自定义文章Slug
-	Content     string          `json:"content"`
-	Summary     string          `json:"summary"`
-	AISummary   string          `json:"ai_summary"` // AI 总结
-	Cover       string          `json:"cover"`
-	Location    string          `json:"location"`    // 发布地点
-	IsPublish   *bool           `json:"is_publish"`  // 是否发布
-	IsTop       *bool           `json:"is_top"`      // 是否置顶
-	IsEssence   *bool           `json:"is_essence"`  // 是否精选
-	IsOutdated  *bool           `json:"is_outdated"` // 是否过时
-	CategoryID  *uint           `json:"category_id"`
-	TagIDs      []uint          `json:"tag_ids"`
-	PublishTime *utils.JSONTime `json:"publish_time"`
-	UpdateTime  *utils.JSONTime `json:"update_time"`
+	Title             string          `json:"title"`
+	Slug              string          `json:"slug"` // 自定义文章Slug
+	Content           string          `json:"content"`
+	Summary           string          `json:"summary"`
+	AISummary         string          `json:"ai_summary"` // AI 总结
+	Cover             string          `json:"cover"`
+	Location          string          `json:"location"`    // 发布地点
+	IsPublish         *bool           `json:"is_publish"`  // 是否发布
+	IsTop             *bool           `json:"is_top"`      // 是否置顶
+	IsEssence         *bool           `json:"is_essence"`  // 是否精选
+	IsOutdated        *bool           `json:"is_outdated"` // 是否过时
+	CategoryID        *uint           `json:"category_id"`
+	TagIDs            []uint          `json:"tag_ids"`
+	PublishTime       *utils.JSONTime `json:"publish_time"`
+	UpdateTime        *utils.JSONTime `json:"update_time"`
+	ExpectedUpdatedAt *time.Time      `json:"-"`
 }
 
 // ============ 后台文章管理响应 ============
@@ -188,6 +191,7 @@ type ArticleAdminDetailResponse struct {
 	IsOutdated  bool            `json:"is_outdated"`
 	PublishTime *utils.JSONTime `json:"publish_time"`
 	UpdateTime  *utils.JSONTime `json:"update_time"`
+	Revision    time.Time       `json:"-"`
 	Category    struct {
 		ID   uint   `json:"id"`
 		Name string `json:"name"`

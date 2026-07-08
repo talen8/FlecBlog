@@ -17,6 +17,15 @@ func NormalizePage(page, pageSize int) (int, int) {
 	return page, pageSize
 }
 
+// ExplicitListFields keeps list-action contracts explicit when items are empty and total is zero.
+// Pointer fields remain nil for non-list actions, so unrelated outputs do not gain list metadata.
+func ExplicitListFields[T any](items []T, total int64) (*[]T, *int64) {
+	if items == nil {
+		items = make([]T, 0)
+	}
+	return &items, &total
+}
+
 // ============ Schema 构建函数 ============
 
 // BuildActionSchema 构建 Action Schema
@@ -38,10 +47,9 @@ func BuildActionSchema(action, description string, payload *jsonschema.Schema) *
 // BuildPayloadSchema 构建 Payload Schema
 func BuildPayloadSchema(properties map[string]*jsonschema.Schema, required ...string) *jsonschema.Schema {
 	return &jsonschema.Schema{
-		Type:                 "object",
-		Properties:           properties,
-		Required:             required,
-		AdditionalProperties: &jsonschema.Schema{Type: "any"},
+		Type:       "object",
+		Properties: properties,
+		Required:   required,
 	}
 }
 

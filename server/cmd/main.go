@@ -71,8 +71,13 @@ func main() {
 
 	// 从数据库加载运行时配置（邮箱、上传等）
 	settingService := service.NewSettingService(db.DB)
-	settingService.SetConfig(cfg)               // 设置全局配置对象，用于热重载
-	_ = settingService.ApplyDatabaseConfig(cfg) // 应用数据库配置
+	settingService.SetConfig(cfg) // 设置全局配置对象，用于热重载
+	if err := settingService.ApplyDatabaseConfig(cfg); err != nil {
+		middleware.ClosePanicLogFile()
+		logger.Close()
+		_ = db.Close()
+		log.Fatalf("Failed to apply database config: %v", err) //nolint:gocritic // 已手动关闭资源
+	}
 
 	// 初始化 IP 地理位置
 	_ = utils.InitIPSearcher("")

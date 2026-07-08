@@ -82,8 +82,8 @@ type CommentManagePayload struct {
 // CommentManageOutput comment_manage 聚合 tool 输出
 type CommentManageOutput struct {
 	// list 结果
-	List     []CommentItem `json:"list,omitempty"`
-	Total    int64         `json:"total,omitempty"`
+	List     *[]CommentItem `json:"list,omitempty"`
+	Total    *int64         `json:"total,omitempty"`
 	Page     int           `json:"page,omitempty"`
 	PageSize int           `json:"page_size,omitempty"`
 
@@ -151,9 +151,11 @@ func (w *CommentWrapper) listComments(payload CommentManagePayload) (*sdkmcp.Cal
 		list[i] = convertToCommentItem(comment)
 	}
 
+	listField, totalField := ExplicitListFields(list, total)
+
 	return nil, CommentManageOutput{
-		List:     list,
-		Total:    total,
+		List:     listField,
+		Total:    totalField,
 		Page:     page,
 		PageSize: pageSize,
 	}, nil

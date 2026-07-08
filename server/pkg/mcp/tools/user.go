@@ -109,19 +109,34 @@ type UserManageOutput struct {
 
 // UserWrapper 用户服务包装器
 type UserWrapper struct {
-	userService *service.UserService
+	userService      *service.UserService
+	operatorResolver *userOperatorResolver
 }
 
-// NewUserWrapper 创建用户服务包装器
+// NewUserWrapper 创建用户服务包装器。
 func NewUserWrapper(userService *service.UserService) *UserWrapper {
-	return &UserWrapper{userService: userService}
+	return NewUserWrapperWithStaticOperatorUserIDProvider(userService, nil)
+}
+
+// NewUserWrapperWithStaticOperatorUserIDProvider 创建带运行时 operator 配置 provider 的用户服务包装器。
+func NewUserWrapperWithStaticOperatorUserIDProvider(
+	userService *service.UserService,
+	staticOperatorUserIDProvider func() uint,
+) *UserWrapper {
+	return &UserWrapper{
+		userService: userService,
+		operatorResolver: newUserOperatorResolver(
+			userService,
+			staticOperatorUserIDProvider,
+		),
+	}
 }
 
 // ============ 聚合 Tool Handler============
 
 // ManageUser 用户管理聚合入口
 func (w *UserWrapper) ManageUser(
-	_ context.Context,
+	ctx context.Context,
 	_ *sdkmcp.CallToolRequest,
 	input UserManageInput,
 ) (*sdkmcp.CallToolResult, UserManageOutput, error) {
@@ -131,11 +146,11 @@ func (w *UserWrapper) ManageUser(
 	case userActionGet:
 		return w.getUser(input.Payload)
 	case userActionCreate:
-		return w.createUser(input.Payload)
+		return w.createUser(ctx, input.Payload)
 	case userActionUpdate:
-		return w.updateUser(input.Payload)
+		return w.updateUser(ctx, input.Payload)
 	case userActionDelete:
-		return w.deleteUser(input.Payload)
+		return w.deleteUser(ctx, input.Payload)
 	default:
 		return nil, UserManageOutput{}, fmt.Errorf("不支持的操作: %s", input.Action)
 	}
@@ -181,7 +196,7 @@ func (w *UserWrapper) getUser(payload UserManagePayload) (*sdkmcp.CallToolResult
 }
 
 // createUser 创建用户
-func (w *UserWrapper) createUser(payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
+func (w *UserWrapper) createUser(ctx context.Context, payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
 	if payload.Email == "" {
 		return nil, UserManageOutput{Error: "邮箱不能为空"}, nil
 	}
@@ -202,7 +217,11 @@ func (w *UserWrapper) createUser(payload UserManagePayload) (*sdkmcp.CallToolRes
 		Role:     parseUserRole(payload.Role),
 	}
 
-	if err := w.userService.Create(mcpSuperAdminOperator(), req, ""); err != nil {
+	operator, err := w.operatorResolver.resolve(ctx)
+	if err != nil {
+		return nil, UserManageOutput{}, fmt.Errorf("解析真实 MCP operator 失败: %w", err)
+	}
+	if err := w.userService.Create(operator, req, ""); err != nil {
 		return nil, UserManageOutput{Error: fmt.Sprintf("创建用户失败: %v", err)}, nil
 	}
 
@@ -217,7 +236,7 @@ func (w *UserWrapper) createUser(payload UserManagePayload) (*sdkmcp.CallToolRes
 }
 
 // updateUser 更新用户
-func (w *UserWrapper) updateUser(payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
+func (w *UserWrapper) updateUser(ctx context.Context, payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, UserManageOutput{Error: "用户 ID 不能为空"}, nil
 	}
@@ -233,7 +252,11 @@ func (w *UserWrapper) updateUser(payload UserManagePayload) (*sdkmcp.CallToolRes
 		Password:  payload.Password,
 	}
 
-	if err := w.userService.Update(mcpSuperAdminOperator(), payload.ID, req); err != nil {
+	operator, err := w.operatorResolver.resolve(ctx)
+	if err != nil {
+		return nil, UserManageOutput{}, fmt.Errorf("解析真实 MCP operator 失败: %w", err)
+	}
+	if err := w.userService.Update(operator, payload.ID, req); err != nil {
 		return nil, UserManageOutput{Error: fmt.Sprintf("更新用户失败: %v", err)}, nil
 	}
 
@@ -248,12 +271,16 @@ func (w *UserWrapper) updateUser(payload UserManagePayload) (*sdkmcp.CallToolRes
 }
 
 // deleteUser 删除用户
-func (w *UserWrapper) deleteUser(payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
+func (w *UserWrapper) deleteUser(ctx context.Context, payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, UserManageOutput{Error: "用户 ID 不能为空"}, nil
 	}
 
-	if err := w.userService.Delete(mcpSuperAdminOperator(), payload.ID); err != nil {
+	operator, err := w.operatorResolver.resolve(ctx)
+	if err != nil {
+		return nil, UserManageOutput{}, fmt.Errorf("解析真实 MCP operator 失败: %w", err)
+	}
+	if err := w.userService.Delete(operator, payload.ID); err != nil {
 		return nil, UserManageOutput{Error: fmt.Sprintf("删除用户失败: %v", err)}, nil
 	}
 
@@ -416,10 +443,6 @@ func parseUserRoleForUpdate(role string) model.UserRole {
 		return ""
 	}
 	return parseUserRole(role)
-}
-
-func mcpSuperAdminOperator() *model.User {
-	return &model.User{Role: model.RoleSuperAdmin}
 }
 
 func userTimePtrFromJSONTime(t utils.JSONTime) *string {

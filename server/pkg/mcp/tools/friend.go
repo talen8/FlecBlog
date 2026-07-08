@@ -92,8 +92,8 @@ type FriendManagePayload struct {
 // FriendManageOutput friend_manage 聚合 tool 输出
 type FriendManageOutput struct {
 	// list 结果
-	List     []FriendItem `json:"list,omitempty"`
-	Total    int64        `json:"total,omitempty"`
+	List     *[]FriendItem `json:"list,omitempty"`
+	Total    *int64        `json:"total,omitempty"`
 	Page     int          `json:"page,omitempty"`
 	PageSize int          `json:"page_size,omitempty"`
 
@@ -159,9 +159,11 @@ func (w *FriendWrapper) listFriends(payload FriendManagePayload) (*sdkmcp.CallTo
 		list[i] = convertToFriendItem(friend)
 	}
 
+	listField, totalField := ExplicitListFields(list, total)
+
 	return nil, FriendManageOutput{
-		List:     list,
-		Total:    total,
+		List:     listField,
+		Total:    totalField,
 		Page:     page,
 		PageSize: pageSize,
 	}, nil
