@@ -189,30 +189,7 @@ const loadList = async () => {
 
 const copyUrl = async (file: FileInfo) => {
   try {
-    if (navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(file.file_url);
-        ElMessage.success('已复制');
-        return;
-      } catch {
-        // 非 HTTPS / 非 localhost 环境下 Clipboard API 可能不可用，回退到 execCommand。
-      }
-    }
-
-    const textarea = document.createElement('textarea');
-    textarea.value = file.file_url;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    let copied = false;
-    try {
-      textarea.select();
-      copied = document.execCommand('copy');
-    } finally {
-      document.body.removeChild(textarea);
-    }
-    if (!copied) throw new Error('copy failed');
-
+    await navigator.clipboard.writeText(file.file_url);
     ElMessage.success('已复制');
   } catch {
     ElMessage.error('复制失败');

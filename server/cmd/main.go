@@ -76,7 +76,7 @@ func main() {
 		middleware.ClosePanicLogFile()
 		logger.Close()
 		_ = db.Close()
-		log.Fatalf("Failed to apply database config: %v", err) //nolint:gocritic // 已手动关闭资源
+		log.Fatalf("Failed to apply database config: %v", err)
 	}
 
 	// 初始化 IP 地理位置

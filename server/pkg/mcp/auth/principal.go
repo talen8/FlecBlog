@@ -13,15 +13,16 @@ import (
 	sdkauth "github.com/modelcontextprotocol/go-sdk/auth"
 )
 
+type SecretProvider func() string
+
 const (
 	staticSubject         = "mcp-static-secret"
-	tokenInfoPrincipalKey = "flecblog.mcp.principal"
+	tokenInfoPrincipalKey = "flecblog.mcp.principal" //nolint:gosec // context key name, not a credential
 	bridgeTokenInfoTTL    = time.Minute
 )
 
 type principalContextKey struct{}
 
-// Principal is the authenticated MCP caller identity.
 type Principal struct {
 	Method  string
 	Subject string
@@ -31,8 +32,6 @@ type Principal struct {
 	verifiedLocalUserID uint
 }
 
-// BindVerifiedLocalUser records an application-validated local user binding.
-// Raw OAuth claims must never be treated as an equivalent binding.
 func (p *Principal) BindVerifiedLocalUser(userID uint) error {
 	if p == nil {
 		return fmt.Errorf("principal is nil")
@@ -44,7 +43,6 @@ func (p *Principal) BindVerifiedLocalUser(userID uint) error {
 	return nil
 }
 
-// VerifiedLocalUserID returns the application-validated local user binding.
 func (p *Principal) VerifiedLocalUserID() (uint, bool) {
 	if p == nil || p.verifiedLocalUserID == 0 {
 		return 0, false
@@ -52,7 +50,6 @@ func (p *Principal) VerifiedLocalUserID() (uint, bool) {
 	return p.verifiedLocalUserID, true
 }
 
-// StaticPrincipal returns the full-capability identity used by the legacy MCP secret.
 func StaticPrincipal() *Principal {
 	return &Principal{
 		Method:  "static",
@@ -61,7 +58,6 @@ func StaticPrincipal() *Principal {
 	}
 }
 
-// ContextWithPrincipal attaches an authenticated principal to a request context.
 func ContextWithPrincipal(ctx context.Context, principal *Principal) context.Context {
 	if principal == nil {
 		return ctx
@@ -69,16 +65,11 @@ func ContextWithPrincipal(ctx context.Context, principal *Principal) context.Con
 	return context.WithValue(ctx, principalContextKey{}, principal)
 }
 
-// PrincipalFromContext returns the authenticated MCP principal, if present.
 func PrincipalFromContext(ctx context.Context) (*Principal, bool) {
 	principal, ok := ctx.Value(principalContextKey{}).(*Principal)
 	return principal, ok && principal != nil
 }
 
-// SDKTokenVerifierFromPrincipalContext bridges an already-authenticated FlecBlog
-// principal into go-sdk TokenInfo. The outer FlecBlog middleware remains the
-// credential verifier; this adapter enables SDK session binding and per-request
-// transport metadata without re-validating the bearer token.
 func SDKTokenVerifierFromPrincipalContext(ctx context.Context, _ string, _ *http.Request) (*sdkauth.TokenInfo, error) {
 	principal, ok := PrincipalFromContext(ctx)
 	if !ok {
@@ -87,8 +78,6 @@ func SDKTokenVerifierFromPrincipalContext(ctx context.Context, _ string, _ *http
 	return sdkTokenInfoFromPrincipal(principal, time.Now())
 }
 
-// PrincipalFromTokenInfo returns the current-request FlecBlog principal carried
-// through go-sdk RequestExtra metadata.
 func PrincipalFromTokenInfo(info *sdkauth.TokenInfo) (*Principal, bool) {
 	if info == nil || info.Extra == nil {
 		return nil, false
@@ -132,13 +121,6 @@ func sessionIdentityKey(principal *Principal) (string, error) {
 	switch method {
 	case "static":
 		material = "static\x00" + subject
-	case "oauth":
-		issuer, _ := principal.Claims["iss"].(string)
-		issuer = strings.TrimSpace(issuer)
-		if issuer == "" {
-			return "", fmt.Errorf("OAuth principal issuer is missing")
-		}
-		material = "oauth\x00" + issuer + "\x00" + subject
 	default:
 		return "", fmt.Errorf("unsupported principal method %q", method)
 	}
@@ -147,7 +129,6 @@ func sessionIdentityKey(principal *Principal) (string, error) {
 	return "flecblog-mcp-v1:" + hex.EncodeToString(digest[:]), nil
 }
 
-// HasScope reports whether the principal can use the requested scope.
 func (p *Principal) HasScope(scope string) bool {
 	if p == nil {
 		return false

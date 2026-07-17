@@ -52,8 +52,8 @@ type TaxonomyManageOutput struct {
 	// list 结果
 	List     *[]TaxonomyItem `json:"list,omitempty"`
 	Total    *int64          `json:"total,omitempty"`
-	Page     int            `json:"page,omitempty"`
-	PageSize int            `json:"page_size,omitempty"`
+	Page     int             `json:"page,omitempty"`
+	PageSize int             `json:"page_size,omitempty"`
 
 	// list_articles 结果
 	Articles *ArticleListResult `json:"articles,omitempty"`

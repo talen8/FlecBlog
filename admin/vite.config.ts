@@ -14,18 +14,6 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       vue(),
-      {
-        name: 'dev-runtime-config',
-        apply: 'serve',
-        configureServer(server) {
-          server.middlewares.use('/config.js', (_req, res) => {
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
-            res.setHeader('Cache-Control', 'no-store')
-            res.end('window.__APP_CONFIG__ = { apiUrl: ' + JSON.stringify(apiBaseUrl) + ' };\n')
-          })
-        }
-      },
       VitePWA({
         registerType: 'autoUpdate',
         manifest: {

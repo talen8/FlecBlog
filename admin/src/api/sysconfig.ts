@@ -8,11 +8,6 @@ export interface ResetMCPSecretResponse {
   secret: string;
 }
 
-export interface MCPAuthStatusResponse {
-  mode: 'static' | 'oauth' | 'hybrid';
-  oauth: 'disabled' | 'embedded' | 'external';
-}
-
 /**
  * 获取指定分组的配置
  * @param group 分组类型
@@ -40,7 +35,3 @@ export const resetMCPSecret = (): Promise<ResetMCPSecretResponse> => {
   return request.put('/admin/settings/ai/mcp-secret/reset');
 };
 
-/** 获取 MCP 运行时认证状态 */
-export const getMCPAuthStatus = (): Promise<MCPAuthStatusResponse> => {
-  return request.get('/admin/settings/ai/mcp-auth-status');
-};

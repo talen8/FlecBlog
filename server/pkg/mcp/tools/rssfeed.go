@@ -51,9 +51,9 @@ type RssFeedManageOutput struct {
 	// list 结果
 	List        *[]RssFeedItem `json:"list,omitempty"`
 	Total       *int64         `json:"total,omitempty"`
-	Page        int           `json:"page,omitempty"`
-	PageSize    int           `json:"page_size,omitempty"`
-	UnreadCount int64         `json:"unread_count,omitempty"`
+	Page        int            `json:"page,omitempty"`
+	PageSize    int            `json:"page_size,omitempty"`
+	UnreadCount int64          `json:"unread_count,omitempty"`
 
 	// mark_read / mark_all_read 结果
 	Success  *bool  `json:"success,omitempty"`

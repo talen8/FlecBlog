@@ -7,7 +7,15 @@ import (
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// InsufficientScopeError reports a missing OAuth scope without exposing token details.
+const (
+	ScopeRead    = "mcp:read"
+	ScopeDraft   = "mcp:draft"
+	ScopePublish = "mcp:publish"
+	ScopeManage  = "mcp:manage"
+	ScopeAdmin   = "mcp:admin"
+)
+
+// InsufficientScopeError reports a missing scope without exposing token details.
 type InsufficientScopeError struct {
 	Required string
 }
@@ -17,8 +25,6 @@ func (e *InsufficientScopeError) Error() string {
 }
 
 // RequireScope wraps a typed MCP tool handler with fail-closed scope authorization.
-// Authorization is derived from the current HTTP request's go-sdk TokenInfo, not
-// from the long-lived Streamable session connection context.
 func RequireScope[In, Out any](required string, next sdkmcp.ToolHandlerFor[In, Out]) sdkmcp.ToolHandlerFor[In, Out] {
 	return func(ctx context.Context, request *sdkmcp.CallToolRequest, input In) (*sdkmcp.CallToolResult, Out, error) {
 		var zero Out

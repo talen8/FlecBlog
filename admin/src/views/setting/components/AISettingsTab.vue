@@ -87,15 +87,7 @@
 
     <el-divider content-position="left">MCP</el-divider>
 
-    <el-form-item label="认证方式">
-      <span>{{ mcpAuthModeLabel }}</span>
-    </el-form-item>
-
-    <el-form-item label="OAuth">
-      <span>{{ mcpOAuthLabel }}</span>
-    </el-form-item>
-
-    <el-form-item v-if="mcpAuthStatus?.mode !== 'oauth'">
+    <el-form-item>
       <template #label>
         <span :class="{ 'field-modified': isFieldModified('mcp_secret') }">Secret</span>
       </template>
@@ -119,7 +111,7 @@
       </el-input>
     </el-form-item>
 
-    <el-form-item v-if="mcpAuthStatus?.mode !== 'oauth'">
+    <el-form-item>
       <template #label>
         <span :class="{ 'field-modified': isFieldModified('mcp_static_operator_user_id') }"
           >管理身份</span
@@ -166,9 +158,7 @@
           inactive-value="false"
           :disabled="loading"
         />
-        <div class="mcp-admin-tools-hint">
-          启用后允许调用用户管理工具；OAuth 连接需重新授权后生效。
-        </div>
+        <div class="mcp-admin-tools-hint">启用后允许调用用户管理工具。</div>
       </div>
     </el-form-item>
   </el-form>
@@ -178,8 +168,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { testAIConfig } from '@/api/ai';
-import { getMCPAuthStatus, resetMCPSecret } from '@/api/sysconfig';
-import type { MCPAuthStatusResponse } from '@/api/sysconfig';
+import { resetMCPSecret } from '@/api/sysconfig';
 import { getUsers } from '@/api/user';
 import type { User } from '@/types/user';
 
@@ -207,20 +196,6 @@ const resetting = ref(false);
 const loadingOperators = ref(false);
 const operatorLoadError = ref(false);
 const operatorOptions = ref<User[]>([]);
-const mcpAuthStatus = ref<MCPAuthStatusResponse | null>(null);
-const mcpAuthStatusFailed = ref(false);
-
-const mcpAuthModeLabel = computed(() => {
-  if (mcpAuthStatusFailed.value) return '未知';
-  if (!mcpAuthStatus.value) return '加载中';
-  return { static: '密钥', oauth: 'OAuth', hybrid: '兼容' }[mcpAuthStatus.value.mode];
-});
-
-const mcpOAuthLabel = computed(() => {
-  if (mcpAuthStatusFailed.value) return '未知';
-  if (!mcpAuthStatus.value) return '加载中';
-  return { disabled: '未启用', embedded: '内置', external: '外部' }[mcpAuthStatus.value.oauth];
-});
 
 const missingConfiguredOperator = computed(() => {
   const configuredID = form.value.mcp_static_operator_user_id;
@@ -231,16 +206,6 @@ const missingConfiguredOperator = computed(() => {
 function formatOperatorLabel(user: User): string {
   const displayName = user.nickname || user.email;
   return displayName + ' · ' + user.email + ' · ' + user.role + ' · ID ' + user.id;
-}
-
-async function loadMCPAuthStatus() {
-  mcpAuthStatusFailed.value = false;
-  try {
-    mcpAuthStatus.value = await getMCPAuthStatus();
-  } catch {
-    mcpAuthStatus.value = null;
-    mcpAuthStatusFailed.value = true;
-  }
 }
 
 async function loadOperatorOptions() {
@@ -274,7 +239,6 @@ async function loadOperatorOptions() {
 
 onMounted(() => {
   void loadOperatorOptions();
-  void loadMCPAuthStatus();
 });
 
 async function handleTest() {

@@ -24,7 +24,7 @@ type publicServer struct {
 	statsService                 *service.StatsService
 	staticOperatorUserIDProvider func() uint
 	adminToolsEnabledProvider    func() bool
-	articleImageUploader          tools.ArticleImageUploader
+	articleImageUploader         tools.ArticleImageUploader
 }
 
 // PublicHandlerOptions configures optional runtime providers without breaking the legacy constructor.
@@ -88,7 +88,7 @@ func NewPublicHandlerWithOptions(
 		statsService:                 statsService,
 		staticOperatorUserIDProvider: options.StaticOperatorUserIDProvider,
 		adminToolsEnabledProvider:    options.AdminToolsEnabledProvider,
-		articleImageUploader:          options.ArticleImageUploader,
+		articleImageUploader:         options.ArticleImageUploader,
 	}
 
 	// 注册 tools

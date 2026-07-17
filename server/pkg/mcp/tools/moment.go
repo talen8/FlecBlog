@@ -54,8 +54,8 @@ type MomentManageOutput struct {
 	// list 结果
 	List     *[]MomentItem `json:"list,omitempty"`
 	Total    *int64        `json:"total,omitempty"`
-	Page     int          `json:"page,omitempty"`
-	PageSize int          `json:"page_size,omitempty"`
+	Page     int           `json:"page,omitempty"`
+	PageSize int           `json:"page_size,omitempty"`
 
 	// get/create/update 结果
 	Item *MomentItem `json:"item,omitempty"`

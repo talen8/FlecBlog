@@ -8587,7 +8587,7 @@
                     "$ref": "#/definitions/dto.MomentContent"
                 },
                 "is_publish": {
-                    "description": "是否发布，默认true",
+                    "description": "是否发布；省略时默认 true",
                     "type": "boolean"
                 },
                 "publish_time": {

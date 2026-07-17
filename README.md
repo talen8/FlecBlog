@@ -131,13 +131,6 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       API_URL: ${API_URL}
       MCP_AUTH_MODE: ${MCP_AUTH_MODE:-static}
-      MCP_OAUTH_RESOURCE_URI: ${MCP_OAUTH_RESOURCE_URI:-}
-      MCP_OAUTH_ISSUER: ${MCP_OAUTH_ISSUER:-}
-      MCP_OAUTH_JWKS_URL: ${MCP_OAUTH_JWKS_URL:-}
-      MCP_OAUTH_AUDIENCE: ${MCP_OAUTH_AUDIENCE:-}
-      MCP_OAUTH_EMBEDDED_SERVER: ${MCP_OAUTH_EMBEDDED_SERVER:-false}
-      MCP_OAUTH_SIGNING_KEY_FILE: ${MCP_OAUTH_SIGNING_KEY_FILE:-}
-      MCP_OAUTH_CHALLENGE_SCOPES: ${MCP_OAUTH_CHALLENGE_SCOPES:-}
     ports:
       - "8080:8080"
     volumes:
@@ -344,28 +337,9 @@ DB_USER=postgres
 DB_PASSWORD=your_database_password
 ```
 
-**MCP 认证（可选）**
+**MCP 认证**
 
-`MCP_AUTH_MODE` 支持 `static`（默认）、`oauth` 和 `hybrid`。`hybrid` 可在同一 `/mcp` 端点同时接受 MCP Secret 与 OAuth access token。
-
-内置 OAuth（Docker Compose）示例：
-
-```env
-MCP_AUTH_MODE=hybrid
-MCP_OAUTH_RESOURCE_URI=https://mcp.example.com/mcp
-MCP_OAUTH_ISSUER=https://mcp.example.com
-MCP_OAUTH_EMBEDDED_SERVER=true
-MCP_OAUTH_SIGNING_KEY_FILE=/app/data/mcp-oauth-ed25519.pem
-```
-
-Docker Compose 部署可先生成签名密钥：
-
-```bash
-openssl genpkey -algorithm Ed25519 -out /srv/flecblog/mcp-oauth-ed25519.pem
-chmod 600 /srv/flecblog/mcp-oauth-ed25519.pem
-```
-
-外部 OAuth issuer 需设置 `MCP_OAUTH_JWKS_URL`；`MCP_OAUTH_AUDIENCE` 与 `MCP_OAUTH_CHALLENGE_SCOPES` 可按部署需要覆盖。
+`MCP_AUTH_MODE` 仅支持 `static` 模式。
 
 **Admin 环境变量**
 

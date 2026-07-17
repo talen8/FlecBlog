@@ -123,31 +123,3 @@ func MCPAuthWithSecretProvider(secretProvider mcpauth.SecretProvider) gin.Handle
 		c.Abort()
 	}
 }
-
-// MCPResourceAuth validates OAuth/hybrid bearer tokens for the MCP resource server.
-func MCPResourceAuth(authenticator *mcpauth.Authenticator) gin.HandlerFunc {
-	if authenticator == nil {
-		panic("MCPResourceAuth requires a non-nil authenticator")
-	}
-	return func(c *gin.Context) {
-		token, ok := mcpauth.ExtractBearerToken(c.GetHeader("Authorization"))
-		if !ok {
-			c.Header("WWW-Authenticate", authenticator.UnauthorizedChallenge())
-			response.Error(c, errcode.Unauthorized.WithDetails("MCP 认证失败"))
-			c.Abort()
-			return
-		}
-
-		principal, err := authenticator.AuthenticateBearer(c.Request.Context(), token)
-		if err != nil {
-			c.Header("WWW-Authenticate", authenticator.UnauthorizedChallenge())
-			response.Error(c, errcode.Unauthorized.WithDetails("MCP 认证失败"))
-			c.Abort()
-			return
-		}
-
-		c.Request = c.Request.WithContext(mcpauth.ContextWithPrincipal(c.Request.Context(), principal))
-		c.Set("mcp_principal", principal)
-		c.Next()
-	}
-}
