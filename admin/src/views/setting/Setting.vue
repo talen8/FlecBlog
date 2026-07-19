@@ -167,8 +167,6 @@ const aiForm = ref({
   ai_summary_prompt: '',
   title_prompt: '',
   mcp_secret: '',
-  mcp_static_operator_user_id: '',
-  mcp_admin_tools_enabled: 'false',
 });
 
 // OAuth 配置表单
@@ -303,11 +301,6 @@ const loadAIConfigs = async () => {
       ai_summary_prompt: configs.ai_summary_prompt || '',
       title_prompt: configs.title_prompt || '',
       mcp_secret: configs.mcp_secret || '',
-      mcp_static_operator_user_id:
-        configs.mcp_static_operator_user_id && configs.mcp_static_operator_user_id !== '0'
-          ? configs.mcp_static_operator_user_id
-          : '',
-      mcp_admin_tools_enabled: configs.mcp_admin_tools_enabled || 'false',
     };
     Object.assign(aiForm.value, data);
     originalAiForm.value = { ...data };
@@ -494,8 +487,6 @@ const handleSave = async () => {
       summary_prompt: aiForm.value.summary_prompt,
       ai_summary_prompt: aiForm.value.ai_summary_prompt,
       title_prompt: aiForm.value.title_prompt,
-      mcp_static_operator_user_id: aiForm.value.mcp_static_operator_user_id,
-      mcp_admin_tools_enabled: aiForm.value.mcp_admin_tools_enabled,
     };
 
     // OAuth 配置

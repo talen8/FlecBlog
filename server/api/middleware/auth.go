@@ -4,10 +4,8 @@ import (
 	"crypto/subtle"
 	"strings"
 
-	"flec_blog/config"
 	"flec_blog/internal/service"
 	"flec_blog/pkg/errcode"
-	mcpauth "flec_blog/pkg/mcp/auth"
 	"flec_blog/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -92,33 +90,28 @@ func OptionalAuth(userService *service.UserService) gin.HandlerFunc {
 	}
 }
 
-// MCPAuth MCP 专用 Bearer 鉴权中间件。
-func MCPAuth(conf *config.Config) gin.HandlerFunc {
-	return MCPAuthWithSecretProvider(func() string {
-		if conf == nil {
-			return ""
-		}
-		return conf.AI.MCPSecret
-	})
-}
-
-// MCPAuthWithSecretProvider 使用动态 SecretProvider 验证旧版 MCP Secret。
-func MCPAuthWithSecretProvider(secretProvider mcpauth.SecretProvider) gin.HandlerFunc {
+// MCPAuth MCP 专用 Bearer 鉴权中间件
+// 验证请求头中的 Bearer Token，与动态提供的 MCP Secret 进行比对
+// 使用: router.Any("/mcp", middleware.MCPAuth(settingService.MCPSecret), mcpHandler)
+func MCPAuth(secretProvider func() string) gin.HandlerFunc {
 	if secretProvider == nil {
 		secretProvider = func() string { return "" }
 	}
 	return func(c *gin.Context) {
+		// 从 Authorization header 获取 Bearer token
 		token, ok := strings.CutPrefix(c.GetHeader("Authorization"), "Bearer ")
+
+		// 获取当前 MCP Secret（支持热重载）
 		secret := secretProvider()
+
+		// 比对 token 与 secret
 		if ok && token != "" && secret != "" &&
 			subtle.ConstantTimeCompare([]byte(token), []byte(secret)) == 1 {
-			principal := mcpauth.StaticPrincipal()
-			c.Request = c.Request.WithContext(mcpauth.ContextWithPrincipal(c.Request.Context(), principal))
-			c.Set("mcp_principal", principal)
 			c.Next()
 			return
 		}
 
+		// 认证失败
 		response.Error(c, errcode.Unauthorized.WithDetails("MCP 认证失败"))
 		c.Abort()
 	}

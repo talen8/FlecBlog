@@ -1,8 +1,6 @@
 package router
 
 import (
-	"os"
-
 	"flec_blog/api/middleware"
 	v1 "flec_blog/api/v1"
 	"flec_blog/api/v1/feeds"
@@ -13,15 +11,12 @@ import (
 	"flec_blog/pkg/email"
 	"flec_blog/pkg/feishu"
 	mcpserver "flec_blog/pkg/mcp"
-	mcpadapters "flec_blog/pkg/mcp/adapters"
-	mcpauth "flec_blog/pkg/mcp/auth"
 
 	"flec_blog/pkg/notification"
 	"flec_blog/pkg/scheduler"
 	"flec_blog/pkg/upload"
 
 	"github.com/gin-gonic/gin"
-	sdkauth "github.com/modelcontextprotocol/go-sdk/auth"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -125,19 +120,11 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	rssFeedController := v1.NewRssFeedController(rssFeedService)
 
 	// MCP 接口
-	articleImageUploader, imageUploaderErr := mcpadapters.NewFileServiceArticleImageUploader(fileService, os.Getenv("API_URL"))
-	if imageUploaderErr != nil {
-		panic("initialize MCP article image uploader: " + imageUploaderErr.Error())
-	}
-	mcpHTTPHandler := mcpserver.NewPublicHandlerWithOptions(
+	mcpHandler := gin.WrapH(mcpserver.NewPublicHandler(
 		articleService, categoryService, tagService, commentService, friendService, rssFeedService, momentService,
-		userService, statsService, mcpserver.PublicHandlerOptions{
-			ArticleImageUploader: articleImageUploader,
-		},
-	)
-	mcpHTTPHandler = sdkauth.RequireBearerToken(mcpauth.SDKTokenVerifierFromPrincipalContext, nil)(mcpHTTPHandler)
-	mcpHandler := gin.WrapH(mcpHTTPHandler)
-	r.Any("/mcp", middleware.MCPAuthWithSecretProvider(settingService.MCPSecret), mcpHandler)
+		userService, statsService,
+	))
+	r.Any("/mcp", middleware.MCPAuth(settingService.MCPSecret), mcpHandler)
 
 	// Atom 订阅
 	r.GET("/atom.xml", atomController.GetAtomFeed)
