@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -69,39 +68,14 @@ const (
 
 // 配置键常量 - AI 相关
 const (
-	KeyAIBaseURL                 = "base_url"
-	KeyAIAPIKey                  = "api_key"
-	KeyAIModel                   = "model"
-	KeyAISummaryPrompt           = "summary_prompt"
-	KeyAIAISummaryPrompt         = "ai_summary_prompt"
-	KeyAITitlePrompt             = "title_prompt"
-	KeyAIMCPSecret               = "mcp_secret"
-	KeyAIMCPStaticOperatorUserID = "mcp_static_operator_user_id"
-	KeyAIMCPAdminToolsEnabled    = "mcp_admin_tools_enabled"
+	KeyAIBaseURL         = "base_url"
+	KeyAIAPIKey          = "api_key"
+	KeyAIModel           = "model"
+	KeyAISummaryPrompt   = "summary_prompt"
+	KeyAIAISummaryPrompt = "ai_summary_prompt"
+	KeyAITitlePrompt     = "title_prompt"
+	KeyAIMCPSecret       = "mcp_secret"
 )
-
-func parseMCPStaticOperatorUserID(raw string) (uint, error) {
-	raw = strings.TrimSpace(raw)
-	if raw == "" || raw == "0" {
-		return 0, nil
-	}
-	parsed, err := strconv.ParseUint(raw, 10, strconv.IntSize)
-	if err != nil || parsed == 0 {
-		return 0, fmt.Errorf("mcp_static_operator_user_id 必须为空、0 或有效的正整数用户 ID")
-	}
-	return uint(parsed), nil
-}
-
-func parseMCPAdminToolsEnabled(raw string) (bool, error) {
-	switch strings.ToLower(strings.TrimSpace(raw)) {
-	case "", "false":
-		return false, nil
-	case "true":
-		return true, nil
-	default:
-		return false, fmt.Errorf("mcp_admin_tools_enabled 必须为 true 或 false")
-	}
-}
 
 // 配置键常量 - OAuth 相关
 // #nosec G101 - 这些是配置项键名，不是实际凭证
@@ -168,26 +142,6 @@ func (s *SettingService) MCPSecret() string {
 	return s.config.AI.MCPSecret
 }
 
-// MCPStaticOperatorUserID 返回当前静态 MCP 管理身份。
-func (s *SettingService) MCPStaticOperatorUserID() uint {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	if s.config == nil {
-		return 0
-	}
-	return s.config.AI.MCPStaticOperatorUserID
-}
-
-// MCPAdminToolsEnabled 返回当前 MCP 管理员工具开关。
-func (s *SettingService) MCPAdminToolsEnabled() bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	if s.config == nil {
-		return false
-	}
-	return s.config.AI.MCPAdminToolsEnabled
-}
-
 // GetByGroup 获取某个分组的所有配置
 func (s *SettingService) GetByGroup(group string, isPublicOnly ...bool) (map[string]string, error) {
 	return s.repo.GetByGroup(group, isPublicOnly...)
@@ -222,20 +176,6 @@ func (s *SettingService) GetAIConfig() (*config.AIConfig, error) {
 	if v, ok := aiSettings[KeyAIMCPSecret]; ok && v != "" {
 		cfg.MCPSecret = v
 	}
-	if v, ok := aiSettings[KeyAIMCPStaticOperatorUserID]; ok {
-		operatorUserID, err := parseMCPStaticOperatorUserID(v)
-		if err != nil {
-			return nil, err
-		}
-		cfg.MCPStaticOperatorUserID = operatorUserID
-	}
-	if v, ok := aiSettings[KeyAIMCPAdminToolsEnabled]; ok {
-		enabled, err := parseMCPAdminToolsEnabled(v)
-		if err != nil {
-			return nil, err
-		}
-		cfg.MCPAdminToolsEnabled = enabled
-	}
 
 	return cfg, nil
 }
@@ -262,19 +202,6 @@ func (s *SettingService) ResetMCPSecret() (string, error) {
 
 // UpdateGroup 更新某个分组的配置（patch 方式），更新后自动重载
 func (s *SettingService) UpdateGroup(group string, updates map[string]string) error {
-	if group == model.SettingGroupAI {
-		if rawOperatorUserID, ok := updates[KeyAIMCPStaticOperatorUserID]; ok {
-			if _, err := parseMCPStaticOperatorUserID(rawOperatorUserID); err != nil {
-				return err
-			}
-		}
-		if rawAdminToolsEnabled, ok := updates[KeyAIMCPAdminToolsEnabled]; ok {
-			if _, err := parseMCPAdminToolsEnabled(rawAdminToolsEnabled); err != nil {
-				return err
-			}
-		}
-	}
-
 	var oldSettings map[string]string
 	if s.fileService != nil && group == model.SettingGroupBasic {
 		settings, err := s.repo.GetByGroup(group)
@@ -504,22 +431,6 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 			_ = s.repo.UpdateGroup(model.SettingGroupAI, map[string]string{
 				KeyAIMCPSecret: cfg.AI.MCPSecret,
 			})
-		}
-		cfg.AI.MCPStaticOperatorUserID = 0
-		if v, ok := aiSettings[KeyAIMCPStaticOperatorUserID]; ok {
-			operatorUserID, err := parseMCPStaticOperatorUserID(v)
-			if err != nil {
-				return err
-			}
-			cfg.AI.MCPStaticOperatorUserID = operatorUserID
-		}
-		cfg.AI.MCPAdminToolsEnabled = false
-		if v, ok := aiSettings[KeyAIMCPAdminToolsEnabled]; ok {
-			enabled, err := parseMCPAdminToolsEnabled(v)
-			if err != nil {
-				return err
-			}
-			cfg.AI.MCPAdminToolsEnabled = enabled
 		}
 	}
 

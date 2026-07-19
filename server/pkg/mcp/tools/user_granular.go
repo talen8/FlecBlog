@@ -95,15 +95,12 @@ type UserDeleteOutput struct {
 	ID      uint `json:"id"`
 }
 
-// ListUsersTool 分页查询用户；要求解析到真实本地管理员 operator。
+// ListUsersTool 分页查询用户。
 func (w *UserWrapper) ListUsersTool(
-	ctx context.Context,
+	_ context.Context,
 	_ *sdkmcp.CallToolRequest,
 	input UserListInput,
 ) (*sdkmcp.CallToolResult, UserListOutput, error) {
-	if _, err := w.operatorResolver.resolve(ctx); err != nil {
-		return nil, UserListOutput{}, fmt.Errorf("解析真实 MCP operator 失败: %w", err)
-	}
 	if input.Role != "" {
 		if _, err := strictUserRole(input.Role); err != nil {
 			return nil, UserListOutput{}, err
@@ -137,17 +134,14 @@ func (w *UserWrapper) ListUsersTool(
 	return nil, UserListOutput{Items: items, Total: total, Page: page, PageSize: pageSize}, nil
 }
 
-// GetUserTool 获取用户详情；要求解析到真实本地管理员 operator。
+// GetUserTool 获取用户详情。
 func (w *UserWrapper) GetUserTool(
-	ctx context.Context,
+	_ context.Context,
 	_ *sdkmcp.CallToolRequest,
 	input UserGetInput,
 ) (*sdkmcp.CallToolResult, UserGetOutput, error) {
 	if input.ID == 0 {
 		return nil, UserGetOutput{}, fmt.Errorf("用户 ID 不能为空")
-	}
-	if _, err := w.operatorResolver.resolve(ctx); err != nil {
-		return nil, UserGetOutput{}, fmt.Errorf("解析真实 MCP operator 失败: %w", err)
 	}
 	item, err := w.loadAccurateUserDetail(input.ID)
 	if err != nil {
@@ -156,16 +150,12 @@ func (w *UserWrapper) GetUserTool(
 	return nil, UserGetOutput{Item: item}, nil
 }
 
-// CreateUserTool 使用本地用户身份创建用户。
+// CreateUserTool 创建用户。
 func (w *UserWrapper) CreateUserTool(
-	ctx context.Context,
+	_ context.Context,
 	_ *sdkmcp.CallToolRequest,
 	input UserCreateInput,
 ) (*sdkmcp.CallToolResult, UserCreateOutput, error) {
-	operator, err := w.operatorResolver.resolve(ctx)
-	if err != nil {
-		return nil, UserCreateOutput{}, fmt.Errorf("解析真实 MCP operator 失败: %w", err)
-	}
 	email := strings.TrimSpace(input.Email)
 	nickname := strings.TrimSpace(input.Nickname)
 	if err := validateUserEmail(email); err != nil {
@@ -182,7 +172,7 @@ func (w *UserWrapper) CreateUserTool(
 		return nil, UserCreateOutput{}, err
 	}
 
-	if err := w.userService.Create(operator, &dto.AdminCreateUserRequest{
+	if err := w.userService.Create(mcpSuperAdminOperator(), &dto.AdminCreateUserRequest{
 		Email:    email,
 		Password: input.Password,
 		Nickname: nickname,
@@ -204,18 +194,14 @@ func (w *UserWrapper) CreateUserTool(
 	return nil, UserCreateOutput{Item: item}, nil
 }
 
-// UpdateUserTool 使用本地用户身份更新用户。
+// UpdateUserTool 更新用户。
 func (w *UserWrapper) UpdateUserTool(
-	ctx context.Context,
+	_ context.Context,
 	_ *sdkmcp.CallToolRequest,
 	input UserUpdateInput,
 ) (*sdkmcp.CallToolResult, UserUpdateOutput, error) {
 	if input.ID == 0 {
 		return nil, UserUpdateOutput{}, fmt.Errorf("用户 ID 不能为空")
-	}
-	operator, err := w.operatorResolver.resolve(ctx)
-	if err != nil {
-		return nil, UserUpdateOutput{}, fmt.Errorf("解析真实 MCP operator 失败: %w", err)
 	}
 
 	req := &dto.AdminUpdateUserRequest{IsEnabled: input.IsEnabled}
@@ -254,7 +240,7 @@ func (w *UserWrapper) UpdateUserTool(
 		req.Role = role
 	}
 
-	if err := w.userService.Update(operator, input.ID, req); err != nil {
+	if err := w.userService.Update(mcpSuperAdminOperator(), input.ID, req); err != nil {
 		return nil, UserUpdateOutput{}, fmt.Errorf("更新用户失败: %w", err)
 	}
 	item, err := w.loadAccurateUserDetail(input.ID)
@@ -264,20 +250,16 @@ func (w *UserWrapper) UpdateUserTool(
 	return nil, UserUpdateOutput{Item: item}, nil
 }
 
-// DeleteUserTool 使用本地用户身份软删除用户。
+// DeleteUserTool 软删除用户。
 func (w *UserWrapper) DeleteUserTool(
-	ctx context.Context,
+	_ context.Context,
 	_ *sdkmcp.CallToolRequest,
 	input UserDeleteInput,
 ) (*sdkmcp.CallToolResult, UserDeleteOutput, error) {
 	if input.ID == 0 {
 		return nil, UserDeleteOutput{}, fmt.Errorf("用户 ID 不能为空")
 	}
-	operator, err := w.operatorResolver.resolve(ctx)
-	if err != nil {
-		return nil, UserDeleteOutput{}, fmt.Errorf("解析真实 MCP operator 失败: %w", err)
-	}
-	if err := w.userService.Delete(operator, input.ID); err != nil {
+	if err := w.userService.Delete(mcpSuperAdminOperator(), input.ID); err != nil {
 		return nil, UserDeleteOutput{}, fmt.Errorf("删除用户失败: %w", err)
 	}
 	return nil, UserDeleteOutput{Deleted: true, ID: input.ID}, nil

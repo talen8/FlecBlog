@@ -130,7 +130,6 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       API_URL: ${API_URL}
-      MCP_AUTH_MODE: ${MCP_AUTH_MODE:-static}
     ports:
       - "8080:8080"
     volumes:
@@ -336,10 +335,6 @@ DB_NAME=postgres
 DB_USER=postgres
 DB_PASSWORD=your_database_password
 ```
-
-**MCP authentication**
-
-`MCP_AUTH_MODE` only supports `static` mode.
 
 **Admin environment variables**
 

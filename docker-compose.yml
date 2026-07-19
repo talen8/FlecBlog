@@ -29,7 +29,6 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       API_URL: ${API_URL}
-      MCP_AUTH_MODE: ${MCP_AUTH_MODE:-static}
     ports:
       - "8080:8080"
     volumes:

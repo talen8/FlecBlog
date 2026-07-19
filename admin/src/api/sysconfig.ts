@@ -34,4 +34,3 @@ export const updateSettingGroup = (group: SettingGroupType, data: Record<string,
 export const resetMCPSecret = (): Promise<ResetMCPSecretResponse> => {
   return request.put('/admin/settings/ai/mcp-secret/reset');
 };
-

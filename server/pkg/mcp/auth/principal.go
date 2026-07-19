@@ -28,26 +28,6 @@ type Principal struct {
 	Subject string
 	Scopes  map[string]struct{}
 	Claims  map[string]any
-
-	verifiedLocalUserID uint
-}
-
-func (p *Principal) BindVerifiedLocalUser(userID uint) error {
-	if p == nil {
-		return fmt.Errorf("principal is nil")
-	}
-	if userID == 0 {
-		return fmt.Errorf("local user ID is empty")
-	}
-	p.verifiedLocalUserID = userID
-	return nil
-}
-
-func (p *Principal) VerifiedLocalUserID() (uint, bool) {
-	if p == nil || p.verifiedLocalUserID == 0 {
-		return 0, false
-	}
-	return p.verifiedLocalUserID, true
 }
 
 func StaticPrincipal() *Principal {

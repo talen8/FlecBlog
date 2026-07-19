@@ -91,15 +91,13 @@ type UploadConfig struct {
 
 // AIConfig AI服务配置（从数据库动态加载）
 type AIConfig struct {
-	BaseURL                 string // API 端点 (OpenAI 兼容格式)
-	APIKey                  string // API 密钥
-	Model                   string // 模型名称
-	SummaryPrompt           string // 文章摘要提示词
-	AISummaryPrompt         string // AI 总结提示词
-	TitlePrompt             string // 标题生成提示词
-	MCPSecret               string // MCP 专用鉴权密钥（系统自动生成）
-	MCPStaticOperatorUserID uint   // MCP 静态认证用户管理操作身份；0 表示自动选择
-	MCPAdminToolsEnabled    bool   // MCP 管理员工具开关；默认关闭
+	BaseURL         string // API 端点 (OpenAI 兼容格式)
+	APIKey          string // API 密钥
+	Model           string // 模型名称
+	SummaryPrompt   string // 文章摘要提示词
+	AISummaryPrompt string // AI 总结提示词
+	TitlePrompt     string // 标题生成提示词
+	MCPSecret       string // MCP 专用鉴权密钥（系统自动生成）
 }
 
 // OAuthConfig OAuth配置（从数据库动态加载）

@@ -132,9 +132,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	mcpHTTPHandler := mcpserver.NewPublicHandlerWithOptions(
 		articleService, categoryService, tagService, commentService, friendService, rssFeedService, momentService,
 		userService, statsService, mcpserver.PublicHandlerOptions{
-			StaticOperatorUserIDProvider: settingService.MCPStaticOperatorUserID,
-			AdminToolsEnabledProvider:    settingService.MCPAdminToolsEnabled,
-			ArticleImageUploader:         articleImageUploader,
+			ArticleImageUploader: articleImageUploader,
 		},
 	)
 	mcpHTTPHandler = sdkauth.RequireBearerToken(mcpauth.SDKTokenVerifierFromPrincipalContext, nil)(mcpHTTPHandler)

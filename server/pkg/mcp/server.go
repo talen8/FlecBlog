@@ -13,26 +13,22 @@ import (
 const publicServerInstructions = "Use article_list or article_search to locate articles before article_get. Create new content with article_create_draft. Use article_update_draft only for drafts and article_update_published only for published articles; omit fields that should be preserved. Call article_publish, article_unpublish, or article_delete only when the user explicitly intends that consequential action. Use article_image_upload for PNG/JPEG/WebP and insert the returned URL into content or cover. Never guess article IDs."
 
 type publicServer struct {
-	articleService               *service.ArticleService
-	categoryService              *service.CategoryService
-	tagService                   *service.TagService
-	commentService               *service.CommentService
-	friendService                *service.FriendService
-	rssFeedService               *service.RssFeedService
-	momentService                *service.MomentService
-	userService                  *service.UserService
-	statsService                 *service.StatsService
-	staticOperatorUserIDProvider func() uint
-	adminToolsEnabledProvider    func() bool
-	articleImageUploader         tools.ArticleImageUploader
+	articleService       *service.ArticleService
+	categoryService      *service.CategoryService
+	tagService           *service.TagService
+	commentService       *service.CommentService
+	friendService        *service.FriendService
+	rssFeedService       *service.RssFeedService
+	momentService        *service.MomentService
+	userService          *service.UserService
+	statsService         *service.StatsService
+	articleImageUploader tools.ArticleImageUploader
 }
 
 // PublicHandlerOptions configures optional runtime providers without breaking the legacy constructor.
 type PublicHandlerOptions struct {
-	StaticOperatorUserIDProvider func() uint
-	AdminToolsEnabledProvider    func() bool
-	ArticleImageUploader         tools.ArticleImageUploader
-	MaxSessions                  int
+	ArticleImageUploader tools.ArticleImageUploader
+	MaxSessions          int
 }
 
 func NewPublicHandler(
@@ -77,18 +73,16 @@ func NewPublicHandlerWithOptions(
 	})
 
 	s := &publicServer{
-		articleService:               articleService,
-		categoryService:              categoryService,
-		tagService:                   tagService,
-		commentService:               commentService,
-		friendService:                friendService,
-		rssFeedService:               rssFeedService,
-		momentService:                momentService,
-		userService:                  userService,
-		statsService:                 statsService,
-		staticOperatorUserIDProvider: options.StaticOperatorUserIDProvider,
-		adminToolsEnabledProvider:    options.AdminToolsEnabledProvider,
-		articleImageUploader:         options.ArticleImageUploader,
+		articleService:       articleService,
+		categoryService:      categoryService,
+		tagService:           tagService,
+		commentService:       commentService,
+		friendService:        friendService,
+		rssFeedService:       rssFeedService,
+		momentService:        momentService,
+		userService:          userService,
+		statsService:         statsService,
+		articleImageUploader: options.ArticleImageUploader,
 	}
 
 	// 注册 tools
