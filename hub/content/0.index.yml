@@ -104,7 +104,7 @@ sections:
     image: /images/preview.png
     features:
       - name: MCP Server
-        description: 8 个 MCP Tool，AI Agent 可直接管理博客内容
+        description: 20 个 MCP Tool，AI Agent 可直接管理博客内容
         icon: i-ri-robot-2-line
       - name: 7 合 1 对象存储
         description: S3/COS/OSS/Kodo/R2/MinIO/本地，工厂模式统一接口
