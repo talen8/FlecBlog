@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -524,15 +523,6 @@ func (w *ArticleWrapper) PublishArticleTool(
 		IsPublish: &publish,
 	}))
 	if err != nil {
-		if errors.Is(err, service.ErrArticleUpdateConflict) {
-			latest, latestErr := w.articleService.Get(ctx, input.ID)
-			if latestErr == nil && latest.IsPublish {
-				return nil, ArticlePublishOutput{
-					Item:             convertToArticleDetailItem(*latest),
-					AlreadyPublished: true,
-				}, nil
-			}
-		}
 		return nil, ArticlePublishOutput{}, fmt.Errorf("发布文章失败: %w", err)
 	}
 	if !article.IsPublish {
@@ -617,15 +607,6 @@ func (w *ArticleWrapper) UnpublishArticleTool(
 		IsPublish: &publish,
 	}))
 	if err != nil {
-		if errors.Is(err, service.ErrArticleUpdateConflict) {
-			latest, latestErr := w.articleService.Get(ctx, input.ID)
-			if latestErr == nil && !latest.IsPublish {
-				return nil, ArticleUnpublishOutput{
-					Item:               convertToArticleDetailItem(*latest),
-					AlreadyUnpublished: true,
-				}, nil
-			}
-		}
 		return nil, ArticleUnpublishOutput{}, fmt.Errorf("取消发布文章失败: %w", err)
 	}
 	if article.IsPublish {
@@ -716,25 +697,19 @@ func buildArticleUpdateRequest(current *dto.ArticleAdminDetailResponse, payload 
 			categoryID = articleCategoryIDPtr(*payload.CategoryID)
 		}
 	}
-	var expectedUpdatedAt = current.Revision
-	var expectedUpdatedAtPtr = &expectedUpdatedAt
-	if expectedUpdatedAt.IsZero() {
-		expectedUpdatedAtPtr = nil
-	}
 	return &dto.UpdateArticleRequest{
-		Title:             payload.Title,
-		Content:           payload.Content,
-		Summary:           summary,
-		AISummary:         aiSummary,
-		Cover:             cover,
-		Location:          location,
-		IsPublish:         payload.IsPublish,
-		IsTop:             payload.IsTop,
-		IsEssence:         payload.IsEssence,
-		IsOutdated:        payload.IsOutdated,
-		CategoryID:        categoryID,
-		TagIDs:            payload.TagIDs,
-		ExpectedUpdatedAt: expectedUpdatedAtPtr,
+		Title:      payload.Title,
+		Content:    payload.Content,
+		Summary:    summary,
+		AISummary:  aiSummary,
+		Cover:      cover,
+		Location:   location,
+		IsPublish:  payload.IsPublish,
+		IsTop:      payload.IsTop,
+		IsEssence:  payload.IsEssence,
+		IsOutdated: payload.IsOutdated,
+		CategoryID: categoryID,
+		TagIDs:     payload.TagIDs,
 	}
 }
 

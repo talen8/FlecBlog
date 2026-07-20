@@ -132,7 +132,7 @@ func (s *SettingService) SetConfig(cfg *config.Config) {
 	s.config = cfg
 }
 
-// MCPSecret 返回当前 MCP Secret 的并发安全快照。
+// MCPSecret 返回当前 MCP Secret 的并发安全快照
 func (s *SettingService) MCPSecret() string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -145,6 +145,25 @@ func (s *SettingService) MCPSecret() string {
 // GetByGroup 获取某个分组的所有配置
 func (s *SettingService) GetByGroup(group string, isPublicOnly ...bool) (map[string]string, error) {
 	return s.repo.GetByGroup(group, isPublicOnly...)
+}
+
+// GetGroupForCaller 获取配置分组，根据调用者角色决定是否脱敏敏感字段
+func (s *SettingService) GetGroupForCaller(group string, callerRole string) (map[string]string, error) {
+	settings, err := s.repo.GetByGroup(group)
+	if err != nil {
+		return nil, err
+	}
+	if group != model.SettingGroupAI || callerRole == string(model.RoleSuperAdmin) || settings == nil {
+		return settings, nil
+	}
+	redacted := make(map[string]string, len(settings))
+	for key, value := range settings {
+		if key == KeyAIMCPSecret {
+			continue
+		}
+		redacted[key] = value
+	}
+	return redacted, nil
 }
 
 // GetAIConfig 获取AI配置

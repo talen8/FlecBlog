@@ -1,15 +1,10 @@
 package repository
 
 import (
-	"errors"
-	"time"
-
 	"flec_blog/internal/model"
 
 	"gorm.io/gorm"
 )
-
-var ErrArticleUpdateConflict = errors.New("article update conflict")
 
 // ArticleRepository 文章仓储
 type ArticleRepository struct {
@@ -342,17 +337,14 @@ func (r *ArticleRepository) Create(article *model.Article, tagIDs []uint) error 
 }
 
 // Update 更新文章，并使用 updated_at 做乐观并发控制。
-func (r *ArticleRepository) Update(article *model.Article, tagIDs []uint, expectedUpdatedAt time.Time) error {
+func (r *ArticleRepository) Update(article *model.Article, tagIDs []uint) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		result := tx.Model(&model.Article{}).
-			Where("id = ? AND updated_at = ?", article.ID, expectedUpdatedAt).
+			Where("id = ?", article.ID).
 			Select("*").Omit("Category", "Tags", "id", "created_at").
 			Updates(article)
 		if result.Error != nil {
 			return result.Error
-		}
-		if result.RowsAffected != 1 {
-			return ErrArticleUpdateConflict
 		}
 
 		if tagIDs != nil {
