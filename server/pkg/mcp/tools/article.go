@@ -275,6 +275,7 @@ func (w *ArticleWrapper) ManageArticle(
 	}
 }
 
+// listArticles 文章列表查询
 func (w *ArticleWrapper) listArticles(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	page, pageSize := NormalizePage(payload.Page, payload.PageSize)
 	req := &dto.ListArticlesRequest{Page: page, PageSize: pageSize}
@@ -289,6 +290,7 @@ func (w *ArticleWrapper) listArticles(payload ArticleManagePayload) (*sdkmcp.Cal
 	return nil, ArticleManageOutput{List: list, Total: total, Page: page, PageSize: pageSize}, nil
 }
 
+// getArticle 文章详情查询
 func (w *ArticleWrapper) getArticle(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, ArticleManageOutput{Error: "文章 ID 不能为空"}, nil
@@ -301,6 +303,7 @@ func (w *ArticleWrapper) getArticle(payload ArticleManagePayload) (*sdkmcp.CallT
 	return nil, ArticleManageOutput{Item: &item}, nil
 }
 
+// createArticle 创建文章
 func (w *ArticleWrapper) createArticle(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	if payload.Title == "" {
 		return nil, ArticleManageOutput{Error: "文章标题不能为空"}, nil
@@ -330,6 +333,7 @@ func (w *ArticleWrapper) createArticle(payload ArticleManagePayload) (*sdkmcp.Ca
 	return nil, ArticleManageOutput{Item: &item}, nil
 }
 
+// updateArticle 更新文章
 func (w *ArticleWrapper) updateArticle(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, ArticleManageOutput{Error: "文章 ID 不能为空"}, nil
@@ -348,6 +352,7 @@ func (w *ArticleWrapper) updateArticle(payload ArticleManagePayload) (*sdkmcp.Ca
 	return nil, ArticleManageOutput{Item: &item}, nil
 }
 
+// deleteArticle 删除文章
 func (w *ArticleWrapper) deleteArticle(payload ArticleManagePayload) (*sdkmcp.CallToolResult, ArticleManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, ArticleManageOutput{Error: "文章 ID 不能为空"}, nil

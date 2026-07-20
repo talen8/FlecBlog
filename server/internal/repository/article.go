@@ -336,7 +336,7 @@ func (r *ArticleRepository) Create(article *model.Article, tagIDs []uint) error 
 	})
 }
 
-// Update 更新文章，并使用 updated_at 做乐观并发控制。
+// Update 更新文章
 func (r *ArticleRepository) Update(article *model.Article, tagIDs []uint) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		result := tx.Model(&model.Article{}).

@@ -214,6 +214,7 @@ func (w *UserWrapper) ManageUser(
 	}
 }
 
+// listUsers 用户列表查询
 func (w *UserWrapper) listUsers(payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
 	page, pageSize := NormalizePage(payload.Page, payload.PageSize)
 	req := &dto.ListUsersRequest{Page: page, PageSize: pageSize}
@@ -228,6 +229,7 @@ func (w *UserWrapper) listUsers(payload UserManagePayload) (*sdkmcp.CallToolResu
 	return nil, UserManageOutput{List: list, Total: total, Page: page, PageSize: pageSize}, nil
 }
 
+// getUser 用户详情查询
 func (w *UserWrapper) getUser(payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, UserManageOutput{Error: "用户 ID 不能为空"}, nil
@@ -241,6 +243,7 @@ func (w *UserWrapper) getUser(payload UserManagePayload) (*sdkmcp.CallToolResult
 	return nil, UserManageOutput{Item: &item}, nil
 }
 
+// createUser 创建用户
 func (w *UserWrapper) createUser(payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
 	if payload.Email == "" {
 		return nil, UserManageOutput{Error: "邮箱不能为空"}, nil
@@ -272,6 +275,7 @@ func (w *UserWrapper) createUser(payload UserManagePayload) (*sdkmcp.CallToolRes
 	return nil, UserManageOutput{Item: &item}, nil
 }
 
+// updateUser 更新用户
 func (w *UserWrapper) updateUser(payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, UserManageOutput{Error: "用户 ID 不能为空"}, nil
@@ -298,6 +302,7 @@ func (w *UserWrapper) updateUser(payload UserManagePayload) (*sdkmcp.CallToolRes
 	return nil, UserManageOutput{Item: &item}, nil
 }
 
+// deleteUser 删除用户
 func (w *UserWrapper) deleteUser(payload UserManagePayload) (*sdkmcp.CallToolResult, UserManageOutput, error) {
 	if payload.ID == 0 {
 		return nil, UserManageOutput{Error: "用户 ID 不能为空"}, nil

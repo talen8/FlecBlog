@@ -505,6 +505,7 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 	if err != nil {
 		return nil, err
 	}
+
 	// 验证新分类是否存在
 	if req.CategoryID != nil && *req.CategoryID > 0 {
 		if _, err := s.categoryRepo.Get(ctx, *req.CategoryID); err != nil {

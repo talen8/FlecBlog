@@ -17,8 +17,7 @@ func NormalizePage(page, pageSize int) (int, int) {
 	return page, pageSize
 }
 
-// ExplicitListFields keeps list-action contracts explicit when items are empty and total is zero.
-// Pointer fields remain nil for non-list actions, so unrelated outputs do not gain list metadata.
+// ExplicitListFields 将列表结果转换为指针形式，空列表返回空数组而非 nil
 func ExplicitListFields[T any](items []T, total int64) (*[]T, *int64) {
 	if items == nil {
 		items = make([]T, 0)
