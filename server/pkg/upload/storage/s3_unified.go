@@ -17,20 +17,18 @@ import (
 
 // S3UnifiedStorage 基于MinIO SDK的统一S3存储
 type S3UnifiedStorage struct {
-	cfg         config.UploadConfig
-	storageType string
-	client      *minio.Client
-	bucketName  string
-	baseURL     string
-	mu          sync.Mutex
+	cfg        config.UploadConfig
+	client     *minio.Client
+	bucketName string
+	baseURL    string
+	mu         sync.Mutex
 }
 
 // NewS3UnifiedStorage 创建统一S3存储实例
-func NewS3UnifiedStorage(cfg config.UploadConfig, storageType string) (*S3UnifiedStorage, error) {
+func NewS3UnifiedStorage(cfg config.UploadConfig) (*S3UnifiedStorage, error) {
 	storage := &S3UnifiedStorage{
-		cfg:         cfg,
-		storageType: storageType,
-		bucketName:  cfg.Bucket,
+		cfg:        cfg,
+		bucketName: cfg.Bucket,
 	}
 	return storage, nil
 }
@@ -45,54 +43,20 @@ func (s *S3UnifiedStorage) ensureClient() error {
 	}
 
 	endpoint := s.cfg.Endpoint
-	useSSL := s.cfg.UseSSL
-
 	if endpoint == "" {
-		switch s.storageType {
-		case "s3":
-			if s.cfg.Region == "" {
-				return fmt.Errorf("AWS S3 需要配置 region")
-			}
-			endpoint = fmt.Sprintf("s3.%s.amazonaws.com", s.cfg.Region)
-			useSSL = true
-		case "cos":
-			if s.cfg.Region == "" {
-				return fmt.Errorf("腾讯云 COS 需要配置 region")
-			}
-			endpoint = fmt.Sprintf("cos.%s.myqcloud.com", s.cfg.Region)
-			useSSL = true
-		case "oss":
-			if s.cfg.Region == "" {
-				return fmt.Errorf("阿里云 OSS 需要配置 region")
-			}
-			endpoint = fmt.Sprintf("oss-%s.aliyuncs.com", s.cfg.Region)
-			useSSL = true
-		case "kodo":
-			if s.cfg.Region == "" {
-				return fmt.Errorf("七牛云 Kodo 需要配置 region")
-			}
-			endpoint = fmt.Sprintf("s3.%s.qiniucs.com", s.cfg.Region)
-			useSSL = true
-		default:
-			return fmt.Errorf("存储类型 %s 需要配置 endpoint", s.storageType)
-		}
+		return fmt.Errorf("对象存储需要配置 endpoint")
 	}
 
+	useSSL := s.cfg.UseSSL
 	region := s.cfg.Region
-	if s.storageType == "minio" && region == "" {
+	if region == "" {
 		region = "us-east-1"
 	}
 
-	bucketLookup := minio.BucketLookupAuto
-	if s.storageType == "cos" || s.storageType == "oss" || s.storageType == "kodo" {
-		bucketLookup = minio.BucketLookupDNS
-	}
-
 	client, err := minio.New(endpoint, &minio.Options{
-		Creds:        credentials.NewStaticV4(s.cfg.AccessKey, s.cfg.SecretKey, ""),
-		Secure:       useSSL,
-		Region:       region,
-		BucketLookup: bucketLookup,
+		Creds:  credentials.NewStaticV4(s.cfg.AccessKey, s.cfg.SecretKey, ""),
+		Secure: useSSL,
+		Region: region,
 	})
 	if err != nil {
 		return fmt.Errorf("创建存储实例失败: %w", err)

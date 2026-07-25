@@ -13,12 +13,7 @@
         :disabled="loading"
       >
         <el-option label="本地存储" value="local" />
-        <el-option label="亚马逊 S3" value="s3" />
-        <el-option label="阿里云 OSS" value="oss" />
-        <el-option label="腾讯云 COS" value="cos" />
-        <el-option label="七牛云 Kodo" value="kodo" />
-        <el-option label="Cloudflare R2" value="r2" />
-        <el-option label="MinIO" value="minio" />
+        <el-option label="对象存储" value="s3" />
       </el-select>
     </el-form-item>
 
@@ -159,126 +154,25 @@ defineProps<{
   isFieldModified: (key: string) => boolean;
 }>();
 
-const accessLabel = computed(() => {
-  switch (form.value.storage_type) {
-    case 'cos':
-      return 'SecretId';
-    case 'oss':
-      return 'AccessKeyId';
-    case 'kodo':
-      return 'AccessKey';
-    case 'r2':
-    case 'minio':
-      return 'Access Key';
-    default:
-      return 'Access Key';
-  }
-});
-
-const secretLabel = computed(() => {
-  switch (form.value.storage_type) {
-    case 'cos':
-      return 'SecretKey';
-    case 'oss':
-      return 'AccessKeySecret';
-    case 'kodo':
-      return 'SecretKey';
-    case 'r2':
-    case 'minio':
-      return 'Secret Key';
-    default:
-      return 'Secret Key';
-  }
-});
-
-const accessPlaceholder = computed(() => {
-  switch (form.value.storage_type) {
-    case 'cos':
-      return '例如 AKIDxxxxxxxxxxxxxxxxxxxx';
-    case 'oss':
-      return '例如 LTAIxxxxxxxxxxxxxxxx';
-    default:
-      return '';
-  }
-});
-
-const secretPlaceholder = computed(() => {
-  switch (form.value.storage_type) {
-    case 'cos':
-      return 'COS 的 SecretKey';
-    case 'oss':
-      return 'OSS 的 AccessKeySecret';
-    default:
-      return '';
-  }
-});
+const accessLabel = computed(() => 'Access Key');
+const secretLabel = computed(() => 'Secret Key');
+const accessPlaceholder = computed(() => '');
+const secretPlaceholder = computed(() => '');
 
 const regionPlaceholder = computed(() => {
-  switch (form.value.storage_type) {
-    case 's3':
-      return '例如 us-east-1, ap-southeast-1';
-    case 'cos':
-      return '例如 ap-guangzhou, ap-beijing';
-    case 'oss':
-      return '例如 oss-cn-hangzhou, oss-cn-beijing';
-    case 'kodo':
-      return '例如 cn-east-1, cn-north-1, cn-south-1';
-    case 'minio':
-      return '例如 us-east-1, cn-east-1';
-    default:
-      return '';
-  }
+  return form.value.storage_type === 's3' ? '例如 us-east-1, ap-southeast-1' : '';
 });
 
 const endpointPlaceholder = computed(() => {
-  switch (form.value.storage_type) {
-    case 's3':
-      return '可选，例如 s3.us-east-1.amazonaws.com';
-    case 'r2':
-      return '例如 <account-id>.r2.cloudflarestorage.com';
-    case 'minio':
-      return '例如 localhost:9000 或 minio.example.com';
-    default:
-      return '';
-  }
+  return form.value.storage_type === 's3' ? '例如 s3.us-east-1.amazonaws.com' : '';
 });
 
-const showRegion = computed(() => {
-  const type = form.value.storage_type;
-  return type === 's3' || type === 'cos' || type === 'oss' || type === 'kodo' || type === 'minio';
-});
+const showRegion = computed(() => form.value.storage_type !== 'local');
+const showEndpoint = computed(() => form.value.storage_type !== 'local');
+const showUseSSL = computed(() => form.value.storage_type !== 'local');
 
-const showEndpoint = computed(() => {
-  const type = form.value.storage_type;
-  return type === 's3' || type === 'r2' || type === 'minio';
-});
-
-const showUseSSL = computed(() => {
-  const type = form.value.storage_type;
-  return type === 'r2' || type === 'minio';
-});
-
-const bucketPlaceholder = computed(() => {
-  switch (form.value.storage_type) {
-    case 'cos':
-      return '例如 my-bucket-1234567890';
-    default:
-      return '例如 my-bucket';
-  }
-});
-
-const domainPlaceholder = computed(() => {
-  switch (form.value.storage_type) {
-    case 'kodo':
-      return '必需，例如 https://cdn.example.com (七牛云CDN域名)';
-    case 'cos':
-      return '可选，例如 https://cdn.example.com (腾讯云CDN域名)';
-    case 'oss':
-      return '可选，例如 https://cdn.example.com (阿里云CDN域名)';
-    default:
-      return '可选，例如 https://cdn.example.com';
-  }
-});
+const bucketPlaceholder = computed(() => '例如 my-bucket');
+const domainPlaceholder = computed(() => '可选，例如 https://cdn.example.com');
 </script>
 
 <style lang="scss" scoped>

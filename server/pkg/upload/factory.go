@@ -10,13 +10,8 @@ import (
 
 // StorageType 存储类型常量
 const (
-	StorageTypeLocal = "local"
-	StorageTypeS3    = "s3"
-	StorageTypeCOS   = "cos"
-	StorageTypeOSS   = "oss"
-	StorageTypeKodo  = "kodo"
-	StorageTypeR2    = "r2"
-	StorageTypeMinIO = "minio"
+	StorageTypeLocal  = "local"
+	StorageTypeS3 = "s3"
 )
 
 // NewStorage 根据配置创建存储实例
@@ -28,22 +23,7 @@ func NewStorage(uploadCfg *config.UploadConfig) (storage.Storage, error) {
 		return storage.NewLocalStorage("/app/data/uploads"), nil
 
 	case StorageTypeS3:
-		return storage.NewS3UnifiedStorage(*uploadCfg, "s3")
-
-	case StorageTypeCOS:
-		return storage.NewS3UnifiedStorage(*uploadCfg, "cos")
-
-	case StorageTypeOSS:
-		return storage.NewS3UnifiedStorage(*uploadCfg, "oss")
-
-	case StorageTypeKodo:
-		return storage.NewS3UnifiedStorage(*uploadCfg, "kodo")
-
-	case StorageTypeR2:
-		return storage.NewS3UnifiedStorage(*uploadCfg, "r2")
-
-	case StorageTypeMinIO:
-		return storage.NewS3UnifiedStorage(*uploadCfg, "minio")
+		return storage.NewS3UnifiedStorage(*uploadCfg)
 
 	default:
 		return nil, fmt.Errorf("不支持的存储类型: %s", storageType)

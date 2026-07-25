@@ -311,17 +311,7 @@ func (m *Manager) DeleteFileByStorageType(filePath string, storageType string) e
 	case "local":
 		targetStorage = storage.NewLocalStorage("/app/data/uploads")
 	case "s3":
-		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload, "s3")
-	case "cos":
-		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload, "cos")
-	case "oss":
-		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload, "oss")
-	case "kodo":
-		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload, "kodo")
-	case "r2":
-		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload, "r2")
-	case "minio":
-		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload, "minio")
+		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload)
 	default:
 		return fmt.Errorf("不支持的存储类型: %s", storageType)
 	}
