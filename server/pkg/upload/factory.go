@@ -10,9 +10,9 @@ import (
 
 // StorageType 存储类型常量
 const (
-	StorageTypeLocal  = "local"
-	StorageTypeS3     = "s3"
-	StorageTypePanel  = "panel"
+	StorageTypeLocal = "local"
+	StorageTypeS3    = "s3"
+	StorageTypePanel = "panel"
 )
 
 // NewStorage 根据配置创建存储实例
