@@ -7,6 +7,7 @@ import { versionRoutes, versionsApi } from './routes/versions';
 import { announcementRoutes, announcementsApi } from './routes/announcements';
 import { settingsRoutes } from './routes/settings';
 import { aiRoutes, aiApi } from './routes/ai';
+import { storageApi } from './routes/storage';
 import { registerApi, registrationRoutes } from './routes/registrations';
 import { syncGitHubReleases, autoEnablePendingVersions } from './services/github';
 
@@ -88,6 +89,7 @@ app.route('/api/versions', versionsApi);
 app.route('/api/announcements', announcementsApi);
 app.route('/api/ai', aiApi);
 app.route('/api/register', registerApi);
+app.route('/api/storage', storageApi);
 app.route('/admin/versions', versionRoutes);
 app.route('/admin/announcements', announcementRoutes);
 app.route('/admin/ai', aiRoutes);

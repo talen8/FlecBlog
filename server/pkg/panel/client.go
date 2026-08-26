@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -27,8 +29,12 @@ type Client struct {
 
 // New 创建 Panel 客户端
 func New() *Client {
+	baseURL := os.Getenv("PANEL_URL")
+	if baseURL == "" {
+		baseURL = defaultBaseURL
+	}
 	return &Client{
-		BaseURL:    defaultBaseURL,
+		BaseURL:    baseURL,
 		HTTPClient: &http.Client{Timeout: 10 * time.Second},
 	}
 }
@@ -174,6 +180,32 @@ func (c *Client) Post(ctx context.Context, path string, body io.Reader, out any)
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	c.setCommonHeaders(req)
+	return c.do(req, out)
+}
+
+// PostMultipart 发送 multipart/form-data 请求
+func (c *Client) PostMultipart(ctx context.Context, path string,
+	fileField string, fileName string, fileReader io.Reader, out any) error {
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+	part, err := writer.CreateFormFile(fileField, fileName)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(part, fileReader); err != nil {
+		_ = writer.Close()
+		return err
+	}
+	if err := writer.Close(); err != nil {
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+path, &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 	c.setCommonHeaders(req)
 	return c.do(req, out)
 }

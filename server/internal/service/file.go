@@ -126,7 +126,7 @@ func (s *FileService) UploadFromReader(reader io.Reader, originalName, fileType 
 	file.Status = 0 // 默认未使用
 
 	if err := s.fileRepo.Create(file); err != nil {
-		_ = s.uploadManager.DeleteFile(fileInfo.FilePath)
+		_ = s.uploadManager.DeleteFile(fileInfo.FilePath, fileInfo.StorageType)
 		return "", fmt.Errorf("保存记录失败: %w", err)
 	}
 
@@ -317,7 +317,7 @@ func (s *FileService) Delete(id uint) error {
 	}
 
 	// 删除物理文件
-	if err := s.uploadManager.DeleteFileByStorageType(file.FilePath, file.StorageType); err != nil {
+	if err := s.uploadManager.DeleteFile(file.FilePath, file.StorageType); err != nil {
 		fmt.Printf("删除文件失败，文件路径: %s, 存储类型: %s, 错误: %v\n",
 			file.FilePath, file.StorageType, err)
 	}
@@ -343,7 +343,7 @@ func (s *FileService) handleUpload(req *upload.Request, host string) (*model.Fil
 	file.Status = 0 // 默认未使用
 
 	if err := s.fileRepo.Create(file); err != nil {
-		_ = s.uploadManager.DeleteFile(result.FileInfo.FilePath)
+		_ = s.uploadManager.DeleteFile(result.FileInfo.FilePath, result.FileInfo.StorageType)
 		return nil, fmt.Errorf("保存记录失败: %w", err)
 	}
 
@@ -415,7 +415,7 @@ func (s *FileService) DeleteUnusedFiles() error {
 
 	deletedIDs := make([]uint, 0, len(deletableFiles))
 	for _, file := range deletableFiles {
-		if err := s.uploadManager.DeleteFileByStorageType(file.FilePath, file.StorageType); err != nil {
+		if err := s.uploadManager.DeleteFile(file.FilePath, file.StorageType); err != nil {
 			logger.Warn("删除物理文件失败 %s: %v", file.FilePath, err)
 			continue
 		}

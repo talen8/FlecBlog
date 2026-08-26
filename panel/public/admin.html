@@ -439,6 +439,17 @@
                 <input type="password" id="settingGithubToken" class="form-input" placeholder="ghp_xxxx" autocomplete="off">
                 <div class="form-hint">可选，用于提高 API 速率限制</div>
               </div>
+              <div style="border-top:1px solid #f0f0f0;margin:20px 0;"></div>
+              <div class="form-item">
+                <label class="form-label">托管存储地址</label>
+                <input type="text" id="settingHostedStorageUrl" class="form-input" placeholder="https://your-storage.example.com" autocomplete="off">
+                <div class="form-hint">托管存储服务地址，托管存储时必填</div>
+              </div>
+              <div class="form-item">
+                <label class="form-label">托管存储 Token</label>
+                <input type="password" id="settingHostedStorageToken" class="form-input" placeholder="Bearer Token" autocomplete="off">
+                <div class="form-hint">需 upload 权限，在托管存储后台创建</div>
+              </div>
               <button class="btn btn-primary" onclick="saveSettings()">保存</button>
             </div>
           </div>
@@ -881,6 +892,8 @@
       if (data.settings) {
         document.getElementById('settingGithubRepo').value = data.settings.github_repo || '';
         document.getElementById('settingGithubToken').value = data.settings.github_token || '';
+        document.getElementById('settingHostedStorageUrl').value = data.settings.hosted_storage_url || '';
+        document.getElementById('settingHostedStorageToken').value = data.settings.hosted_storage_token || '';
       }
     }
 
@@ -893,7 +906,9 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           github_repo: document.getElementById('settingGithubRepo').value || undefined,
-          github_token: document.getElementById('settingGithubToken').value || undefined
+          github_token: document.getElementById('settingGithubToken').value || undefined,
+          hosted_storage_url: document.getElementById('settingHostedStorageUrl').value || undefined,
+          hosted_storage_token: document.getElementById('settingHostedStorageToken').value || undefined
         })
       });
       const data = await res.json();

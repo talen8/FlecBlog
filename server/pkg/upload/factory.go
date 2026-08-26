@@ -11,7 +11,8 @@ import (
 // StorageType 存储类型常量
 const (
 	StorageTypeLocal  = "local"
-	StorageTypeS3 = "s3"
+	StorageTypeS3     = "s3"
+	StorageTypePanel  = "panel"
 )
 
 // NewStorage 根据配置创建存储实例
@@ -24,6 +25,9 @@ func NewStorage(uploadCfg *config.UploadConfig) (storage.Storage, error) {
 
 	case StorageTypeS3:
 		return storage.NewS3UnifiedStorage(*uploadCfg)
+
+	case StorageTypePanel:
+		return storage.NewHostedStorage(), nil
 
 	default:
 		return nil, fmt.Errorf("不支持的存储类型: %s", storageType)

@@ -14,6 +14,7 @@
       >
         <el-option label="本地存储" value="local" />
         <el-option label="对象存储" value="s3" />
+        <el-option label="托管存储" value="panel" />
       </el-select>
     </el-form-item>
 
@@ -25,7 +26,7 @@
       <span class="unit-tip">MB</span>
     </el-form-item>
 
-    <el-form-item>
+    <el-form-item v-if="form.storage_type !== 'panel'">
       <template #label>
         <span :class="{ 'field-modified': isFieldModified('path_pattern') }">文件命名</span>
       </template>
@@ -36,7 +37,7 @@
       />
     </el-form-item>
 
-    <template v-if="form.storage_type !== 'local'">
+    <template v-if="form.storage_type === 's3'">
       <el-form-item>
         <template #label>
           <span :class="{ 'field-modified': isFieldModified('access_key') }">{{
@@ -167,9 +168,9 @@ const endpointPlaceholder = computed(() => {
   return form.value.storage_type === 's3' ? '例如 s3.us-east-1.amazonaws.com' : '';
 });
 
-const showRegion = computed(() => form.value.storage_type !== 'local');
-const showEndpoint = computed(() => form.value.storage_type !== 'local');
-const showUseSSL = computed(() => form.value.storage_type !== 'local');
+const showRegion = computed(() => form.value.storage_type === 's3');
+const showEndpoint = computed(() => form.value.storage_type === 's3');
+const showUseSSL = computed(() => form.value.storage_type === 's3');
 
 const bucketPlaceholder = computed(() => '例如 my-bucket');
 const domainPlaceholder = computed(() => '可选，例如 https://cdn.example.com');

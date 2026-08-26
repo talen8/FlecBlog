@@ -235,13 +235,23 @@ func (m *Manager) HandleUpload(req *Request, host string) (*Response, error) {
 		_ = file.Close()
 	}()
 
-	// 5. 保存文件
-	if err := m.storage.Save(file, filePath); err != nil {
-		return m.createErrorResponse(fmt.Sprintf("文件保存失败: %v", err)), err
+	// 5. 保存文件（托管存储返回元数据）
+	var meta storage.SaveMetadata
+	if ms, ok := m.storage.(storage.MetaSaver); ok {
+		var err error
+		meta, err = ms.SaveWithMeta(file, filePath)
+		if err != nil {
+			return m.createErrorResponse(fmt.Sprintf("文件保存失败: %v", err)), err
+		}
+	} else {
+		if err := m.storage.Save(file, filePath); err != nil {
+			return m.createErrorResponse(fmt.Sprintf("文件保存失败: %v", err)), err
+		}
 	}
 
 	// 6. 生成文件信息（使用动态 host）
 	fileInfo := m.createFileInfo(req, filePath, fileHash, host)
+	fileInfo.applyStorageMeta(meta)
 
 	return &Response{
 		Success:  true,
@@ -269,9 +279,18 @@ func (m *Manager) SaveFileData(data []byte, fileHash string, originalName string
 	// 1. 生成文件路径
 	filePath := m.generateFilePath(uploadType, userID, originalName)
 
-	// 2. 保存文件
-	if err := m.storage.Save(bytes.NewReader(data), filePath); err != nil {
-		return nil, fmt.Errorf("文件保存失败: %w", err)
+	// 2. 保存文件（托管存储返回元数据）
+	var meta storage.SaveMetadata
+	if ms, ok := m.storage.(storage.MetaSaver); ok {
+		var err error
+		meta, err = ms.SaveWithMeta(bytes.NewReader(data), filePath)
+		if err != nil {
+			return nil, fmt.Errorf("文件保存失败: %w", err)
+		}
+	} else {
+		if err := m.storage.Save(bytes.NewReader(data), filePath); err != nil {
+			return nil, fmt.Errorf("文件保存失败: %w", err)
+		}
 	}
 
 	// 3. 生成文件信息（使用动态 host）
@@ -287,17 +306,18 @@ func (m *Manager) SaveFileData(data []byte, fileHash string, originalName string
 		UploadTime:   time.Now(),
 		FileURL:      m.storage.GetURL(filePath, host),
 	}
+	fileInfo.applyStorageMeta(meta)
 
 	return fileInfo, nil
 }
 
-// DeleteFile 删除文件
-func (m *Manager) DeleteFile(filePath string) error {
-	return m.storage.Delete(filePath)
-}
+// DeleteFile 根据存储类型删除文件
+func (m *Manager) DeleteFile(filePath string, storageType string) error {
+	// 托管存储无需清理，仅删除数据库记录即可
+	if storageType == StorageTypePanel {
+		return nil
+	}
 
-// DeleteFileByStorageType 根据存储类型删除文件
-func (m *Manager) DeleteFileByStorageType(filePath string, storageType string) error {
 	// 如果是当前使用的存储类型，直接使用现有实例
 	if storageType == m.config.Upload.StorageType {
 		return m.storage.Delete(filePath)
@@ -406,6 +426,13 @@ func (m *Manager) createFileInfo(req *Request, filePath string, fileHash string,
 		UserID:       req.UserID,
 		UploadTime:   time.Now(),
 		FileURL:      m.storage.GetURL(filePath, host),
+	}
+}
+
+// applyStorageMeta 应用托管存储元数据（URL）
+func (f *FileInfo) applyStorageMeta(meta storage.SaveMetadata) {
+	if meta.URL != "" {
+		f.FileURL = meta.URL
 	}
 }
 
