@@ -16,6 +16,9 @@ type CreateCommentRequest struct {
 	Email    string `json:"email,omitempty" binding:"omitempty,email"`
 	Website  string `json:"website,omitempty" binding:"omitempty,url,max=255"`
 
+	// 蜜罐字段
+	Honeypot string `json:"site_url,omitempty"`
+
 	// 客户端信息（由 handler 层填充）
 	IP        string `json:"-"` // 不从请求体获取
 	UserAgent string `json:"-"` // 不从请求体获取

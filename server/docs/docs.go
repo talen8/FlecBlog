@@ -8508,6 +8508,10 @@ const docTemplate = `{
                 "parent_id": {
                     "type": "integer"
                 },
+                "site_url": {
+                    "description": "蜜罐字段",
+                    "type": "string"
+                },
                 "target_key": {
                     "type": "string"
                 },

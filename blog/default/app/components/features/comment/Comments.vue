@@ -102,7 +102,12 @@ const totalCommentsCount = computed(() => {
 // 处理评论提交（顶层评论）
 const handleAddComment = async (
   content: string,
-  guestInfo?: { nickname?: string; email?: string; website?: string }
+  guestInfo?: {
+    nickname?: string;
+    email?: string;
+    website?: string;
+    site_url?: string;
+  }
 ) => {
   await addComment({
     target_type: props.targetType,
@@ -116,7 +121,12 @@ const handleAddComment = async (
 const handleAddReply = async (
   commentId: number,
   content: string,
-  guestInfo?: { nickname?: string; email?: string; website?: string }
+  guestInfo?: {
+    nickname?: string;
+    email?: string;
+    website?: string;
+    site_url?: string;
+  }
 ) => {
   await addComment({
     target_type: props.targetType,

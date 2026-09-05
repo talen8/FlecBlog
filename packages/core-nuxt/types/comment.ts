@@ -52,6 +52,9 @@ export interface CreateCommentParams {
   nickname?: string;
   email?: string;
   website?: string;
+
+  // 蜜罐字段
+  site_url?: string;
 }
 
 /**
@@ -61,6 +64,7 @@ export interface GuestInfo {
   nickname?: string;
   email?: string;
   website?: string;
+  site_url?: string;
 }
 
 /**

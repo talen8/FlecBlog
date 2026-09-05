@@ -314,6 +314,11 @@ func (s *CommentService) Delete(ctx context.Context, id uint) error {
 
 // createComment 创建评论的通用逻辑
 func (s *CommentService) createComment(ctx context.Context, req *dto.CreateCommentRequest, userID uint) (*dto.CommentResponse, error) {
+	// 蜜罐检测
+	if req.Honeypot != "" {
+		return nil, errors.New("评论提交失败")
+	}
+
 	// 验证目标类型
 	switch req.TargetType {
 	case "article":
@@ -584,16 +589,20 @@ func (s *CommentService) sendNotifications(comment *model.Comment, senderID uint
 	notifyCtx := context.Background()
 	targetTitle := s.getTargetTitle(comment.TargetType, comment.TargetKey)
 
-	// 构建通知链接（文章类型需要将 ID 转为 slug）
-	targetKeyForLink := comment.TargetKey
+	// 构建通知链接
+	var pageLink string
 	if comment.TargetType == "article" {
+		targetKeyForLink := comment.TargetKey
 		if id, err := strconv.ParseUint(comment.TargetKey, 10, 64); err == nil {
 			if article, err := s.articleRepo.Get(uint(id)); err == nil {
 				targetKeyForLink = article.Slug
 			}
 		}
+		pageLink = fmt.Sprintf("/posts/%s#comment-%d", targetKeyForLink, comment.ID)
+	} else {
+		// 页面类型（友链、动态、留言等），直接使用页面路径
+		pageLink = fmt.Sprintf("/%s#comment-%d", comment.TargetKey, comment.ID)
 	}
-	pageLink := fmt.Sprintf("/posts/%s#comment-%d", targetKeyForLink, comment.ID)
 
 	if comment.ReplyTo != nil {
 		_ = s.notificationService.NotifyCommentReply(notifyCtx, senderID, *comment.ReplyTo, comment, targetTitle, pageLink)

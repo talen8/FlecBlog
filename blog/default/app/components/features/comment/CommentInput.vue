@@ -20,6 +20,7 @@ const nickname = ref('');
 const email = ref('');
 const website = ref('');
 const commentContent = ref('');
+const honeypot = ref('');
 
 // 在客户端加载本地存储数据
 onMounted(() => {
@@ -169,10 +170,12 @@ const handleSubmitComment = async () => {
           nickname: nickname.value.trim(),
           email: email.value.trim(),
           website: website.value.trim() || undefined,
+          site_url: honeypot.value || undefined,
         }
       : undefined;
 
     commentContent.value = '';
+    honeypot.value = '';
     localStorage.removeItem('comment_draft');
     resetToDefaultHeight();
 
@@ -370,6 +373,9 @@ onUnmounted(() => {
 
 <template>
   <div class="comment-input" :class="{ 'reply-mode': isReplyMode }">
+    <div class="honeypot-field" aria-hidden="true">
+      <input v-model="honeypot" type="text" name="site_url" tabindex="-1" autocomplete="off" />
+    </div>
     <template v-if="!isLoggedIn">
       <div class="user-info-row">
         <div class="input-wrapper">
@@ -581,6 +587,20 @@ onUnmounted(() => {
   &.reply-mode {
     background: var(--flec-heavy-bg);
     margin-bottom: 0;
+  }
+}
+
+.honeypot-field {
+  position: relative;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    height: 0;
   }
 }
 
