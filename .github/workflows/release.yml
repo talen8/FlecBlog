@@ -63,7 +63,8 @@ jobs:
         if: matrix.target != 'server'
         working-directory: ${{ matrix.context }}
         run: |
-          npm install
+          npm cache clean --force
+          npm install --legacy-peer-deps
           if [ "${{ matrix.target }}" = "blog" ]; then
             NUXT_PUBLIC_API_URL= npm run build
           else

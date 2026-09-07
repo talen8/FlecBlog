@@ -9,12 +9,8 @@ let typingTimer: number | null = null;
 
 // 获取打字机文本列表
 const getTypingTexts = (): string[] => {
-  try {
-    const parsed = JSON.parse(themeConfig.value.typing_texts || '[]');
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  const list = parseJSON<Array<{ value?: string }>>(themeConfig.value.typing_texts, []);
+  return list.map(item => item?.value ?? '').filter(text => text.trim() !== '');
 };
 
 const scrollToContent = () => {
