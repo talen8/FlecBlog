@@ -13,6 +13,11 @@ const (
 	StorageTypeLocal = "local"
 	StorageTypeS3    = "s3"
 	StorageTypePanel = "panel"
+	StorageTypeCOS   = "cos"
+	StorageTypeOSS   = "oss"
+	StorageTypeKodo  = "kodo"
+	StorageTypeR2    = "r2"
+	StorageTypeMinio = "minio"
 )
 
 // NewStorage 根据配置创建存储实例
@@ -23,7 +28,7 @@ func NewStorage(uploadCfg *config.UploadConfig) (storage.Storage, error) {
 	case "", StorageTypeLocal: // 空值默认使用本地存储
 		return storage.NewLocalStorage("/app/data/uploads"), nil
 
-	case StorageTypeS3:
+	case StorageTypeS3, StorageTypeCOS, StorageTypeOSS, StorageTypeKodo, StorageTypeR2, StorageTypeMinio:
 		return storage.NewS3UnifiedStorage(*uploadCfg)
 
 	case StorageTypePanel:

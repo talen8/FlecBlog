@@ -328,9 +328,9 @@ func (m *Manager) DeleteFile(filePath string, storageType string) error {
 	var err error
 
 	switch storageType {
-	case "local":
+	case StorageTypeLocal:
 		targetStorage = storage.NewLocalStorage("/app/data/uploads")
-	case "s3":
+	case StorageTypeS3, StorageTypeCOS, StorageTypeOSS, StorageTypeKodo, StorageTypeR2, StorageTypeMinio:
 		targetStorage, err = storage.NewS3UnifiedStorage(m.config.Upload)
 	default:
 		return fmt.Errorf("不支持的存储类型: %s", storageType)
