@@ -23,14 +23,16 @@ type ThemeService struct {
 	db          *gorm.DB
 	themeRepo   *repository.ThemeRepository
 	fileService *FileService
+	blogURL     string
 }
 
 // NewThemeService 创建主题服务
-func NewThemeService(db *gorm.DB, themeRepo *repository.ThemeRepository, fileService *FileService) *ThemeService {
+func NewThemeService(db *gorm.DB, themeRepo *repository.ThemeRepository, fileService *FileService, blogURL string) *ThemeService {
 	return &ThemeService{
 		db:          db,
 		themeRepo:   themeRepo,
 		fileService: fileService,
+		blogURL:     blogURL,
 	}
 }
 
@@ -71,6 +73,108 @@ func (s *ThemeService) SyncThemeMeta(req *dto.ThemeMetaSyncRequest) error {
 			Menus:       menus,
 		})
 	})
+}
+
+// PullThemeMeta 从博客容器拉取 theme.json 并同步元数据
+// 版本与库中一致时跳过写库；force 为 true 时强制同步（管端手动触发）
+func (s *ThemeService) PullThemeMeta(ctx context.Context, force bool) error {
+	meta, schema, err := s.fetchThemeMeta(ctx)
+	if err != nil {
+		return err
+	}
+
+	// 版本未变化时跳过，减少无谓事务与配置迁移
+	if !force {
+		if active, err := s.themeRepo.GetActive(); err == nil && active.Version == meta.Version {
+			return nil
+		}
+	}
+
+	return s.SyncThemeMeta(&dto.ThemeMetaSyncRequest{
+		Slug:        meta.Slug,
+		Name:        meta.Name,
+		Version:     meta.Version,
+		Author:      meta.Author,
+		Description: meta.Description,
+		License:     meta.License,
+		Repo:        meta.Repo,
+		Schema:      schema,
+	})
+}
+
+// themeMetaBrief theme.json 中 $meta 的扁平结构
+type themeMetaBrief struct {
+	Slug        string
+	Name        string
+	Version     string
+	Author      string
+	Description string
+	License     string
+	Repo        string
+}
+
+// fetchThemeMeta 拉取 theme.json，拆出 $meta 与 schema
+func (s *ThemeService) fetchThemeMeta(ctx context.Context) (*themeMetaBrief, json.RawMessage, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.blogURL+"/theme.json", nil)
+	if err != nil {
+		return nil, nil, fmt.Errorf("创建请求失败: %w", err)
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, nil, fmt.Errorf("请求博客端失败: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, nil, errors.New("博客端未提供 theme.json（主题镜像可能未基于新版 core-nuxt 构建）")
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, nil, fmt.Errorf("博客端返回错误: status=%d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
+	if err != nil {
+		return nil, nil, fmt.Errorf("读取响应失败: %w", err)
+	}
+
+	// theme.json 结构: { $meta: {...}, ...schema }，拆出 $meta，剩余整体作为 schema
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(body, &raw); err != nil {
+		return nil, nil, fmt.Errorf("解析 theme.json 失败: %w", err)
+	}
+
+	metaRaw, ok := raw["$meta"]
+	if !ok {
+		return nil, nil, errors.New("theme.json 中缺少 $meta")
+	}
+	delete(raw, "$meta")
+
+	var metaFields map[string]string
+	if err := json.Unmarshal(metaRaw, &metaFields); err != nil {
+		return nil, nil, fmt.Errorf("解析 $meta 失败: %w", err)
+	}
+
+	meta := &themeMetaBrief{
+		Slug:        metaFields["slug"],
+		Name:        metaFields["name"],
+		Version:     metaFields["version"],
+		Author:      metaFields["author"],
+		Description: metaFields["description"],
+		License:     metaFields["license"],
+		Repo:        metaFields["repo"],
+	}
+	if meta.Slug == "" {
+		return nil, nil, errors.New("theme.json 中缺少 $meta.slug")
+	}
+
+	schema, err := json.Marshal(raw)
+	if err != nil {
+		return nil, nil, fmt.Errorf("序列化 schema 失败: %w", err)
+	}
+
+	return meta, schema, nil
 }
 
 // GetActiveTheme 获取前台激活主题信息

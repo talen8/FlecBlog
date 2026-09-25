@@ -1302,27 +1302,6 @@ definitions:
         description: 标签名称
         type: string
     type: object
-  dto.ThemeMetaSyncRequest:
-    properties:
-      author:
-        type: string
-      description:
-        type: string
-      license:
-        type: string
-      name:
-        type: string
-      repo:
-        type: string
-      schema:
-        type: object
-      slug:
-        type: string
-      version:
-        type: string
-    required:
-    - slug
-    type: object
   dto.ThemePublicResponse:
     properties:
       author:
@@ -4380,6 +4359,21 @@ paths:
       summary: 主题列表
       tags:
       - 主题管理
+  /admin/themes/_resync:
+    post:
+      description: 拉取 theme.json，版本变化时更新主题元数据
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 同步主题元数据
+      tags:
+      - 主题管理
   /admin/themes/{slug}:
     get:
       description: 获取指定主题详情
@@ -6226,28 +6220,6 @@ paths:
                   $ref: '#/definitions/dto.ThemePublicResponse'
               type: object
       summary: 获取激活主题
-      tags:
-      - 主题
-  /themes/_sync:
-    post:
-      consumes:
-      - application/json
-      description: 主题镜像启动时上报元数据并激活当前主题
-      parameters:
-      - description: 主题元数据
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ThemeMetaSyncRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: 同步主题元数据
       tags:
       - 主题
   /upload:

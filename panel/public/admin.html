@@ -148,6 +148,25 @@
       background: #fafafa;
     }
 
+    .table-scroll {
+      max-height: 240px;
+      overflow-y: auto;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+    }
+
+    .table-scroll table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .table-scroll thead th {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 1;
+    }
+
     .btn {
       padding: 8px 16px;
       border: 1px solid #d9d9d9;
@@ -1076,14 +1095,15 @@
         const history = JSON.parse(r.site_url_history || '[]');
         const callCounts = JSON.parse(r.call_counts || '{}');
         const todayCounts = callCounts[today] || {};
-        const todayTotal = (todayCounts.ai || 0) + (todayCounts.versions || 0);
+        const todayTotal = (todayCounts.ai || 0) + (todayCounts.versions || 0) + (todayCounts.storage || 0);
 
         const banStatus = r.banned === 1 ? '<span style="color:#ff4d4f;">已封禁</span>' : (r.banned === 2 ? '<span style="color:#faad14;">已解封</span>' : '');
         const maskedKey = r.client_key.slice(0, 12) + '...';
+        const displaySite = r.site_url ? r.site_url.replace(/^https?:\/\//, '').replace(/\/api\/v\d+.*$/, '') : '';
 
         return '<tr>' +
           '<td title="' + escapeHtml(r.client_key) + '" style="font-family:monospace;">' + escapeHtml(maskedKey) + '</td>' +
-          '<td>' + escapeHtml(r.site_url) + '</td>' +
+          '<td title="' + escapeHtml(r.site_url) + '">' + escapeHtml(displaySite) + '</td>' +
           '<td>' + escapeHtml(r.version) + '</td>' +
           '<td>' + r.first_seen_at + '</td>' +
           '<td>' + r.last_seen_at + '</td>' +
@@ -1121,12 +1141,12 @@
       const dates = Object.keys(callCounts).sort().reverse();
       dates.forEach(d => {
         const day = callCounts[d];
-        const total = (day.ai || 0) + (day.versions || 0);
+        const total = (day.ai || 0) + (day.versions || 0) + (day.storage || 0);
         grandTotal += total;
-        callHtml += '<tr><td>' + d + '</td><td>' + (day.ai || 0) + '</td><td>' + (day.versions || 0) + '</td></tr>';
+        callHtml += '<tr><td>' + d + '</td><td>' + (day.ai || 0) + '</td><td>' + (day.versions || 0) + '</td><td>' + (day.storage || 0) + '</td></tr>';
       });
       if (dates.length > 1) {
-        callHtml += '<tr style="font-weight:600;"><td>合计</td><td>-</td><td>-</td></tr>';
+        callHtml += '<tr style="font-weight:600;"><td>合计</td><td>-</td><td>-</td><td>-</td></tr>';
       }
 
       const banLabel = r.banned === 1 ? '已封禁' : (r.banned === 2 ? '已解封' : '正常');
@@ -1145,13 +1165,13 @@
         '<div><div style="font-size:13px;color:#999;">备注</div><div>' + escapeHtml(r.remark || '-') + '</div></div>' +
       '</div>' +
       (history.length > 0 || r.site_url ? '<div style="margin-bottom:20px;">' +
-        '<div style="font-weight:600;margin-bottom:8px;">域名更换历史</div>' +
-        '<table><thead><tr><th>域名</th><th>首次出现</th><th>最后出现</th></tr></thead>' +
-        '<tbody>' + historyHtml + '</tbody></table></div>' : '') +
+'<div style="font-weight:600;margin-bottom:8px;">域名更换历史</div>' +
+      '<div class="table-scroll"><table><thead><tr><th>域名</th><th>首次出现</th><th>最后出现</th></tr></thead>' +
+      '<tbody>' + historyHtml + '</tbody></table></div></div>' : '') +
       '<div>' +
         '<div style="font-weight:600;margin-bottom:8px;">调用次数（逐日）</div>' +
-        '<table><thead><tr><th>日期</th><th>/api/ai</th><th>/api/versions</th></tr></thead>' +
-        '<tbody>' + (callHtml || '<tr><td colspan="3" class="empty">暂无调用</td></tr>') + '</tbody></table>' +
+        '<div class="table-scroll"><table><thead><tr><th>日期</th><th>/api/ai</th><th>/api/versions</th><th>/api/storage</th></tr></thead>' +
+        '<tbody>' + (callHtml || '<tr><td colspan="4" class="empty">暂无调用</td></tr>') + '</tbody></table></div>' +
       '</div>';
 
       document.getElementById('regDetailBody').innerHTML = html;

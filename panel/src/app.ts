@@ -74,6 +74,7 @@ app.use('/api/*', async (c, next) => {
   const path = c.req.path;
   if (path === '/api/ai') counts[today].ai = (counts[today].ai || 0) + 1;
   else if (path === '/api/versions') counts[today].versions = (counts[today].versions || 0) + 1;
+  else if (path.startsWith('/api/storage')) counts[today].storage = (counts[today].storage || 0) + 1;
   updateFields.push('call_counts = ?');
   updateParams.push(JSON.stringify(counts));
 

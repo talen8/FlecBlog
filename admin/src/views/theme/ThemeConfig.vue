@@ -196,7 +196,7 @@ import type { FieldConfig } from '@/components/common/JsonListEditor.vue';
 import ImageUploader from '@/components/common/ImageUploader.vue';
 import ThemeInfo from './components/ThemeInfo.vue';
 import ThemeMenu from './components/ThemeMenu.vue';
-import { getTheme, getThemes, updateThemeConfig } from '@/api/theme';
+import { getTheme, getThemes, resyncTheme, updateThemeConfig } from '@/api/theme';
 import { uploadFile } from '@/api/file';
 import type { ThemeResponse, SchemaField, SchemaGroup } from '@/types/theme';
 import { isSuperAdmin } from '@/utils/auth';
@@ -439,6 +439,7 @@ watch(schemaGroups, groups => {
 onMounted(async () => {
   loading.value = true;
   try {
+    await resyncTheme().catch(() => {});
     const list = await getThemes();
     const activeTheme = list.find(theme => theme.is_active) || list[0];
     if (activeTheme) {

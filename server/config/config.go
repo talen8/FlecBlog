@@ -21,8 +21,9 @@ type Config struct {
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	Port         int
-	AllowOrigins []string
+	Port            int
+	AllowOrigins    []string
+	BlogInternalURL string
 }
 
 // DatabaseConfig 数据库配置
@@ -132,8 +133,9 @@ type OAuthProviderConfig struct {
 func LoadConfig() (*Config, error) {
 	config := &Config{
 		Server: ServerConfig{
-			Port:         getEnvAsInt("SERVER_PORT", 8080),
-			AllowOrigins: getEnvAsSlice("SERVER_ALLOW_ORIGINS", []string{"*"}),
+			Port:            getEnvAsInt("SERVER_PORT", 8080),
+			AllowOrigins:    getEnvAsSlice("SERVER_ALLOW_ORIGINS", []string{"*"}),
+			BlogInternalURL: getEnv("BLOG_URL", "http://blog:3000"),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),

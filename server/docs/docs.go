@@ -4250,6 +4250,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/themes/_resync": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "拉取 theme.json，版本变化时更新主题元数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "主题管理"
+                ],
+                "summary": "同步主题元数据",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/themes/{slug}": {
             "get": {
                 "security": [
@@ -7271,40 +7296,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/themes/_sync": {
-            "post": {
-                "description": "主题镜像启动时上报元数据并激活当前主题",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "主题"
-                ],
-                "summary": "同步主题元数据",
-                "parameters": [
-                    {
-                        "description": "主题元数据",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.ThemeMetaSyncRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/upload": {
             "post": {
                 "description": "用户上传文件，存在限制",
@@ -9572,38 +9563,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "标签名称",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.ThemeMetaSyncRequest": {
-            "type": "object",
-            "required": [
-                "slug"
-            ],
-            "properties": {
-                "author": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "license": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repo": {
-                    "type": "string"
-                },
-                "schema": {
-                    "type": "object"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "version": {
                     "type": "string"
                 }
             }

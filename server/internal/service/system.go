@@ -13,6 +13,7 @@ import (
 	"flec_blog/internal/dto"
 	"flec_blog/pkg/email"
 	feishupkg "flec_blog/pkg/feishu"
+	"flec_blog/pkg/logger"
 	"flec_blog/pkg/panel"
 	"flec_blog/pkg/upload"
 
@@ -84,6 +85,7 @@ func (s *SystemService) StartRegistration() {
 		}
 
 		if err := s.panelClient.Register(ctx, siteURL, AppVersion); err != nil {
+			logger.Warn("Panel 注册已跳过: %v", err)
 			return
 		}
 

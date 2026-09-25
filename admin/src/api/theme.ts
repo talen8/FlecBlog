@@ -28,3 +28,7 @@ export const updateThemeMenus = (
 export const checkThemeUpdate = (slug: string): Promise<ThemeUpdateCheckResponse> => {
   return request.post(`/admin/themes/${slug}/check`);
 };
+
+export const resyncTheme = (): Promise<void> => {
+  return request.post('/admin/themes/_resync');
+};

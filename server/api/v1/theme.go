@@ -35,24 +35,17 @@ func (h *ThemeHandler) GetActive(ctx *gin.Context) {
 	response.Success(ctx, result)
 }
 
-// SyncMeta 同步主题元数据
+// PullMeta 同步主题元数据
 //
 //	@Summary		同步主题元数据
-//	@Description	主题镜像启动时上报元数据并激活当前主题
-//	@Tags			主题
-//	@Accept			json
+//	@Description	拉取 theme.json，版本变化时更新主题元数据
+//	@Tags			主题管理
 //	@Produce		json
-//	@Param			request	body	dto.ThemeMetaSyncRequest	true	"主题元数据"
-//	@Success		200		{object}	response.Response
-//	@Router			/themes/_sync [post]
-func (h *ThemeHandler) SyncMeta(ctx *gin.Context) {
-	var req dto.ThemeMetaSyncRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.ValidateFailed(ctx, err.Error())
-		return
-	}
-
-	if err := h.themeService.SyncThemeMeta(&req); err != nil {
+//	@Security		BearerAuth
+//	@Success		200	{object}	response.Response
+//	@Router			/admin/themes/_resync [post]
+func (h *ThemeHandler) PullMeta(ctx *gin.Context) {
+	if err := h.themeService.PullThemeMeta(ctx.Request.Context(), false); err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}

@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -61,8 +64,47 @@ func CurrentClientKey() string {
 	return currentClientKey
 }
 
+// isPlaceholderDomain 判断主机名是否为占位域名（通配规则：任一标签包含 domain 或 example，如 yourdomain.com、example.top）
+func isPlaceholderDomain(host string) bool {
+	for _, label := range strings.Split(host, ".") {
+		if strings.Contains(label, "domain") || strings.Contains(label, "example") {
+			return true
+		}
+	}
+	return false
+}
+
+// ValidateSiteURL 校验站点地址：必须为 HTTPS 协议，且主机名不能是 IP、localhost 或占位域名
+func ValidateSiteURL(siteURL string) error {
+	u, err := url.Parse(siteURL)
+	if err != nil {
+		return fmt.Errorf("站点地址格式无效: %w", err)
+	}
+	if u.Scheme != "https" {
+		return fmt.Errorf("站点地址必须使用 HTTPS 协议，当前: %s", u.Scheme)
+	}
+	host := u.Hostname()
+	if host == "" {
+		return fmt.Errorf("站点地址缺少主机名")
+	}
+	if net.ParseIP(host) != nil {
+		return fmt.Errorf("站点地址不能使用 IP 地址: %s", host)
+	}
+	if host == "localhost" || strings.HasSuffix(host, ".localhost") {
+		return fmt.Errorf("站点地址不能使用 localhost")
+	}
+	if isPlaceholderDomain(host) {
+		return fmt.Errorf("站点地址不能使用文档示例占位域名: %s", host)
+	}
+	return nil
+}
+
 // Register 注册或心跳
 func (c *Client) Register(ctx context.Context, siteURL, version string) error {
+	if err := ValidateSiteURL(siteURL); err != nil {
+		return err
+	}
+
 	if c.ExtraHeaders == nil {
 		c.ExtraHeaders = make(map[string]string)
 	}

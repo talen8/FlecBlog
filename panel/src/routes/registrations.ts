@@ -4,6 +4,28 @@ import { Env, RegistrationUpdate } from '../types';
 // ── Public API ──────────────────────────────────────────────────────────
 const api = new Hono<{ Bindings: Env }>();
 
+// isPlaceholderDomain 判断主机名是否为占位域名（通配规则：任一标签包含 domain 或 example，如 yourdomain.com、example.top）
+function isPlaceholderDomain(host: string): boolean {
+  return host.split('.').some((label) => label.includes('domain') || label.includes('example'));
+}
+
+// isValidSiteUrl 校验站点地址：必须为 HTTPS 协议的域名，不允许 IP 地址、localhost 和占位域名
+function isValidSiteUrl(rawUrl: string): boolean {
+  try {
+    const u = new URL(rawUrl);
+    if (u.protocol !== 'https:') return false;
+    const host = u.hostname.toLowerCase();
+    if (!host) return false;
+    if (host === 'localhost' || host.endsWith('.localhost')) return false;
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return false; // IPv4
+    if (u.hostname.startsWith('[')) return false; // IPv6
+    if (isPlaceholderDomain(host)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 api.post('/', async (c) => {
   const body = await c.req.json<{
     client_key?: string;
@@ -18,8 +40,8 @@ api.post('/', async (c) => {
     return c.json({ error: 'site_url is required' }, 400);
   }
 
-  if (site_url.includes('localhost')) {
-    return c.json({ error: '请确保后端服务外网可访问' }, 400);
+  if (!isValidSiteUrl(site_url)) {
+    return c.json({ error: '站点地址必须为 HTTPS 协议的真实域名，不支持 IP 地址、localhost 或文档示例占位域名' }, 400);
   }
 
   // Heartbeat: existing client_key
