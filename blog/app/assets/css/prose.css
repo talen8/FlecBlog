@@ -4,38 +4,42 @@
   --prose-heading: #2c3e50;
   --prose-light: #5a6c7d;
   --prose-meta: #858585;
-  --prose-link: #49b1f5;
-  --prose-link-hover: #3498db;
+  --prose-link: var(--theme-color);
+  --prose-link-hover: hsl(from var(--theme-color) h calc(s - 19%) calc(l - 9%));
   --prose-code-text: #e74c3c;
-  --prose-code-bg: rgba(73, 177, 245, 0.08);
-  --prose-code-border: rgba(73, 177, 245, 0.15);
+  --prose-code-bg: color-mix(in srgb, var(--theme-color) 8%, transparent);
+  --prose-code-border: color-mix(in srgb, var(--theme-color) 15%, transparent);
   --prose-codeblock-bg: #f6f8fa;
   --prose-codeblock-border: #e1e4e8;
   --prose-codeblock-text: #24292e;
   --prose-codeblock-lang: #586069;
   --prose-codeblock-line-number: #858585;
   --prose-codeblock-line-border: #d1d5da;
-  --prose-quote-bg: linear-gradient(to right, rgba(73, 177, 245, 0.05), transparent);
-  --prose-quote-border: #49b1f5;
+  --prose-quote-bg: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--theme-color) 5%, transparent),
+    transparent
+  );
+  --prose-quote-border: var(--theme-color);
   --prose-quote-text: #5a6c7d;
   --prose-table-header-bg: linear-gradient(
     135deg,
-    rgba(73, 177, 245, 0.1),
-    rgba(73, 177, 245, 0.05)
+    color-mix(in srgb, var(--theme-color) 10%, transparent),
+    color-mix(in srgb, var(--theme-color) 5%, transparent)
   );
   --prose-table-border: rgba(128, 128, 128, 0.15);
   --prose-table-row-even: rgba(128, 128, 128, 0.02);
-  --prose-table-row-hover: rgba(73, 177, 245, 0.05);
+  --prose-table-row-hover: color-mix(in srgb, var(--theme-color) 5%, transparent);
   --prose-table-shadow: rgba(0, 0, 0, 0.1);
   --prose-hr-bg: linear-gradient(
     to right,
     transparent,
-    rgba(73, 177, 245, 0.2),
-    rgba(73, 177, 245, 0.6),
-    rgba(73, 177, 245, 0.2),
+    color-mix(in srgb, var(--theme-color) 20%, transparent),
+    color-mix(in srgb, var(--theme-color) 60%, transparent),
+    color-mix(in srgb, var(--theme-color) 20%, transparent),
     transparent
   );
-  --prose-hr-dot: #49b1f5;
+  --prose-hr-dot: var(--theme-color);
   --prose-hr-shadow: white;
   --prose-img-shadow: rgba(0, 0, 0, 0.1);
   --prose-img-shadow-hover: rgba(0, 0, 0, 0.08);
@@ -49,7 +53,7 @@
   --prose-custom-bg: rgba(249, 250, 251, 0.5);
   --prose-custom-hover-bg: rgba(0, 0, 0, 0.05);
   --prose-custom-border: rgba(128, 128, 128, 0.2);
-  --prose-custom-accent: #49b1f5;
+  --prose-custom-accent: var(--theme-color);
 }
 
 [data-theme=dark] {
@@ -57,38 +61,42 @@
   --prose-heading: #e0e0e0;
   --prose-light: #b8b8b8;
   --prose-meta: #999;
-  --prose-link: #49b1f5;
-  --prose-link-hover: #78c2f4;
+  --prose-link: var(--theme-color);
+  --prose-link-hover: color-mix(in srgb, var(--theme-color) 74%, #ffffff);
   --prose-code-text: #ff6b6b;
-  --prose-code-bg: rgba(73, 177, 245, 0.12);
-  --prose-code-border: rgba(73, 177, 245, 0.25);
+  --prose-code-bg: color-mix(in srgb, var(--theme-color) 12%, transparent);
+  --prose-code-border: color-mix(in srgb, var(--theme-color) 25%, transparent);
   --prose-codeblock-bg: #1e1e1e;
   --prose-codeblock-border: #333;
   --prose-codeblock-text: #d4d4d4;
   --prose-codeblock-lang: #b8b8b8;
   --prose-codeblock-line-number: #666;
   --prose-codeblock-line-border: #444;
-  --prose-quote-bg: linear-gradient(to right, rgba(73, 177, 245, 0.08), transparent);
-  --prose-quote-border: #49b1f5;
+  --prose-quote-bg: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--theme-color) 8%, transparent),
+    transparent
+  );
+  --prose-quote-border: var(--theme-color);
   --prose-quote-text: #b8b8b8;
   --prose-table-header-bg: linear-gradient(
     135deg,
-    rgba(73, 177, 245, 0.15),
-    rgba(73, 177, 245, 0.08)
+    color-mix(in srgb, var(--theme-color) 15%, transparent),
+    color-mix(in srgb, var(--theme-color) 8%, transparent)
   );
   --prose-table-border: rgba(255, 255, 255, 0.1);
   --prose-table-row-even: rgba(255, 255, 255, 0.02);
-  --prose-table-row-hover: rgba(73, 177, 245, 0.08);
+  --prose-table-row-hover: color-mix(in srgb, var(--theme-color) 8%, transparent);
   --prose-table-shadow: rgba(0, 0, 0, 0.3);
   --prose-hr-bg: linear-gradient(
     to right,
     transparent,
-    rgba(73, 177, 245, 0.3),
-    rgba(73, 177, 245, 0.7),
-    rgba(73, 177, 245, 0.3),
+    color-mix(in srgb, var(--theme-color) 30%, transparent),
+    color-mix(in srgb, var(--theme-color) 70%, transparent),
+    color-mix(in srgb, var(--theme-color) 30%, transparent),
     transparent
   );
-  --prose-hr-dot: #49b1f5;
+  --prose-hr-dot: var(--theme-color);
   --prose-hr-shadow: #121212;
   --prose-img-shadow: rgba(0, 0, 0, 0.4);
   --prose-img-shadow-hover: rgba(0, 0, 0, 0.3);
@@ -102,7 +110,7 @@
   --prose-custom-bg: rgba(30, 30, 30, 0.5);
   --prose-custom-hover-bg: rgba(255, 255, 255, 0.05);
   --prose-custom-border: rgba(255, 255, 255, 0.15);
-  --prose-custom-accent: #49b1f5;
+  --prose-custom-accent: var(--theme-color);
 }
 
 .markdown-content {
@@ -765,7 +773,7 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   color: var(--prose-meta);
-  background: rgba(73, 177, 245, 0.05);
+  background: color-mix(in srgb, var(--theme-color) 5%, transparent);
   border-bottom: 1px solid var(--prose-custom-border);
   transition: all 0.3s ease;
 }

@@ -1,7 +1,7 @@
 :root,
 [data-theme='light'] {
   /* 主题色 */
-  --theme-color: #49B1F5;
+  --theme-color: var(--theme-color-custom, #49B1F5);
   --theme-meta-color: #666666;
 
   /* 基础颜色 */
@@ -11,8 +11,8 @@
   /* 卡片和背景 */
   --flec-card-bg: #ffffffd0;
   --flec-page-bg: #ffffff66;
-  --flec-btn: #49B1F5;
-  --flec-btn-hover: #78c2f4ff;
+  --flec-btn: var(--theme-color);
+  --flec-btn-hover: color-mix(in srgb, var(--theme-color) 74%, #ffffff);
   --flec-heavy-bg: #f5f5f5;
   --flec-border: #e0e0e0;
 
@@ -21,10 +21,10 @@
   --flec-nav-font-hover: #ffffff;
   --flec-nav-fixed-font: #4c4948;
   --flec-nav-fixed-font-hover: #33302f;
-  --flec-nav-focus: #49B1F5;
+  --flec-nav-focus: var(--theme-color);
   --flec-nav-bg: #fffffff2;
   --flec-nav-menu-bg: #f6f8fa;
-  --flec-nav-menu-bg-hover: #49B1F5;
+  --flec-nav-menu-bg-hover: var(--theme-color);
 
   /* 页脚 */
   --flec-footer-icon: #121212;
@@ -32,7 +32,7 @@
   --flec-footer-icon-bg-hover: #4c4948;
   --flec-footer-font: #121212;
   --flec-footer-font-hover: #ffffff;
-  --flec-footer-font-bg-hover: #49b1f5b3;
+  --flec-footer-font-bg-hover: color-mix(in srgb, var(--theme-color) 70%, transparent);
 
   /* 动态说说 */
   --flec-moment-font: #4c4948;

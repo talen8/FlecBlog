@@ -5,33 +5,18 @@
     "footer": { "label": "页脚菜单", "maxDepth": 2, "defaults": [] }
   },
   "外观与主题": {
+    "theme_color": {
+      "type": "string",
+      "title": "主题色",
+      "format": "color",
+      "default": "#49B1F5"
+    },
     "background_image": {
       "type": "string",
       "title": "背景图片",
       "format": "upload",
       "placeholder": "支持粘贴图片URL或上传",
       "default": ""
-    },
-    "sidebar_social": {
-      "type": "array",
-      "title": "侧边社交",
-      "default": [],
-      "x-item-fields": [
-        { "key": "name", "type": "text", "placeholder": "平台名称" },
-        { "key": "icon", "type": "text", "placeholder": "图标类名" },
-        { "key": "url",  "type": "text", "placeholder": "链接地址" }
-      ]
-    },
-    "footer_social": {
-      "type": "array",
-      "title": "页脚社交",
-      "default": [],
-      "x-item-fields": [
-        { "key": "name", "type": "text", "placeholder": "平台名称" },
-        { "key": "icon", "type": "text", "placeholder": "图标类名", "width": 2 },
-        { "key": "url",  "type": "text", "placeholder": "链接地址", "width": 2 },
-        { "key": "position", "type": "select", "placeholder": "位置", "options": [{ "label": "左", "value": "left" }, { "label": "右", "value": "right" }] }
-      ]
     },
     "theme_light_start": {
       "type": "string",
@@ -73,6 +58,27 @@
         { "label": "单栏", "value": "single_column" }
       ],
       "default": "waterfall"
+    },
+    "sidebar_social": {
+      "type": "array",
+      "title": "侧边社交",
+      "default": [],
+      "x-item-fields": [
+        { "key": "name", "type": "text", "placeholder": "平台名称" },
+        { "key": "icon", "type": "text", "placeholder": "图标类名" },
+        { "key": "url",  "type": "text", "placeholder": "链接地址" }
+      ]
+    },
+    "footer_social": {
+      "type": "array",
+      "title": "页脚社交",
+      "default": [],
+      "x-item-fields": [
+        { "key": "name", "type": "text", "placeholder": "平台名称" },
+        { "key": "icon", "type": "text", "placeholder": "图标类名", "width": 2 },
+        { "key": "url",  "type": "text", "placeholder": "链接地址", "width": 2 },
+        { "key": "position", "type": "select", "placeholder": "位置", "options": [{ "label": "左", "value": "left" }, { "label": "右", "value": "right" }] }
+      ]
     },
     "moments_size": {
       "type": "integer",
