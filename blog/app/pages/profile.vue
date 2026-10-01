@@ -1290,7 +1290,7 @@ onMounted(async () => {
   &:focus {
     outline: none;
     border-color: var(--theme-color);
-    box-shadow: 0 0 0 3px #49b1f526;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 15%, transparent);
   }
 
   &.error {
@@ -1355,7 +1355,7 @@ onMounted(async () => {
   display: flex;
   gap: 8px;
   padding: 12px;
-  background: #49b1f50d;
+  background: color-mix(in srgb, var(--theme-color) 5%, transparent);
   border-radius: 8px;
   font-size: 0.9rem;
   color: var(--theme-meta-color);

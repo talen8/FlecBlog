@@ -92,7 +92,7 @@ const errorInfo = computed(() => {
   font-size: 7rem;
   font-weight: 300;
   line-height: 1;
-  color: #49b1f5;
+  color: var(--theme-color);
   margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
 }
@@ -134,11 +134,12 @@ const errorInfo = computed(() => {
     }
 
     &.btn-primary {
-      background: #49b1f5;
+      background: var(--theme-color);
       color: white;
 
       &:hover {
-        background: #3da0e3;
+        /* 原 #3da0e3 相对 #49b1f5 为 S-14%、L-6%，非等比压暗，故用相对颜色语法 */
+        background: hsl(from var(--theme-color) h calc(s - 14%) calc(l - 6%));
       }
     }
 
@@ -148,8 +149,8 @@ const errorInfo = computed(() => {
       border: 1px solid #e0e0e0;
 
       &:hover {
-        border-color: #49b1f5;
-        color: #49b1f5;
+        border-color: var(--theme-color);
+        color: var(--theme-color);
       }
     }
   }
@@ -194,7 +195,7 @@ const errorInfo = computed(() => {
   }
 
   .error-code {
-    color: #49b1f5;
+    color: var(--theme-color);
   }
 
   .error-title {
@@ -210,8 +211,8 @@ const errorInfo = computed(() => {
     border-color: #333;
 
     &:hover {
-      border-color: #49b1f5;
-      color: #49b1f5;
+      border-color: var(--theme-color);
+      color: var(--theme-color);
     }
   }
 }
@@ -230,7 +231,7 @@ const errorInfo = computed(() => {
   }
 
   .error-code {
-    color: #49b1f5;
+    color: var(--theme-color);
   }
 
   .error-title {
@@ -246,8 +247,8 @@ const errorInfo = computed(() => {
     border-color: #333;
 
     &:hover {
-      border-color: #49b1f5;
-      color: #49b1f5;
+      border-color: var(--theme-color);
+      color: var(--theme-color);
     }
   }
 }

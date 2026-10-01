@@ -247,7 +247,7 @@ watch(
   &:focus {
     outline: none;
     border-color: var(--theme-color);
-    box-shadow: 0 0 0 3px #49b1f526;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 15%, transparent);
   }
 
   &.error {

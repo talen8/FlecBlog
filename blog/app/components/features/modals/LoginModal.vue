@@ -884,7 +884,7 @@ const handleSubmit = async () => {
       &:focus {
         outline: none;
         border-color: var(--theme-color);
-        box-shadow: 0 0 0 3px rgba(73, 177, 245, 0.1);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 10%, transparent);
       }
 
       &:disabled {

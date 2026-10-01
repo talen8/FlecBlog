@@ -163,7 +163,7 @@ onMounted(() => {
 
     i {
       font-size: 16px;
-      color: var(--flec-btn-hover, #49b1f5);
+      color: var(--flec-btn-hover);
     }
   }
 
@@ -219,7 +219,7 @@ onMounted(() => {
     transform: translateY(-50%);
     width: 3px;
     height: 0;
-    background: var(--flec-btn-hover, #49b1f5);
+    background: var(--flec-btn-hover);
     border-radius: 0 2px 2px 0;
     transition: height 0.25s ease;
   }
@@ -234,7 +234,7 @@ onMounted(() => {
   }
 
   &.active {
-    background-color: var(--flec-btn-hover, #49b1f5);
+    background-color: var(--flec-btn-hover);
     color: #fff;
     font-weight: 500;
 

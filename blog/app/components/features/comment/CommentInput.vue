@@ -682,8 +682,8 @@ textarea {
   &:hover,
   &:focus-visible {
     color: var(--theme-color);
-    border-color: rgba(73, 177, 245, 0.35);
-    background: rgba(73, 177, 245, 0.08);
+    border-color: color-mix(in srgb, var(--theme-color) 35%, transparent);
+    background: color-mix(in srgb, var(--theme-color) 8%, transparent);
   }
 }
 
@@ -983,7 +983,7 @@ textarea {
 
   &.active {
     color: var(--theme-color);
-    background: rgba(73, 177, 245, 0.1);
+    background: color-mix(in srgb, var(--theme-color) 10%, transparent);
   }
 
   &.uploading {

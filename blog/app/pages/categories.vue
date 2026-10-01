@@ -57,7 +57,7 @@ useSeoMeta({
           left: 0;
           width: 0.8em;
           height: 0.8em;
-          border: 0.215em solid #49b1f5;
+          border: 0.215em solid var(--theme-color);
           border-radius: 50%;
           background: transparent;
           content: '';

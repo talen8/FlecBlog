@@ -627,7 +627,7 @@ const handleCommentClick = (moment: Moment) => {
 
         &:hover {
           background: var(--flec-moment-card-bg);
-          color: #49b1f5;
+          color: var(--theme-color);
         }
       }
     }

@@ -150,7 +150,7 @@ onMounted(() => {
   font-size: inherit;
 
   &:hover {
-    background-color: rgba(73, 177, 245, 0.1);
+    background-color: color-mix(in srgb, var(--theme-color) 10%, transparent);
     border-left-color: var(--flec-btn-hover);
   }
 

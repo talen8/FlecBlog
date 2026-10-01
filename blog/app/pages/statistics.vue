@@ -236,7 +236,12 @@ const visitCards = computed(() => [
     padding: 24px;
     border-radius: 22px;
     background:
-      linear-gradient(180deg, rgba(73, 177, 245, 0.08), transparent 120px), var(--flec-card-bg);
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--theme-color) 8%, transparent),
+        transparent 120px
+      ),
+      var(--flec-card-bg);
     border: 1px solid var(--flec-border-color);
   }
 
@@ -271,7 +276,11 @@ const visitCards = computed(() => [
     width: 52px;
     height: 52px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(73, 177, 245, 0.16), rgba(73, 177, 245, 0.04));
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--theme-color) 16%, transparent),
+      color-mix(in srgb, var(--theme-color) 4%, transparent)
+    );
     color: var(--theme-color);
     flex-shrink: 0;
 
