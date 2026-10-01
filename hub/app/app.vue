@@ -35,10 +35,6 @@ const links = [{
   icon: 'i-lucide-book',
   to: '/docs/getting-started'
 }, {
-  label: '主题',
-  icon: 'i-lucide-palette',
-  to: '/themes'
-}, {
   label: '公告',
   icon: 'i-lucide-history',
   to: '/changelog'

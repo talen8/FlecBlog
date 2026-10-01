@@ -64,6 +64,11 @@ func CurrentClientKey() string {
 	return currentClientKey
 }
 
+// IsOfficialBuild 判断是否为官方构建版本
+func IsOfficialBuild() bool {
+	return apiKey != ""
+}
+
 // isPlaceholderDomain 判断主机名是否为占位域名（通配规则：任一标签包含 domain 或 example，如 yourdomain.com、example.top）
 func isPlaceholderDomain(host string) bool {
 	for _, label := range strings.Split(host, ".") {
@@ -165,6 +170,14 @@ type Announcement struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 	Link    string `json:"link"`
+}
+
+// Ping 校验与 Panel 端的连通性及官版身份
+func (c *Client) Ping(ctx context.Context) error {
+	var result struct {
+		Status string `json:"status"`
+	}
+	return c.get(ctx, "/api/ping", &result)
 }
 
 // FetchVersions 获取已启用的版本列表

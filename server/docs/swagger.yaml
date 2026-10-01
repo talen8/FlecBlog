@@ -1269,6 +1269,8 @@ definitions:
         type: integer
       os:
         type: string
+      panel_status:
+        type: string
       server_ip:
         type: string
       storage_status:
@@ -1302,64 +1304,12 @@ definitions:
         description: 标签名称
         type: string
     type: object
-  dto.ThemePublicResponse:
+  dto.ThemeConfigResponse:
     properties:
-      author:
-        type: string
       config:
         type: object
-      description:
-        type: string
-      is_active:
-        type: boolean
-      license:
-        type: string
       menus:
         type: object
-      name:
-        type: string
-      repo:
-        type: string
-      slug:
-        type: string
-      version:
-        type: string
-    type: object
-  dto.ThemeResponse:
-    properties:
-      author:
-        type: string
-      config:
-        type: object
-      description:
-        type: string
-      is_active:
-        type: boolean
-      license:
-        type: string
-      menus:
-        type: object
-      name:
-        type: string
-      repo:
-        type: string
-      schema:
-        type: object
-      slug:
-        type: string
-      version:
-        type: string
-    type: object
-  dto.ThemeUpdateCheckResponse:
-    properties:
-      current_version:
-        type: string
-      has_update:
-        type: boolean
-      latest_version:
-        type: string
-      release_url:
-        type: string
     type: object
   dto.TrendData:
     properties:
@@ -4339,7 +4289,7 @@ paths:
       - 标签管理
   /admin/themes:
     get:
-      description: 获取全部主题实例
+      description: 获取后台主题配置，返回全部配置项与完整菜单
       produces:
       - application/json
       responses:
@@ -4350,93 +4300,19 @@ paths:
             - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/dto.ThemeResponse'
-                  type: array
+                  $ref: '#/definitions/dto.ThemeConfigResponse'
               type: object
       security:
       - BearerAuth: []
-      summary: 主题列表
+      summary: 主题配置详情
       tags:
       - 主题管理
-  /admin/themes/_resync:
-    post:
-      description: 拉取 theme.json，版本变化时更新主题元数据
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
-      summary: 同步主题元数据
-      tags:
-      - 主题管理
-  /admin/themes/{slug}:
-    get:
-      description: 获取指定主题详情
-      parameters:
-      - description: 主题 slug
-        in: path
-        name: slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.ThemeResponse'
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 主题详情
-      tags:
-      - 主题管理
-  /admin/themes/{slug}/check:
-    post:
-      description: 检查指定主题是否有新版本
-      parameters:
-      - description: 主题 slug
-        in: path
-        name: slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.ThemeUpdateCheckResponse'
-              type: object
-      security:
-      - BearerAuth: []
-      summary: 检查主题版本更新
-      tags:
-      - 主题管理
-  /admin/themes/{slug}/config:
+  /admin/themes/config:
     put:
       consumes:
       - application/json
-      description: 替换指定主题的 config JSON
+      description: 按提交的配置项逐个覆盖（patch 语义），菜单需通过菜单接口更新
       parameters:
-      - description: 主题 slug
-        in: path
-        name: slug
-        required: true
-        type: string
       - description: 主题配置
         in: body
         name: request
@@ -4455,17 +4331,12 @@ paths:
       summary: 更新主题配置
       tags:
       - 主题管理
-  /admin/themes/{slug}/menus:
+  /admin/themes/menus:
     put:
       consumes:
       - application/json
-      description: 整体替换指定主题菜单
+      description: 整体替换主题菜单
       parameters:
-      - description: 主题 slug
-        in: path
-        name: slug
-        required: true
-        type: string
       - description: 主题菜单
         in: body
         name: request
@@ -6206,7 +6077,7 @@ paths:
       - 标签
   /themes:
     get:
-      description: 获取当前激活主题详情，菜单仅返回启用项
+      description: 获取前台主题配置，菜单仅返回启用项
       produces:
       - application/json
       responses:
@@ -6217,9 +6088,9 @@ paths:
             - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/dto.ThemePublicResponse'
+                  $ref: '#/definitions/dto.ThemeConfigResponse'
               type: object
-      summary: 获取激活主题
+      summary: 获取主题配置
       tags:
       - 主题
   /upload:

@@ -1,7 +1,7 @@
 title: 一款有 [边界感]{class="text-primary"} 的博客系统
 description: 简约，不是把内容做空。高级，也不是故作夸张。
 seo:
-  title: FlecBlog
+  title: FlecHub
   description: 一款有边界感的博客系统，简约而不空洞，高级而不夸张。
 navigation: false
 hero:
@@ -151,7 +151,7 @@ testimonials:
         description: 全栈工程师
         avatar:
           src: https://i.pravatar.cc/120?img=3
-    - quote: 主题二开模板非常清晰，composables 和 types 都导出了，定制自己的博客风格几乎零门槛。
+    - quote: 站点外观全部收敛在后台的可视化配置里，不用碰代码也不用重新构建，定制自己的博客风格几乎零门槛。
       user:
         name: PixelDrift
         description: 前端架构师

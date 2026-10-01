@@ -69,13 +69,9 @@
             <el-option label="博客图标" value="博客图标" />
             <el-option label="站长头像" value="站长头像" />
           </el-option-group>
-          <el-option-group label="主题板块" v-if="themeList.length">
-            <el-option
-              v-for="theme in themeList"
-              :key="theme.slug"
-              :label="theme.name"
-              :value="theme.slug"
-            />
+          <el-option-group label="主题板块">
+            <el-option label="主题图片" value="主题图片" />
+            <el-option label="菜单图标" value="菜单图标" />
           </el-option-group>
         </el-select>
       </el-form-item>
@@ -119,8 +115,6 @@
 import { ref, watch, onMounted } from 'vue';
 import { Search } from '@element-plus/icons-vue';
 import FilterPanel from '@/components/common/FilterPanel.vue';
-import { getThemes } from '@/api/theme';
-import type { ThemeResponse } from '@/types/theme';
 import type { FileListQuery } from '@/types/file';
 
 /**
@@ -158,8 +152,6 @@ const emit = defineEmits<{
 const filterForm = ref<FileListQuery>({ ...props.modelValue });
 const dateRange = ref<[string, string] | null>(null);
 const sizeRange = ref<string | null>(null);
-
-const themeList = ref<Pick<ThemeResponse, 'slug' | 'name'>[]>([]);
 
 let isExternalUpdate = false;
 let isResetting = false;
@@ -245,15 +237,9 @@ const handleReset = () => {
   }, 100);
 };
 
-onMounted(async () => {
+onMounted(() => {
   if (filterForm.value.start_time && filterForm.value.end_time) {
     dateRange.value = [filterForm.value.start_time, filterForm.value.end_time];
-  }
-  try {
-    const themes = await getThemes();
-    themeList.value = themes.map(t => ({ slug: t.slug, name: t.name }));
-  } catch {
-    // 静默失败，主题板块不显示
   }
 });
 </script>

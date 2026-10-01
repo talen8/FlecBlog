@@ -2,7 +2,6 @@ const INSTALL_SCRIPT =
   '#!/bin/bash\n' +
   '# FlecBlog 一键部署与管理脚本\n' +
   '# 部署: curl -fsSL https://get.flec.top | bash\n' +
-  '# 主题: curl -fsSL https://get.flec.top | bash -s theme <镜像名称>\n' +
   '# 卸载: curl -fsSL https://get.flec.top | bash -s uninstall\n' +
   '# 升级: curl -fsSL https://get.flec.top | bash -s upgrade\n' +
   '# 状态: curl -fsSL https://get.flec.top | bash -s status\n' +
@@ -23,15 +22,9 @@ const INSTALL_SCRIPT =
   'error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }\n' +
   '\n' +
   'ACTION="deploy"\n' +
-  'THEME=""\n' +
   '\n' +
   'while [[ $# -gt 0 ]]; do\n' +
   '  case $1 in\n' +
-  '    theme)\n' +
-  '      THEME="$2"\n' +
-  '      ACTION="theme"\n' +
-  '      shift 2\n' +
-  '      ;;\n' +
   '    uninstall)\n' +
   '      ACTION="uninstall"\n' +
   '      shift\n' +
@@ -212,7 +205,6 @@ const INSTALL_SCRIPT =
   '  echo ""\n' +
   '  echo "命令:"\n' +
   '  echo "  (无参数)    创建配置文件"\n' +
-  '  echo "  theme       更换博客主题"\n' +
   '  echo "  upgrade     拉取最新镜像并重启"\n' +
   '  echo "  status      查看服务状态"\n' +
   '  echo "  logs        查看服务日志"\n' +
@@ -221,31 +213,9 @@ const INSTALL_SCRIPT =
   '  echo ""\n' +
   '}\n' +
   '\n' +
-  'change_theme() {\n' +
-  '  if [ -z "$THEME" ]; then\n' +
-  '    error "请指定主题镜像名称，例如: bash -s theme talen8/flec-blog"\n' +
-  '  fi\n' +
-  '\n' +
-  '  if [ ! -f docker-compose.yml ]; then\n' +
-  '    error "当前目录未找到 docker-compose.yml，请确认安装位置"\n' +
-  '  fi\n' +
-  '\n' +
-  '  [[ "$THEME" == *:* ]] || THEME="$THEME:latest"\n' +
-  "  sed -i '/blog:/,/^[^ ]/{s|image: .*|image: '\"$THEME\"'|;}' docker-compose.yml\n" +
-  '\n' +
-  '  info "正在重启博客服务..."\n' +
-  '  docker compose up -d blog\n' +
-  '\n' +
-  '  success "主题已更换为 $THEME"\n' +
-  '  echo ""\n' +
-  '}\n' +
-  '\n' +
   'case $ACTION in\n' +
   '  deploy)\n' +
   '    deploy\n' +
-  '    ;;\n' +
-  '  theme)\n' +
-  '    change_theme\n' +
   '    ;;\n' +
   '  uninstall)\n' +
   '    uninstall\n' +

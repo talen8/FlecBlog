@@ -12,18 +12,17 @@ type Config struct {
 	Server       ServerConfig
 	Database     DatabaseConfig
 	JWT          JWTConfig
-	Basic        BasicConfig        // 从数据库加载
-	Notification NotificationConfig // 从数据库加载
-	Upload       UploadConfig       // 从数据库加载
-	AI           AIConfig           // 从数据库加载
-	OAuth        OAuthConfig        // 从数据库加载
+	Basic        BasicConfig
+	Notification NotificationConfig
+	Upload       UploadConfig
+	AI           AIConfig
+	OAuth        OAuthConfig
 }
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	Port            int
-	AllowOrigins    []string
-	BlogInternalURL string
+	Port         int
+	AllowOrigins []string
 }
 
 // DatabaseConfig 数据库配置
@@ -133,9 +132,8 @@ type OAuthProviderConfig struct {
 func LoadConfig() (*Config, error) {
 	config := &Config{
 		Server: ServerConfig{
-			Port:            getEnvAsInt("SERVER_PORT", 8080),
-			AllowOrigins:    getEnvAsSlice("SERVER_ALLOW_ORIGINS", []string{"*"}),
-			BlogInternalURL: getEnv("BLOG_URL", "http://blog:3000"),
+			Port:         getEnvAsInt("SERVER_PORT", 8080),
+			AllowOrigins: getEnvAsSlice("SERVER_ALLOW_ORIGINS", []string{"*"}),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),

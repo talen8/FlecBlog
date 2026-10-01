@@ -119,7 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: blog/default
+        working-directory: blog
 
     steps:
       - uses: actions/checkout@v4

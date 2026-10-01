@@ -114,27 +114,6 @@ export const collections = {
       })
     })
   }),
-  themes: defineCollection({
-    source: '2.themes.yml',
-    type: 'page',
-    schema: z.object({
-      items: z.array(
-        z.object({
-          name: z.string().nonempty(),
-          display_name: z.string().nonempty(),
-          slug: z.string().nonempty(),
-          author: z.string().nonempty(),
-          description: z.string().optional(),
-          image: z.string().nonempty(),
-          links: z.object({
-            preview: z.string().optional(),
-            download: z.string().optional(),
-            source: z.string().optional()
-          }).optional()
-        })
-      )
-    })
-  }),
   community: defineCollection({
     source: '5.community.yml',
     type: 'page',

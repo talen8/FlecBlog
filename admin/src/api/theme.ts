@@ -1,34 +1,30 @@
 import request from '@/utils/request';
-import type {
-  ThemeConfig,
-  ThemeResponse,
-  ThemeMenuItem,
-  ThemeUpdateCheckResponse,
-} from '@/types/theme';
+import type { ThemeConfig, ThemeConfigResponse, ThemeMenuItem } from '@/types/theme';
 
-export const getThemes = (): Promise<ThemeResponse[]> => {
+/**
+ * 获取主题配置
+ * @returns Promise<ThemeConfigResponse>
+ */
+export const getThemeConfig = (): Promise<ThemeConfigResponse> => {
   return request.get('/admin/themes');
 };
 
-export const getTheme = (slug: string): Promise<ThemeResponse> => {
-  return request.get(`/admin/themes/${slug}`);
+/**
+ * 更新主题配置
+ * @param config 主题配置数据
+ * @returns Promise<ThemeConfig>
+ */
+export const updateThemeConfig = (config: ThemeConfig): Promise<ThemeConfig> => {
+  return request.put('/admin/themes/config', { config });
 };
 
-export const updateThemeConfig = (slug: string, config: ThemeConfig): Promise<ThemeConfig> => {
-  return request.put(`/admin/themes/${slug}/config`, { config });
-};
-
+/**
+ * 更新主题菜单
+ * @param menus 菜单数据
+ * @returns Promise<Record<string, ThemeMenuItem[]>>
+ */
 export const updateThemeMenus = (
-  slug: string,
   menus: Record<string, ThemeMenuItem[]>
 ): Promise<Record<string, ThemeMenuItem[]>> => {
-  return request.put(`/admin/themes/${slug}/menus`, { menus });
-};
-
-export const checkThemeUpdate = (slug: string): Promise<ThemeUpdateCheckResponse> => {
-  return request.post(`/admin/themes/${slug}/check`);
-};
-
-export const resyncTheme = (): Promise<void> => {
-  return request.post('/admin/themes/_resync');
+  return request.put('/admin/themes/menus', { menus });
 };
