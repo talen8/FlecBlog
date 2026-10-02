@@ -106,7 +106,7 @@ onUnmounted(() => {
 .post-content {
   line-height: 1.8;
   font-size: 1rem;
-  color: var(--theme-text-color);
+  color: var(--font-color);
   word-wrap: break-word;
 
   :deep(.markdown-content) {
@@ -137,7 +137,7 @@ onUnmounted(() => {
       align-items: center;
       margin: 1.5rem 0;
       padding: 1rem;
-      background: var(--theme-bg-color-secondary, #f5f5f5);
+      background: var(--flec-heavy-bg);
       border-radius: 8px;
       overflow-x: auto;
 

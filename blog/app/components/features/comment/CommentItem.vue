@@ -200,7 +200,7 @@ const handleReplyClick = () => {
     padding: 10px 0;
 
     &:not(:last-child) {
-      border-bottom: 1px solid var(--flec-border-color);
+      border-bottom: 1px solid var(--flec-border);
     }
   }
 }
@@ -344,7 +344,7 @@ const handleReplyClick = () => {
   transition: all 0.2s;
 
   &:hover {
-    background: var(--flec-hover-bg);
+    background: var(--flec-heavy-bg);
   }
 
   i {
@@ -376,7 +376,7 @@ const handleReplyClick = () => {
 
   &.delete-btn {
     &:hover:not(:disabled) {
-      color: var(--flec-danger, #f56c6c);
+      color: var(--flec-danger);
     }
 
     &:disabled {
@@ -388,12 +388,6 @@ const handleReplyClick = () => {
 
 .reply-input-wrapper {
   margin-top: 12px;
-}
-
-.replies-list {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--flec-border-color);
 }
 
 @media screen and (max-width: 768px) {

@@ -718,7 +718,7 @@ ol {
   }
 
   p {
-    color: var(--text-color);
+    color: var(--font-color);
     margin-bottom: 16px;
     font-size: 1rem;
     line-height: 1.6;

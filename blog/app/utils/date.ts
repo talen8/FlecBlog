@@ -63,6 +63,17 @@ export function formatForBackend(date: Date | null | undefined): string {
 }
 
 /**
+ * 计算自建站日期起运行的天数
+ * @param established 建站日期（YYYY-MM-DD）
+ * @returns 运行天数
+ */
+export function getRunningDays(established: string | null | undefined): number | null {
+  const start = established ? new Date(established).getTime() : NaN;
+  if (!Number.isFinite(start)) return null;
+  return Math.max(0, Math.floor((Date.now() - start) / 86400000));
+}
+
+/**
  * 判断日期是否有效
  * @param date 日期字符串或 Date 对象
  * @returns 是否有效

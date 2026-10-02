@@ -11,12 +11,7 @@ useSeoMeta({
 const { basicConfig } = useSysConfig();
 const { siteStats: stats } = useStats();
 
-const establishedDate = computed(() => basicConfig.value.established || '2024-01-01');
-
-const runningDays = computed(() => {
-  const startDate = new Date(establishedDate.value).getTime();
-  return Math.max(0, Math.floor((Date.now() - startDate) / 86400000));
-});
+const runningDays = computed(() => getRunningDays(basicConfig.value.established));
 
 const formatNumber = (value: string | number) => {
   if (typeof value === 'string') return value;
@@ -167,13 +162,13 @@ const visitCards = computed(() => [
         </div>
 
         <div class="runtime-cards">
-          <article class="runtime-card">
+          <article v-if="runningDays !== null" class="runtime-card">
             <span class="runtime-card__label">运行时长</span>
             <strong class="runtime-card__value">{{ runningDays }} 天</strong>
           </article>
-          <article class="runtime-card">
+          <article v-if="basicConfig.established" class="runtime-card">
             <span class="runtime-card__label">建站日期</span>
-            <strong class="runtime-card__value">{{ establishedDate }}</strong>
+            <strong class="runtime-card__value">{{ basicConfig.established }}</strong>
           </article>
         </div>
       </article>
@@ -242,7 +237,7 @@ const visitCards = computed(() => [
         transparent 120px
       ),
       var(--flec-card-bg);
-    border: 1px solid var(--flec-border-color);
+    border: 1px solid var(--flec-border);
   }
 
   .section-head {
@@ -266,7 +261,7 @@ const visitCards = computed(() => [
     padding: 20px;
     border-radius: 20px;
     background: var(--flec-card-bg);
-    border: 1px solid var(--flec-border-color);
+    border: 1px solid var(--flec-border);
   }
 
   .stat-card__icon {

@@ -662,7 +662,6 @@ textarea {
   width: 24px;
   height: 24px;
   padding: 0;
-  border: 1px solid var(--flec-border-color);
   border-radius: 999px;
   background: transparent;
   color: var(--theme-meta-color);
@@ -925,7 +924,6 @@ textarea {
   background: var(--flec-card-bg);
   border-radius: 6px;
   margin-right: 8px;
-  border: 1px solid var(--flec-border-color);
 
   &-text {
     font-size: 0.85rem;

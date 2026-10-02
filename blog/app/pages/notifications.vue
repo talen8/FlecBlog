@@ -138,11 +138,11 @@ onMounted(() => {
       margin: 0;
       font-size: 1rem;
       font-weight: 500;
-      color: var(--flec-font, #333);
+      color: var(--font-color);
 
       .count {
         font-size: 0.9rem;
-        color: var(--flec-secondary-text, #6b7280);
+        color: var(--theme-meta-color);
         font-weight: 400;
       }
     }
@@ -150,7 +150,7 @@ onMounted(() => {
     .mark-all-btn {
       padding: 0.4rem 0.8rem;
       background: transparent;
-      color: var(--flec-secondary-text, #6b7280);
+      color: var(--theme-meta-color);
       border: 1px solid var(--flec-border, #e5e7eb);
       border-radius: 0.25rem;
       font-size: 0.8rem;
@@ -158,8 +158,8 @@ onMounted(() => {
       transition: all 0.15s;
 
       &:hover {
-        border-color: var(--flec-primary, #3b82f6);
-        color: var(--flec-primary, #3b82f6);
+        border-color: var(--theme-color);
+        color: var(--theme-color);
       }
     }
   }
@@ -168,7 +168,7 @@ onMounted(() => {
     padding: 2rem;
     text-align: center;
     font-size: 0.85rem;
-    color: var(--flec-secondary-text, #9ca3af);
+    color: var(--theme-meta-color);
   }
 
   .list-content {
@@ -182,7 +182,7 @@ onMounted(() => {
     padding: 3rem;
     text-align: center;
     font-size: 0.85rem;
-    color: var(--flec-secondary-text, #9ca3af);
+    color: var(--theme-meta-color);
   }
 }
 
@@ -198,7 +198,7 @@ onMounted(() => {
   }
 
   &:hover {
-    background-color: var(--flec-hover-bg, rgba(0, 0, 0, 0.01));
+    background-color: var(--flec-heavy-bg);
   }
 
   .unread-indicator {
@@ -207,7 +207,7 @@ onMounted(() => {
     right: 0.75rem;
     width: 6px;
     height: 6px;
-    background-color: var(--flec-primary, #3b82f6);
+    background-color: var(--theme-color);
     border-radius: 50%;
   }
 
@@ -226,20 +226,20 @@ onMounted(() => {
         flex: 1;
         font-size: 0.9rem;
         font-weight: 500;
-        color: var(--flec-font, #333);
+        color: var(--font-color);
         margin: 0;
       }
 
       .time {
         font-size: 0.75rem;
-        color: var(--flec-secondary-text, #9ca3af);
+        color: var(--theme-meta-color);
         white-space: nowrap;
       }
     }
 
     .content-text {
       font-size: 0.85rem;
-      color: var(--flec-secondary-text, #6b7280);
+      color: var(--theme-meta-color);
       margin: 0;
       line-height: 1.5;
     }

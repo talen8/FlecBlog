@@ -2,12 +2,7 @@
 const { siteStats } = useStats();
 const { basicConfig } = useSysConfig();
 
-const runningDays = computed(() => {
-  const established = basicConfig.value.established || '2024-01-01';
-  const startDate = new Date(established).getTime();
-  const now = Date.now();
-  return Math.floor((now - startDate) / 86400000);
-});
+const runningDays = computed(() => getRunningDays(basicConfig.value.established));
 </script>
 
 <template>
@@ -33,7 +28,7 @@ const runningDays = computed(() => {
         <div class="item-name">当前在线人数 :</div>
         <div class="item-count">{{ siteStats.online_users }}</div>
       </div>
-      <div class="webinfo-item">
+      <div v-if="runningDays !== null" class="webinfo-item">
         <div class="item-name">网站运行天数 :</div>
         <div class="item-count">{{ runningDays }}</div>
       </div>

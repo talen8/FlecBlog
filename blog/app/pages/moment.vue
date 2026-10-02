@@ -5,10 +5,7 @@ import type { Moment } from '~~/types';
 const { basicConfig } = useSysConfig();
 const { themeConfig } = useTheme();
 const avatarUrl = computed(() => basicConfig.value.author_avatar || '/avatar.webp');
-const momentsPageSize = computed(() => {
-  const configSize = parseInt(themeConfig.value['moments_size'] || '30');
-  return configSize > 0 ? configSize : 30;
-});
+const momentsSize = computed(() => Number(themeConfig.value.moments_size) || 30);
 
 definePageMeta({
   showSidebar: false,
@@ -20,7 +17,7 @@ useSeoMeta({
 });
 
 // 动态列表（最近 N 条，SSR）
-const { data: momentsData } = await useMomentList(momentsPageSize);
+const { data: momentsData } = await useMomentList(momentsSize);
 const moments = computed(() => momentsData.value ?? []);
 
 const { waterfall, isLayoutReady } = useWaterfall({
@@ -245,7 +242,7 @@ const handleCommentClick = (moment: Moment) => {
     <!-- 底部提示 -->
     <div v-if="moments.length > 0" class="moment-tip">
       <i class="ri-information-line" />
-      <span>只显示最近{{ momentsPageSize }}条动态</span>
+      <span>只显示最近{{ momentsSize }}条动态</span>
     </div>
 
     <!-- 评论区域 -->

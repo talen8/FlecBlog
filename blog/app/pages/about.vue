@@ -78,13 +78,10 @@ const info = computed(() => {
   };
 });
 
-const runningDays = computed(() => {
-  const established = basicConfig.value.established || '2024-01-01';
-  const startDate = new Date(established).getTime();
-  const now = Date.now();
-  return Math.floor((now - startDate) / 86400000);
-});
-const runTime = computed(() => `已稳定运行 ${runningDays.value} 天 🚀`);
+const runningDays = computed(() => getRunningDays(basicConfig.value.established));
+const runTime = computed(() =>
+  runningDays.value === null ? '' : `已稳定运行 ${runningDays.value} 天 🚀`
+);
 
 const formatWords = (words: string) => {
   const n = +words;
@@ -214,7 +211,7 @@ const formatWords = (words: string) => {
           <span>02</span>
           <div class="title-h1">本站信息</div>
         </div>
-        <div class="about-layout box-bottom">{{ runTime }}</div>
+        <div v-if="runTime" class="about-layout box-bottom">{{ runTime }}</div>
       </div>
       <div class="information">
         <div class="about-layout Version">

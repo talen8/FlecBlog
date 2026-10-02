@@ -15,6 +15,7 @@
   --flec-btn-hover: color-mix(in srgb, var(--theme-color) 74%, #ffffff);
   --flec-heavy-bg: #f5f5f5;
   --flec-border: #e0e0e0;
+  --flec-danger: #f56c6c;
 
   /* 导航栏 */
   --flec-nav-font: #eeeeee;
@@ -64,6 +65,7 @@
   --flec-btn-hover: #787878;
   --flec-heavy-bg: #1f1f1f;
   --flec-border: #3a3a3a;
+  --flec-danger: #ff6b6b;
 
   --flec-nav-font: #b8b8b8;
   --flec-nav-font-hover: #cfcfcf;

@@ -1250,7 +1250,7 @@ const formatDate = (date?: string) => {
   }
 
   .query-result {
-    background: var(--flec-light-bg);
+    background: var(--flec-heavy-bg);
     border: 1px solid var(--flec-border);
     border-radius: 8px;
     padding: 1.5rem;

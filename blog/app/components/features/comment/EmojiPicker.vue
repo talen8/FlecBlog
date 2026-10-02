@@ -135,7 +135,6 @@ onMounted(loadEmojis);
 
 .emoji-tabs {
   display: flex;
-  border-bottom: 1px solid var(--flec-border-color);
   background: var(--flec-heavy-bg);
   overflow-x: auto;
 
@@ -176,7 +175,7 @@ onMounted(loadEmojis);
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--flec-border-color);
+    background: var(--flec-border);
     border-radius: 3px;
   }
 }

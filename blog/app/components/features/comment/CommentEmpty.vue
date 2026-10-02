@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: var(--flec-lightText);
+  color: var(--theme-meta-color);
   text-align: center;
 
   i {

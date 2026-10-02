@@ -1,13 +1,17 @@
 <script lang="ts" setup>
 const { basicConfig } = useSysConfig();
 const { themeConfig } = useTheme();
-const startYear = 2024;
-const copyrightYear = ref(`${startYear}`);
 
-onMounted(() => {
+/**
+ * 版权年份区间
+ * 起始年取系统配置的建站日期，未配置时退化为只显示当前年
+ */
+const copyrightYear = computed(() => {
   const currentYear = new Date().getFullYear();
-  copyrightYear.value =
-    startYear === currentYear ? `${currentYear}` : `${startYear} - ${currentYear}`;
+  const establishedYear = new Date(basicConfig.value.established ?? '').getUTCFullYear();
+  const startYear = Number.isFinite(establishedYear) ? establishedYear : currentYear;
+
+  return startYear >= currentYear ? `${currentYear}` : `${startYear} - ${currentYear}`;
 });
 
 /**

@@ -18,14 +18,12 @@ const groupedComments = computed(() => {
 
   props.comments.forEach(item => {
     if (item.depth === 0) {
-      // 顶级评论，创建新�?
       currentGroup = {
         parent: item,
         replies: [],
       };
       groups.push(currentGroup);
     } else {
-      // 回复评论，添加到当前�?
       if (currentGroup) {
         currentGroup.replies.push(item);
       }
@@ -62,6 +60,12 @@ const groupedComments = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  .replies-list {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--flec-border);
+  }
 }
 
 .comment-card {

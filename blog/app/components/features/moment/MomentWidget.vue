@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import type { Moment } from '~~/types';
 
-// 动态列表（最近 10 条，SSR）
-const { data: moments } = await useMomentList(() => 10);
+// 动态列表
+const { themeConfig } = useTheme();
+const { data: moments } = await useMomentList(() => Number(themeConfig.value.moments_size) || 30);
 
 // 当前显示的动态索引
 const currentIndex = ref(0);

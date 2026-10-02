@@ -46,7 +46,7 @@ onMounted(async () => {
 
 .loading-content {
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--theme-meta-color);
 }
 
 .spin {
