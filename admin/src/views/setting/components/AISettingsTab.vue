@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="form" label-width="120px" class="setting-form">
+  <el-form :model="form" label-width="120px" class="setting-form" autocomplete="off">
     <el-divider content-position="left">基础配置</el-divider>
 
     <el-form-item>
@@ -8,6 +8,8 @@
       </template>
       <el-input
         v-model="form.base_url"
+        name="ai-endpoint"
+        autocomplete="off"
         placeholder="例如 https://api.deepseek.com"
         :disabled="loading"
       />
@@ -19,11 +21,12 @@
       </template>
       <el-input
         v-model="form.api_key"
+        name="ai-secret"
         type="password"
         show-password
         placeholder="输入 API Key"
         :disabled="loading"
-        autocomplete="off"
+        autocomplete="new-password"
       />
     </el-form-item>
 

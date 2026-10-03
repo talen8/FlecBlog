@@ -1,15 +1,9 @@
 package service
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
@@ -18,231 +12,87 @@ import (
 	"gorm.io/gorm"
 )
 
-// ThemeService 主题服务
+// ThemeService 主题配置服务
 type ThemeService struct {
-	db          *gorm.DB
 	themeRepo   *repository.ThemeRepository
 	fileService *FileService
-	blogURL     string
 }
 
-// NewThemeService 创建主题服务
-func NewThemeService(db *gorm.DB, themeRepo *repository.ThemeRepository, fileService *FileService, blogURL string) *ThemeService {
+// NewThemeService 创建主题配置服务
+func NewThemeService(themeRepo *repository.ThemeRepository, fileService *FileService) *ThemeService {
 	return &ThemeService{
-		db:          db,
 		themeRepo:   themeRepo,
 		fileService: fileService,
-		blogURL:     blogURL,
 	}
 }
 
-// SyncThemeMeta 同步主题镜像元数据，并激活当前主题
-func (s *ThemeService) SyncThemeMeta(req *dto.ThemeMetaSyncRequest) error {
-	if !json.Valid(req.Schema) {
-		return errors.New("schema 不是合法 JSON")
-	}
-
-	return s.db.Transaction(func(tx *gorm.DB) error {
-		repo := repository.NewThemeRepository(tx)
-
-		oldTheme, _ := repo.Get(req.Slug)
-
-		if err := repo.DeactivateAll(); err != nil {
-			return err
-		}
-
-		config := `{}`
-		menus := `{}`
-
-		if oldTheme != nil {
-			config = migrateConfigBySchema(oldTheme.Config, req.Schema)
-			menus = oldTheme.Menus
-		}
-
-		return repo.SyncTheme(&model.ThemeInstance{
-			Slug:        req.Slug,
-			Name:        req.Name,
-			Version:     req.Version,
-			Author:      req.Author,
-			Description: req.Description,
-			License:     req.License,
-			Repo:        req.Repo,
-			Schema:      string(req.Schema),
-			IsActive:    true,
-			Config:      config,
-			Menus:       menus,
-		})
-	})
-}
-
-// PullThemeMeta 从博客容器拉取 theme.json 并同步元数据
-// 版本与库中一致时跳过写库；force 为 true 时强制同步（管端手动触发）
-func (s *ThemeService) PullThemeMeta(ctx context.Context, force bool) error {
-	meta, schema, err := s.fetchThemeMeta(ctx)
-	if err != nil {
-		return err
-	}
-
-	// 版本未变化时跳过，减少无谓事务与配置迁移
-	if !force {
-		if active, err := s.themeRepo.GetActive(); err == nil && active.Version == meta.Version {
-			return nil
-		}
-	}
-
-	return s.SyncThemeMeta(&dto.ThemeMetaSyncRequest{
-		Slug:        meta.Slug,
-		Name:        meta.Name,
-		Version:     meta.Version,
-		Author:      meta.Author,
-		Description: meta.Description,
-		License:     meta.License,
-		Repo:        meta.Repo,
-		Schema:      schema,
-	})
-}
-
-// themeMetaBrief theme.json 中 $meta 的扁平结构
-type themeMetaBrief struct {
-	Slug        string
-	Name        string
-	Version     string
-	Author      string
-	Description string
-	License     string
-	Repo        string
-}
-
-// fetchThemeMeta 拉取 theme.json，拆出 $meta 与 schema
-func (s *ThemeService) fetchThemeMeta(ctx context.Context) (*themeMetaBrief, json.RawMessage, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.blogURL+"/theme.json", nil)
-	if err != nil {
-		return nil, nil, fmt.Errorf("创建请求失败: %w", err)
-	}
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, nil, fmt.Errorf("请求博客端失败: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, nil, errors.New("博客端未提供 theme.json（主题镜像可能未基于新版 core-nuxt 构建）")
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, nil, fmt.Errorf("博客端返回错误: status=%d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
-	if err != nil {
-		return nil, nil, fmt.Errorf("读取响应失败: %w", err)
-	}
-
-	// theme.json 结构: { $meta: {...}, ...schema }，拆出 $meta，剩余整体作为 schema
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(body, &raw); err != nil {
-		return nil, nil, fmt.Errorf("解析 theme.json 失败: %w", err)
-	}
-
-	metaRaw, ok := raw["$meta"]
-	if !ok {
-		return nil, nil, errors.New("theme.json 中缺少 $meta")
-	}
-	delete(raw, "$meta")
-
-	var metaFields map[string]string
-	if err := json.Unmarshal(metaRaw, &metaFields); err != nil {
-		return nil, nil, fmt.Errorf("解析 $meta 失败: %w", err)
-	}
-
-	meta := &themeMetaBrief{
-		Slug:        metaFields["slug"],
-		Name:        metaFields["name"],
-		Version:     metaFields["version"],
-		Author:      metaFields["author"],
-		Description: metaFields["description"],
-		License:     metaFields["license"],
-		Repo:        metaFields["repo"],
-	}
-	if meta.Slug == "" {
-		return nil, nil, errors.New("theme.json 中缺少 $meta.slug")
-	}
-
-	schema, err := json.Marshal(raw)
-	if err != nil {
-		return nil, nil, fmt.Errorf("序列化 schema 失败: %w", err)
-	}
-
-	return meta, schema, nil
-}
-
-// GetActiveTheme 获取前台激活主题信息
-func (s *ThemeService) GetActiveTheme() (*dto.ThemePublicResponse, error) {
-	theme, err := s.themeRepo.GetActive()
-	if err != nil {
-		return nil, err
-	}
-	return s.toThemePublicResponse(theme, true)
-}
-
-// ListThemes 获取主题列表
-func (s *ThemeService) ListThemes() ([]dto.ThemeResponse, error) {
-	themes, err := s.themeRepo.List()
+// GetThemeConfig 获取后台主题配置
+func (s *ThemeService) GetThemeConfig() (*dto.ThemeConfigResponse, error) {
+	config, err := s.loadConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]dto.ThemeResponse, 0, len(themes))
-	for i := range themes {
-		resp, err := s.toThemeResponse(&themes[i], false)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, *resp)
-	}
-	return result, nil
-}
-
-// GetTheme 获取后台主题详情
-func (s *ThemeService) GetTheme(slug string) (*dto.ThemeResponse, error) {
-	theme, err := s.themeRepo.Get(slug)
+	menus, err := s.loadMenus()
 	if err != nil {
 		return nil, err
 	}
-	return s.toThemeResponse(theme, false)
+
+	return buildThemeConfigResponse(config, menus)
+}
+
+// GetThemeConfigForWeb 获取前台主题配置（菜单只返回启用项）
+func (s *ThemeService) GetThemeConfigForWeb() (*dto.ThemeConfigResponse, error) {
+	config, err := s.loadConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	menus, err := s.loadMenus()
+	if err != nil {
+		return nil, err
+	}
+
+	return buildThemeConfigResponse(config, filterEnabledMenuGroups(menus))
 }
 
 // UpdateConfig 更新主题配置
-func (s *ThemeService) UpdateConfig(slug string, req *dto.ConfigUpdateRequest) (json.RawMessage, error) {
-	nextConfig := rawJSONOrDefault(req.Config, `{}`)
-	if !json.Valid(nextConfig) {
-		return nil, errors.New("config 不是合法 JSON")
+func (s *ThemeService) UpdateConfig(req *dto.ConfigUpdateRequest) (json.RawMessage, error) {
+	var data map[string]interface{}
+	if err := json.Unmarshal(req.Config, &data); err != nil {
+		return nil, fmt.Errorf("config 不是合法 JSON: %w", err)
 	}
 
-	theme, err := s.themeRepo.Get(slug)
+	items := make([]model.ThemeConfig, 0, len(data))
+	for key, value := range data {
+		if key == model.ThemeConfigKeyMenus {
+			continue // 菜单由独立接口维护，避免配置整体覆盖时误改菜单
+		}
+		encoded, err := encodeConfigValue(value)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, model.ThemeConfig{Key: key, Value: encoded})
+	}
+
+	oldConfig, err := s.loadConfig()
 	if err != nil {
 		return nil, err
 	}
-
-	if err := s.updateConfigImageUsage(theme, nextConfig); err != nil {
-		return nil, err
-	}
-	if err := s.themeRepo.UpdateConfig(slug, string(nextConfig)); err != nil {
+	if err := s.updateConfigImageUsage(oldConfig, data); err != nil {
 		return nil, err
 	}
 
-	return nextConfig, nil
+	if err := s.themeRepo.UpsertMany(items); err != nil {
+		return nil, err
+	}
+
+	return req.Config, nil
 }
 
-// UpdateMenus 整体替换主题菜单
-func (s *ThemeService) UpdateMenus(slug string, req *dto.MenuUpdateRequest) (map[string][]dto.MenuDataItem, error) {
-	theme, err := s.themeRepo.Get(slug)
-	if err != nil {
-		return nil, err
-	}
-
-	oldMenus, err := parseMenus(theme.Menus)
+// UpdateMenus 更新主题菜单
+func (s *ThemeService) UpdateMenus(req *dto.MenuUpdateRequest) (map[string][]dto.MenuDataItem, error) {
+	oldMenus, err := s.loadMenus()
 	if err != nil {
 		return nil, err
 	}
@@ -259,106 +109,67 @@ func (s *ThemeService) UpdateMenus(slug string, req *dto.MenuUpdateRequest) (map
 	if err != nil {
 		return nil, err
 	}
-	if err := s.themeRepo.UpdateMenus(slug, string(encoded)); err != nil {
+	if err := s.themeRepo.Upsert(model.ThemeConfigKeyMenus, string(encoded)); err != nil {
 		return nil, err
 	}
-	if err := s.updateMenuIconUsage(slug, oldMenus, nextMenus); err != nil {
+	if err := s.updateMenuIconUsage(oldMenus, nextMenus); err != nil {
 		return nil, err
 	}
 
 	return nextMenus, nil
 }
 
-// toThemeResponse 将主题模型转换为接口响应，并按需过滤未启用菜单
-func (s *ThemeService) toThemeResponse(theme *model.ThemeInstance, filterEnabledMenus bool) (*dto.ThemeResponse, error) {
-	menusRaw := rawJSONOrDefault([]byte(theme.Menus), `{}`)
-	if filterEnabledMenus {
-		menus, err := parseMenus(theme.Menus)
-		if err != nil {
-			return nil, err
+// loadMenus 读取菜单配置
+func (s *ThemeService) loadMenus() (map[string][]dto.MenuDataItem, error) {
+	item, err := s.themeRepo.Get(model.ThemeConfigKeyMenus)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return map[string][]dto.MenuDataItem{}, nil
 		}
-		filtered := filterEnabledMenuGroups(menus)
-		encoded, err := json.Marshal(filtered)
-		if err != nil {
-			return nil, err
-		}
-		menusRaw = encoded
+		return nil, err
 	}
-
-	return &dto.ThemeResponse{
-		Slug:        theme.Slug,
-		Name:        theme.Name,
-		Version:     theme.Version,
-		Author:      theme.Author,
-		Description: theme.Description,
-		License:     theme.License,
-		Repo:        theme.Repo,
-		Schema:      rawJSONOrDefault([]byte(theme.Schema), `{}`),
-		IsActive:    theme.IsActive,
-		Config:      rawJSONOrDefault([]byte(theme.Config), `{}`),
-		Menus:       menusRaw,
-	}, nil
+	return parseMenus(item.Value)
 }
 
-// toThemePublicResponse 转换为前台主题响应（不含 schema）
-func (s *ThemeService) toThemePublicResponse(theme *model.ThemeInstance, filterEnabledMenus bool) (*dto.ThemePublicResponse, error) {
-	menusRaw := rawJSONOrDefault([]byte(theme.Menus), `{}`)
-	if filterEnabledMenus {
-		menus, err := parseMenus(theme.Menus)
-		if err != nil {
-			return nil, err
-		}
-		filtered := filterEnabledMenuGroups(menus)
-		encoded, err := json.Marshal(filtered)
-		if err != nil {
-			return nil, err
-		}
-		menusRaw = encoded
+// updateConfigImageUsage 根据配置变更同步文件使用状态
+func (s *ThemeService) updateConfigImageUsage(oldConfig map[string]interface{}, patch map[string]interface{}) error {
+	nextConfig := make(map[string]interface{}, len(oldConfig)+len(patch))
+	for key, value := range oldConfig {
+		nextConfig[key] = value
+	}
+	for key, value := range patch {
+		nextConfig[key] = value
 	}
 
-	return &dto.ThemePublicResponse{
-		Slug:        theme.Slug,
-		Name:        theme.Name,
-		Version:     theme.Version,
-		Author:      theme.Author,
-		Description: theme.Description,
-		License:     theme.License,
-		Repo:        theme.Repo,
-		IsActive:    theme.IsActive,
-		Config:      rawJSONOrDefault([]byte(theme.Config), `{}`),
-		Menus:       menusRaw,
-	}, nil
-}
+	oldRefs := collectStrings(oldConfig)
+	nextRefs := collectStrings(nextConfig)
 
-// updateConfigImageUsage 根据配置变更同步主题图片文件使用状态
-func (s *ThemeService) updateConfigImageUsage(theme *model.ThemeInstance, nextConfig json.RawMessage) error {
-	if s.fileService == nil {
-		return nil
-	}
-
-	oldURLs := collectConfigImageURLs([]byte(theme.Schema), []byte(theme.Config))
-	nextURLs := collectConfigImageURLs([]byte(theme.Schema), nextConfig)
-	for url := range oldURLs {
-		if !nextURLs[url] {
-			_ = s.fileService.MarkAsUnused(url)
+	changed := make([]string, 0, len(oldRefs)+len(nextRefs))
+	for url := range oldRefs {
+		if !nextRefs[url] {
+			changed = append(changed, url)
 		}
 	}
-	for url := range nextURLs {
-		if !oldURLs[url] {
-			if err := s.fileService.MarkAsUsedWithType(url, theme.Slug); err != nil {
+	for url := range nextRefs {
+		if !oldRefs[url] {
+			changed = append(changed, url)
+		}
+	}
+
+	for _, url := range changed {
+		if nextRefs[url] {
+			if err := s.fileService.MarkAsUsed(url); err != nil {
 				return err
 			}
+		} else {
+			_ = s.fileService.MarkAsUnused(url)
 		}
 	}
 	return nil
 }
 
 // updateMenuIconUsage 根据菜单变更同步菜单图标文件使用状态
-func (s *ThemeService) updateMenuIconUsage(slug string, oldMenus map[string][]dto.MenuDataItem, nextMenus map[string][]dto.MenuDataItem) error {
-	if s.fileService == nil {
-		return nil
-	}
-
+func (s *ThemeService) updateMenuIconUsage(oldMenus map[string][]dto.MenuDataItem, nextMenus map[string][]dto.MenuDataItem) error {
 	oldIcons := collectMenusIcons(oldMenus)
 	nextIcons := collectMenusIcons(nextMenus)
 	for icon := range oldIcons {
@@ -368,7 +179,7 @@ func (s *ThemeService) updateMenuIconUsage(slug string, oldMenus map[string][]dt
 	}
 	for icon := range nextIcons {
 		if !oldIcons[icon] {
-			if err := s.fileService.MarkAsUsedWithType(icon, slug); err != nil {
+			if err := s.fileService.MarkAsUsed(icon); err != nil {
 				return err
 			}
 		}
@@ -376,12 +187,86 @@ func (s *ThemeService) updateMenuIconUsage(slug string, oldMenus map[string][]dt
 	return nil
 }
 
-// rawJSONOrDefault 在 JSON 为空或 null 时返回默认 JSON
-func rawJSONOrDefault(raw []byte, fallback string) json.RawMessage {
-	if len(raw) == 0 || string(raw) == "null" {
-		return json.RawMessage(fallback)
+// loadConfig 读取全部配置项为对象，菜单键不参与
+func (s *ThemeService) loadConfig() (map[string]interface{}, error) {
+	items, err := s.themeRepo.List()
+	if err != nil {
+		return nil, err
 	}
-	return json.RawMessage(raw)
+
+	config := make(map[string]interface{}, len(items))
+	for i := range items {
+		if items[i].Key == model.ThemeConfigKeyMenus {
+			continue
+		}
+		config[items[i].Key] = decodeConfigValue(items[i].Value)
+	}
+	return config, nil
+}
+
+// buildThemeConfigResponse 组装配置与菜单响应
+func buildThemeConfigResponse(config map[string]interface{}, menus map[string][]dto.MenuDataItem) (*dto.ThemeConfigResponse, error) {
+	configRaw, err := json.Marshal(config)
+	if err != nil {
+		return nil, err
+	}
+	menusRaw, err := json.Marshal(menus)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.ThemeConfigResponse{Config: configRaw, Menus: menusRaw}, nil
+}
+
+// decodeConfigValue 将数据库文本还原为 JSON 值：可解析为 JSON 的按类型还原，否则按纯字符串处理
+func decodeConfigValue(raw string) interface{} {
+	if raw == "" {
+		return ""
+	}
+
+	var value interface{}
+	if err := json.Unmarshal([]byte(raw), &value); err != nil {
+		return raw
+	}
+	return value
+}
+
+// encodeConfigValue 将 JSON 值序列化为数据库文本：字符串直接存原文，其余存 JSON 文本
+func encodeConfigValue(value interface{}) (string, error) {
+	if text, ok := value.(string); ok {
+		return text, nil
+	}
+
+	data, err := json.Marshal(value)
+	if err != nil {
+		return "", fmt.Errorf("配置值序列化失败: %w", err)
+	}
+	return string(data), nil
+}
+
+// collectStrings 深度遍历配置值，收集所有非空字符串叶子
+func collectStrings(value interface{}) map[string]bool {
+	out := make(map[string]bool)
+
+	var walk func(v interface{})
+	walk = func(v interface{}) {
+		switch t := v.(type) {
+		case string:
+			if t != "" {
+				out[t] = true
+			}
+		case map[string]interface{}:
+			for _, item := range t {
+				walk(item)
+			}
+		case []interface{}:
+			for _, item := range t {
+				walk(item)
+			}
+		}
+	}
+	walk(value)
+
+	return out
 }
 
 // parseMenus 将菜单 JSON 字符串解析为按类型分组的菜单树
@@ -451,10 +336,10 @@ func normalizeMenuItemsWithCounter(items []dto.MenuDataItem, existingIDs map[int
 
 	result := make([]dto.MenuDataItem, 0, len(items))
 	for _, item := range items {
-		if item.ID == 0 {
+		if item.ID <= 0 {
 			item.ID = *nextID
 			(*nextID)++
-		} else if item.ID < 0 || !existingIDs[item.ID] {
+		} else if !existingIDs[item.ID] {
 			return nil, fmt.Errorf("菜单 ID 非法: %d", item.ID)
 		}
 
@@ -468,7 +353,7 @@ func normalizeMenuItemsWithCounter(items []dto.MenuDataItem, existingIDs map[int
 	return result, nil
 }
 
-// validateUniqueMenuIDs 校验所有菜单项 ID 在主题内全局唯一
+// validateUniqueMenuIDs 校验所有菜单项 ID 全局唯一
 func validateUniqueMenuIDs(menus map[string][]dto.MenuDataItem) error {
 	seen := make(map[int]bool)
 	for _, items := range menus {
@@ -518,9 +403,6 @@ func filterEnabledMenuItems(items []dto.MenuDataItem) []dto.MenuDataItem {
 			continue
 		}
 		item.Children = filterEnabledMenuItems(item.Children)
-		if item.Children == nil {
-			item.Children = []dto.MenuDataItem{}
-		}
 		result = append(result, item)
 	}
 	return result
@@ -537,344 +419,4 @@ func collectMenusIcons(menus map[string][]dto.MenuDataItem) map[string]bool {
 		})
 	}
 	return icons
-}
-
-// CheckThemeUpdate 检查主题版本更新
-func (s *ThemeService) CheckThemeUpdate(ctx context.Context, slug string) (*dto.ThemeUpdateCheckResponse, error) {
-	theme, err := s.themeRepo.Get(slug)
-	if err != nil {
-		return nil, fmt.Errorf("获取主题失败: %w", err)
-	}
-
-	if theme.Repo == "" {
-		return nil, errors.New("主题未设置仓库地址")
-	}
-
-	owner, repoName, ok := parseRepoURL(theme.Repo)
-	if !ok {
-		return nil, errors.New("仅支持 GitHub 仓库地址")
-	}
-
-	resp := &dto.ThemeUpdateCheckResponse{
-		CurrentVersion: strings.TrimPrefix(theme.Version, "v"),
-	}
-
-	latestVersion, releaseURL, err := fetchLatestRelease(ctx, owner, repoName)
-	if err != nil {
-		return nil, err
-	}
-
-	resp.LatestVersion = strings.TrimPrefix(latestVersion, "v")
-	resp.ReleaseURL = releaseURL
-
-	if resp.CurrentVersion == "" {
-		return resp, nil
-	}
-
-	cmp, err := compareVersion(latestVersion, resp.CurrentVersion)
-	if err != nil {
-		return nil, fmt.Errorf("比较版本失败: %w", err)
-	}
-
-	resp.HasUpdate = cmp > 0
-	return resp, nil
-}
-
-// parseRepoURL 解析 GitHub 仓库地址，返回 owner 和 repo
-func parseRepoURL(repo string) (string, string, bool) {
-	repo = strings.TrimSuffix(repo, ".git")
-	repo = strings.TrimSuffix(repo, "/")
-
-	if !strings.HasPrefix(repo, "https://github.com/") {
-		return "", "", false
-	}
-
-	parts := strings.SplitN(strings.TrimPrefix(repo, "https://github.com/"), "/", 2)
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return "", "", false
-	}
-
-	return parts[0], parts[1], true
-}
-
-// fetchLatestRelease 从 GitHub API 获取最新 release
-func fetchLatestRelease(ctx context.Context, owner, repo string) (tagName, htmlURL string, err error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
-	if err != nil {
-		return "", "", fmt.Errorf("创建请求失败: %w", err)
-	}
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "FlecBlog-ThemeUpdateChecker")
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", "", fmt.Errorf("请求 GitHub API 失败: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode == http.StatusNotFound {
-		return "", "", errors.New("仓库不存在或没有 release")
-	}
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
-		return "", "", fmt.Errorf("GitHub API 返回错误: status=%d body=%s", resp.StatusCode, strings.TrimSpace(string(body)))
-	}
-
-	var release struct {
-		TagName string `json:"tag_name"`
-		HTMLURL string `json:"html_url"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return "", "", fmt.Errorf("解析响应失败: %w", err)
-	}
-
-	if release.TagName == "" {
-		return "", "", errors.New("release 缺少 tag_name")
-	}
-
-	return release.TagName, release.HTMLURL, nil
-}
-
-// collectConfigImageURLs 按主题 schema 从配置中收集图片地址
-func collectConfigImageURLs(schemaRaw []byte, configRaw []byte) map[string]bool {
-	urls := make(map[string]bool)
-
-	var configData interface{}
-	if err := json.Unmarshal(rawJSONOrDefault(configRaw, `{}`), &configData); err != nil {
-		return urls
-	}
-
-	var schemaData interface{}
-	if err := json.Unmarshal(rawJSONOrDefault(schemaRaw, `{}`), &schemaData); err != nil {
-		return urls
-	}
-	collectSchemaImageURLs(schemaData, configData, urls)
-	return urls
-}
-
-// collectSchemaImageURLs 递归按 schema 字段定义收集配置中的图片地址
-func collectSchemaImageURLs(schemaData interface{}, configData interface{}, urls map[string]bool) {
-	schemaObj, ok := schemaData.(map[string]interface{})
-	if !ok {
-		return
-	}
-
-	if isImageField(schemaObj) {
-		if value, ok := configData.(string); ok && value != "" {
-			urls[value] = true
-		}
-	}
-
-	if properties, ok := schemaObj["properties"].(map[string]interface{}); ok {
-		configObj, _ := configData.(map[string]interface{})
-		for key, childSchema := range properties {
-			collectSchemaImageURLs(childSchema, configObj[key], urls)
-		}
-	}
-
-	if itemFields, ok := schemaObj["x-item-fields"].([]interface{}); ok {
-		if configItems, ok := configData.([]interface{}); ok {
-			for _, item := range configItems {
-				itemObj, _ := item.(map[string]interface{})
-				for _, fieldSchema := range itemFields {
-					fieldObj, ok := fieldSchema.(map[string]interface{})
-					if !ok {
-						continue
-					}
-					key, _ := fieldObj["key"].(string)
-					collectSchemaImageURLs(fieldSchema, itemObj[key], urls)
-				}
-			}
-		}
-	}
-
-	if itemsSchema, ok := schemaObj["items"]; ok {
-		if configItems, ok := configData.([]interface{}); ok {
-			for _, item := range configItems {
-				collectSchemaImageURLs(itemsSchema, item, urls)
-			}
-		}
-	}
-
-	configObj, _ := configData.(map[string]interface{})
-	for key, childSchema := range schemaObj {
-		if strings.HasPrefix(key, "$") || isSchemaKeyword(key) {
-			continue
-		}
-		childObj, ok := childSchema.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		if isThemeFieldSchema(childObj) {
-			collectSchemaImageURLs(childSchema, configObj[key], urls)
-		} else {
-			collectSchemaImageURLs(childSchema, configData, urls)
-		}
-	}
-}
-
-// isImageField 判断 schema 字段是否表示图片或上传类型
-func isImageField(schemaObj map[string]interface{}) bool {
-	format, _ := schemaObj["format"].(string)
-	fieldType, _ := schemaObj["type"].(string)
-	return format == "image" || format == "upload" || fieldType == "upload"
-}
-
-// isThemeFieldSchema 判断对象是否像一个主题字段 schema
-func isThemeFieldSchema(schemaObj map[string]interface{}) bool {
-	_, hasType := schemaObj["type"]
-	_, hasFormat := schemaObj["format"]
-	_, hasItems := schemaObj["items"]
-	_, hasProperties := schemaObj["properties"]
-	_, hasItemFields := schemaObj["x-item-fields"]
-	_, hasEnum := schemaObj["enum"]
-	_, hasOptions := schemaObj["options"]
-	return hasType || hasFormat || hasItems || hasProperties || hasItemFields || hasEnum || hasOptions
-}
-
-// isSchemaKeyword 判断 key 是否为 schema 元信息关键字
-func isSchemaKeyword(key string) bool {
-	switch key {
-	case "type", "title", "label", "description", "default", "enum", "enumNames",
-		"options", "format", "placeholder", "widget", "group", "properties", "items",
-		"minimum", "maximum", "min", "max", "rows", "uploadType", "x-group",
-		"x-component", "x-upload-type", "x-item-fields", "width", "height":
-		return true
-	default:
-		return false
-	}
-}
-
-// migrateConfigBySchema 按新 schema 中声明的 $from 迁移旧配置
-func migrateConfigBySchema(oldConfigStr string, schemaRaw json.RawMessage) string {
-	var config map[string]interface{}
-	if err := json.Unmarshal([]byte(oldConfigStr), &config); err != nil {
-		return oldConfigStr
-	}
-
-	var schema interface{}
-	if err := json.Unmarshal(schemaRaw, &schema); err != nil {
-		return oldConfigStr
-	}
-
-	collectAliases(schema, func(from, to string) {
-		if _, exists := config[to]; exists {
-			return
-		}
-		if val, ok := config[from]; ok {
-			config[to] = val
-			delete(config, from)
-		}
-	})
-
-	coerceConfigTypes(config, schema)
-
-	data, _ := json.Marshal(config)
-	return string(data)
-}
-
-// collectAliases 递归遍历 schema，对每个含 $from 的字段回调 (旧名, 新名)
-func collectAliases(schema interface{}, fn func(from, to string)) {
-	obj, ok := schema.(map[string]interface{})
-	if !ok {
-		return
-	}
-
-	for key, val := range obj {
-		child, ok := val.(map[string]interface{})
-		if !ok {
-			continue
-		}
-
-		if from, ok := child["$from"]; ok {
-			emitAlias(from, key, fn)
-			continue
-		}
-
-		collectAliases(val, fn)
-	}
-}
-
-// coerceConfigTypes 按 schema 声明的 type 隐式转换 config 值类型
-func coerceConfigTypes(config map[string]interface{}, schema interface{}) {
-	obj, ok := schema.(map[string]interface{})
-	if !ok {
-		return
-	}
-	for key, val := range obj {
-		child, ok := val.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		if targetType, ok := child["type"]; ok {
-			if v, exists := config[key]; exists {
-				config[key] = coerceValue(v, fmt.Sprintf("%v", targetType))
-			}
-			continue
-		}
-		coerceConfigTypes(config, val)
-	}
-}
-
-func coerceValue(v interface{}, targetType string) interface{} {
-	switch targetType {
-	case "number", "integer":
-		switch val := v.(type) {
-		case string:
-			if n, err := strconv.ParseFloat(val, 64); err == nil {
-				if targetType == "integer" {
-					return int(n)
-				}
-				return n
-			}
-		case bool:
-			if val {
-				return 1
-			}
-			return 0
-		}
-	case "string":
-		switch val := v.(type) {
-		case float64:
-			if val == float64(int64(val)) {
-				return fmt.Sprintf("%.0f", val)
-			}
-			return fmt.Sprintf("%v", val)
-		case bool:
-			return fmt.Sprintf("%v", val)
-		case int:
-			return fmt.Sprintf("%d", val)
-		}
-	case "boolean":
-		switch val := v.(type) {
-		case string:
-			switch val {
-			case "true", "1":
-				return true
-			case "false", "0":
-				return false
-			}
-		case float64:
-			return val != 0
-		case int:
-			return val != 0
-		}
-	}
-	return v
-}
-
-func emitAlias(raw interface{}, to string, fn func(from, to string)) {
-	switch v := raw.(type) {
-	case string:
-		fn(v, to)
-	case []interface{}:
-		for _, alias := range v {
-			if s, ok := alias.(string); ok {
-				fn(s, to)
-			}
-		}
-	}
 }

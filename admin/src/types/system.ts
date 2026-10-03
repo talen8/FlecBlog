@@ -14,6 +14,7 @@ export interface SystemStatic {
   storage_status: string;
   email_status: string;
   feishu_status: string;
+  panel_status: string;
   app_version: string;
 }
 

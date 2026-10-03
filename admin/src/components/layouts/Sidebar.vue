@@ -27,7 +27,7 @@
           <i class="ri-article-line ri-lg"></i>
           <template #title>文章管理</template>
         </el-menu-item>
-        <el-menu-item v-if="isFeatureEnabled('moments')" index="/moments">
+        <el-menu-item index="/moments">
           <i class="ri-chat-3-line ri-lg"></i>
           <template #title>动态管理</template>
         </el-menu-item>
@@ -50,7 +50,7 @@
           <i class="ri-rss-line ri-lg"></i>
           <template #title>RSS订阅</template>
         </el-menu-item>
-        <el-menu-item v-if="isFeatureEnabled('feedback')" index="/feedback">
+        <el-menu-item index="/feedback">
           <i class="ri-feedback-line ri-lg"></i>
           <template #title>反馈投诉</template>
         </el-menu-item>
@@ -93,11 +93,9 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import { ref, nextTick } from 'vue';
-import { useThemeFeatures } from '@/utils/visibility';
 
 const route = useRoute();
 const menuRef = ref();
-const { isFeatureEnabled } = useThemeFeatures();
 
 // 子菜单索引列表
 const subMenus = ['content', 'interaction', 'management'];

@@ -4217,14 +4217,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取全部主题实例",
+                "description": "获取后台主题配置，返回全部配置项与完整菜单",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "主题管理"
                 ],
-                "summary": "主题列表",
+                "summary": "主题配置详情",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -4237,10 +4237,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/dto.ThemeResponse"
-                                            }
+                                            "$ref": "#/definitions/dto.ThemeConfigResponse"
                                         }
                                     }
                                 }
@@ -4250,131 +4247,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/themes/_resync": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "拉取 theme.json，版本变化时更新主题元数据",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "主题管理"
-                ],
-                "summary": "同步主题元数据",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/themes/{slug}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "获取指定主题详情",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "主题管理"
-                ],
-                "summary": "主题详情",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "主题 slug",
-                        "name": "slug",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.ThemeResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/themes/{slug}/check": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "检查指定主题是否有新版本",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "主题管理"
-                ],
-                "summary": "检查主题版本更新",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "主题 slug",
-                        "name": "slug",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.ThemeUpdateCheckResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/themes/{slug}/config": {
+        "/admin/themes/config": {
             "put": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "替换指定主题的 config JSON",
+                "description": "按提交的配置项逐个覆盖（patch 语义），菜单需通过菜单接口更新",
                 "consumes": [
                     "application/json"
                 ],
@@ -4386,13 +4266,6 @@ const docTemplate = `{
                 ],
                 "summary": "更新主题配置",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "主题 slug",
-                        "name": "slug",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "主题配置",
                         "name": "request",
@@ -4413,14 +4286,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/themes/{slug}/menus": {
+        "/admin/themes/menus": {
             "put": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "整体替换指定主题菜单",
+                "description": "整体替换主题菜单",
                 "consumes": [
                     "application/json"
                 ],
@@ -4432,13 +4305,6 @@ const docTemplate = `{
                 ],
                 "summary": "更新主题菜单",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "主题 slug",
-                        "name": "slug",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "主题菜单",
                         "name": "request",
@@ -7266,14 +7132,14 @@ const docTemplate = `{
         },
         "/themes": {
             "get": {
-                "description": "获取当前激活主题详情，菜单仅返回启用项",
+                "description": "获取前台主题配置，菜单仅返回启用项",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "主题"
                 ],
-                "summary": "获取激活主题",
+                "summary": "获取主题配置",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -7286,7 +7152,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.ThemePublicResponse"
+                                            "$ref": "#/definitions/dto.ThemeConfigResponse"
                                         }
                                     }
                                 }
@@ -9517,6 +9383,9 @@ const docTemplate = `{
                 "os": {
                     "type": "string"
                 },
+                "panel_status": {
+                    "type": "string"
+                },
                 "server_ip": {
                     "type": "string"
                 },
@@ -9567,93 +9436,14 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ThemePublicResponse": {
+        "dto.ThemeConfigResponse": {
             "type": "object",
             "properties": {
-                "author": {
-                    "type": "string"
-                },
                 "config": {
                     "type": "object"
                 },
-                "description": {
-                    "type": "string"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "license": {
-                    "type": "string"
-                },
                 "menus": {
                     "type": "object"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repo": {
-                    "type": "string"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.ThemeResponse": {
-            "type": "object",
-            "properties": {
-                "author": {
-                    "type": "string"
-                },
-                "config": {
-                    "type": "object"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "license": {
-                    "type": "string"
-                },
-                "menus": {
-                    "type": "object"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repo": {
-                    "type": "string"
-                },
-                "schema": {
-                    "type": "object"
-                },
-                "slug": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.ThemeUpdateCheckResponse": {
-            "type": "object",
-            "properties": {
-                "current_version": {
-                    "type": "string"
-                },
-                "has_update": {
-                    "type": "boolean"
-                },
-                "latest_version": {
-                    "type": "string"
-                },
-                "release_url": {
-                    "type": "string"
                 }
             }
         },

@@ -85,7 +85,7 @@ func (s *SystemService) StartRegistration() {
 		}
 
 		if err := s.panelClient.Register(ctx, siteURL, AppVersion); err != nil {
-			logger.Warn("Panel 注册已跳过: %v", err)
+			logger.Warn("Panel 注册已跳过")
 			return
 		}
 
@@ -131,6 +131,7 @@ func (s *SystemService) GetStaticInfo() *dto.SystemStaticInfo {
 	info.StorageStatus = s.checkStorage()
 	info.EmailStatus = s.checkEmail()
 	info.FeishuStatus = s.checkFeishu()
+	info.PanelStatus = s.checkPanel()
 	info.AppVersion = currentVersion()
 
 	return info
@@ -407,6 +408,20 @@ func (s *SystemService) checkEmail() string {
 		return "未配置"
 	}
 	if err := s.emailClient.HealthCheck(); err != nil {
+		return "异常"
+	}
+	return "正常"
+}
+
+// checkPanel 校验官版身份
+func (s *SystemService) checkPanel() string {
+	if !panel.IsOfficialBuild() {
+		return "异常"
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := s.panelClient.Ping(ctx); err != nil {
 		return "异常"
 	}
 	return "正常"

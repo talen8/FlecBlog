@@ -57,7 +57,7 @@
         </el-tab-pane>
 
         <!-- OAuth 配置标签页 -->
-        <el-tab-pane v-if="isFeatureEnabled('oauth')" label="OAuth 配置" name="oauth">
+        <el-tab-pane label="OAuth 配置" name="oauth">
           <OAuthSettingsTab
             v-model:form="oauthForm"
             :is-field-modified="oauthIsFieldModified"
@@ -80,7 +80,6 @@ import { useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { getSettingGroup, updateSettingGroup } from '@/api/sysconfig';
 import { isSuperAdmin } from '@/utils/auth';
-import { useThemeFeatures } from '@/utils/visibility';
 import BasicSettingsTab from './components/BasicSettingsTab.vue';
 import NotificationSettingsTab from './components/NotificationSettingsTab.vue';
 import UploadSettingsTab from './components/UploadSettingsTab.vue';
@@ -97,7 +96,6 @@ const route = useRoute();
 const loading = ref(false);
 const saving = ref(false);
 const canEditSettings = computed(() => isSuperAdmin());
-const { isFeatureEnabled } = useThemeFeatures();
 
 // 标签页引用
 const basicTabRef = ref<InstanceType<typeof BasicSettingsTab>>();
@@ -112,6 +110,9 @@ const originalOAuthForm = ref<Record<string, string>>({});
 // 基本配置表单
 const basicForm = ref({
   author: '',
+  author_email: '',
+  author_desc: '',
+  home_url: '',
   author_avatar: '',
   icp: '',
   police_record: '',
@@ -122,6 +123,7 @@ const basicForm = ref({
   description: '',
   keywords: '',
   favicon: '',
+  established: '',
   custom_head: '',
   custom_body: '',
   emojis: '',
@@ -219,6 +221,9 @@ const loadBasicConfigs = async () => {
     const configs = await loadConfigs('basic');
     const data = {
       author: configs.author || '',
+      author_email: configs.author_email || '',
+      author_desc: configs.author_desc || '',
+      home_url: configs.home_url || '',
       author_avatar: configs.author_avatar || '',
       icp: configs.icp || '',
       police_record: configs.police_record || '',
@@ -229,6 +234,7 @@ const loadBasicConfigs = async () => {
       description: configs.description || '',
       keywords: configs.keywords || '',
       favicon: configs.favicon || '',
+      established: configs.established || '',
       custom_head: configs.custom_head || '',
       custom_body: configs.custom_body || '',
       emojis: configs.emojis || '',
@@ -433,6 +439,9 @@ const handleSave = async () => {
     // 基本配置
     const basicPayload: Record<string, string> = {
       author: basicForm.value.author,
+      author_email: basicForm.value.author_email,
+      author_desc: basicForm.value.author_desc,
+      home_url: basicForm.value.home_url,
       author_avatar: basicForm.value.author_avatar,
       icp: basicForm.value.icp,
       police_record: basicForm.value.police_record,
@@ -443,6 +452,7 @@ const handleSave = async () => {
       description: basicForm.value.description,
       keywords: basicForm.value.keywords,
       favicon: basicForm.value.favicon,
+      established: basicForm.value.established,
       custom_head: basicForm.value.custom_head,
       custom_body: basicForm.value.custom_body,
       emojis: basicForm.value.emojis,

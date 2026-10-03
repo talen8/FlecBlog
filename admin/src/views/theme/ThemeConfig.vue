@@ -7,12 +7,12 @@
           <el-button
             type="primary"
             :loading="saving"
-            :disabled="loading || !canEditTheme || !currentTheme || !hasSchema"
+            :disabled="loading || !canEditTheme || !themeConfig"
             @click="handleSave"
           >
             保存配置
           </el-button>
-          <el-button :disabled="loading || !currentTheme" @click="() => loadCurrentTheme()">
+          <el-button :disabled="loading || !themeConfig" @click="() => loadThemeConfig()">
             重置
           </el-button>
         </div>
@@ -27,161 +27,151 @@
         class="permission-alert"
       />
 
-      <el-skeleton v-if="loading && !currentTheme" :rows="10" animated />
+      <el-skeleton v-if="loading && !themeConfig" :rows="10" animated />
 
-      <template v-else-if="currentTheme">
+      <template v-else-if="themeConfig">
         <el-tabs v-model="activeTab" class="theme-tabs">
-          <el-tab-pane label="主题信息" name="info">
-            <ThemeInfo :theme="currentTheme" />
-          </el-tab-pane>
+          <el-tab-pane
+            v-for="group in schemaGroups"
+            :key="group.name"
+            :label="group.label || '配置项'"
+            :name="groupTabName(group)"
+          >
+            <el-form label-position="top" :disabled="formDisabled">
+              <el-form-item v-for="(field, key) in group.fields" :key="key">
+                <template #label>
+                  <span :class="{ 'field-modified': isFieldModified(String(key)) }">{{
+                    field.title || String(key)
+                  }}</span>
+                  <div v-if="field.description" class="field-desc">
+                    {{ field.description }}
+                  </div>
+                </template>
 
-          <template v-if="hasSchema">
-            <el-tab-pane
-              v-for="group in schemaGroups"
-              :key="group.name"
-              :label="group.label || '配置项'"
-              :name="groupTabName(group)"
-            >
-              <el-form label-position="top" :disabled="formDisabled">
-                <el-form-item v-for="(field, key) in group.fields" :key="key">
-                  <template #label>
-                    <span :class="{ 'field-modified': isFieldModified(String(key)) }">{{
-                      field.title || String(key)
-                    }}</span>
-                    <div v-if="field.description" class="field-desc">
-                      {{ field.description }}
-                    </div>
+                <el-switch v-if="field.type === 'boolean'" v-model="configValues[String(key)]" />
+
+                <el-input-number
+                  v-else-if="field.type === 'number' || field.type === 'integer'"
+                  v-model="configValues[String(key)]"
+                  :min="field.min"
+                  :max="field.max"
+                  :step="field.type === 'integer' ? 1 : 0.1"
+                />
+
+                <el-select
+                  v-else-if="field.type === 'string' && field.enum"
+                  v-model="configValues[String(key)]"
+                  :placeholder="field.placeholder || '请选择'"
+                  clearable
+                  filterable
+                >
+                  <el-option
+                    v-for="opt in field.enum"
+                    :key="typeof opt === 'object' ? opt.value : String(opt)"
+                    :label="typeof opt === 'object' ? opt.label : String(opt)"
+                    :value="typeof opt === 'object' ? opt.value : opt"
+                  />
+                </el-select>
+
+                <el-color-picker
+                  v-else-if="field.format === 'color'"
+                  v-model="configValues[String(key)]"
+                />
+
+                <el-date-picker
+                  v-else-if="field.format === 'date'"
+                  v-model="configValues[String(key)]"
+                  type="date"
+                  value-format="YYYY-MM-DD"
+                  placeholder="选择日期"
+                />
+
+                <el-time-picker
+                  v-else-if="field.format === 'time'"
+                  v-model="configValues[String(key)]"
+                  value-format="HH:mm:ss"
+                  placeholder="选择时间"
+                />
+
+                <el-date-picker
+                  v-else-if="field.format === 'date-time'"
+                  v-model="configValues[String(key)]"
+                  type="datetime"
+                  value-format="YYYY-MM-DDTHH:mm:ss"
+                  placeholder="选择日期时间"
+                />
+
+                <ImageUploader
+                  v-else-if="field.format === 'image'"
+                  :ref="(el: unknown) => setImageUploaderRef(String(key), el)"
+                  v-model="configValues[String(key)]"
+                  upload-type="主题图片"
+                  :width="(field.width || 120) + 'px'"
+                  :height="(field.height || 120) + 'px'"
+                  :disabled="formDisabled"
+                />
+
+                <el-input
+                  v-else-if="field.format === 'upload'"
+                  v-model="configValues[String(key)]"
+                  :placeholder="field.placeholder || field.description || '文件URL'"
+                >
+                  <template #append>
+                    <el-upload
+                      :show-file-list="false"
+                      :http-request="
+                        (opts: UploadRequestOptions) => handleSimpleUpload(String(key), opts)
+                      "
+                      accept="image/*"
+                      :disabled="formDisabled"
+                    >
+                      <el-button
+                        :icon="Upload"
+                        :type="pendingUploadFiles[String(key)] ? 'success' : 'default'"
+                      />
+                    </el-upload>
                   </template>
+                </el-input>
 
-                  <el-switch v-if="field.type === 'boolean'" v-model="configValues[String(key)]" />
+                <JsonListEditor
+                  v-else-if="field.type === 'array' && field['x-item-fields']"
+                  v-model="configValues[String(key)]"
+                  :fields="buildItemFields(field['x-item-fields'])"
+                  :default-item="buildDefaultItem(field['x-item-fields'])"
+                  upload-type="主题图片"
+                  :disabled="formDisabled"
+                />
 
-                  <el-input-number
-                    v-else-if="field.type === 'number' || field.type === 'integer'"
-                    v-model="configValues[String(key)]"
-                    :min="field.min"
-                    :max="field.max"
-                    :step="field.type === 'integer' ? 1 : 0.1"
-                  />
+                <el-input
+                  v-else-if="field.format === 'textarea'"
+                  v-model="configValues[String(key)]"
+                  type="textarea"
+                  :rows="4"
+                  :placeholder="field.placeholder || ''"
+                />
 
-                  <el-select
-                    v-else-if="field.type === 'string' && field.enum"
-                    v-model="configValues[String(key)]"
-                    :placeholder="field.placeholder || '请选择'"
-                    clearable
-                    filterable
-                  >
-                    <el-option
-                      v-for="opt in field.enum"
-                      :key="typeof opt === 'object' ? opt.value : String(opt)"
-                      :label="typeof opt === 'object' ? opt.label : String(opt)"
-                      :value="typeof opt === 'object' ? opt.value : opt"
-                    />
-                  </el-select>
-
-                  <el-color-picker
-                    v-else-if="field.format === 'color'"
-                    v-model="configValues[String(key)]"
-                  />
-
-                  <el-date-picker
-                    v-else-if="field.format === 'date'"
-                    v-model="configValues[String(key)]"
-                    type="date"
-                    value-format="YYYY-MM-DD"
-                    placeholder="选择日期"
-                  />
-
-                  <el-time-picker
-                    v-else-if="field.format === 'time'"
-                    v-model="configValues[String(key)]"
-                    value-format="HH:mm:ss"
-                    placeholder="选择时间"
-                  />
-
-                  <el-date-picker
-                    v-else-if="field.format === 'date-time'"
-                    v-model="configValues[String(key)]"
-                    type="datetime"
-                    value-format="YYYY-MM-DDTHH:mm:ss"
-                    placeholder="选择日期时间"
-                  />
-
-                  <ImageUploader
-                    v-else-if="field.format === 'image'"
-                    :ref="(el: unknown) => setImageUploaderRef(String(key), el)"
-                    v-model="configValues[String(key)]"
-                    upload-type="主题图片"
-                    :width="(field.width || 120) + 'px'"
-                    :height="(field.height || 120) + 'px'"
-                    :disabled="formDisabled"
-                  />
-
-                  <el-input
-                    v-else-if="field.format === 'upload'"
-                    v-model="configValues[String(key)]"
-                    :placeholder="field.placeholder || field.description || '文件URL'"
-                  >
-                    <template #append>
-                      <el-upload
-                        :show-file-list="false"
-                        :http-request="
-                          (opts: UploadRequestOptions) => handleSimpleUpload(String(key), opts)
-                        "
-                        accept="image/*"
-                        :disabled="formDisabled"
-                      >
-                        <el-button
-                          :icon="Upload"
-                          :type="pendingUploadFiles[String(key)] ? 'success' : 'default'"
-                        />
-                      </el-upload>
-                    </template>
-                  </el-input>
-
-                  <JsonListEditor
-                    v-else-if="field.type === 'array' && field['x-item-fields']"
-                    v-model="configValues[String(key)]"
-                    :fields="buildItemFields(field['x-item-fields'])"
-                    :default-item="buildDefaultItem(field['x-item-fields'])"
-                    :disabled="formDisabled"
-                  />
-
-                  <el-input
-                    v-else-if="field.format === 'textarea'"
-                    v-model="configValues[String(key)]"
-                    type="textarea"
-                    :rows="4"
-                    :placeholder="field.placeholder || ''"
-                  />
-
-                  <el-input
-                    v-else
-                    v-model="configValues[String(key)]"
-                    :placeholder="field.placeholder || ''"
-                    clearable
-                  />
-                </el-form-item>
-              </el-form>
-            </el-tab-pane>
-          </template>
-
-          <el-tab-pane v-if="!hasSchema" label="配置项" name="config-empty">
-            <el-empty description="当前主题未提供配置 schema" />
+                <el-input
+                  v-else
+                  v-model="configValues[String(key)]"
+                  :placeholder="field.placeholder || ''"
+                  clearable
+                />
+              </el-form-item>
+            </el-form>
           </el-tab-pane>
 
-          <el-tab-pane label="主题菜单" name="menus">
+          <el-tab-pane label="菜单管理" name="menus">
             <ThemeMenu
-              :theme-slug="currentTheme.slug"
-              :schema="currentTheme.schema"
-              :menus="currentTheme.menus"
+              :schema="themeSchema"
+              :menus="themeConfig.menus"
               :disabled="formDisabled"
-              @refresh="loadCurrentTheme"
+              @refresh="loadThemeConfig"
             />
           </el-tab-pane>
         </el-tabs>
       </template>
 
-      <el-empty v-else description="暂无可配置主题" />
+      <el-empty v-else description="暂无主题配置" />
     </el-card>
   </div>
 </template>
@@ -194,18 +184,18 @@ import { Upload } from '@element-plus/icons-vue';
 import JsonListEditor from '@/components/common/JsonListEditor.vue';
 import type { FieldConfig } from '@/components/common/JsonListEditor.vue';
 import ImageUploader from '@/components/common/ImageUploader.vue';
-import ThemeInfo from './components/ThemeInfo.vue';
 import ThemeMenu from './components/ThemeMenu.vue';
-import { getTheme, getThemes, resyncTheme, updateThemeConfig } from '@/api/theme';
+import { getThemeConfig, updateThemeConfig } from '@/api/theme';
 import { uploadFile } from '@/api/file';
-import type { ThemeResponse, SchemaField, SchemaGroup } from '@/types/theme';
+import themeSchema from '@/config/theme.json';
+import type { ThemeConfigResponse, SchemaField, SchemaGroup } from '@/types/theme';
 import { isSuperAdmin } from '@/utils/auth';
 
 const route = useRoute();
-const activeTab = ref(route.query.tab === 'menus' ? 'menus' : 'info');
+const activeTab = ref(route.query.tab === 'menus' ? 'menus' : 'config');
 const loading = ref(false);
 const saving = ref(false);
-const currentTheme = ref<ThemeResponse | null>(null);
+const themeConfig = ref<ThemeConfigResponse | null>(null);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const configValues = ref<Record<string, any>>({});
 const pendingUploadFiles = ref<Record<string, File>>({});
@@ -229,36 +219,23 @@ const formDisabled = computed(() => loading.value || saving.value || !canEditThe
 
 const originalConfigValues = ref<Record<string, unknown>>({});
 
-const schema = computed<Record<string, unknown>>(() => {
-  const raw = (currentTheme.value?.schema || {}) as Record<string, unknown>;
-  const nested = raw.config as Record<string, unknown> | undefined;
-  if (nested && typeof nested === 'object') return nested;
-  return raw;
-});
+const schema = themeSchema as unknown as Record<string, unknown>;
 
-const hasSchema = computed(() => {
-  const s = schema.value;
-  return Object.keys(s).some(k => !k.startsWith('$'));
-});
-
-const schemaGroups = computed<SchemaGroup[]>(() => {
-  const s = schema.value;
-  const entries = Object.entries(s).filter(([k]) => !k.startsWith('$'));
-  if (entries.length === 0) return [];
-
-  const first = entries[0]![1];
-  if (first && typeof first === 'object' && 'type' in (first as Record<string, unknown>)) {
-    return [{ name: '_default', label: '配置项', fields: s as Record<string, SchemaField> }];
-  }
-
-  return entries
-    .filter(([, v]) => v && typeof v === 'object' && !('type' in (v as Record<string, unknown>)))
+const schemaGroups = computed<SchemaGroup[]>(() =>
+  Object.entries(schema)
+    .filter(
+      ([k, v]) =>
+        !k.startsWith('$') &&
+        v &&
+        typeof v === 'object' &&
+        !('type' in (v as Record<string, unknown>))
+    )
     .map(([name, val]) => ({
       name,
       label: name,
       fields: val as Record<string, SchemaField>,
-    }));
-});
+    }))
+);
 
 const groupTabName = (group: SchemaGroup) => `config:${group.name}`;
 
@@ -332,17 +309,15 @@ const handleSimpleUpload = (key: string, opts: UploadRequestOptions): Promise<vo
   return Promise.resolve();
 };
 
-const loadCurrentTheme = async (slug = currentTheme.value?.slug) => {
-  if (!slug) return;
+const loadThemeConfig = async () => {
   loading.value = true;
   try {
-    const theme = await getTheme(slug);
-    currentTheme.value = theme;
-    const rawConfig = (theme.config || {}) as Record<string, unknown>;
+    const result = await getThemeConfig();
+    themeConfig.value = result;
+    const rawConfig = (result.config || {}) as Record<string, unknown>;
 
     const defaults: Record<string, unknown> = {};
-    const s = schema.value;
-    collectDefaults(s, defaults);
+    collectDefaults(schema, defaults);
 
     for (const url of Object.values(pendingPreviews.value)) {
       URL.revokeObjectURL(url);
@@ -364,7 +339,7 @@ const handleSave = async () => {
     ElMessage.warning('仅超级管理员可修改主题配置');
     return;
   }
-  if (!currentTheme.value || !hasSchema.value) return;
+  if (!themeConfig.value) return;
 
   saving.value = true;
   try {
@@ -398,12 +373,10 @@ const handleSave = async () => {
       }
     }
 
-    const updatedConfig = await updateThemeConfig(currentTheme.value.slug, {
-      ...configValues.value,
-    });
-    currentTheme.value = {
-      ...currentTheme.value,
+    const updatedConfig = await updateThemeConfig({ ...configValues.value });
+    themeConfig.value = {
       config: updatedConfig as Record<string, unknown>,
+      menus: themeConfig.value.menus,
     };
     configValues.value = { ...(updatedConfig as Record<string, unknown>) };
     originalConfigValues.value = { ...(updatedConfig as Record<string, unknown>) };
@@ -419,37 +392,28 @@ watch(
   () => route.query.tab,
   tab => {
     if (tab === 'config') {
-      activeTab.value = schemaGroups.value[0]
-        ? groupTabName(schemaGroups.value[0])
-        : 'config-empty';
+      const first = schemaGroups.value[0];
+      if (first) activeTab.value = groupTabName(first);
       return;
     }
-    if (tab === 'info' || tab === 'menus') {
+    if (tab === 'menus') {
       activeTab.value = tab;
     }
   }
 );
 
-watch(schemaGroups, groups => {
-  if (activeTab.value === 'config' || activeTab.value === 'config-empty') {
-    activeTab.value = groups[0] ? groupTabName(groups[0]) : 'config-empty';
-  }
-});
-
-onMounted(async () => {
-  loading.value = true;
-  try {
-    await resyncTheme().catch(() => {});
-    const list = await getThemes();
-    const activeTheme = list.find(theme => theme.is_active) || list[0];
-    if (activeTheme) {
-      await loadCurrentTheme(activeTheme.slug);
+watch(
+  schemaGroups,
+  groups => {
+    if (activeTab.value === 'config' && groups[0]) {
+      activeTab.value = groupTabName(groups[0]);
     }
-  } catch (error) {
-    ElMessage.error((error as Error)?.message || '获取主题列表失败');
-  } finally {
-    loading.value = false;
-  }
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  void loadThemeConfig();
 });
 </script>
 
@@ -502,6 +466,12 @@ onMounted(async () => {
     flex-direction: column;
     overflow: hidden;
 
+    :deep(.el-tabs__nav-wrap) {
+      &::after {
+        display: none;
+      }
+    }
+
     :deep(.el-tabs__content) {
       flex: 1;
       overflow: hidden;
@@ -552,6 +522,38 @@ onMounted(async () => {
     :deep(.el-form-item__label) {
       width: 100px !important;
       font-size: 13px;
+    }
+
+    .theme-tabs {
+      :deep(.el-tabs__nav-scroll) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      :deep(.el-tabs__nav-wrap.is-scrollable) {
+        padding: 0;
+      }
+
+      :deep(.el-tab-pane) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        .el-form,
+        .theme-info,
+        .theme-menu-panel {
+          max-width: none;
+        }
+      }
     }
   }
 }

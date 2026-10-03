@@ -84,7 +84,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	statsService := service.NewStatsService(statsRepo, conf)
 	friendService := service.NewFriendService(friendRepo, fileService, notificationService)
 	momentService := service.NewMomentService(momentRepo, fileService)
-	themeService := service.NewThemeService(db.DB, themeRepo, fileService, conf.Server.BlogInternalURL)
+	themeService := service.NewThemeService(themeRepo, fileService)
 	feedbackService := service.NewFeedbackService(feedbackRepo, notificationService, fileService)
 	subscriberService := service.NewSubscriberService(subscriberRepo, emailClient, conf)
 	rssFeedService := service.NewRssFeedService(rssFeedRepo, notificationService)
@@ -237,7 +237,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 		// ==================== 主题相关 ====================
 		themeGroup := frontendAPI.Group("/themes")
 		{
-			themeGroup.GET("", themeHandler.GetActive) // 获取当前激活主题
+			themeGroup.GET("", themeHandler.GetForWeb) // 获取主题配置
 		}
 
 		// ==================== 评论相关 ====================
@@ -410,12 +410,9 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 		// ==================== 主题管理 ====================
 		themeManagement := adminAPI.Group("/themes")
 		{
-			themeManagement.GET("", themeHandler.List)                      // 获取主题列表
-			themeManagement.GET("/:slug", themeHandler.Get)                 // 获取主题详情
-			themeManagement.PUT("/:slug/config", themeHandler.UpdateConfig) // 更新主题配置
-			themeManagement.PUT("/:slug/menus", themeHandler.UpdateMenus)   // 更新主题菜单
-			themeManagement.POST("/:slug/check", themeHandler.CheckUpdate)  // 检查主题版本更新
-			themeManagement.POST("/_resync", themeHandler.PullMeta)         // 拉取主题元数据
+			themeManagement.GET("", themeHandler.Get)                 // 获取主题配置
+			themeManagement.PUT("/config", themeHandler.UpdateConfig) // 更新主题配置
+			themeManagement.PUT("/menus", themeHandler.UpdateMenus)   // 更新主题菜单
 		}
 
 		// ==================== 反馈管理 ====================

@@ -1,15 +1,6 @@
 export type ThemeConfig = Record<string, unknown>;
 
-export interface ThemeResponse {
-  slug: string;
-  name: string;
-  version: string;
-  author: string;
-  description: string;
-  license: string;
-  repo: string;
-  schema?: Record<string, unknown>;
-  is_active: boolean;
+export interface ThemeConfigResponse {
   config?: ThemeConfig;
   menus?: Record<string, ThemeMenuItem[]>;
 }
@@ -47,18 +38,10 @@ export interface SchemaGroup {
 
 export interface MenuSlot {
   label?: string;
-  title?: string;
   maxDepth?: number;
   defaults?: Partial<ThemeMenuItem>[];
 }
 
 export interface ThemeSchema {
   $menus?: Record<string, MenuSlot>;
-}
-
-export interface ThemeUpdateCheckResponse {
-  has_update: boolean;
-  current_version: string;
-  latest_version: string;
-  release_url: string;
 }

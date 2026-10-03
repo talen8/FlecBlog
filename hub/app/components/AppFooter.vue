@@ -30,8 +30,7 @@ const columns = [
   {
     label: '资源',
     children: [
-      { label: 'GitHub', to: 'https://github.com/talen8/FlecBlog', target: '_blank' },
-      { label: '主题', to: '/themes' }
+      { label: 'GitHub', to: 'https://github.com/talen8/FlecBlog', target: '_blank' }
     ]
   },
   {

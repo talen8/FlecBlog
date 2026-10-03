@@ -52,6 +52,19 @@
       </el-form-item>
     </div>
 
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('established') }">建站日期</span>
+      </template>
+      <el-date-picker
+        v-model="form.established"
+        type="date"
+        value-format="YYYY-MM-DD"
+        placeholder="选择建站日期"
+        :disabled="loading"
+      />
+    </el-form-item>
+
     <el-divider content-position="left">站长信息</el-divider>
 
     <el-form-item>
@@ -59,6 +72,37 @@
         <span :class="{ 'field-modified': isFieldModified('author') }">站长姓名</span>
       </template>
       <el-input v-model="form.author" placeholder="站长姓名" :disabled="loading" />
+    </el-form-item>
+
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('author_email') }">站长邮箱</span>
+      </template>
+      <el-input v-model="form.author_email" placeholder="用于展示联系方式" :disabled="loading" />
+    </el-form-item>
+
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('author_desc') }">站长简介</span>
+      </template>
+      <el-input
+        v-model="form.author_desc"
+        type="textarea"
+        :rows="3"
+        placeholder="展示在站长的简短介绍"
+        :disabled="loading"
+      />
+    </el-form-item>
+
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('home_url') }">主页地址</span>
+      </template>
+      <el-input
+        v-model="form.home_url"
+        placeholder="例如 https://your-site.com"
+        :disabled="loading"
+      />
     </el-form-item>
 
     <div class="image-row">
@@ -202,6 +246,9 @@ import ImageUploader from '@/components/common/ImageUploader.vue';
 
 interface BasicForm {
   author: string;
+  author_email: string;
+  author_desc: string;
+  home_url: string;
   author_avatar: string;
   icp: string;
   police_record: string;
@@ -212,6 +259,7 @@ interface BasicForm {
   description: string;
   keywords: string;
   favicon: string;
+  established: string;
   custom_head: string;
   custom_body: string;
   emojis: string;

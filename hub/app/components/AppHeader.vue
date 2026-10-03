@@ -6,9 +6,6 @@ const items = computed(() => [{
   to: '/docs',
   active: route.path.startsWith('/docs')
 }, {
-  label: '主题',
-  to: '/themes'
-}, {
   label: '公告',
   to: '/changelog'
 }, {

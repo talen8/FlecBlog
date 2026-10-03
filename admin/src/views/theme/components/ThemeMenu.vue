@@ -16,10 +16,8 @@
       </el-segmented>
 
       <div class="menu-actions">
-        <el-button type="primary" :disabled="disabled || !themeSlug" @click="handleCreate">
-          新增菜单
-        </el-button>
-        <el-button :disabled="loading || !themeSlug" @click="fetchMenuTree">刷新</el-button>
+        <el-button type="primary" :disabled="disabled" @click="handleCreate">新增菜单</el-button>
+        <el-button :disabled="loading" @click="fetchMenuTree">刷新</el-button>
       </div>
     </div>
 
@@ -260,7 +258,6 @@ interface MenuTypeOption {
 
 const props = withDefaults(
   defineProps<{
-    themeSlug: string;
     schema?: ThemeSchema | Record<string, unknown>;
     menus?: Record<string, ThemeMenuItem[]>;
     disabled?: boolean;
@@ -286,7 +283,7 @@ const parentMenu = ref<ThemeMenuItem | null>(null);
 const menuTypeOptions = computed<MenuTypeOption[]>(() => {
   const slots = (props.schema as ThemeSchema)?.$menus || {};
   return Object.entries(slots).map(([value, slot]) => ({
-    label: slot.label || slot.title || value,
+    label: slot.label || value,
     value,
     icon: Menu,
   }));
@@ -295,7 +292,7 @@ const menuTypeOptions = computed<MenuTypeOption[]>(() => {
 const currentTypeLabel = computed(() => {
   const slots = (props.schema as ThemeSchema)?.$menus || {};
   const slot = slots[selectedType.value];
-  return slot?.label || slot?.title || selectedType.value;
+  return slot?.label || selectedType.value;
 });
 
 const currentMaxDepth = computed(() => {
@@ -330,8 +327,6 @@ const buildDefaults = (items: Partial<ThemeMenuItem>[]): ThemeMenuItem[] =>
   }));
 
 const fetchMenuTree = () => {
-  if (!props.themeSlug) return;
-
   const menus = props.menus || {};
   const type = selectedType.value;
   const saved = menus[type];
@@ -367,8 +362,6 @@ const flushMenus = (): Record<string, ThemeMenuItem[]> => {
 };
 
 const handleDelete = async (id: number) => {
-  if (!props.themeSlug) return;
-
   try {
     const menuNode = findMenu(menuTree.value, id);
     const hasChildren = menuNode?.children && menuNode.children.length > 0;
@@ -392,7 +385,7 @@ const handleDelete = async (id: number) => {
     const tree = [...menuTree.value];
     removeMenu(tree, id, action);
     menuTree.value = tree;
-    await updateThemeMenus(props.themeSlug, flushMenus());
+    await updateThemeMenus(flushMenus());
 
     ElMessage.success('删除成功');
     emit('refresh');
@@ -519,7 +512,7 @@ const handleSubmit = async () => {
       ElMessage.success('创建成功');
     }
 
-    await updateThemeMenus(props.themeSlug, flushMenus());
+    await updateThemeMenus(flushMenus());
     dialogVisible.value = false;
     emit('refresh');
   } catch (error) {
@@ -557,7 +550,7 @@ watch(dialogVisible, val => {
 });
 
 watch(
-  () => [props.themeSlug, props.menus, menuTypeOptions.value.map(option => option.value).join(',')],
+  () => [props.menus, menuTypeOptions.value.map(option => option.value).join(',')],
   () => {
     const firstType = menuTypeOptions.value[0]?.value || 'aggregate';
     if (!menuTypeOptions.value.some(option => option.value === selectedType.value)) {

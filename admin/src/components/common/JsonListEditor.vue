@@ -149,7 +149,6 @@ export interface FieldConfig {
   filterable?: boolean;
   allowCreate?: boolean;
   options?: Array<{ label: string; value: string; icon?: string }>;
-  uploadType?: string;
 }
 
 export interface JsonListEditorProps {
@@ -160,12 +159,14 @@ export interface JsonListEditorProps {
   defaultItem?: Record<string, any>;
   disabled?: boolean;
   hideControls?: boolean;
+  uploadType?: string;
 }
 
 const props = withDefaults(defineProps<JsonListEditorProps>(), {
   disabled: false,
   defaultItem: () => ({}),
   hideControls: false,
+  uploadType: '图片',
 });
 
 const emit = defineEmits<{
@@ -248,7 +249,7 @@ const handleUpload = async (opts: UploadRequestOptions, index: number, field: Fi
   }
 
   try {
-    const result = await uploadFile(file, field.uploadType || '图片');
+    const result = await uploadFile(file, props.uploadType);
     if (internalValue.value[index]) {
       internalValue.value[index][field.key] = result.file_url;
       URL.revokeObjectURL(blobUrl);

@@ -20,7 +20,7 @@ jobs:
             output_dir: dist
           - target: blog
             image_name: flec-blog
-            context: ./blog/default
+            context: ./blog
             output_dir: .output
           - target: server
             image_name: flec-server
