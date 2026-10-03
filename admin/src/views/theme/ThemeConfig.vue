@@ -523,6 +523,38 @@ onMounted(() => {
       width: 100px !important;
       font-size: 13px;
     }
+
+    .theme-tabs {
+      :deep(.el-tabs__nav-scroll) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      :deep(.el-tabs__nav-wrap.is-scrollable) {
+        padding: 0;
+      }
+
+      :deep(.el-tab-pane) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        .el-form,
+        .theme-info,
+        .theme-menu-panel {
+          max-width: none;
+        }
+      }
+    }
   }
 }
 </style>
