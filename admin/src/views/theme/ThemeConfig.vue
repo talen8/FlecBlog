@@ -160,7 +160,7 @@
             </el-form>
           </el-tab-pane>
 
-          <el-tab-pane label="主题菜单" name="menus">
+          <el-tab-pane label="菜单管理" name="menus">
             <ThemeMenu
               :schema="themeSchema"
               :menus="themeConfig.menus"
@@ -465,6 +465,12 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+
+    :deep(.el-tabs__nav-wrap) {
+      &::after {
+        display: none;
+      }
+    }
 
     :deep(.el-tabs__content) {
       flex: 1;
