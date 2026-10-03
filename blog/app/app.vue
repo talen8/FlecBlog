@@ -39,9 +39,6 @@ onMounted(() => {
 
 // SEO Meta
 useSeoMeta({
-  description: () => basicConfig.value.description,
-  keywords: () => basicConfig.value.keywords,
-  author: () => basicConfig.value.author,
   // Open Graph
   ogTitle: () => basicConfig.value.title,
   ogDescription: () => basicConfig.value.description,

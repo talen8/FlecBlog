@@ -21,6 +21,8 @@ interface FontResult {
   style: { innerHTML: string }[];
 }
 
+type CustomHeadInput = Parameters<typeof useHead>[0];
+
 export default defineNuxtPlugin({
   name: 'custom-code',
   setup() {
@@ -140,7 +142,7 @@ export default defineNuxtPlugin({
           script: customHead?.script || [],
           style: [...(customHead?.style || []), ...fontLink.style],
         };
-      })
+      }) as unknown as CustomHeadInput
     );
 
     const injectBodyCode = () => {
