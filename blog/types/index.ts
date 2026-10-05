@@ -9,6 +9,7 @@ export * from './comment';
 export * from './feedback';
 export * from './friend';
 export * from './moment';
+export * from './music';
 export * from './notification';
 export * from './request';
 export * from './stats';

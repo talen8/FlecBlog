@@ -1,8 +1,11 @@
 <script lang="ts" setup>
-import type { MomentMusic, AudioTrack, LyricLine } from '~~/types';
+import type { MusicSource, AudioTrack, LyricLine } from '~~/types';
+
+/** 动态播放器实例序号，用于生成唯一发声权标识 */
+let playerSeq = 0;
 
 const props = defineProps<{
-  music: MomentMusic;
+  music: MusicSource;
 }>();
 
 const {
@@ -30,13 +33,9 @@ const currentTrack = computed<AudioTrack | null>(() => audioList.value[currentIn
 const hasPlaylist = computed(() => audioList.value.length > 1);
 const progress = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0));
 
-// 格式化时间为 mm:ss
-const formatTime = (seconds: number) => {
-  if (!isFinite(seconds) || isNaN(seconds)) return '00:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-};
+// 发声权
+const slotId = `moment-music-${++playerSeq}`;
+const { claim, release } = usePlaybackSlot(slotId, () => audioRef.value?.pause());
 
 // 播放/暂停切换
 const togglePlay = () => {
@@ -93,6 +92,18 @@ const onLoadedMetadata = () => {
   if (audioRef.value) duration.value = audioRef.value.duration;
 };
 
+/** 开始播放并取得发声权 */
+const onAudioPlay = () => {
+  isPlaying.value = true;
+  claim();
+};
+
+/** 暂停播放并释放发声权 */
+const onAudioPause = () => {
+  isPlaying.value = false;
+  release();
+};
+
 // 播放结束处理
 const onEnded = () => {
   if (hasPlaylist.value) {
@@ -136,8 +147,8 @@ onMounted(async () => {
         preload="metadata"
         @timeupdate="onTimeUpdate"
         @loadedmetadata="onLoadedMetadata"
-        @play="isPlaying = true"
-        @pause="isPlaying = false"
+        @play="onAudioPlay"
+        @pause="onAudioPause"
         @ended="onEnded"
         @error="handleAudioError"
       />
@@ -181,7 +192,7 @@ onMounted(async () => {
               <div class="progress-played" :style="{ width: `${progress}%` }" />
             </div>
             <div class="progress-time">
-              {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+              {{ formatDuration(currentTime) }} / {{ formatDuration(duration) }}
             </div>
             <button v-if="hasPlaylist" class="ctrl-btn" @click="showPlaylist = !showPlaylist">
               <i class="ri-menu-fill" />

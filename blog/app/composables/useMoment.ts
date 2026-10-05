@@ -1,4 +1,4 @@
-import type { MomentMusic, AudioTrack, MusicApiResponse, LyricLine } from '../../types/moment';
+import type { MusicSource, AudioTrack } from '../../types/music';
 import { getMoments } from './api/moment';
 
 /**
@@ -25,54 +25,17 @@ export function useMomentList(pageSize: MaybeRefOrGetter<number> = () => 30) {
  * @returns load - 加载音乐
  * @returns fetchLyrics(lrc) - 解析歌词
  */
-export function useMusic(music: MaybeRefOrGetter<MomentMusic>) {
-  const { basicConfig } = useSysConfig();
-  const metingApi = computed(() => basicConfig.value.meting_api || 'https://meting.flec.top/api');
+export function useMusic(music: MaybeRefOrGetter<MusicSource>) {
+  const { fetchTracks, fetchLyrics } = useMeting();
 
   const tracks = ref<AudioTrack[]>([]);
   const loading = ref(true);
   const error = ref(false);
 
-  const parseLyrics = (lrcText: string): LyricLine[] => {
-    if (!lrcText) return [];
-    const result: LyricLine[] = [];
-    for (const line of lrcText.split('\n')) {
-      const match = line.match(/\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\](.*)/);
-      if (match && match[1] && match[2] && match[4]) {
-        const text = match[4].trim();
-        if (text) {
-          const ms = match[3] ? parseInt(match[3].padEnd(3, '0')) : 0;
-          result.push({ time: parseInt(match[1]) * 60 + parseInt(match[2]) + ms / 1000, text });
-        }
-      }
-    }
-    return result.sort((a, b) => a.time - b.time);
-  };
-
-  const fetchLyrics = async (lrc: string): Promise<LyricLine[]> => {
-    if (!lrc) return [];
-    try {
-      const text = lrc.startsWith('http') ? await (await fetch(lrc)).text() : lrc;
-      return parseLyrics(text);
-    } catch {
-      return [];
-    }
-  };
-
   const load = async () => {
     loading.value = true;
     try {
-      const { server, type, id } = toValue(music);
-      const res = await fetch(`${metingApi.value}?server=${server}&type=${type}&id=${id}`);
-      const data = await res.json();
-      const list = (Array.isArray(data) ? data : [data]) as MusicApiResponse[];
-      tracks.value = list.map(item => ({
-        name: item.name || item.title || '未知歌曲',
-        artist: item.artist || item.author || '未知艺术家',
-        url: item.url,
-        cover: item.pic || item.cover || '',
-        lrc: item.lrc || '',
-      }));
+      tracks.value = await fetchTracks(toValue(music));
       error.value = false;
     } catch {
       error.value = true;

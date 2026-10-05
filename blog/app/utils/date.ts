@@ -97,6 +97,21 @@ export function formatFriendly(date: string | Date | null | undefined): string {
 }
 
 /**
+ * 格式化音频时长为 mm:ss
+ * @param seconds 秒数
+ * @returns 格式化后的时长字符串，非法值返回 "00:00"
+ */
+export function formatDuration(seconds: number | null | undefined): string {
+  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || Number.isNaN(seconds)) {
+    return '00:00';
+  }
+  const total = Math.max(0, Math.floor(seconds));
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+/**
  * 格式化为动态友好时间
  * @param date 日期字符串或 Date 对象
  * @returns 友好时间字符串：n小时前（24小时内）、n天前（3天内）、几月几日（本年）、几年几月几日（非本年）

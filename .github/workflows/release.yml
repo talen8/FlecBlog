@@ -163,22 +163,29 @@ jobs:
         id: changelog
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-
-          if [ -n "$PREV_TAG" ]; then
-            COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges --invert-grep --grep="^hub:")
-          else
-            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges -10 --invert-grep --grep="^hub:")
-          fi
-
-          if [ -z "$COMMITS" ]; then
-            COMMITS="- 无功能性更新"
-          fi
 
           if [[ "$VERSION" =~ (alpha|beta|rc|pre) ]]; then
             IS_PRERELEASE="true"
           else
             IS_PRERELEASE="false"
+          fi
+
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          else
+            PREV_TAG=$(git describe --tags --abbrev=0 \
+              --exclude='*-alpha*' --exclude='*-beta*' \
+              --exclude='*-rc*' --exclude='*-pre*' HEAD^ 2>/dev/null || echo "")
+          fi
+
+          if [ -n "$PREV_TAG" ]; then
+            COMMITS=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s (%h)" --no-merges --invert-grep --grep="^hub:")
+          else
+            COMMITS=$(git log HEAD --pretty=format:"- %s (%h)" --no-merges --invert-grep --grep="^hub:")
+          fi
+
+          if [ -z "$COMMITS" ]; then
+            COMMITS="- 无功能性更新"
           fi
 
           cat > release_notes.md << EOF

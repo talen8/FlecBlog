@@ -87,6 +87,21 @@
       "min": 1,
       "max": 100
     },
+    "music_server": {
+      "type": "string",
+      "title": "音乐平台",
+      "enum": [
+        { "label": "网易云音乐", "value": "netease" },
+        { "label": "QQ音乐", "value": "tencent" }
+      ],
+      "default": "netease"
+    },
+    "music_id": {
+      "type": "string",
+      "title": "歌单 ID",
+      "placeholder": "网易云 / QQ 音乐的歌单 ID",
+      "default": ""
+    },
     "announcement": {
       "type": "string",
       "title": "公告",

@@ -1,3 +1,5 @@
+import type { MusicSource } from './music';
+
 /**
  * 视频内容
  */
@@ -12,42 +14,6 @@ export interface MomentVideo {
  */
 export interface MomentAudio {
   url: string;
-}
-
-/**
- * 音乐内容
- */
-export interface MomentMusic {
-  server: 'netease' | 'tencent';
-  type: 'song' | 'playlist' | 'album' | 'artist';
-  id: string;
-}
-
-/** meting api 原始响应项 */
-export interface MusicApiResponse {
-  name?: string;
-  title?: string;
-  artist?: string;
-  author?: string;
-  url: string;
-  pic?: string;
-  cover?: string;
-  lrc?: string;
-}
-
-/** 播放器解析后的音轨 */
-export interface AudioTrack {
-  name: string;
-  artist: string;
-  url: string;
-  cover: string;
-  lrc?: string;
-}
-
-/** 歌词行 */
-export interface LyricLine {
-  time: number;
-  text: string;
 }
 
 /**
@@ -69,7 +35,7 @@ export interface MomentContent {
   tags?: string;
   video?: MomentVideo;
   audio?: MomentAudio;
-  music?: MomentMusic;
+  music?: MusicSource;
   link?: MomentLink;
 }
 

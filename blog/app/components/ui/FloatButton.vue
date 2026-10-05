@@ -2,6 +2,28 @@
   <!-- 悬浮按钮组 -->
   <Transition name="fade">
     <div v-show="visible" class="float-button-group">
+      <!-- 全局音乐按钮 -->
+      <div
+        v-if="enabled && state.tracks.length > 0"
+        ref="musicToggle"
+        class="music-toggle"
+        @mouseenter="setHovered(true)"
+        @mouseleave="setHovered(false)"
+      >
+        <Transition name="music-panel">
+          <FeaturesPlayerMusicPanel v-show="musicPanelVisible" />
+        </Transition>
+
+        <div
+          class="float-button"
+          :title="state.playing ? '暂停音乐' : '播放音乐'"
+          @mouseenter="setHovered(true)"
+          @click="onMusicClick"
+        >
+          <i class="ri-headphone-line" :class="{ 'music-spin': state.playing }" />
+        </div>
+      </div>
+
       <!-- 主题切换按钮 -->
       <div class="float-button theme-toggle" title="切换主题" @click="toggleTheme">
         <i class="ri-moon-line theme-icon-moon" />
@@ -71,6 +93,26 @@ const showMobileToc = ref(false);
 const isArticlePage = computed(() => route.name === 'posts-slug');
 const { toggleTheme } = useDarkMode();
 
+const { enabled, state, toggle, pause } = useGlobalMusic();
+usePlaybackSlot(GLOBAL_PLAYBACK_SLOT, () => pause());
+
+const { panel: musicPanel, hasHover, setHovered } = useMusicPanel();
+
+const musicToggle = ref<HTMLElement | null>(null);
+
+const musicPanelVisible = computed(() => state.value.playing || musicPanel.value.hovered);
+
+const onMusicClick = () => {
+  if (!hasHover.value) setHovered(true);
+  toggle();
+};
+
+const onOutsidePointer = (event: PointerEvent) => {
+  if (hasHover.value || !musicPanel.value.hovered) return;
+  if (musicToggle.value?.contains(event.target as Node)) return;
+  setHovered(false);
+};
+
 const isMobile = ref(false);
 
 const checkMobile = () => {
@@ -116,11 +158,13 @@ onMounted(() => {
   handleScroll();
   checkMobile();
   window.addEventListener('resize', checkMobile);
+  document.addEventListener('pointerdown', onOutsidePointer);
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
   window.removeEventListener('resize', checkMobile);
+  document.removeEventListener('pointerdown', onOutsidePointer);
 });
 </script>
 
@@ -171,6 +215,33 @@ onUnmounted(() => {
       position: absolute;
       transition: opacity 0.2s ease;
     }
+  }
+}
+
+.music-toggle {
+  position: relative;
+}
+
+.music-panel-enter-active,
+.music-panel-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.music-panel-enter-from,
+.music-panel-leave-to {
+  opacity: 0;
+  transform: translateX(10px) scale(0.98);
+}
+
+.music-spin {
+  animation: music-spin 20s linear infinite;
+}
+
+@keyframes music-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
