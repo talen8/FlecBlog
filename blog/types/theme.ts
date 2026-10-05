@@ -14,3 +14,18 @@ export interface ThemeConfigResponse {
   config: Record<string, string>;
   menus: Record<string, ThemeMenuItem[]>;
 }
+
+/** 版权协议标识 */
+export type LicenseKey =
+  'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0';
+
+/** 协议条款标识 */
+export type LicenseClauseCode = 'by' | 'nc' | 'nd' | 'sa' | 'cc0';
+
+/** 版权协议完整信息 */
+export interface CopyrightLicense {
+  short: string;
+  name: string;
+  url: string;
+  clauses: LicenseClauseCode[];
+}

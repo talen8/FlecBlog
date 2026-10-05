@@ -29,19 +29,20 @@ const contactEmail = computed(() => basicConfig.value.author_email || '');
 
       <h2>1.1 自动收集的信息</h2>
 
-      <p>当你访问本站时，我们会自动收集以下技术信息用于统计分析：</p>
+      <p>当你访问本站时，我们会自动记录以下技术信息用于统计分析：</p>
 
       <ul>
-        <li>访问的页面、停留时长、来源网站</li>
+        <li>访问的页面、来源页面、访问日期</li>
         <li>IP 地址、地理位置（国家/城市级别）</li>
-        <li>设备类型、操作系统、浏览器类型</li>
+        <li>浏览器类型、操作系统、浏览器标识（User-Agent）</li>
       </ul>
 
       <h2>1.2 用户主动提供的信息</h2>
 
       <p><strong>注册账号时：</strong></p>
       <ul>
-        <li>用户名、邮箱地址、密码（加密存储）</li>
+        <li>邮箱地址、密码（加密存储）、昵称、头像、个人网站</li>
+        <li>使用第三方账号登录时，仅保存该平台的账号标识（如 OpenID）</li>
       </ul>
 
       <p><strong>发表评论时：</strong></p>
@@ -49,6 +50,12 @@ const contactEmail = computed(() => basicConfig.value.author_email || '');
         <li>游客评论：昵称、邮箱、个人网站（可选）</li>
         <li>用户评论：使用账号关联的信息</li>
         <li>评论内容、IP 地址</li>
+      </ul>
+
+      <p><strong>订阅或反馈时：</strong></p>
+      <ul>
+        <li>邮件订阅：邮箱地址（可通过邮件中的链接随时退订）</li>
+        <li>意见反馈：联系邮箱（可选）、反馈内容</li>
       </ul>
 
       <h1>二、信息的使用目的</h1>
@@ -65,18 +72,32 @@ const contactEmail = computed(() => basicConfig.value.author_email || '');
 
       <h1>三、信息的存储</h1>
 
-      <p><strong>服务器存储：</strong>用户账号信息、评论内容、访问日志等存储在服务器数据库中。</p>
+      <p>
+        <strong>服务器存储：</strong
+        >用户账号信息、评论内容、订阅邮箱、访问日志等存储在服务器数据库中。
+      </p>
 
       <p>
-        <strong>本地存储：</strong>主题偏好、登录令牌等保存在你的浏览器中，详见
+        <strong>浏览器存储：</strong>登录凭证、主题偏好等保存在你的浏览器中，详见
         <router-link to="/cookies">Cookie 与本地存储</router-link>。
       </p>
 
       <h1>四、第三方服务</h1>
 
-      <p>
-        本站使用 Cravatar 头像服务，仅发送邮箱的 MD5 哈希值（不发送原始邮箱），用于获取用户头像。
-      </p>
+      <p>本站会使用以下第三方服务，它们各自按自己的隐私政策处理数据：</p>
+
+      <ul>
+        <li>
+          <strong>头像服务</strong>：默认使用
+          Cravatar，仅发送邮箱的哈希值（不发送原始邮箱）用于获取头像，服务地址可在后台更换
+        </li>
+        <li><strong>音乐接口</strong>：获取歌单与歌曲信息时会向第三方音乐接口发起请求</li>
+        <li>
+          <strong>第三方登录</strong>：启用 GitHub、Google、Microsoft、QQ、微信、飞书或通用 OIDC
+          登录时，由对应平台完成身份验证，我们只接收其返回的账号标识
+        </li>
+        <li><strong>邮件服务</strong>：用于发送订阅推送、评论回复通知与账号相关邮件</li>
+      </ul>
 
       <h1>五、信息的共享</h1>
 
@@ -105,7 +126,8 @@ const contactEmail = computed(() => basicConfig.value.author_email || '');
         <li>访问、更正、删除你的个人信息</li>
         <li>删除账号及所有相关数据</li>
         <li>导出你发表的评论</li>
-        <li>拒绝特定数据处理</li>
+        <li>通过邮件中的链接随时退订文章推送</li>
+        <li>清除浏览器中的 Cookie 与本地存储数据</li>
       </ul>
 
       <p>
@@ -164,7 +186,7 @@ const contactEmail = computed(() => basicConfig.value.author_email || '');
         >。
       </p>
 
-      <p class="update-time">最后更新时间：2025年10月</p>
+      <p class="update-time">最后更新时间：2026年10月</p>
     </div>
   </div>
 </template>

@@ -17,29 +17,46 @@ useSeoMeta({
       <p>本页面说明本站在你的浏览器中存储了哪些数据，以及如何管理这些数据。</p>
 
       <p>
-        本站不使用
-        Cookie，而是使用浏览器本地存储（LocalStorage）。这些数据仅保存在你的设备上，不会自动发送到服务器。
+        本站只使用一个维持登录所必需的 Cookie，其余数据都存放在浏览器本地存储（LocalStorage /
+        SessionStorage）中，仅保存在你的设备上，不会随每次请求自动发送到服务器。
       </p>
 
       <p>
         关于数据收集和使用的完整说明，请查看 <router-link to="/privacy">隐私政策</router-link>。
       </p>
 
+      <h1>使用的 Cookie</h1>
+
+      <ul>
+        <li>
+          <strong>refresh_token</strong>：登录后的刷新令牌，有效期 30 天，用于自动续期登录状态。
+        </li>
+      </ul>
+
       <h1>存储的数据</h1>
 
       <ul>
-        <li><strong>主题偏好</strong>（isDark）：记住你选择的深色/浅色模式</li>
-        <li><strong>游客信息</strong>（guest_info）：未登录时评论所填写的昵称、邮箱、网址</li>
-        <li><strong>登录令牌</strong>（token）：登录后的身份凭证，用于保持登录状态</li>
+        <li><strong>theme</strong>：选择的深色 / 浅色模式</li>
+        <li><strong>access_token</strong>：登录后的访问令牌，有效期 1 小时</li>
+        <li><strong>guest_info</strong>：未登录时评论填写的昵称、邮箱、网址</li>
+        <li><strong>comment_draft</strong>：尚未提交的评论草稿，避免刷新页面丢失</li>
+        <li><strong>flec:global-music</strong>：播放器的音量、进度、播放顺序等状态</li>
+        <li><strong>bindEmailSkipTime</strong>：跳过绑定邮箱提醒的时间</li>
+        <li><strong>ctx-tip</strong>：功能提示是否已经展示过</li>
       </ul>
 
-      <h1>为什么使用本地存储</h1>
-
-      <p><strong>更好的隐私保护：</strong></p>
       <p>
-        与传统 Cookie 不同，LocalStorage
-        中的数据不会在每次请求时自动发送到服务器。这意味着你的主题偏好等个人设置完全保存在本地，服务器无权访问。
+        此外，页面跳转时会用 SessionStorage
+        临时记录滚动位置，用于返回列表时恢复浏览进度，关闭标签页即失效。
       </p>
+
+      <h1>为什么这样分工</h1>
+
+      <p><strong>登录凭证放 Cookie：</strong></p>
+      <p>刷新令牌由浏览器以 HttpOnly 方式保管，页面脚本读不到，可降低被恶意脚本窃取的风险。</p>
+
+      <p><strong>偏好设置放本地存储：</strong></p>
+      <p>主题、播放进度这类数据无需传给服务器，放在本地既减少请求体积，服务器也无权访问。</p>
 
       <p><strong>更快的加载速度：</strong></p>
       <p>主题设置等数据直接从本地读取，无需等待服务器响应，页面加载更快。</p>
@@ -56,11 +73,17 @@ useSeoMeta({
         <li><strong>随时清除</strong>：可以通过浏览器设置随时清除，无需联系我们</li>
       </ul>
 
+      <blockquote>
+        服务端还会记录访问日志用于站点统计（含
+        IP、浏览器标识、来源页面等），这部分数据不在你的浏览器本地，详见
+        <router-link to="/privacy">隐私政策</router-link>。
+      </blockquote>
+
       <h1>如何管理这些数据</h1>
 
       <p><strong>查看存储的数据：</strong></p>
       <p>
-        按 <strong>F12</strong> 打开开发者工具 → Application/Storage → Local Storage →
+        按 <strong>F12</strong> 打开开发者工具 → Application/Storage → Local Storage / Cookies →
         选择本站域名。
       </p>
 
@@ -76,7 +99,8 @@ useSeoMeta({
       <p><strong>清除后的影响：</strong></p>
       <ul>
         <li>主题设置恢复为默认</li>
-        <li>游客评论需重新填写信息</li>
+        <li>游客评论需重新填写信息，未提交的评论草稿丢失</li>
+        <li>播放器的音量与播放进度恢复为默认</li>
         <li>登录状态丢失，需重新登录</li>
       </ul>
 
@@ -112,12 +136,12 @@ useSeoMeta({
       <ul>
         <li>因浏览器设置、扩展程序或其他软件导致的存储失效</li>
         <li>因用户主动清除数据或浏览器隐私模式导致的数据丢失</li>
-        <li>第三方服务（如 Cravatar）的可用性和隐私政策变更</li>
+        <li>第三方服务（如头像服务、音乐接口）的可用性和隐私政策变更</li>
       </ul>
 
       <p>继续使用本站即表示你理解并接受上述说明。</p>
 
-      <p class="update-time">最后更新时间：2025年10月</p>
+      <p class="update-time">最后更新时间：2026年10月</p>
     </div>
   </div>
 </template>

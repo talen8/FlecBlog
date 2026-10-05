@@ -2,6 +2,9 @@
 import type { Article } from '~~/types';
 const props = defineProps<{ article: Article }>();
 const { basicConfig } = useSysConfig();
+const { themeConfig } = useTheme();
+
+const license = computed(() => getLicense(themeConfig.value.copyright_license));
 
 const articleUrl = computed(() => {
   const blogUrl = basicConfig.value.blog_url;
@@ -42,12 +45,13 @@ const articleUrl = computed(() => {
           <span class="label">许可协议</span>
           <span class="value">
             <a
-              href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+              :href="license.url"
+              :title="license.name"
               target="_blank"
               rel="noopener noreferrer"
               class="license-link"
             >
-              CC BY-NC-SA 4.0
+              {{ license.short }}
             </a>
           </span>
         </div>
