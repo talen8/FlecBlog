@@ -4,7 +4,7 @@
 
 ## 技术栈
 
-- **语言**: [Go 1.25](https://golang.org)
+- **语言**: [Go 1.27.1](https://golang.org)
 - **框架**: [Gin](https://github.com/gin-gonic/gin)
 - **ORM**: [GORM](https://gorm.io)
 - **数据库**: PostgreSQL

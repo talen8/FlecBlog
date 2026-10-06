@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"flec_blog/config"
@@ -20,10 +21,19 @@ func (d *Database) GetDB() *gorm.DB {
 	return d.DB
 }
 
+// escapeConnInfoValue 按 libpq 规则转义 keyword/value 连接串中的值
+func escapeConnInfoValue(value string) string {
+	return "'" + strings.NewReplacer(`\`, `\\`, `'`, `\'`).Replace(value) + "'"
+}
+
 // NewDB 创建数据库连接
 func NewDB(config *config.DatabaseConfig) (*Database, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC",
-		config.Host, config.User, config.Password, config.DBName, config.Port)
+		escapeConnInfoValue(config.Host),
+		escapeConnInfoValue(config.User),
+		escapeConnInfoValue(config.Password),
+		escapeConnInfoValue(config.DBName),
+		config.Port)
 
 	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Error),

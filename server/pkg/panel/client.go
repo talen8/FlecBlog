@@ -266,7 +266,7 @@ func (c *Client) PostMultipart(ctx context.Context, path string,
 }
 
 func (c *Client) do(req *http.Request, out any) error {
-	resp, err := c.HTTPClient.Do(req) //nolint:gosec // URL 由内部拼接 c.BaseURL+path，BaseURL 为预设常量
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}

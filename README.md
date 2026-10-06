@@ -25,9 +25,9 @@
 
   <p>
     <img src="https://img.shields.io/badge/Monorepo-FlecBlog-111111?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAACDUlEQVR4nO3XS4iNYRgH8BNRNhYmkctMkpXJSslth1hiKxsbRmqoQU2NjY2J1GwsbGgsSG5FQ0kozMrKQhZqUCbkMsjdT2/znvo6fd93vjnznSPlX2dx3vN/nv//vT3PeyqV//hXgZt4jSEcRjeuYASf42ckjnVHzlCMuV2GgVGNY7QMA5cmYeBiGQb2T8JAT6Oii7E97ufdmqSrsCZFLG1870REZ+MQntSZVRBZW3D8VBHhqTiIj8rHiXriM3FL87A7T3w67jVR/BPm5Bno11yczRPvwNcmG/iG9r81+yr60sRn4I3W4E6agc1ah1dpBo7lBIRq1o4DIbgEA9/TDAznBKxO8NpiW50I3uECBvEstRvieU6C33iAdYlaUdsLshDeDW0JnWnYmWZgrECyn+hKXNkPBWL6I38DtmJK1hX8UnBGwcTKGNNXgB9W70Xi+74sA48j4WGBpMOJnhGeWBPB0SwDVyOhq855qGJLjFuAXXhbIOYl5mUZ6I2kc1has2xpeIpFifjOOmU85OtMFQ/AEvyKScIjZC6uFdjfR9XE4aGRwTuPWZV6ME4MGEyMbcSNKJaFI5HbU3NYL2N9XeEqsDBxtXprfpuPHTiJ+7GgjMXzsjxy9mAA28LZqDQC4zP+EU2cLrR0ZQObEoXpfewTKzKLSJNMdMS/Vcm9v94yAwkjy3A8PsvPlC3wB5cqDes3vUmxAAAAAElFTkSuQmCC&style=flat-square" alt="Monorepo" />
-    <img src="https://img.shields.io/badge/Server-Go%201.25-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go" />
+    <img src="https://img.shields.io/badge/Server-Go%201.27.1-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go" />
     <img src="https://img.shields.io/badge/Admin-Vue%203-42B883?style=flat-square&logo=vuedotjs&logoColor=white" alt="Vue 3" />
-    <img src="https://img.shields.io/badge/Blog-Nuxt%204.3.1-00DC82?style=flat-square&logo=nuxt&logoColor=white" alt="Nuxt 4" />
+    <img src="https://img.shields.io/badge/Blog-Nuxt%204.5.2-00DC82?style=flat-square&logo=nuxt&logoColor=white" alt="Nuxt 4" />
   </p>
 </div>
 
@@ -43,9 +43,9 @@ FlecBlog 是一个三端分离的博客系统，围绕内容创作这件事，�
 
 | 模块 | 技术栈 | 定位 |
 | --- | --- | --- |
-| `server` | Go 1.25 / Gin / GORM / PostgreSQL | 后端服务、认证、接口、数据与定时任务 |
+| `server` | Go 1.27.1 / Gin / GORM / PostgreSQL | 后端服务、认证、接口、数据与定时任务 |
 | `admin` | Vue 3 / Element Plus / Vite | 内容管理、仪表盘、编辑器、运营后台 |
-| `blog` | Nuxt 4.3.1 / Vue 3.5 / SCSS | 博客前台、SSR、SEO、阅读体验 |
+| `blog` | Nuxt 4.5.2 / Vue 3.5 / SCSS | 博客前台、SSR、SEO、阅读体验 |
 
 **为什么选择 FlecBlog**
 
@@ -68,7 +68,7 @@ FlecBlog 是一个三端分离的博客系统，围绕内容创作这件事，�
 
 ### Server - 服务端
 
-- **语言**: [Go 1.25](https://golang.org)
+- **语言**: [Go 1.27.1](https://golang.org)
 - **框架**: [Gin](https://github.com/gin-gonic/gin)
 - **ORM**: [GORM](https://gorm.io)
 - **数据库**: PostgreSQL
@@ -267,8 +267,8 @@ docker-compose up -d
 
 ### 前置要求
 
-- Node.js 20+ (admin, blog)
-- Go 1.25 (server)
+- Node.js 24+ (admin, blog)
+- Go 1.27.1 (server)
 - PostgreSQL 12+ (server)
 
 ### 数据库准备

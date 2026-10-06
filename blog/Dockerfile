@@ -1,7 +1,7 @@
 # 多阶段构建 Dockerfile for Nuxt 4
 
 # 阶段 1: 构建阶段
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -24,7 +24,7 @@ ENV FLECBLOG_VERSION=${APP_VERSION}
 RUN npm run build
 
 # 阶段 2: 运行阶段
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 

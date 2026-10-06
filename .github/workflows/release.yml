@@ -91,7 +91,7 @@ jobs:
         if: matrix.target == 'server'
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25"
+          go-version: "1.27.1"
           cache-dependency-path: server/go.sum
 
       - name: 交叉编译多平台二进制文件

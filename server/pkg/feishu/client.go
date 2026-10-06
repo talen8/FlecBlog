@@ -2,6 +2,7 @@ package feishu
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -78,6 +79,11 @@ var (
 	globalMu     sync.RWMutex
 )
 
+const (
+	wsRetryInitialInterval = 5 * time.Second
+	wsRetryMaxInterval     = 5 * time.Minute
+)
+
 // Client 飞书客户端
 type Client struct {
 	appID     string
@@ -85,7 +91,6 @@ type Client struct {
 	chatID    string
 	enable    bool
 	client    *lark.Client
-	wsClient  *larkws.Client
 	cancel    context.CancelFunc
 	mu        sync.Mutex
 }
@@ -211,6 +216,42 @@ func (c *Client) SendMessage(ctx context.Context, cardJSON string) error {
 	return nil
 }
 
+// runWebSocket 启动飞书长连接
+func runWebSocket(ctx context.Context, appID, appSecret string) {
+	interval := wsRetryInitialInterval
+
+	for {
+		if ctx.Err() != nil {
+			return
+		}
+
+		wsClient := larkws.NewClient(appID, appSecret, larkws.WithEventHandler(createEventHandler()))
+		err := wsClient.Start(ctx)
+		if ctx.Err() != nil {
+			return
+		}
+
+		var clientErr *larkws.ClientError
+		if errors.As(err, &clientErr) {
+			logger.Error("[Feishu] 长连接被服务端拒绝，请检查 AppID/AppSecret 配置: code=%d, msg=%s",
+				clientErr.Code, clientErr.Msg)
+		} else {
+			logger.Error("[Feishu] 长连接异常退出: %v", err)
+		}
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(interval):
+		}
+
+		interval *= 2
+		if interval > wsRetryMaxInterval {
+			interval = wsRetryMaxInterval
+		}
+	}
+}
+
 // start 启动长连接
 func (c *Client) start() {
 	c.mu.Lock()
@@ -226,13 +267,8 @@ func (c *Client) start() {
 	// #nosec G118 - cancel 函数保存在 c.cancel 中，在 stop/Reload 时调用
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
-	c.wsClient = larkws.NewClient(c.appID, c.appSecret, larkws.WithEventHandler(createEventHandler()))
 
-	go func(ctx context.Context) {
-		if err := c.wsClient.Start(ctx); err != nil {
-			logger.Error("[Feishu] WebSocket 连接失败: %v", err)
-		}
-	}(ctx)
+	go runWebSocket(ctx, c.appID, c.appSecret)
 }
 
 // createEventHandler 创建事件处理器
@@ -286,13 +322,8 @@ func Reload(appID, appSecret, chatID string) {
 		// #nosec G118 - cancel 函数保存在 globalClient.cancel 中，在 Reload 时调用
 		ctx, cancel := context.WithCancel(context.Background())
 		globalClient.cancel = cancel
-		globalClient.wsClient = larkws.NewClient(appID, appSecret, larkws.WithEventHandler(createEventHandler()))
 
-		go func(ctx context.Context) {
-			if err := globalClient.wsClient.Start(ctx); err != nil {
-				logger.Error("[Feishu] WebSocket 连接失败: %v", err)
-			}
-		}(ctx)
+		go runWebSocket(ctx, appID, appSecret)
 	}
 }
 
