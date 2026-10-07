@@ -97,6 +97,14 @@ func (r *RssFeedRepository) MarkRead(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).Model(&model.RssArticle{}).Where("id = ?", id).Update("is_read", true).Error
 }
 
+// SetBlockCircle 设置文章的友圈屏蔽状态
+func (r *RssFeedRepository) SetBlockCircle(ctx context.Context, id uint, block bool) error {
+	return r.db.WithContext(ctx).
+		Model(&model.RssArticle{}).
+		Where("id = ?", id).
+		Update("block_circle", block).Error
+}
+
 // MarkAllRead 全部标记已读
 func (r *RssFeedRepository) MarkAllRead(ctx context.Context) (int64, error) {
 	result := r.db.WithContext(ctx).Model(&model.RssArticle{}).Where("is_read = ?", false).Update("is_read", true)
@@ -129,6 +137,49 @@ func (r *RssFeedRepository) ListUnread(ctx context.Context, limit int) ([]model.
 	return articles, nil
 }
 
+// CountSubscribedFriends 统计已订阅且未屏蔽的友链数量
+func (r *RssFeedRepository) CountSubscribedFriends(ctx context.Context) (int64, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&model.Friend{}).
+		Where("rss_url != '' AND rss_url IS NOT NULL").
+		Where("is_invalid = ?", false).
+		Where("is_pending = ?", false).
+		Where("block_circle = ?", false).
+		Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// ListFriendCircle 获取友圈文章
+func (r *RssFeedRepository) ListFriendCircle(ctx context.Context) ([]model.RssArticle, error) {
+	var friendIDs []uint
+	if err := r.db.WithContext(ctx).Model(&model.Friend{}).
+		Where("rss_url != '' AND rss_url IS NOT NULL").
+		Where("is_invalid = ?", false).
+		Where("is_pending = ?", false).
+		Where("block_circle = ?", false).
+		Pluck("id", &friendIDs).Error; err != nil {
+		return nil, err
+	}
+	if len(friendIDs) == 0 {
+		return []model.RssArticle{}, nil
+	}
+
+	query := r.db.WithContext(ctx).Model(&model.RssArticle{}).
+		Preload("Friend").
+		Where("friend_id IN ?", friendIDs).
+		Where("block_circle = ?", false).
+		Where("published_at IS NOT NULL").
+		Order("published_at DESC, created_at DESC")
+
+	var articles []model.RssArticle
+	if err := query.Find(&articles).Error; err != nil {
+		return nil, err
+	}
+	return articles, nil
+}
+
 // DeleteOrphaned 删除孤立文章（友链不存在、失效或RSS地址为空）
 func (r *RssFeedRepository) DeleteOrphaned(ctx context.Context) (int64, error) {
 	result := r.db.WithContext(ctx).
@@ -141,6 +192,17 @@ func (r *RssFeedRepository) DeleteOrphaned(ctx context.Context) (int64, error) {
 func (r *RssFeedRepository) ExistsByLink(ctx context.Context, link string) (bool, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&model.RssArticle{}).Where("link = ?", link).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+// ExistsByFriendAndTitle 检查同一友链下是否已存在相同标题的文章
+func (r *RssFeedRepository) ExistsByFriendAndTitle(ctx context.Context, friendID uint, title string) (bool, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&model.RssArticle{}).
+		Where("friend_id = ? AND title = ?", friendID, title).
+		Count(&count).Error; err != nil {
 		return false, err
 	}
 	return count > 0, nil

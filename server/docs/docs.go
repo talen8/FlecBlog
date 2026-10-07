@@ -3160,6 +3160,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/rssfeed/{id}/block-circle": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "屏蔽后该文章不再出现在前台友圈，限超级管理员",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RSS订阅管理"
+                ],
+                "summary": "设置文章友圈屏蔽",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "屏蔽状态",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SetArticleBlockCircleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/rssfeed/{id}/read": {
             "put": {
                 "security": [
@@ -6837,6 +6907,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/friends/circle": {
+            "get": {
+                "description": "返回友圈文章，可按关键词搜索；无筛选条件时返回最新文章",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友链"
+                ],
+                "summary": "友圈",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "关键词，匹配文章标题或友链站点名",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/circle/random": {
+            "get": {
+                "description": "从友圈全部文章中随机返回一篇",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友链"
+                ],
+                "summary": "友圈随机文章",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/friends/circle/stats": {
+            "get": {
+                "description": "统计友圈的文章总数、站点数量、今日更新数",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友链"
+                ],
+                "summary": "友圈统计",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/moments": {
             "get": {
                 "description": "获取所有公开的动态",
@@ -8396,6 +8552,10 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255
                 },
+                "block_circle": {
+                    "description": "友圈屏蔽",
+                    "type": "boolean"
+                },
                 "description": {
                     "type": "string",
                     "maxLength": 500
@@ -9125,6 +9285,14 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.SetArticleBlockCircleRequest": {
+            "type": "object",
+            "properties": {
+                "block_circle": {
+                    "type": "boolean"
+                }
+            }
+        },
         "dto.SetPasswordRequest": {
             "type": "object",
             "required": [
@@ -9589,6 +9757,10 @@ const docTemplate = `{
                 "avatar": {
                     "type": "string",
                     "maxLength": 255
+                },
+                "block_circle": {
+                    "description": "友圈屏蔽",
+                    "type": "boolean"
                 },
                 "description": {
                     "type": "string",

@@ -49,6 +49,7 @@ export interface Friend {
   rss_url: string; // RSS订阅地址
   rss_latime?: string; // RSS订阅最后更新时间
   accessible: number; // 可访问性状态: 0=正常, -1=忽略检查, >0=连续失败次数
+  block_circle: boolean; // 友圈屏蔽
 }
 
 // 友链列表查询参数
@@ -82,6 +83,7 @@ export interface CreateFriendRequest {
   sort?: number; // 排序值，范围1-10，默认5
   type_id: number; // 友链类型ID（必选）
   rss_url?: string; // RSS订阅地址
+  block_circle?: boolean; // 友圈屏蔽
 }
 
 // 更新友链请求
@@ -97,4 +99,5 @@ export interface UpdateFriendRequest {
   is_pending?: boolean; // 是否为待审核申请
   rss_url?: string; // RSS订阅地址
   accessible?: number; // 可访问性状态
+  block_circle?: boolean; // 友圈屏蔽
 }

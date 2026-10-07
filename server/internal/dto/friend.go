@@ -117,6 +117,7 @@ type CreateFriendRequest struct {
 	Sort        int    `json:"sort" binding:"omitempty,min=1,max=10"`
 	TypeID      *uint  `json:"type_id" binding:"omitempty"`
 	RSSUrl      string `json:"rss_url" binding:"omitempty,url,max=500"` // RSS订阅地址
+	BlockCircle bool   `json:"block_circle"`                            // 友圈屏蔽
 }
 
 // UpdateFriendRequest 更新友链请求
@@ -132,6 +133,7 @@ type UpdateFriendRequest struct {
 	TypeID      *uint  `json:"type_id" binding:"omitempty"`
 	RSSUrl      string `json:"rss_url" binding:"omitempty,url,max=500"` // RSS订阅地址
 	Accessible  *int   `json:"accessible"`                              // 可访问性状态
+	BlockCircle *bool  `json:"block_circle"`                            // 友圈屏蔽
 }
 
 // ============ 前台友链申请 ============
@@ -163,4 +165,5 @@ type FriendListResponse struct {
 	RSSUrl      string          `json:"rss_url"`
 	RSSLatime   *utils.JSONTime `json:"rss_latime,omitempty"`
 	Accessible  int             `json:"accessible"`
+	BlockCircle bool            `json:"block_circle"`
 }

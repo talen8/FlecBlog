@@ -27,6 +27,16 @@ export const markRssArticleRead = async (id: number): Promise<void> => {
 };
 
 /**
+ * 设置文章的友圈屏蔽状态
+ * @param id 文章ID
+ * @param block true 屏蔽，false 取消屏蔽
+ * @returns Promise<void>
+ */
+export const setRssArticleBlockCircle = async (id: number, block: boolean): Promise<void> => {
+  await request.put(`/admin/rssfeed/${id}/block-circle`, { block_circle: block });
+};
+
+/**
  * 全部标记已读
  * @returns Promise<MarkAllReadResponse>
  */

@@ -30,6 +30,7 @@ type Friend struct {
 	RSSUrl      string      `gorm:"size:500;default:''" json:"rss_url"`      // RSS订阅地址
 	RSSLatime   *time.Time  `json:"rss_latime,omitempty"`                    // RSS订阅最后更新时间
 	Accessible  int         `gorm:"default:0" json:"accessible"`             // 可访问性状态: 0=正常, -1=忽略检查, >0=连续失败次数
+	BlockCircle bool        `gorm:"default:false" json:"block_circle"`       // 友圈屏蔽
 	CreatedAt   time.Time   `json:"created_at"`
 	UpdatedAt   time.Time   `json:"updated_at"`
 }

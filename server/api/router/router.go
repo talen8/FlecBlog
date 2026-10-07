@@ -93,6 +93,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	settingService := service.NewSettingService(db.DB)
 	settingService.SetConfig(conf)                         // 设置全局配置对象，用于热重载
 	settingService.SetFileService(fileService)             // 设置文件服务，用于文件状态管理
+	friendService.SetRssFeedService(rssFeedService)        // 友链变动后失效友圈缓存
 	articleService.SetSubscriberService(subscriberService) // 设置订阅服务，用于文章推送
 	systemService.StartRegistration()
 
@@ -217,7 +218,10 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 		friendGroup := frontendAPI.Group("/friends")
 		{
 			// 公开接口
-			friendGroup.GET("", friendController.ListForWeb) // 获取友链分组列表
+			friendGroup.GET("", friendController.ListForWeb)                        // 获取友链分组列表
+			friendGroup.GET("/circle", rssFeedController.FriendCircle)              // 获取友圈文章
+			friendGroup.GET("/circle/random", rssFeedController.FriendCircleRandom) // 随机获取一篇友圈文章
+			friendGroup.GET("/circle/stats", rssFeedController.FriendCircleStats)   // 获取友圈统计数据
 
 			// 需要登录的接口
 			authFriend := friendGroup.Group("")
@@ -464,9 +468,10 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 		// ==================== RSS订阅管理 ====================
 		rssFeedManagement := adminAPI.Group("/rssfeed")
 		{
-			rssFeedManagement.GET("", rssFeedController.List)                                            // 获取RSS文章列表
-			rssFeedManagement.PUT("/:id/read", middleware.IsSuperAdmin(), rssFeedController.MarkRead)    // 标记文章已读（仅超级管理员）
-			rssFeedManagement.PUT("/read-all", middleware.IsSuperAdmin(), rssFeedController.MarkAllRead) // 全部标记已读（仅超级管理员）
+			rssFeedManagement.GET("", rssFeedController.List)                                                       // 获取RSS文章列表
+			rssFeedManagement.PUT("/:id/read", middleware.IsSuperAdmin(), rssFeedController.MarkRead)               // 标记文章已读（仅超级管理员）
+			rssFeedManagement.PUT("/read-all", middleware.IsSuperAdmin(), rssFeedController.MarkAllRead)            // 全部标记已读（仅超级管理员）
+			rssFeedManagement.PUT("/:id/block-circle", middleware.IsSuperAdmin(), rssFeedController.SetBlockCircle) // 设置文章友圈屏蔽（仅超级管理员）
 		}
 
 		// ==================== 邮件订阅者管理 ====================

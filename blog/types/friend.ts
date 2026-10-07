@@ -52,6 +52,55 @@ export interface FriendQueryParams {
 }
 
 /**
+ * 友圈文章作者
+ */
+export interface FriendCircleAuthor {
+  id: number;
+  name: string;
+  avatar?: string;
+  url: string;
+}
+
+/**
+ * 友圈文章条目
+ */
+export interface FriendCircleItem {
+  id: number;
+  title: string;
+  link: string;
+  published_at?: string;
+  author?: FriendCircleAuthor;
+}
+
+/**
+ * 友圈统计
+ */
+export interface FriendCircleStats {
+  total: number;
+  site_count: number;
+  today_count: number;
+}
+
+/**
+ * 友圈响应
+ */
+export interface FriendCircleResponse {
+  list: FriendCircleItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+/**
+ * 友圈查询参数
+ */
+export interface FriendCircleQueryParams {
+  page?: number;
+  page_size?: number;
+  keyword?: string;
+}
+
+/**
  * 友链申请请求
  */
 export interface FriendApplyRequest {

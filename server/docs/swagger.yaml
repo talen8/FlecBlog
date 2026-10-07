@@ -595,6 +595,9 @@ definitions:
       avatar:
         maxLength: 255
         type: string
+      block_circle:
+        description: 友圈屏蔽
+        type: boolean
       description:
         maxLength: 500
         type: string
@@ -1090,6 +1093,11 @@ definitions:
     - email
     - password
     type: object
+  dto.SetArticleBlockCircleRequest:
+    properties:
+      block_circle:
+        type: boolean
+    type: object
   dto.SetPasswordRequest:
     properties:
       confirm_password:
@@ -1408,6 +1416,9 @@ definitions:
       avatar:
         maxLength: 255
         type: string
+      block_circle:
+        description: 友圈屏蔽
+        type: boolean
       description:
         maxLength: 500
         type: string
@@ -3624,6 +3635,51 @@ paths:
       security:
       - BearerAuth: []
       summary: RSS文章列表
+      tags:
+      - RSS订阅管理
+  /admin/rssfeed/{id}/block-circle:
+    put:
+      consumes:
+      - application/json
+      description: 屏蔽后该文章不再出现在前台友圈，限超级管理员
+      parameters:
+      - description: 文章ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 屏蔽状态
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SetArticleBlockCircleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 设置文章友圈屏蔽
       tags:
       - RSS订阅管理
   /admin/rssfeed/{id}/read:
@@ -5895,6 +5951,62 @@ paths:
       security:
       - BearerAuth: []
       summary: 申请友链
+      tags:
+      - 友链
+  /friends/circle:
+    get:
+      description: 返回友圈文章，可按关键词搜索；无筛选条件时返回最新文章
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 关键词，匹配文章标题或友链站点名
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 友圈
+      tags:
+      - 友链
+  /friends/circle/random:
+    get:
+      description: 从友圈全部文章中随机返回一篇
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 友圈随机文章
+      tags:
+      - 友链
+  /friends/circle/stats:
+    get:
+      description: 统计友圈的文章总数、站点数量、今日更新数
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 友圈统计
       tags:
       - 友链
   /moments:

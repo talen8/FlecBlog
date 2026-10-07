@@ -108,17 +108,27 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="120" align="center" fixed="right">
+      <el-table-column label="操作" width="160" align="center" fixed="right">
         <template #default="{ row }">
-          <el-button
-            v-if="!row.is_read && isSuperAdmin"
-            type="primary"
-            link
-            size="small"
-            @click="handleMarkRead(row)"
-          >
-            标记已读
-          </el-button>
+          <template v-if="isSuperAdmin">
+            <el-button
+              v-if="!row.is_read"
+              type="primary"
+              link
+              size="small"
+              @click="handleMarkRead(row)"
+            >
+              标记已读
+            </el-button>
+            <el-button
+              :type="row.block_circle ? 'success' : 'warning'"
+              link
+              size="small"
+              @click="handleToggleBlockCircle(row)"
+            >
+              {{ row.block_circle ? '取消屏蔽' : '友圈屏蔽' }}
+            </el-button>
+          </template>
           <span v-else style="color: #999">-</span>
         </template>
       </el-table-column>
@@ -188,7 +198,12 @@ import RssFeedFilter from './components/RssFeedFilter.vue';
 import type { RssArticle, RssArticleQuery } from '@/types/rssfeed';
 import type { Subscriber } from '@/types/subscriber';
 import type { Friend } from '@/types/friend';
-import { getRssArticles, markRssArticleRead, markAllRssArticlesRead } from '@/api/rssfeed';
+import {
+  getRssArticles,
+  markRssArticleRead,
+  markAllRssArticlesRead,
+  setRssArticleBlockCircle,
+} from '@/api/rssfeed';
 import { getSubscribers, deleteSubscriber } from '@/api/subscriber';
 import { getFriends } from '@/api/friend';
 import { formatDateTime } from '@/utils/date';
@@ -290,6 +305,19 @@ const handleMarkRead = async (article: RssArticle) => {
     article.is_read = true;
     unreadCount.value = Math.max(0, unreadCount.value - 1);
     ElMessage.success('已标记为已读');
+  } catch {
+    ElMessage.error('操作失败');
+  }
+};
+
+/**
+ * 切换文章的友圈屏蔽状态
+ */
+const handleToggleBlockCircle = async (article: RssArticle) => {
+  const block = !article.block_circle;
+  try {
+    await setRssArticleBlockCircle(article.id, block);
+    article.block_circle = block;
   } catch {
     ElMessage.error('操作失败');
   }

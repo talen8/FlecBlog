@@ -9,6 +9,7 @@ export interface RssArticle {
   description: string;
   published_at?: string;
   is_read: boolean;
+  block_circle: boolean;
   created_at: string;
 }
 

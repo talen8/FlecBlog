@@ -17,6 +17,7 @@ type FriendService struct {
 	repo                *repository.FriendRepository
 	fileService         *FileService
 	notificationService *NotificationService
+	rssFeedService      *RssFeedService
 }
 
 // NewFriendService 创建友链服务实例
@@ -25,6 +26,18 @@ func NewFriendService(repo *repository.FriendRepository, fileService *FileServic
 		repo:                repo,
 		fileService:         fileService,
 		notificationService: notificationService,
+	}
+}
+
+// SetRssFeedService 注入RSS订阅服务，用于友链变动后失效友圈缓存
+func (s *FriendService) SetRssFeedService(rssFeedService *RssFeedService) {
+	s.rssFeedService = rssFeedService
+}
+
+// invalidateFriendCircle 通知友圈缓存失效
+func (s *FriendService) invalidateFriendCircle() {
+	if s.rssFeedService != nil {
+		s.rssFeedService.InvalidateCircleCache()
 	}
 }
 
@@ -205,6 +218,7 @@ func (s *FriendService) List(ctx context.Context, req *dto.ListFriendRequest) ([
 			TypeID:      friend.TypeID,
 			RSSUrl:      friend.RSSUrl,
 			Accessible:  friend.Accessible,
+			BlockCircle: friend.BlockCircle,
 		}
 
 		// 如果有类型，返回类型名称（后台展示用）
@@ -250,6 +264,7 @@ func (s *FriendService) Create(ctx context.Context, req *dto.CreateFriendRequest
 		IsInvalid:   false, // 新创建的友链默认不失效
 		TypeID:      req.TypeID,
 		RSSUrl:      req.RSSUrl,
+		BlockCircle: req.BlockCircle,
 	}
 
 	if err := s.repo.Create(ctx, friend); err != nil {
@@ -265,6 +280,8 @@ func (s *FriendService) Create(ctx context.Context, req *dto.CreateFriendRequest
 			_ = s.fileService.MarkAsUsed(req.Screenshot)
 		}
 	}
+
+	s.invalidateFriendCircle()
 
 	return friend, nil
 }
@@ -319,6 +336,11 @@ func (s *FriendService) Update(ctx context.Context, id uint, req *dto.UpdateFrie
 		existingFriend.Accessible = *req.Accessible
 	}
 
+	// 如果请求中指定了友圈屏蔽状态
+	if req.BlockCircle != nil {
+		existingFriend.BlockCircle = *req.BlockCircle
+	}
+
 	if err := s.repo.Update(ctx, existingFriend); err != nil {
 		return err
 	}
@@ -342,6 +364,8 @@ func (s *FriendService) Update(ctx context.Context, id uint, req *dto.UpdateFrie
 			}
 		}
 	}
+
+	s.invalidateFriendCircle()
 
 	return nil
 }
@@ -367,6 +391,8 @@ func (s *FriendService) Delete(ctx context.Context, id uint) error {
 			_ = s.fileService.MarkAsUnused(friend.Screenshot)
 		}
 	}
+
+	s.invalidateFriendCircle()
 
 	return nil
 }

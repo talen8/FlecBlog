@@ -114,19 +114,24 @@
 
         <!-- 只有编辑时才显示状态控制 -->
         <el-row v-if="isEdit" :gutter="20">
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="已失效">
               <el-switch v-model="formData.is_invalid" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="待审核">
               <el-switch v-model="formData.is_pending" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="忽略检查">
               <el-switch v-model="formData.ignoreCheck" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="友圈屏蔽">
+              <el-switch v-model="formData.block_circle" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -187,6 +192,7 @@ interface FriendFormData {
   is_pending?: boolean;
   rss_url?: string;
   ignoreCheck?: boolean;
+  block_circle?: boolean;
 }
 
 // 表单数据
@@ -202,6 +208,7 @@ const formData = ref<FriendFormData>({
   is_pending: false,
   rss_url: '',
   ignoreCheck: false,
+  block_circle: false,
 });
 
 // 表单验证规则
@@ -257,6 +264,7 @@ const resetFormData = () => {
     is_pending: false,
     rss_url: '',
     ignoreCheck: false,
+    block_circle: false,
   };
   // 清除表单验证状态
   setTimeout(() => {
@@ -290,6 +298,7 @@ watch(
         is_pending: friend.is_pending ?? false,
         rss_url: friend.rss_url || '',
         ignoreCheck: friend.accessible === -1,
+        block_circle: friend.block_circle ?? false,
       };
       // 清除表单验证
       setTimeout(() => {
@@ -439,6 +448,7 @@ const handleSubmit = async () => {
         is_pending: formData.value.is_pending,
         rss_url: formData.value.rss_url,
         accessible: formData.value.ignoreCheck ? -1 : 0,
+        block_circle: formData.value.block_circle,
       };
       await updateFriend(props.editFriend.id, updateData);
       ElMessage.success('更新友链成功');
@@ -453,6 +463,7 @@ const handleSubmit = async () => {
         sort: formData.value.sort,
         type_id: formData.value.type_id!,
         rss_url: formData.value.rss_url,
+        block_circle: formData.value.block_circle,
       };
       await createFriend(createData);
       ElMessage.success('创建友链成功');
