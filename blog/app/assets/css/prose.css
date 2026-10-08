@@ -773,7 +773,7 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   color: var(--prose-meta);
-  background: color-mix(in srgb, var(--theme-color) 5%, transparent);
+  background: rgba(73, 177, 245, 0.05);
   border-bottom: 1px solid var(--prose-custom-border);
   transition: all 0.3s ease;
 }
@@ -841,6 +841,90 @@
   flex-shrink: 0;
 }
 .markdown-content .custom-link-card .custom-link-arrow i {
+  font-size: 1.25rem;
+  font-style: normal;
+  color: var(--prose-meta);
+  transition: transform 0.3s ease;
+}
+.markdown-content .custom-file-card {
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  background: var(--prose-custom-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+.markdown-content .custom-file-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.markdown-content .custom-file-card .custom-file-type {
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--prose-meta);
+  background: rgba(255, 152, 0, 0.08);
+  border-bottom: 1px solid var(--prose-custom-border);
+  transition: all 0.3s ease;
+}
+.markdown-content .custom-file-card .custom-file-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: none;
+}
+.markdown-content .custom-file-card .custom-file-main::after {
+  content: none;
+}
+.markdown-content .custom-file-card .custom-file-main:hover {
+  border-bottom: none;
+}
+.markdown-content .custom-file-card .custom-file-main:hover .custom-file-action i {
+  transform: translateY(2px);
+}
+.markdown-content .custom-file-card .custom-file-icon {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--prose-custom-bg);
+  border: 1px solid var(--prose-custom-border);
+}
+.markdown-content .custom-file-card .custom-file-icon i {
+  font-size: 1.6rem;
+  font-style: normal;
+  color: var(--prose-meta);
+}
+.markdown-content .custom-file-card .custom-file-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.markdown-content .custom-file-card .custom-file-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--prose-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.markdown-content .custom-file-card .custom-file-meta {
+  font-size: 0.875rem;
+  color: var(--prose-light);
+  line-height: 1.5;
+}
+.markdown-content .custom-file-card .custom-file-action {
+  flex-shrink: 0;
+}
+.markdown-content .custom-file-card .custom-file-action i {
   font-size: 1.25rem;
   font-style: normal;
   color: var(--prose-meta);
@@ -1062,6 +1146,27 @@
     font-size: 0.95rem;
   }
   .markdown-content .custom-link-card .custom-link-desc {
+    font-size: 0.8rem;
+  }
+  .markdown-content .custom-file-card .custom-file-type {
+    padding: 5px 12px;
+    font-size: 0.7rem;
+  }
+  .markdown-content .custom-file-card .custom-file-main {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .markdown-content .custom-file-card .custom-file-icon {
+    width: 40px;
+    height: 40px;
+  }
+  .markdown-content .custom-file-card .custom-file-icon i {
+    font-size: 1.4rem;
+  }
+  .markdown-content .custom-file-card .custom-file-name {
+    font-size: 0.95rem;
+  }
+  .markdown-content .custom-file-card .custom-file-meta {
     font-size: 0.8rem;
   }
 }

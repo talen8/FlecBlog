@@ -39,11 +39,15 @@ var AllowedFileTypes = []string{
 	"image/svg+xml",
 	"image/bmp",
 	"image/tiff",
+	"image/heic",
+	"image/heif",
 	// 视频类型
 	"video/mp4",
 	"video/webm",
 	"video/quicktime",
-	"video/x-msvideo",  // avi
+	"video/x-msvideo", // avi
+	"video/avi",
+	"video/x-ms-wmv",
 	"video/x-matroska", // mkv
 	"video/mpeg",
 	"video/3gpp",
@@ -54,17 +58,36 @@ var AllowedFileTypes = []string{
 	"audio/ogg",
 	"audio/aac",
 	"audio/flac",
+	"audio/mp4",
+	"audio/x-ms-wma",
 	// 文档类型
 	"text/plain",
+	"text/csv",
+	"text/markdown",
 	"application/pdf",
 	"application/msword", // doc
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document", // docx
+	"application/vnd.ms-excel", // xls
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",         // xlsx
+	"application/vnd.ms-powerpoint",                                             // ppt
+	"application/vnd.openxmlformats-officedocument.presentationml.presentation", // pptx
 	// 压缩文件
 	"application/zip",
+	"application/x-zip-compressed",
 	"application/x-rar-compressed",
 	"application/x-7z-compressed",
+	"application/x-compressed",
+	"application/x-tar",  // tar
+	"application/gzip",   // gz / tgz
+	"application/x-gzip", // gz
+	"application/x-gtar", // tar.gz
 	// JSON类型（用于配置文件等）
 	"application/json",
+	// YAML类型（用于配置文件等）
+	"text/yaml",
+	"text/x-yaml",
+	"application/yaml",
+	"application/x-yaml",
 }
 
 // FileInfo 文件信息

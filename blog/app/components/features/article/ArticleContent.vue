@@ -59,6 +59,7 @@ watch(
     await nextTick();
     initZoom();
     await renderMermaidDiagrams();
+    void loadFileSizes();
   }
 );
 
@@ -71,6 +72,7 @@ onMounted(() => {
   nextTick(async () => {
     initZoom();
     await renderMermaidDiagrams();
+    void loadFileSizes();
   });
 });
 

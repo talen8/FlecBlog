@@ -7,6 +7,7 @@ import type { FileListData, FileListQuery } from '@/types/file';
 export interface UploadResponse {
   file_url: string;
   file_name: string;
+  original_name: string;
   file_size: number;
 }
 

@@ -313,6 +313,93 @@ function renderVideo(params: string[], sourceAttrs = ''): string {
 }
 
 /**
+ * 根据文件扩展名推断附件图标
+ * @param ext - 小写且不含点号的文件扩展名
+ * @returns 图标类名；无法识别时返回通用文件图标
+ */
+function resolveFileIcon(ext: string): string {
+  const iconMap: Record<string, string> = {
+    pdf: 'ri-file-pdf-line',
+    doc: 'ri-file-word-line',
+    docx: 'ri-file-word-line',
+    xls: 'ri-file-excel-line',
+    xlsx: 'ri-file-excel-line',
+    csv: 'ri-file-excel-line',
+    ppt: 'ri-file-ppt-line',
+    pptx: 'ri-file-ppt-line',
+    zip: 'ri-file-zip-line',
+    rar: 'ri-file-zip-line',
+    '7z': 'ri-file-zip-line',
+    tar: 'ri-file-zip-line',
+    gz: 'ri-file-zip-line',
+    txt: 'ri-file-text-line',
+    md: 'ri-file-text-line',
+    json: 'ri-file-code-line',
+    yaml: 'ri-file-code-line',
+    yml: 'ri-file-code-line',
+  };
+  return iconMap[ext] || 'ri-file-3-line';
+}
+
+/**
+ * 从文件 URL 推断展示文件名
+ * @param url - 文件 URL
+ * @returns 推断出的文件名；无法推断时返回空字符串
+ */
+function resolveFileName(url: string): string {
+  const path = url.split(/[?#]/)[0] || '';
+  const lastSegment = path.split('/').filter(Boolean).pop() || '';
+  try {
+    return decodeURIComponent(lastSegment);
+  } catch {
+    return lastSegment;
+  }
+}
+
+/**
+ * 从文件 URL 推断扩展名
+ * @param url - 文件 URL
+ * @returns 小写且不含点号的扩展名；无扩展名时返回空字符串
+ */
+function resolveFileExt(url: string): string {
+  return (
+    resolveFileName(url)
+      .match(/\.([a-z0-9]+)$/i)?.[1]
+      ?.toLowerCase() || ''
+  );
+}
+
+/**
+ * 渲染文章附件卡片
+ * @param params - [文件URL, 显示名称(可选，可包含空格)]；省略名称时从 URL 推断
+ * @param sourceAttrs - 源码属性（可选，用于滚动同步）
+ */
+function renderFile(params: string[], sourceAttrs = ''): string {
+  const url = params[0] || '';
+  if (!url) return '';
+
+  const name = params.slice(1).join(' ') || resolveFileName(url);
+  const ext = resolveFileExt(url);
+  const meta = ext ? `${ext.toUpperCase()} · 点击下载` : '点击下载';
+
+  return `<div class="custom-file-card"${sourceAttrs}>
+    <div class="custom-file-type">文章附件</div>
+    <a href="${md.utils.escapeHtml(url)}" class="custom-file-main" download="${md.utils.escapeHtml(name)}" target="_blank" rel="noopener noreferrer">
+      <div class="custom-file-icon">
+        <i class="${resolveFileIcon(ext)}"></i>
+      </div>
+      <div class="custom-file-info">
+        <div class="custom-file-name">${md.utils.escapeHtml(name)}</div>
+        <div class="custom-file-meta">${meta}</div>
+      </div>
+      <div class="custom-file-action">
+        <i class="ri-download-2-line"></i>
+      </div>
+    </a>
+  </div>`;
+}
+
+/**
  * 渲染在线音乐/音频
  * @param params - [标题, 音频URL]
  * @param sourceAttrs - 源码属性（可选，用于滚动同步）
@@ -564,6 +651,8 @@ function customBlocksPlugin(md: MarkdownIt) {
         html = renderAudio(params, buildBlockSourceAttrs(startLine, startLine + 1));
       } else if (tag === 'music') {
         html = renderMusic(params, buildBlockSourceAttrs(startLine, startLine + 1));
+      } else if (tag === 'file') {
+        html = renderFile(params, buildBlockSourceAttrs(startLine, startLine + 1));
       }
 
       if (html) {
@@ -842,6 +931,7 @@ const SANITIZE_CONFIG = {
   ],
   ALLOWED_ATTR: [
     'href',
+    'download',
     'title',
     'target',
     'rel',

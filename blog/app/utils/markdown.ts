@@ -341,6 +341,170 @@ function renderVideo(params: string[]): string {
   return '';
 }
 
+/**
+ * 根据文件扩展名推断附件图标
+ * @param ext - 小写且不含点号的文件扩展名
+ * @returns 图标类名；无法识别时返回通用文件图标
+ */
+function resolveFileIcon(ext: string): string {
+  const iconMap: Record<string, string> = {
+    pdf: 'ri-file-pdf-line',
+    doc: 'ri-file-word-line',
+    docx: 'ri-file-word-line',
+    xls: 'ri-file-excel-line',
+    xlsx: 'ri-file-excel-line',
+    csv: 'ri-file-excel-line',
+    ppt: 'ri-file-ppt-line',
+    pptx: 'ri-file-ppt-line',
+    zip: 'ri-file-zip-line',
+    rar: 'ri-file-zip-line',
+    '7z': 'ri-file-zip-line',
+    tar: 'ri-file-zip-line',
+    gz: 'ri-file-zip-line',
+    txt: 'ri-file-text-line',
+    md: 'ri-file-text-line',
+    json: 'ri-file-code-line',
+    yaml: 'ri-file-code-line',
+    yml: 'ri-file-code-line',
+  };
+  return iconMap[ext] || 'ri-file-3-line';
+}
+
+/**
+ * 从文件 URL 推断展示文件名
+ * @param url - 文件 URL
+ * @returns 推断出的文件名；无法推断时返回空字符串
+ */
+function resolveFileName(url: string): string {
+  const path = url.split(/[?#]/)[0] || '';
+  const lastSegment = path.split('/').filter(Boolean).pop() || '';
+  try {
+    return decodeURIComponent(lastSegment);
+  } catch {
+    return lastSegment;
+  }
+}
+
+/**
+ * 从文件 URL 推断扩展名
+ * @param url - 文件 URL
+ * @returns 小写且不含点号的扩展名；无扩展名时返回空字符串
+ */
+function resolveFileExt(url: string): string {
+  return (
+    resolveFileName(url)
+      .match(/\.([a-z0-9]+)$/i)?.[1]
+      ?.toLowerCase() || ''
+  );
+}
+
+/**
+ * 渲染文章附件卡片
+ * @param params - [文件URL, 显示名称(可选，可包含空格)]；省略名称时从 URL 推断
+ * 体积需要客户端探测（见 loadFileSizes），未探测成功前显示「点击下载」
+ */
+function renderFile(params: string[]): string {
+  const url = params[0] || '';
+  if (!url) return '';
+
+  const name = params.slice(1).join(' ') || resolveFileName(url);
+  const ext = resolveFileExt(url);
+  const meta = ext ? `${ext.toUpperCase()} · 点击下载` : '点击下载';
+
+  return `<div class="custom-file-card" data-file-ext="${md.utils.escapeHtml(ext)}">
+    <div class="custom-file-type">文章附件</div>
+    <a href="${md.utils.escapeHtml(url)}" class="custom-file-main" download="${md.utils.escapeHtml(name)}" target="_blank" rel="noopener noreferrer">
+      <div class="custom-file-icon">
+        <i class="${resolveFileIcon(ext)}"></i>
+      </div>
+      <div class="custom-file-info">
+        <div class="custom-file-name">${md.utils.escapeHtml(name)}</div>
+        <div class="custom-file-meta">${meta}</div>
+      </div>
+      <div class="custom-file-action">
+        <i class="ri-download-2-line"></i>
+      </div>
+    </a>
+  </div>`;
+}
+
+/**
+ * 格式化文件体积
+ * @param bytes - 字节数
+ * @returns 带单位的可读体积，如 2.4 MB
+ */
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+
+  const units = ['KB', 'MB', 'GB', 'TB', 'PB'];
+  let value = bytes / 1024;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex++;
+  }
+  return `${value >= 100 ? value.toFixed(0) : value.toFixed(1)} ${units[unitIndex]}`;
+}
+
+/**
+ * 探测文件体积
+ * 先尝试 HEAD，不支持时退化为 1 字节的 Range 请求
+ * @param url - 文件 URL
+ * @returns 字节数；跨域、无 Content-Length 或 Range 等情况下返回 null
+ */
+async function probeFileSize(url: string): Promise<number | null> {
+  try {
+    const head = await fetch(url, { method: 'HEAD' });
+    const length = Number(head.headers.get('Content-Length'));
+    if (Number.isFinite(length) && length > 0) return length;
+  } catch {
+    // 跨域或不支持 HEAD，继续退化为 Range 请求
+  }
+
+  const controller = new AbortController();
+  try {
+    const partial = await fetch(url, {
+      headers: { Range: 'bytes=0-0' },
+      signal: controller.signal,
+    });
+    const total = partial.headers.get('Content-Range')?.match(/\/(\d+)$/)?.[1];
+    const size = Number(total);
+    return Number.isFinite(size) && size > 0 ? size : null;
+  } catch {
+    return null;
+  } finally {
+    controller.abort();
+  }
+}
+
+/**
+ * 填充文章附件卡片的体积
+ * 将 `自定义扩展名 · 点击下载` 替换为 `扩展名 · 体积`，探测失败时保留原文案
+ */
+export async function loadFileSizes(): Promise<void> {
+  if (typeof document === 'undefined') return;
+
+  const cards = document.querySelectorAll<HTMLElement>(
+    '.custom-file-card:not([data-file-size="1"])'
+  );
+
+  await Promise.all(
+    Array.from(cards).map(async card => {
+      card.dataset.fileSize = '1';
+
+      const meta = card.querySelector('.custom-file-meta');
+      const url = card.querySelector('a.custom-file-main')?.getAttribute('href');
+      if (!meta || !url) return;
+
+      const size = await probeFileSize(url);
+      if (size === null) return;
+
+      const ext = card.dataset.fileExt ? `${card.dataset.fileExt.toUpperCase()} · ` : '';
+      meta.textContent = `${ext}${formatFileSize(size)}`;
+    })
+  );
+}
+
 // 创建 markdown-it 实例
 const md = new MarkdownIt({
   html: false,
@@ -480,6 +644,8 @@ function customBlocksPlugin(md: MarkdownIt) {
         html = renderAudio(params);
       } else if (tag === 'music') {
         html = renderMusic(params);
+      } else if (tag === 'file') {
+        html = renderFile(params);
       }
 
       if (html) {
@@ -660,7 +826,7 @@ md.use(customBlocksPlugin);
 
 // 渲染 Markdown 为 HTML
 /**
- * 完整 Markdown 渲染（含代码高亮、KaTeX 公式、自定义卡片：note/tabs/fold/link/video/audio/music/photo）
+ * 完整 Markdown 渲染（含代码高亮、KaTeX 公式、自定义卡片：note/tabs/fold/link/video/audio/music/photo/file）
  * @param markdown - Markdown 文本
  * @returns DOMPurify 消毒后的 HTML 字符串
  */
@@ -777,6 +943,7 @@ export function renderMarkdown(markdown: string): string {
     ],
     ALLOWED_ATTR: [
       'href',
+      'download',
       'title',
       'target',
       'rel',

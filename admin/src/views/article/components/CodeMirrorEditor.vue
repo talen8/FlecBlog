@@ -554,6 +554,65 @@
             </div>
           </el-popover>
         </template>
+        <!-- 附件按钮 -->
+        <template v-else-if="item.title === '上传附件'">
+          <el-popover
+            :width="320"
+            trigger="click"
+            placement="bottom"
+            v-model:visible="fileDialog.visible"
+          >
+            <template #reference>
+              <button
+                :title="item.title"
+                class="toolbar-btn"
+                :class="{ active: fileDialog.visible }"
+              >
+                <i :class="item.icon"></i>
+              </button>
+            </template>
+            <div class="file-dialog-wrap">
+              <div class="file-form-item">
+                <el-upload
+                  :show-file-list="false"
+                  :accept="ATTACHMENT_ACCEPT"
+                  :before-upload="
+                    (file: File) => {
+                      handleFileUpload(file);
+                      return false;
+                    }
+                  "
+                  :disabled="fileDialog.uploading"
+                >
+                  <el-button
+                    type="primary"
+                    :loading="fileDialog.uploading"
+                    size="small"
+                    style="width: 100%"
+                  >
+                    <i v-if="!fileDialog.uploading" class="ri-upload-line"></i>
+                    {{ fileDialog.fileUrl ? '重新选择文件' : '选择附件文件' }}
+                  </el-button>
+                </el-upload>
+                <div v-if="fileDialog.fileUrl" class="file-url-preview">
+                  {{ fileDialog.fileUrl }}
+                </div>
+              </div>
+              <div class="file-form-item">
+                <el-input
+                  v-model="fileDialog.name"
+                  placeholder="显示名称"
+                  size="small"
+                  clearable
+                  @keyup.enter="handleInsertFile"
+                />
+              </div>
+              <div class="file-form-actions">
+                <el-button type="primary" size="small" @click="handleInsertFile"> 插入 </el-button>
+              </div>
+            </div>
+          </el-popover>
+        </template>
         <!-- 普通按钮 -->
         <button
           v-else
@@ -908,6 +967,25 @@ const audioDialog = reactive({
   musicServer: 'netease',
   musicId: '',
   musicInfo: null as { title: string; artist: string; pic: string } | null,
+});
+
+// 文件选择器的 accept 值
+const ATTACHMENT_ACCEPT =
+  // 文档
+  '.pdf,.doc,.docx,.txt,.md,.csv,' +
+  // 表格 / 演示
+  '.xls,.xlsx,.ppt,.pptx,' +
+  // 压缩包
+  '.zip,.rar,.7z,.tar,.gz,' +
+  // 数据
+  '.json,.yaml,.yml';
+
+// 附件弹窗状态
+const fileDialog = reactive({
+  visible: false,
+  name: '',
+  fileUrl: '',
+  uploading: false,
 });
 
 // 照片墙弹窗状态
@@ -1581,6 +1659,11 @@ const toolbarItems: ToolbarItem[] = [
     title: '音乐',
     action: () => toggleAudioDialog(),
   },
+  {
+    icon: 'ri-attachment-2',
+    title: '上传附件',
+    action: () => toggleFileDialog(),
+  },
 
   // 弹性空间，将后续按钮推到右侧
   { type: 'spacer' },
@@ -1660,6 +1743,46 @@ const handleImageSelect = async (event: Event) => {
   await uploadArticleImages(Array.from(input.files || []), () => {
     input.value = '';
   });
+};
+
+// ==================== 附件 ====================
+// 切换附件弹窗显示
+const toggleFileDialog = () => {
+  fileDialog.visible = !fileDialog.visible;
+  if (fileDialog.visible) {
+    fileDialog.name = '';
+    fileDialog.fileUrl = '';
+    fileDialog.uploading = false;
+  }
+};
+
+// 处理附件上传
+const handleFileUpload = async (file: File) => {
+  fileDialog.uploading = true;
+  try {
+    const results = await uploadFile(file, '文章附件');
+    fileDialog.fileUrl = results.file_url;
+    // 预填原始文件名，作者可改成更友好的显示名称
+    fileDialog.name = results.original_name;
+    ElMessage.success('附件上传成功');
+  } catch (error: unknown) {
+    ElMessage.error((error as Error)?.message || '附件上传失败');
+  } finally {
+    fileDialog.uploading = false;
+  }
+};
+
+// 插入附件语法
+const handleInsertFile = () => {
+  const url = fileDialog.fileUrl.trim();
+  if (!url) {
+    ElMessage.warning('请先选择附件文件');
+    return;
+  }
+  // 名称置于末位，可包含空格（与 :::file 语法的解析约定一致）
+  const name = fileDialog.name.trim();
+  insertText(name ? `:::file ${url} ${name} :::\n` : `:::file ${url} :::\n`);
+  fileDialog.visible = false;
 };
 
 // 处理粘贴图片
@@ -2965,6 +3088,34 @@ onBeforeUnmount(() => {
   }
 
   .video-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
+// 附件弹窗样式
+.file-dialog-wrap {
+  padding: 4px 0;
+
+  .file-form-item {
+    margin-bottom: 12px;
+
+    &:last-of-type {
+      margin-bottom: 16px;
+    }
+  }
+
+  .file-url-preview {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #909399;
+    word-break: break-all;
+    max-height: 40px;
+    overflow-y: auto;
+  }
+
+  .file-form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
