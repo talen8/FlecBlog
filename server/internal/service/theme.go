@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
@@ -38,7 +39,12 @@ func (s *ThemeService) GetThemeConfig() (*dto.ThemeConfigResponse, error) {
 		return nil, err
 	}
 
-	return buildThemeConfigResponse(config, menus)
+	pages, err := s.loadPages()
+	if err != nil {
+		return nil, err
+	}
+
+	return buildThemeConfigResponse(config, menus, pages)
 }
 
 // GetThemeConfigForWeb 获取前台主题配置（菜单只返回启用项）
@@ -53,7 +59,12 @@ func (s *ThemeService) GetThemeConfigForWeb() (*dto.ThemeConfigResponse, error) 
 		return nil, err
 	}
 
-	return buildThemeConfigResponse(config, filterEnabledMenuGroups(menus))
+	pages, err := s.loadPages()
+	if err != nil {
+		return nil, err
+	}
+
+	return buildThemeConfigResponse(config, filterEnabledMenuGroups(menus), pages)
 }
 
 // UpdateConfig 更新主题配置
@@ -65,8 +76,8 @@ func (s *ThemeService) UpdateConfig(req *dto.ConfigUpdateRequest) (json.RawMessa
 
 	items := make([]model.ThemeConfig, 0, len(data))
 	for key, value := range data {
-		if key == model.ThemeConfigKeyMenus {
-			continue // 菜单由独立接口维护，避免配置整体覆盖时误改菜单
+		if isReservedConfigKey(key) {
+			continue
 		}
 		encoded, err := encodeConfigValue(value)
 		if err != nil {
@@ -117,6 +128,52 @@ func (s *ThemeService) UpdateMenus(req *dto.MenuUpdateRequest) (map[string][]dto
 	}
 
 	return nextMenus, nil
+}
+
+// UpdatePages 更新主题页面
+func (s *ThemeService) UpdatePages(req *dto.PageUpdateRequest) (map[string]dto.PageDataItem, error) {
+	nextPages := make(map[string]dto.PageDataItem, len(req.Pages))
+	for path, item := range req.Pages {
+		item.Title = strings.TrimSpace(item.Title)
+		item.Description = strings.TrimSpace(item.Description)
+		if item.Title == "" && item.Description == "" {
+			continue
+		}
+		nextPages[path] = item
+	}
+
+	encoded, err := json.Marshal(nextPages)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.themeRepo.Upsert(model.ThemeConfigKeyPages, string(encoded)); err != nil {
+		return nil, err
+	}
+
+	return nextPages, nil
+}
+
+// loadPages 读取页面文案配置
+func (s *ThemeService) loadPages() (map[string]dto.PageDataItem, error) {
+	item, err := s.themeRepo.Get(model.ThemeConfigKeyPages)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return map[string]dto.PageDataItem{}, nil
+		}
+		return nil, err
+	}
+	if item.Value == "" {
+		return map[string]dto.PageDataItem{}, nil
+	}
+
+	var pages map[string]dto.PageDataItem
+	if err := json.Unmarshal([]byte(item.Value), &pages); err != nil {
+		return nil, fmt.Errorf("pages 不是合法 JSON: %w", err)
+	}
+	if pages == nil {
+		pages = map[string]dto.PageDataItem{}
+	}
+	return pages, nil
 }
 
 // loadMenus 读取菜单配置
@@ -196,7 +253,7 @@ func (s *ThemeService) loadConfig() (map[string]interface{}, error) {
 
 	config := make(map[string]interface{}, len(items))
 	for i := range items {
-		if items[i].Key == model.ThemeConfigKeyMenus {
+		if isReservedConfigKey(items[i].Key) {
 			continue
 		}
 		config[items[i].Key] = decodeConfigValue(items[i].Value)
@@ -204,8 +261,17 @@ func (s *ThemeService) loadConfig() (map[string]interface{}, error) {
 	return config, nil
 }
 
-// buildThemeConfigResponse 组装配置与菜单响应
-func buildThemeConfigResponse(config map[string]interface{}, menus map[string][]dto.MenuDataItem) (*dto.ThemeConfigResponse, error) {
+// isReservedConfigKey 判断配置键是否由专项接口维护，普通配置读写需跳过
+func isReservedConfigKey(key string) bool {
+	return key == model.ThemeConfigKeyMenus || key == model.ThemeConfigKeyPages
+}
+
+// buildThemeConfigResponse 组装配置、菜单与页面文案响应
+func buildThemeConfigResponse(
+	config map[string]interface{},
+	menus map[string][]dto.MenuDataItem,
+	pages map[string]dto.PageDataItem,
+) (*dto.ThemeConfigResponse, error) {
 	configRaw, err := json.Marshal(config)
 	if err != nil {
 		return nil, err
@@ -214,7 +280,11 @@ func buildThemeConfigResponse(config map[string]interface{}, menus map[string][]
 	if err != nil {
 		return nil, err
 	}
-	return &dto.ThemeConfigResponse{Config: configRaw, Menus: menusRaw}, nil
+	pagesRaw, err := json.Marshal(pages)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.ThemeConfigResponse{Config: configRaw, Menus: menusRaw, Pages: pagesRaw}, nil
 }
 
 // decodeConfigValue 将数据库文本还原为 JSON 值：可解析为 JSON 的按类型还原，否则按纯字符串处理

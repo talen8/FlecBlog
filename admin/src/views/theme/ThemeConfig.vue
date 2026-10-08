@@ -168,6 +168,15 @@
               @refresh="loadThemeConfig"
             />
           </el-tab-pane>
+
+          <el-tab-pane label="页面管理" name="pages">
+            <ThemePage
+              :schema="themeSchema"
+              :pages="themeConfig.pages"
+              :disabled="formDisabled"
+              @refresh="loadThemeConfig"
+            />
+          </el-tab-pane>
         </el-tabs>
       </template>
 
@@ -185,6 +194,7 @@ import JsonListEditor from '@/components/common/JsonListEditor.vue';
 import type { FieldConfig } from '@/components/common/JsonListEditor.vue';
 import ImageUploader from '@/components/common/ImageUploader.vue';
 import ThemeMenu from './components/ThemeMenu.vue';
+import ThemePage from './components/ThemePage.vue';
 import { getThemeConfig, updateThemeConfig } from '@/api/theme';
 import { uploadFile } from '@/api/file';
 import themeSchema from '@/config/theme.json';
@@ -192,7 +202,9 @@ import type { ThemeConfigResponse, SchemaField, SchemaGroup } from '@/types/them
 import { isSuperAdmin } from '@/utils/auth';
 
 const route = useRoute();
-const activeTab = ref(route.query.tab === 'menus' ? 'menus' : 'config');
+const activeTab = ref(
+  route.query.tab === 'menus' || route.query.tab === 'pages' ? String(route.query.tab) : 'config'
+);
 const loading = ref(false);
 const saving = ref(false);
 const themeConfig = ref<ThemeConfigResponse | null>(null);
@@ -377,6 +389,7 @@ const handleSave = async () => {
     themeConfig.value = {
       config: updatedConfig as Record<string, unknown>,
       menus: themeConfig.value.menus,
+      pages: themeConfig.value.pages,
     };
     configValues.value = { ...(updatedConfig as Record<string, unknown>) };
     originalConfigValues.value = { ...(updatedConfig as Record<string, unknown>) };
@@ -396,8 +409,8 @@ watch(
       if (first) activeTab.value = groupTabName(first);
       return;
     }
-    if (tab === 'menus') {
-      activeTab.value = tab;
+    if (tab === 'menus' || tab === 'pages') {
+      activeTab.value = String(tab);
     }
   }
 );
@@ -482,7 +495,8 @@ onMounted(() => {
 
         .el-form,
         .theme-info,
-        .theme-menu-panel {
+        .theme-menu-panel,
+        .theme-page-panel {
           max-width: 95%;
           margin: 0 auto;
         }
@@ -550,7 +564,8 @@ onMounted(() => {
 
         .el-form,
         .theme-info,
-        .theme-menu-panel {
+        .theme-menu-panel,
+        .theme-page-panel {
           max-width: none;
         }
       }

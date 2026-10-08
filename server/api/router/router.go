@@ -417,6 +417,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 			themeManagement.GET("", themeHandler.Get)                 // 获取主题配置
 			themeManagement.PUT("/config", themeHandler.UpdateConfig) // 更新主题配置
 			themeManagement.PUT("/menus", themeHandler.UpdateMenus)   // 更新主题菜单
+			themeManagement.PUT("/pages", themeHandler.UpdatePages)   // 更新页面文案
 		}
 
 		// ==================== 反馈管理 ====================

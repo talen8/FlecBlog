@@ -3,7 +3,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/feedback',
   title: '反馈投诉',
   description: '如果您有任何问题或建议，欢迎通过此表单向我们反馈',
 });
@@ -16,7 +17,7 @@ const handleSuccess = () => {
 
 <template>
   <div id="page">
-    <h1 class="page-title">反馈投诉</h1>
+    <h1 class="page-title">{{ title }}</h1>
 
     <div class="feedback-content">
       <FeaturesFeedbackForm @success="handleSuccess" />

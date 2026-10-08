@@ -6,7 +6,8 @@ const { data: list, page } = useArticleList(() => ({ page_size: 20 }));
 const articles = computed(() => list.value?.list ?? []);
 const total = computed(() => list.value?.total ?? 0);
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/archive',
   title: '归档',
   description: () => `浏览所有文章归档，共 ${total.value} 篇文章，按时间顺序查看历史文章`,
 });
@@ -25,7 +26,7 @@ const handlePageChange = (p: number) => {
     <FeaturesArchiveArticleList
       :articles="articles"
       :group-by-year="true"
-      title="归档"
+      :title="title"
       :total="total"
     />
 

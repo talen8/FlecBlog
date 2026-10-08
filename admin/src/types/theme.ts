@@ -3,6 +3,7 @@ export type ThemeConfig = Record<string, unknown>;
 export interface ThemeConfigResponse {
   config?: ThemeConfig;
   menus?: Record<string, ThemeMenuItem[]>;
+  pages?: Record<string, ThemePageItem>;
 }
 
 export interface ThemeMenuItem {
@@ -42,6 +43,12 @@ export interface MenuSlot {
   defaults?: Partial<ThemeMenuItem>[];
 }
 
+export interface ThemePageItem {
+  title?: string;
+  description?: string;
+}
+
 export interface ThemeSchema {
   $menus?: Record<string, MenuSlot>;
+  $pages?: string[];
 }

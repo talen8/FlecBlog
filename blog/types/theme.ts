@@ -9,10 +9,17 @@ export interface ThemeMenuItem {
   children?: ThemeMenuItem[];
 }
 
+/** 主题页面项 */
+export interface ThemePageItem {
+  title?: string;
+  description?: string;
+}
+
 /** 主题配置响应 */
 export interface ThemeConfigResponse {
   config: Record<string, string>;
   menus: Record<string, ThemeMenuItem[]>;
+  pages?: Record<string, ThemePageItem>;
 }
 
 /** 版权协议标识 */

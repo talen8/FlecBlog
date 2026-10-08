@@ -1058,6 +1058,13 @@ definitions:
         description: 类型中文文本（前端直接显示）
         type: string
     type: object
+  dto.PageUpdateRequest:
+    properties:
+      pages:
+        type: object
+    required:
+    - pages
+    type: object
   dto.RegisterRequest:
     properties:
       email:
@@ -1317,6 +1324,8 @@ definitions:
       config:
         type: object
       menus:
+        type: object
+      pages:
         type: object
     type: object
   dto.TrendData:
@@ -4409,6 +4418,30 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新主题菜单
+      tags:
+      - 主题管理
+  /admin/themes/pages:
+    put:
+      consumes:
+      - application/json
+      description: 整体替换页面展示标题与描述，标题与描述均为空表示恢复主题默认文案
+      parameters:
+      - description: 页面文案
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PageUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新页面文案
       tags:
       - 主题管理
   /admin/users:

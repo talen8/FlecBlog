@@ -17,7 +17,8 @@ const router = useRouter();
 
 definePageMeta({});
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/notifications',
   title: '通知中心',
   description: '查看您的所有通知，及时了解最新动态',
 });
@@ -59,7 +60,7 @@ onMounted(() => {
 
 <template>
   <div id="page">
-    <h1 class="page-title">通知中心</h1>
+    <h1 class="page-title">{{ title }}</h1>
 
     <div class="notification-list">
       <div class="list-header">

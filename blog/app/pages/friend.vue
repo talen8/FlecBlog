@@ -3,7 +3,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/friend',
   title: '友链',
   description: '浏览我的友情链接，发现更多优秀的博客和网站',
 });
@@ -30,7 +31,7 @@ const isEmpty = computed(() => (allGroups.value ?? []).every(group => group.frie
 
 <template>
   <div id="friend-page">
-    <h1 class="page-title">友链</h1>
+    <h1 class="page-title">{{ title }}</h1>
 
     <div class="friend-sections">
       <!-- 友链分组 -->

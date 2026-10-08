@@ -79,6 +79,32 @@ func (h *ThemeHandler) UpdateConfig(ctx *gin.Context) {
 	response.Success(ctx, result)
 }
 
+// UpdatePages 更新主题页面
+//
+//	@Summary		更新主题页面
+//	@Description	整体替换页面展示标题与描述，标题与描述均为空表示恢复主题默认文案
+//	@Tags			主题管理
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Param			request	body	dto.PageUpdateRequest	true	"页面文案"
+//	@Success		200		{object}	response.Response
+//	@Router			/admin/themes/pages [put]
+func (h *ThemeHandler) UpdatePages(ctx *gin.Context) {
+	var req dto.PageUpdateRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.ValidateFailed(ctx, err.Error())
+		return
+	}
+
+	result, err := h.themeService.UpdatePages(&req)
+	if err != nil {
+		response.Failed(ctx, err.Error())
+		return
+	}
+	response.Success(ctx, result)
+}
+
 // UpdateMenus 更新主题菜单
 //
 //	@Summary		更新主题菜单

@@ -3,7 +3,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/statistics',
   title: '统计',
   description: '公开展示本站的文章、评论、友链、分类、标签、动态与访问情况等统计数据',
 });
@@ -117,7 +118,7 @@ const visitCards = computed(() => [
 
 <template>
   <div id="statistics-page">
-    <h1 class="page-title">统计</h1>
+    <h1 class="page-title">{{ title }}</h1>
 
     <section id="overview" class="content-section">
       <div class="overview-grid">

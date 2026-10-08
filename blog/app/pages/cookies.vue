@@ -3,15 +3,16 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
-  title: 'Cookie',
+const { title } = usePageSeo({
+  path: '/cookies',
+  title: 'Cookie 与本地存储',
   description: '了解本站在浏览器中存储的数据类型及如何管理这些数据',
 });
 </script>
 
 <template>
   <div id="page">
-    <div class="page-title">Cookie 与本地存储</div>
+    <div class="page-title">{{ title }}</div>
 
     <div class="content">
       <p>本页面说明本站在你的浏览器中存储了哪些数据，以及如何管理这些数据。</p>

@@ -5,7 +5,8 @@ definePageMeta({
 
 const { tags } = useTags();
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/tags',
   title: '标签',
   description: '浏览所有文章标签，快速找到感兴趣的内容',
 });
@@ -13,7 +14,7 @@ useSeoMeta({
 
 <template>
   <div id="page">
-    <h1 class="page-title">标签</h1>
+    <h1 class="page-title">{{ title }}</h1>
     <div class="tag-cloud-list">
       <router-link v-for="tag in tags" :key="tag.id" :to="tag.url" :title="tag.name">
         {{ tag.name }}

@@ -4395,6 +4395,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/themes/pages": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "整体替换页面展示标题与描述，标题与描述均为空表示恢复主题默认文案",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "主题管理"
+                ],
+                "summary": "更新页面文案",
+                "parameters": [
+                    {
+                        "description": "页面文案",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PageUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/users": {
             "get": {
                 "security": [
@@ -9237,6 +9276,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.PageUpdateRequest": {
+            "type": "object",
+            "required": [
+                "pages"
+            ],
+            "properties": {
+                "pages": {
+                    "type": "object"
+                }
+            }
+        },
         "dto.RegisterRequest": {
             "type": "object",
             "required": [
@@ -9611,6 +9661,9 @@ const docTemplate = `{
                     "type": "object"
                 },
                 "menus": {
+                    "type": "object"
+                },
+                "pages": {
                     "type": "object"
                 }
             }

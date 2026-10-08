@@ -14,4 +14,5 @@ type ThemeConfig struct {
 // 主题配置常量
 const (
 	ThemeConfigKeyMenus = "menus"
+	ThemeConfigKeyPages = "pages"
 )

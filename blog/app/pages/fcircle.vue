@@ -6,7 +6,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/fcircle',
   title: '友圈',
   description: '聚合友链站点的最新文章，看看朋友们最近更新了什么',
 });
@@ -38,7 +39,7 @@ const authorInitial = (name?: string) => name?.trim().charAt(0) || '?';
 
 <template>
   <div id="fcircle-page">
-    <h1 class="page-title">友圈</h1>
+    <h1 class="page-title">{{ title }}</h1>
 
     <div class="circle-overview">
       <template v-if="stats">

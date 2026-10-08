@@ -4,6 +4,25 @@
     "navigation": { "label": "导航菜单", "maxDepth": 2, "defaults": [{"title":"首页","url":"/","icon":"ri-home-line","sort":1,"is_enabled":true}] },
     "footer": { "label": "页脚菜单", "maxDepth": 2, "defaults": [] }
   },
+  "$pages": [
+    "/archive",
+    "/categories",
+    "/tags",
+    "/friend",
+    "/fcircle",
+    "/moment",
+    "/message",
+    "/about",
+    "/feedback",
+    "/subscribe",
+    "/statistics",
+    "/ask",
+    "/cookies",
+    "/privacy",
+    "/copyright",
+    "/profile",
+    "/notifications"
+  ],
   "外观与主题": {
     "theme_color": {
       "type": "string",

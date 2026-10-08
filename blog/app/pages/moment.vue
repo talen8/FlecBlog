@@ -11,7 +11,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/moment',
   title: '动态',
   description: '查看我的最新动态，分享生活点滴和即时想法',
 });
@@ -96,7 +97,7 @@ const handleCommentClick = (moment: Moment) => {
 
 <template>
   <div id="moment-page">
-    <h1 class="page-title">动态</h1>
+    <h1 class="page-title">{{ title }}</h1>
 
     <div v-if="moments.length === 0" class="empty-state">
       <i class="ri-chat-3-line" />

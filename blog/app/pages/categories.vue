@@ -5,7 +5,8 @@ definePageMeta({
 
 const { categories } = useCategories();
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/categories',
   title: '分类',
   description: '浏览所有文章分类，探索不同主题的技术与生活内容',
 });
@@ -13,7 +14,7 @@ useSeoMeta({
 
 <template>
   <div id="page">
-    <h1 class="page-title">分类</h1>
+    <h1 class="page-title">{{ title }}</h1>
     <div class="category-lists">
       <ul class="category-list">
         <li v-for="category in categories" :key="category.id" class="category-list-item">

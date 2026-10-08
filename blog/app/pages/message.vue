@@ -3,7 +3,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/message',
   title: '留言',
   description: '在这里留下你的足迹，分享你的想法和祝福',
 });
@@ -29,7 +30,7 @@ const toggleEnvelope = () => {
 
 <template>
   <div id="page">
-    <h1 class="page-title">留言</h1>
+    <h1 class="page-title">{{ title }}</h1>
 
     <div class="content">
       <!-- 中式信封 -->

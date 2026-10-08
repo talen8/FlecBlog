@@ -10,7 +10,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/copyright',
   title: '版权协议',
   description: () => `了解本站内容的版权归属和使用许可，包括 ${license.value.short} 协议`,
 });
@@ -18,7 +19,7 @@ useSeoMeta({
 
 <template>
   <div id="page">
-    <div class="page-title">版权协议</div>
+    <div class="page-title">{{ title }}</div>
 
     <div class="content">
       <p>本页面说明本站内容的版权归属和使用许可。</p>

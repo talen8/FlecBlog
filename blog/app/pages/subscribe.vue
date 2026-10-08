@@ -3,7 +3,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/subscribe',
   title: '订阅本站',
   description: '通过公众号、邮件或RSS订阅本站，第一时间获取最新文章更新',
 });
@@ -92,7 +93,7 @@ const closeUnsubscribeDialog = () => {
 
 <template>
   <div id="subscribe-page">
-    <h1 class="page-title">订阅本站</h1>
+    <h1 class="page-title">{{ title }}</h1>
     <div class="page-subtitle">选择您喜欢的订阅方式，随时获取最新更新</div>
 
     <!-- 订阅方式卡片 -->

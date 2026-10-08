@@ -3,7 +3,8 @@ import type { UserInfo, UserRole } from '~~/types';
 
 definePageMeta({});
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/profile',
   title: '个人信息',
   description: '管理和编辑您的个人资料、账户设置和登录方式',
 });
@@ -428,7 +429,7 @@ onMounted(async () => {
 
 <template>
   <div id="page">
-    <h1 class="page-title">个人信息</h1>
+    <h1 class="page-title">{{ title }}</h1>
 
     <div v-if="userInfo" class="profile-content">
       <!-- 基础信息 -->

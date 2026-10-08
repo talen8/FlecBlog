@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import type { ThemeConfig, ThemeConfigResponse, ThemeMenuItem } from '@/types/theme';
+import type { ThemeConfig, ThemeConfigResponse, ThemeMenuItem, ThemePageItem } from '@/types/theme';
 
 /**
  * 获取主题配置
@@ -27,4 +27,15 @@ export const updateThemeMenus = (
   menus: Record<string, ThemeMenuItem[]>
 ): Promise<Record<string, ThemeMenuItem[]>> => {
   return request.put('/admin/themes/menus', { menus });
+};
+
+/**
+ * 更新主题页面
+ * @param pages 页面数据
+ * @returns Promise<Record<string, ThemePageItem>>
+ */
+export const updateThemePages = (
+  pages: Record<string, ThemePageItem>
+): Promise<Record<string, ThemePageItem>> => {
+  return request.put('/admin/themes/pages', { pages });
 };

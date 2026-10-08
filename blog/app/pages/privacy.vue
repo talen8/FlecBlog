@@ -5,7 +5,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/privacy',
   title: '隐私政策',
   description: '了解我们如何收集、使用和保护您的个人信息',
 });
@@ -15,7 +16,7 @@ const contactEmail = computed(() => basicConfig.value.author_email || '');
 
 <template>
   <div id="page">
-    <div class="page-title">隐私政策</div>
+    <div class="page-title">{{ title }}</div>
 
     <div class="content">
       <p>本隐私政策说明我们如何收集、使用和保护你的个人信息。</p>

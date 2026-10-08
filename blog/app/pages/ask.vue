@@ -7,7 +7,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+const { title } = usePageSeo({
+  path: '/ask',
   title: '提问须知',
   description: '学习如何提出高质量的问题，获得更好的技术交流和帮助',
 });
@@ -15,7 +16,7 @@ useSeoMeta({
 
 <template>
   <div id="page">
-    <div class="page-title">提问须知</div>
+    <div class="page-title">{{ title }}</div>
 
     <div class="content">
       <p>本页面旨在帮助你更有效地提问和交流，获得更有价值的回答。</p>

@@ -3,7 +3,8 @@ definePageMeta({
   showSidebar: false,
 });
 
-useSeoMeta({
+usePageSeo({
+  path: '/about',
   title: '关于',
   description: '了解博主的个人信息、经历和故事',
 });
