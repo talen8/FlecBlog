@@ -294,18 +294,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f9eb;
   border-radius: 8px;
   font-size: 20px;
-  color: #67c23a;
-}
-
-.export-option:nth-child(1) .option-icon {
-  background: #e6f7e6;
-  color: #07c160;
-}
-
-.export-option:nth-child(2) .option-icon {
   background: #f4f4f5;
   color: #909399;
 }
@@ -364,7 +354,7 @@ import CommonList from '@/components/common/CommonList.vue';
 import ArticleFilter from './components/ArticleFilter.vue';
 import type { Article, ArticleListQuery } from '@/types/article';
 import type { Category } from '@/types/category';
-import { getArticles, deleteArticle, exportToWeChat, downloadArticleZip } from '@/api/article';
+import { getArticles, deleteArticle, downloadArticleZip } from '@/api/article';
 import { getCategories } from '@/api/category';
 import CategoryManager from './components/CategoryManager.vue';
 import TagManager from './components/TagManager.vue';
@@ -514,13 +504,6 @@ const exportArticleId = ref<number>(0);
 
 const exportOptions = reactive([
   {
-    key: 'wechat',
-    title: '复制微信公众号格式',
-    desc: '转换为公众号 HTML 并复制到剪贴板',
-    icon: 'ri-wechat-line',
-    loading: false,
-  },
-  {
     key: 'markdown',
     title: '下载为 Markdown',
     desc: '下载含图片资源的完整文章',
@@ -542,9 +525,6 @@ const handleExport = async (key: string) => {
 
   try {
     switch (key) {
-      case 'wechat':
-        await handleExportToWeChat();
-        break;
       case 'markdown':
         await handleDownloadMarkdown();
         break;
@@ -552,18 +532,6 @@ const handleExport = async (key: string) => {
   } finally {
     option.loading = false;
   }
-};
-
-// 复制微信公众号格式到剪贴板
-const handleExportToWeChat = async () => {
-  const result = await exportToWeChat(exportArticleId.value);
-  if (result.html) {
-    await copyRichText(result.html);
-    ElMessage.success('已复制到剪贴板，请粘贴到微信公众平台编辑器');
-  } else {
-    ElMessage.error('生成失败');
-  }
-  exportDialogVisible.value = false;
 };
 
 // 下载为 Markdown
@@ -605,37 +573,6 @@ const downloadBlob = (blob: Blob, filename: string) => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-};
-
-// 复制富文本到剪贴板（HTML 格式）
-const copyRichText = async (html: string) => {
-  try {
-    // 使用 Clipboard API 写入富文本
-    const blob = new Blob([html], { type: 'text/html' });
-    const clipboardItem = new ClipboardItem({
-      'text/html': blob,
-      'text/plain': new Blob([html], { type: 'text/plain' }),
-    });
-    await navigator.clipboard.write([clipboardItem]);
-  } catch {
-    // 降级方案：通过临时元素复制
-    const container = document.createElement('div');
-    container.innerHTML = html;
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
-    container.style.whiteSpace = 'pre-wrap';
-    document.body.appendChild(container);
-
-    const range = document.createRange();
-    range.selectNodeContents(container);
-    const selection = window.getSelection();
-    selection?.removeAllRanges();
-    selection?.addRange(range);
-
-    document.execCommand('copy');
-    selection?.removeAllRanges();
-    document.body.removeChild(container);
-  }
 };
 
 onMounted(() => {

@@ -21,7 +21,6 @@ require (
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	github.com/ulule/limiter/v3 v3.11.2
-	github.com/yuin/goldmark v1.8.6
 	golang.org/x/crypto v0.57.0
 	golang.org/x/net v0.58.0
 	golang.org/x/oauth2 v0.30.0

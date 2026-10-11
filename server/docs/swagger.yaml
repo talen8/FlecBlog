@@ -1571,12 +1571,6 @@ definitions:
       version:
         type: string
     type: object
-  dto.WeChatExportResult:
-    properties:
-      html:
-        description: 公众号 HTML，用于复制粘贴到微信公众平台
-        type: string
-    type: object
   dto.WechatConfirmRequest:
     properties:
       code:
@@ -2146,46 +2140,6 @@ paths:
       security:
       - BearerAuth: []
       summary: 下载为 Markdown
-      tags:
-      - 文章管理
-  /admin/articles/{id}/wechat/export:
-    post:
-      consumes:
-      - application/json
-      description: 将文章 Markdown 转换为微信公众号 HTML 格式，供复制粘贴到微信公众平台
-      parameters:
-      - description: 文章 ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.WeChatExportResult'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerAuth: []
-      summary: 生成微信公众号 HTML
       tags:
       - 文章管理
   /admin/articles/import:
@@ -4441,7 +4395,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
-      summary: 更新页面文案
+      summary: 更新主题页面
       tags:
       - 主题管理
   /admin/users:

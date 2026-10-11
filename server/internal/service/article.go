@@ -20,12 +20,7 @@ import (
 	"flec_blog/pkg/logger"
 	"flec_blog/pkg/random"
 	"flec_blog/pkg/utils"
-	"flec_blog/pkg/wechatmp"
 
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer/html"
 	"gorm.io/gorm"
 )
 
@@ -38,30 +33,11 @@ type ArticleService struct {
 	fileService       *FileService
 	subscriberService *SubscriberService
 	db                *gorm.DB
-	md                goldmark.Markdown
 	httpClient        *http.Client
 }
 
 // NewArticleService 创建文章服务实例
 func NewArticleService(articleRepo *repository.ArticleRepository, tagRepo *repository.TagRepository, categoryRepo *repository.CategoryRepository, commentRepo *repository.CommentRepository, fileService *FileService, db *gorm.DB) *ArticleService {
-	// 初始化 goldmark（用于微信导出时渲染 Markdown）
-	md := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			extension.Table,
-			extension.Strikethrough,
-			extension.TaskList,
-		),
-		goldmark.WithParserOptions(
-			parser.WithAutoHeadingID(),
-		),
-		goldmark.WithRendererOptions(
-			html.WithHardWraps(),
-			html.WithXHTML(),
-			html.WithUnsafe(),
-		),
-	)
-
 	return &ArticleService{
 		articleRepo:  articleRepo,
 		tagRepo:      tagRepo,
@@ -69,7 +45,6 @@ func NewArticleService(articleRepo *repository.ArticleRepository, tagRepo *repos
 		commentRepo:  commentRepo,
 		fileService:  fileService,
 		db:           db,
-		md:           md,
 		httpClient: &http.Client{
 			Timeout: 60 * time.Second,
 			Transport: &http.Transport{
@@ -1275,33 +1250,6 @@ func parseMarkdownArticle(filename, content string) (*ParsedArticle, error) {
 	parsed.Content = content
 
 	return parsed, nil
-}
-
-// ============ 微信公众号导出 ============
-
-// ExportToWeChat 将文章渲染为微信公众号 HTML 格式
-func (s *ArticleService) ExportToWeChat(_ context.Context, id uint) *dto.WeChatExportResult {
-	article, err := s.articleRepo.Get(id)
-	if err != nil {
-		return &dto.WeChatExportResult{}
-	}
-
-	// 预处理并渲染 Markdown
-	processed := wechatmp.ConvertCustomBlocks(article.Content)
-	processed = wechatmp.ConvertLinksToFootnotes(processed)
-	processed = wechatmp.PreprocessMarkdown(processed)
-
-	var htmlBuf bytes.Buffer
-	if err := s.md.Convert([]byte(processed), &htmlBuf); err != nil {
-		return &dto.WeChatExportResult{}
-	}
-
-	result, err := wechatmp.ConvertMarkdownToWeChatHTML(htmlBuf.String())
-	if err != nil {
-		return &dto.WeChatExportResult{}
-	}
-
-	return &dto.WeChatExportResult{HTML: result.HTML}
 }
 
 // fetchImage 下载图片，返回数据和扩展名

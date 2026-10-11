@@ -6,7 +6,6 @@ import type {
   CreateArticleRequest,
   UpdateArticleRequest,
   ImportArticlesResult,
-  WeChatExportResult,
 } from '@/types/article';
 
 /**
@@ -66,17 +65,6 @@ export function importArticles(formData: FormData): Promise<ImportArticlesResult
       'Content-Type': 'multipart/form-data',
     },
   });
-}
-
-// ==================== 微信公众号导出 ====================
-
-/**
- * 将文章渲染为微信公众号 HTML 格式
- * @param id 文章ID
- * @returns Promise<WeChatExportResult>
- */
-export function exportToWeChat(id: number): Promise<WeChatExportResult> {
-  return request.post(`/admin/articles/${id}/wechat/export`);
 }
 
 /**

@@ -400,33 +400,6 @@ func isMarkdownFile(filename string) bool {
 	return len(filename) > 3 && (filename[len(filename)-3:] == ".md" || filename[len(filename)-9:] == ".markdown")
 }
 
-// ============ 微信公众号导出接口 ============
-
-// ExportToWeChat 将文章渲染为微信公众号格式
-//
-//	@Summary		生成微信公众号 HTML
-//	@Description	将文章 Markdown 转换为微信公众号 HTML 格式，供复制粘贴到微信公众平台
-//	@Tags			文章管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id		path		int	true	"文章 ID"
-//	@Success		200		{object}	response.Response{data=dto.WeChatExportResult}
-//	@Failure		400		{object}	response.Response
-//	@Failure		401		{object}	response.Response
-//	@Failure		403		{object}	response.Response
-//	@Router			/admin/articles/{id}/wechat/export [post]
-func (c *ArticleController) ExportToWeChat(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	if err != nil {
-		response.ValidateFailed(ctx, "无效的文章 ID")
-		return
-	}
-
-	result := c.articleService.ExportToWeChat(ctx.Request.Context(), uint(id))
-	response.Success(ctx, result)
-}
-
 // DownloadZip 下载文章为压缩包
 //
 //	@Summary		下载为 Markdown

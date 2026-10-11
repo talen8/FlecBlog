@@ -82,11 +82,6 @@ export interface ImportArticlesResult {
   errors?: ImportArticleError[];
 }
 
-// 微信公众号导出结果
-export interface WeChatExportResult {
-  html: string; // 公众号 HTML，用于复制粘贴到微信公众平台
-}
-
 // 文章列表查询参数
 export interface ArticleListQuery {
   page?: number;

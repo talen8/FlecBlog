@@ -226,10 +226,3 @@ type ImportArticleError struct {
 	Title    string `json:"title"`
 	Error    string `json:"error"`
 }
-
-// ============ 微信公众号导出 ============
-
-// WeChatExportResult 微信导出结果
-type WeChatExportResult struct {
-	HTML string `json:"html"` // 公众号 HTML，用于复制粘贴到微信公众平台
-}

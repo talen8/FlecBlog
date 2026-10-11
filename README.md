@@ -75,7 +75,7 @@ FlecBlog 是一个三端分离的博客系统，围绕内容创作这件事，�
 - **认证**: JWT (JSON Web Tokens), OAuth2, Goth
 - **API 文档**: Swagger
 - **定时任务**: [Cron](https://github.com/robfig/cron)
-- **其他**: User-Agent 解析, 飞书 SDK, 微信公众号
+- **其他**: User-Agent 解析, 飞书 SDK, 微信扫码登录
 
 ### Admin - 管理端
 

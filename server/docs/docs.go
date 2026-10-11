@@ -826,73 +826,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/articles/{id}/wechat/export": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "将文章 Markdown 转换为微信公众号 HTML 格式，供复制粘贴到微信公众平台",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "文章管理"
-                ],
-                "summary": "生成微信公众号 HTML",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "文章 ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.WeChatExportResult"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/categories": {
             "get": {
                 "security": [
@@ -4412,7 +4345,7 @@ const docTemplate = `{
                 "tags": [
                     "主题管理"
                 ],
-                "summary": "更新页面文案",
+                "summary": "更新主题页面",
                 "parameters": [
                     {
                         "description": "页面文案",
@@ -10016,15 +9949,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.WeChatExportResult": {
-            "type": "object",
-            "properties": {
-                "html": {
-                    "description": "公众号 HTML，用于复制粘贴到微信公众平台",
                     "type": "string"
                 }
             }

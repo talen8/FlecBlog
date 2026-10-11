@@ -112,8 +112,8 @@ sections:
       - name: 飞书机器人集成
         description: 交互式卡片消息，斜杠命令，友链/评论即时通知
         icon: i-ri-message-3-line
-      - name: 多通道通知与微信导出
-        description: 邮件+飞书双通道推送，Markdown 转微信公众号排版
+      - name: 多通道通知
+        description: 邮件+飞书双通道推送，评论与友链即时提醒
         icon: i-ri-notification-3-line
       - name: Docker Compose 部署
         description: 一行命令启动，Docker 全生命周期管理
