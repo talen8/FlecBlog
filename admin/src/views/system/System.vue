@@ -254,21 +254,6 @@
                 </el-tag>
               </div>
               <div class="info-item">
-                <span class="label">飞书交互</span>
-                <el-tag
-                  :type="
-                    staticInfo.feishu_status === '正常'
-                      ? 'success'
-                      : staticInfo.feishu_status === '未配置'
-                        ? 'info'
-                        : 'danger'
-                  "
-                  size="small"
-                >
-                  {{ staticInfo.feishu_status }}
-                </el-tag>
-              </div>
-              <div class="info-item">
                 <span class="label">官版校验</span>
                 <el-tag
                   :type="staticInfo.panel_status === '正常' ? 'success' : 'danger'"
@@ -333,7 +318,6 @@ const staticInfo = ref<SystemStatic>({
   db_tables: 0,
   storage_status: '',
   email_status: '',
-  feishu_status: '',
   panel_status: '',
   app_version: '',
 });

@@ -9522,9 +9522,6 @@ const docTemplate = `{
                 "email_status": {
                     "type": "string"
                 },
-                "feishu_status": {
-                    "type": "string"
-                },
                 "hostname": {
                     "type": "string"
                 },

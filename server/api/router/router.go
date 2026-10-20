@@ -9,7 +9,6 @@ import (
 	"flec_blog/internal/service"
 	"flec_blog/pkg/database"
 	"flec_blog/pkg/email"
-	"flec_blog/pkg/feishu"
 	mcpserver "flec_blog/pkg/mcp"
 	"flec_blog/pkg/notification"
 	"flec_blog/pkg/scheduler"
@@ -72,8 +71,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 
 	// 初始化服务
 	emailClient := email.Initialize(conf)
-	feishuClient := feishu.Initialize(conf)
-	notificationSvc := notification.NewService(emailClient, feishuClient, conf)
+	notificationSvc := notification.NewService(emailClient, conf)
 	userService := service.NewUserService(userRepo, fileService, conf)
 	verificationService := service.NewVerificationService(verificationRepo, userRepo, emailClient, conf)
 	articleService := service.NewArticleService(articleRepo, tagRepo, categoryRepo, commentRepo, fileService, db.DB)
@@ -88,8 +86,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	feedbackService := service.NewFeedbackService(feedbackRepo, notificationService, fileService)
 	subscriberService := service.NewSubscriberService(subscriberRepo, emailClient, conf)
 	rssFeedService := service.NewRssFeedService(rssFeedRepo, notificationService)
-	systemService := service.NewSystemService(db.DB, uploadManager, emailClient, feishuClient, notificationService)
-	feishu.InitCardHandlers(friendService, commentService, userService, statsService, systemService, rssFeedService)
+	systemService := service.NewSystemService(db.DB, uploadManager, emailClient, notificationService)
 	settingService := service.NewSettingService(db.DB)
 	settingService.SetConfig(conf)                         // 设置全局配置对象，用于热重载
 	settingService.SetFileService(fileService)             // 设置文件服务，用于文件状态管理

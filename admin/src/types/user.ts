@@ -15,7 +15,6 @@ export interface User {
   google_id: string; // Google ID
   qq_id: string; // QQ ID
   microsoft_id: string; // Microsoft ID
-  feishu_open_id: string; // 飞书 OpenID
 }
 
 // 登录请求

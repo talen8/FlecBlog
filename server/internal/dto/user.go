@@ -43,9 +43,6 @@ func NewUserResponse(user *model.User) *UserResponse {
 	if user.OidcID != "" {
 		linkedOAuths = append(linkedOAuths, "oidc")
 	}
-	if user.FeishuOpenID != "" {
-		linkedOAuths = append(linkedOAuths, "feishu")
-	}
 	if user.WechatOpenID != "" {
 		linkedOAuths = append(linkedOAuths, "wechat")
 	}
@@ -179,22 +176,21 @@ type AdminUpdateUserRequest struct {
 
 // UserListResponse 用户列表响应
 type UserListResponse struct {
-	ID           uint            `json:"id"`
-	Email        string          `json:"email"`
-	Nickname     string          `json:"nickname"`
-	Avatar       string          `json:"avatar"`
-	Badge        string          `json:"badge"`
-	Website      string          `json:"website"`
-	Role         model.UserRole  `json:"role"`
-	IsEnabled    bool            `json:"is_enabled"`
-	LastLogin    *utils.JSONTime `json:"last_login,omitempty"`
-	CreatedAt    utils.JSONTime  `json:"created_at"`
-	DeletedAt    *utils.JSONTime `json:"deleted_at,omitempty"`
-	HasPassword  bool            `json:"has_password"`   // 是否设置了密码
-	GithubID     string          `json:"github_id"`      // GitHub ID
-	GoogleID     string          `json:"google_id"`      // Google ID
-	QQID         string          `json:"qq_id"`          // QQ OpenID
-	MicrosoftID  string          `json:"microsoft_id"`   // Microsoft ID
-	OidcID       string          `json:"oidc_id"`        // 通用 OIDC 用户ID
-	FeishuOpenID string          `json:"feishu_open_id"` // 飞书 OpenID
+	ID          uint            `json:"id"`
+	Email       string          `json:"email"`
+	Nickname    string          `json:"nickname"`
+	Avatar      string          `json:"avatar"`
+	Badge       string          `json:"badge"`
+	Website     string          `json:"website"`
+	Role        model.UserRole  `json:"role"`
+	IsEnabled   bool            `json:"is_enabled"`
+	LastLogin   *utils.JSONTime `json:"last_login,omitempty"`
+	CreatedAt   utils.JSONTime  `json:"created_at"`
+	DeletedAt   *utils.JSONTime `json:"deleted_at,omitempty"`
+	HasPassword bool            `json:"has_password"` // 是否设置了密码
+	GithubID    string          `json:"github_id"`    // GitHub ID
+	GoogleID    string          `json:"google_id"`    // Google ID
+	QQID        string          `json:"qq_id"`        // QQ OpenID
+	MicrosoftID string          `json:"microsoft_id"` // Microsoft ID
+	OidcID      string          `json:"oidc_id"`      // 通用 OIDC 用户ID
 }

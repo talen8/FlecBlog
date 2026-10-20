@@ -19,29 +19,29 @@ func NewEmailNotifier(client *email.Client, cfg *config.Config) *EmailNotifier {
 }
 
 // Send 发送邮件通知
-func (e *EmailNotifier) Send(to string, data Data) error {
+func (e *EmailNotifier) Send(to string, msg Message) error {
 	if e.client == nil || e.config == nil {
 		return nil // 邮件服务未配置，静默返回
 	}
 
 	// 根据通知类型选择地址（管理员通知用后台地址）
 	siteURL := e.config.Basic.BlogURL
-	if e.isAdminNotification(data.Type) {
+	if e.isAdminNotification(msg.Type) {
 		siteURL = e.config.Basic.AdminURL
 	}
 
 	// 准备模板数据
 	templateData := map[string]interface{}{
-		"Title":    data.Title,
-		"Content":  data.Content,
-		"Link":     data.Link,
+		"Title":    msg.Title,
+		"Content":  msg.Content,
+		"Link":     msg.Link,
 		"SiteURL":  siteURL,
 		"SiteName": e.config.Basic.Title,
-		"Data":     data.Data,
+		"Data":     msg.Data,
 	}
 
 	// 使用全局模板管理器渲染
-	templateName := e.getTemplateName(data.Type)
+	templateName := e.getTemplateName(msg.Type)
 	tmplMgr := email.GetGlobalTemplateManager()
 	htmlBody, err := tmplMgr.Render(templateName, templateData)
 	if err != nil {
@@ -49,12 +49,12 @@ func (e *EmailNotifier) Send(to string, data Data) error {
 	}
 
 	// 生成邮件主题
-	subject := e.generateSubject(data)
+	subject := e.generateSubject(msg)
 
 	// 确定发件人名称（评论通知用回复者昵称，其他用站点名）
 	fromName := templateData["SiteName"].(string)
-	if data.SenderName != "" && (data.Type == "comment_reply" || data.Type == "comment_new") {
-		fromName = data.SenderName
+	if msg.SenderName != "" && (msg.Type == "comment_reply" || msg.Type == "comment_new") {
+		fromName = msg.SenderName
 	}
 
 	// 发送邮件
@@ -62,12 +62,12 @@ func (e *EmailNotifier) Send(to string, data Data) error {
 }
 
 // generateSubject 生成邮件主题
-func (e *EmailNotifier) generateSubject(data Data) string {
+func (e *EmailNotifier) generateSubject(msg Message) string {
 	siteName := e.config.Basic.Title
 
-	switch data.Type {
+	switch msg.Type {
 	case "comment_reply":
-		senderName := data.SenderName
+		senderName := msg.SenderName
 		if senderName == "" {
 			senderName = "匿名用户"
 		}

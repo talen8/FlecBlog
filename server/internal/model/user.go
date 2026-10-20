@@ -33,7 +33,6 @@ type User struct {
 	GithubID     string     `gorm:"size:50;index" json:"-"`  // GitHub 用户ID
 	GoogleID     string     `gorm:"size:50;index" json:"-"`  // Google 用户ID
 	QQID         string     `gorm:"size:50;index" json:"-"`  // QQ OpenID
-	FeishuOpenID string     `gorm:"size:50;index" json:"-"`  // 飞书 OpenID
 	MicrosoftID  string     `gorm:"size:50;index" json:"-"`  // Microsoft 用户ID
 	OidcID       string     `gorm:"size:100;index" json:"-"` // 通用 OIDC 用户ID
 	WechatOpenID string     `gorm:"size:100;index" json:"-"` // 微信小程序 OpenID

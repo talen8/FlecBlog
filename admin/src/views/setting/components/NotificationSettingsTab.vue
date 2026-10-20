@@ -1,6 +1,6 @@
 <template>
   <el-form :model="form" label-width="120px" class="setting-form">
-    <el-divider content-position="left">邮件通知配置</el-divider>
+    <el-divider content-position="left">邮件通知</el-divider>
 
     <el-form-item>
       <template #label>
@@ -69,24 +69,46 @@
       />
     </el-form-item>
 
-    <el-divider content-position="left">飞书通知配置</el-divider>
+    <el-divider content-position="left">飞书通知</el-divider>
 
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('feishu_app_id') }">App ID</span>
+        <span :class="{ 'field-modified': isFieldModified('feishu_webhook_url') }"
+          >Webhook 地址</span
+        >
       </template>
-      <el-input v-model="form.feishu_app_id" placeholder="飞书应用ID" :disabled="loading" />
+      <el-input
+        v-model="form.feishu_webhook_url"
+        placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/xxxxx"
+        :disabled="loading"
+      />
     </el-form-item>
 
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('feishu_secret') }">App Secret</span>
+        <span :class="{ 'field-modified': isFieldModified('feishu_secret') }">签名密钥</span>
       </template>
       <el-input
         v-model="form.feishu_secret"
         type="password"
         show-password
-        placeholder="飞书应用Secret"
+        placeholder="留空表示机器人未开启签名校验"
+        :disabled="loading"
+        autocomplete="new-password"
+      />
+    </el-form-item>
+
+    <el-divider content-position="left">Telegram</el-divider>
+
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('telegram_bot_token') }">Bot Token</span>
+      </template>
+      <el-input
+        v-model="form.telegram_bot_token"
+        type="password"
+        show-password
+        placeholder="123456:ABC-DEF..."
         :disabled="loading"
         autocomplete="new-password"
       />
@@ -94,27 +116,17 @@
 
     <el-form-item>
       <template #label>
-        <span :class="{ 'field-modified': isFieldModified('feishu_chat_id') }">群聊 ID</span>
+        <span :class="{ 'field-modified': isFieldModified('telegram_chat_id') }">Chat ID</span>
       </template>
-      <el-input v-model="form.feishu_chat_id" placeholder="接收通知的群聊ID" :disabled="loading" />
+      <el-input v-model="form.telegram_chat_id" placeholder="-1001234567890" :disabled="loading" />
     </el-form-item>
   </el-form>
 </template>
 
 <script setup lang="ts">
-export interface NotificationForm {
-  email_host: string;
-  email_port: string;
-  email_secure: string;
-  email_username: string;
-  email_from: string;
-  email_password: string;
-  feishu_app_id: string;
-  feishu_secret: string;
-  feishu_chat_id: string;
-}
+import type { NotificationForm } from '@/types/setting';
 
-defineModel<NotificationForm>('form', { required: true });
+const form = defineModel<NotificationForm>('form', { required: true });
 
 defineProps<{
   loading?: boolean;

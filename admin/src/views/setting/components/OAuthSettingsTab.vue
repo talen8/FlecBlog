@@ -275,49 +275,11 @@
         :disabled="loading"
       />
     </el-form-item>
-
-    <el-divider content-position="left">代理配置</el-divider>
-    <el-form-item>
-      <template #label>
-        <span :class="{ 'field-modified': isFieldModified('worker_proxy') }">Worker 代理</span>
-      </template>
-      <el-input
-        v-model="form.worker_proxy"
-        placeholder="Cloudflare Worker 代理地址，如 https://proxy.flec.top"
-        :disabled="loading"
-      />
-    </el-form-item>
   </el-form>
 </template>
 
 <script setup lang="ts">
-interface OAuthForm {
-  'github.enabled': string;
-  'github.client_id': string;
-  'github.client_secret': string;
-  'github.redirect_url': string;
-  'google.enabled': string;
-  'google.client_id': string;
-  'google.client_secret': string;
-  'google.redirect_url': string;
-  'qq.enabled': string;
-  'qq.client_id': string;
-  'qq.client_secret': string;
-  'qq.redirect_url': string;
-  'microsoft.enabled': string;
-  'microsoft.client_id': string;
-  'microsoft.client_secret': string;
-  'microsoft.redirect_url': string;
-  'wechat.enabled': string;
-  'wechat.appid': string;
-  'wechat.secret': string;
-  'oidc.enabled': string;
-  'oidc.issuer_url': string;
-  'oidc.client_id': string;
-  'oidc.client_secret': string;
-  'oidc.redirect_url': string;
-  worker_proxy: string;
-}
+import type { OAuthForm } from '@/types/setting';
 
 defineModel<OAuthForm>('form', { required: true });
 

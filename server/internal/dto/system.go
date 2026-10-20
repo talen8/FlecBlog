@@ -18,7 +18,6 @@ type SystemStaticInfo struct {
 
 	StorageStatus string `json:"storage_status"`
 	EmailStatus   string `json:"email_status"`
-	FeishuStatus  string `json:"feishu_status"`
 	PanelStatus   string `json:"panel_status"`
 
 	AppVersion string `json:"app_version"`

@@ -11,7 +11,7 @@
 - **认证**: JWT (JSON Web Tokens), OAuth2, Goth
 - **API 文档**: Swagger
 - **定时任务**: [Cron](https://github.com/robfig/cron)
-- **其他**: User-Agent 解析, 飞书 SDK, 微信扫码登录
+- **其他**: User-Agent 解析, 多渠道通知, 微信扫码登录
 
 ## 文件结构
 

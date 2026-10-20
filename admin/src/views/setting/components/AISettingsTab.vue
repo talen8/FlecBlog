@@ -121,16 +121,7 @@ import { ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { testAIConfig } from '@/api/ai';
 import { resetMCPSecret } from '@/api/sysconfig';
-
-interface AIForm {
-  base_url: string;
-  api_key: string;
-  model: string;
-  summary_prompt: string;
-  ai_summary_prompt: string;
-  title_prompt: string;
-  mcp_secret: string;
-}
+import type { AIForm } from '@/types/setting';
 
 const form = defineModel<AIForm>('form', { required: true });
 

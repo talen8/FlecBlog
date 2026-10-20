@@ -59,19 +59,24 @@ type BasicConfig struct {
 	CravatarURL   string // 头像服务 URL（%s 为邮箱哈希）
 	IPApiURL      string // IP 归属地查询 URL（%s 为 IP）
 	CoverMakerAPI string // 封面制作图片源 API
+	WorkerProxy   string // Cloudflare Worker 代理地址
 }
 
 // NotificationConfig 通知配置（从数据库动态加载）
 type NotificationConfig struct {
+	// 邮箱
 	EmailHost     string // SMTP服务器地址
 	EmailPort     int    // SMTP服务器端口
 	EmailSecure   string // 加密方式: none/ssl/starttls
 	EmailUsername string // SMTP登录账号
 	EmailFrom     string // 发件人邮箱地址
-	EmailPassword string // 邮箱密码
-	FeishuAppID   string // 飞书应用ID
-	FeishuSecret  string // 飞书应用Secret
-	FeishuChatID  string // 飞书群聊ID
+	EmailPassword string // 密码
+	// 飞书
+	FeishuWebhookURL string // Webhook 地址
+	FeishuSecret     string // 签名密钥
+	// Telegram
+	TelegramBotToken string // BotFather 签发的 Bot Token
+	TelegramChatID   string // 目标会话 ID
 }
 
 // UploadConfig 上传配置（从数据库动态加载）
@@ -103,7 +108,6 @@ type AIConfig struct {
 // OAuthConfig OAuth配置（从数据库动态加载）
 type OAuthConfig struct {
 	SessionSecret string // Session加密密钥（自动生成）
-	WorkerProxy   string // OAuth Worker 代理地址
 	Github        OAuthProviderConfig
 	Google        OAuthProviderConfig
 	QQ            OAuthProviderConfig

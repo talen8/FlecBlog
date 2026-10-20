@@ -681,23 +681,22 @@ func (s *UserService) List(req *dto.ListUsersRequest) ([]dto.UserListResponse, i
 	userResponses := make([]dto.UserListResponse, len(users))
 	for i, user := range users {
 		resp := dto.UserListResponse{
-			ID:           user.ID,
-			Email:        user.Email,
-			Nickname:     user.Nickname,
-			Avatar:       user.Avatar,
-			Badge:        user.Badge,
-			Website:      user.Website,
-			Role:         user.Role,
-			IsEnabled:    user.IsEnabled,
-			LastLogin:    utils.ToJSONTime(user.LastLogin),
-			CreatedAt:    utils.NewJSONTime(user.CreatedAt),
-			HasPassword:  user.HasPassword,
-			GithubID:     user.GithubID,
-			GoogleID:     user.GoogleID,
-			QQID:         user.QQID,
-			MicrosoftID:  user.MicrosoftID,
-			OidcID:       user.OidcID,
-			FeishuOpenID: user.FeishuOpenID,
+			ID:          user.ID,
+			Email:       user.Email,
+			Nickname:    user.Nickname,
+			Avatar:      user.Avatar,
+			Badge:       user.Badge,
+			Website:     user.Website,
+			Role:        user.Role,
+			IsEnabled:   user.IsEnabled,
+			LastLogin:   utils.ToJSONTime(user.LastLogin),
+			CreatedAt:   utils.NewJSONTime(user.CreatedAt),
+			HasPassword: user.HasPassword,
+			GithubID:    user.GithubID,
+			GoogleID:    user.GoogleID,
+			QQID:        user.QQID,
+			MicrosoftID: user.MicrosoftID,
+			OidcID:      user.OidcID,
 		}
 
 		if user.DeletedAt.Valid {
@@ -1110,9 +1109,6 @@ func (s *UserService) mergeAccounts(primary, secondary *model.User) error {
 	if secondary.OidcID != "" && primary.OidcID == "" {
 		primary.OidcID = secondary.OidcID
 	}
-	if secondary.FeishuOpenID != "" && primary.FeishuOpenID == "" {
-		primary.FeishuOpenID = secondary.FeishuOpenID
-	}
 
 	// 转移头像
 	if primary.Avatar == "" && secondary.Avatar != "" {
@@ -1129,31 +1125,4 @@ func (s *UserService) mergeAccounts(primary, secondary *model.User) error {
 
 	// 删除副账户
 	return s.repo.Delete(secondary.ID)
-}
-
-// ============ 飞书绑定服务 ============
-
-// BindFeishuByEmail 通过邮箱绑定飞书
-func (s *UserService) BindFeishuByEmail(email, openID string) error {
-	// 查询用户
-	user, err := s.repo.GetByEmail(email)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("用户不存在")
-		}
-		return err
-	}
-
-	// 验证用户是管理员
-	if user.Role != model.RoleAdmin && user.Role != model.RoleSuperAdmin {
-		return errors.New("只有管理员可以绑定飞书")
-	}
-
-	// 检查 OpenID 是否已被其他用户绑定，如果是则清除旧绑定
-	existingUser, err := s.repo.GetByOAuthID("feishu", openID)
-	if err == nil && existingUser.ID != user.ID {
-		_ = s.repo.ClearOAuthBinding(existingUser.ID, "feishu")
-	}
-
-	return s.repo.UpdateOAuthBinding(user.ID, "feishu", openID)
 }

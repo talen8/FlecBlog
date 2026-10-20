@@ -150,10 +150,11 @@ func (s *NotificationService) NotifyRssFeedDaily(unreadCount int, articles inter
 		"articles":     articles,
 	}
 
-	return s.notificationSvc.SendFeishu(notifier.Data{
+	s.notificationSvc.Broadcast(context.Background(), notifier.Message{
 		Type: "rss_feed_daily",
 		Data: data,
 	})
+	return nil
 }
 
 // NotifyVersionUpdateToSuperAdmins 版本更新通知超级管理员（仅站内信）
@@ -318,7 +319,7 @@ func (s *NotificationService) sendInApp(ctx context.Context, notifType model.Not
 	return s.createUserNotifications(ctx, notification.ID, senderID, receiverIDs)
 }
 
-// sendToAdmins 发送给所有管理员（站内+邮件+飞书）
+// sendToAdmins 发送给所有管理员（站内 + 邮件 + 出站渠道广播）
 func (s *NotificationService) sendToAdmins(ctx context.Context, notifType model.NotificationType, title, content, link string, data any, senderID, targetID, excludeUserID *uint) error {
 	adminIDs, err := s.repo.GetAllAdmins(ctx)
 	if err != nil {
@@ -344,9 +345,9 @@ func (s *NotificationService) sendToAdmins(ctx context.Context, notifType model.
 		return err
 	}
 
-	// 异步发送飞书
+	// 向所有已启用的出站渠道广播
 	if s.notificationSvc != nil {
-		go s.sendFeishu(notifType, title, content, link, data)
+		s.broadcast(notifType, title, content, link, data)
 	}
 
 	return nil
@@ -396,7 +397,7 @@ func (s *NotificationService) sendEmails(notification *model.Notification, recei
 		}
 
 		senderName, _ := data["sender_name"].(string)
-		notifData := notifier.Data{
+		notifMsg := notifier.Message{
 			Title:      notification.Title,
 			Content:    notification.Content,
 			Link:       notification.Link,
@@ -405,29 +406,25 @@ func (s *NotificationService) sendEmails(notification *model.Notification, recei
 			Data:       data,
 		}
 
-		if err := s.notificationSvc.SendEmail(user.Email, notifData); err != nil {
+		if err := s.notificationSvc.SendEmail(user.Email, notifMsg); err != nil {
 			logger.Warn("发送邮件通知失败 (用户ID: %d): %v", userID, err)
 		}
 	}
 }
 
-// sendFeishu 异步发送飞书通知
-func (s *NotificationService) sendFeishu(notifType model.NotificationType, title, content, link string, data any) {
+// broadcast 向所有已启用的出站渠道广播通知
+func (s *NotificationService) broadcast(notifType model.NotificationType, title, content, link string, data any) {
 	dataMap, _ := data.(map[string]any)
 	senderName, _ := dataMap["sender_name"].(string)
 
-	notifData := notifier.Data{
+	s.notificationSvc.Broadcast(context.Background(), notifier.Message{
 		Title:      title,
 		Content:    content,
 		Link:       link,
 		Type:       string(notifType),
 		SenderName: senderName,
 		Data:       dataMap,
-	}
-
-	if err := s.notificationSvc.SendFeishu(notifData); err != nil {
-		logger.Warn("发送飞书通知失败: %v", err)
-	}
+	})
 }
 
 // list 获取通知列表

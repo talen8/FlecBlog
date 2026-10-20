@@ -10,7 +10,6 @@ import (
 	"flec_blog/internal/repository"
 	"flec_blog/pkg/auth"
 	"flec_blog/pkg/email"
-	"flec_blog/pkg/feishu"
 	"flec_blog/pkg/random"
 	"flec_blog/pkg/utils"
 
@@ -37,19 +36,21 @@ const (
 	KeyBasicCravatarURL   = "cravatar_url"    // 头像服务 URL（%s 为邮箱哈希）
 	KeyBasicIPApiURL      = "ip_api_url"      // IP 归属地查询 URL（%s 为 IP）
 	KeyBasicCoverMakerAPI = "cover_maker_api" // 封面制作图片源 API
+	KeyBasicWorkerProxy   = "worker_proxy"    // Cloudflare Worker 代理地址
 )
 
 // 配置键常量 - Notification 相关
 const (
-	KeyNotificationEmailHost     = "email_host"
-	KeyNotificationEmailPort     = "email_port"
-	KeyNotificationEmailSecure   = "email_secure"
-	KeyNotificationEmailUsername = "email_username"
-	KeyNotificationEmailFrom     = "email_from"
-	KeyNotificationEmailPassword = "email_password"
-	KeyNotificationFeishuAppID   = "feishu_app_id"
-	KeyNotificationFeishuSecret  = "feishu_secret"
-	KeyNotificationFeishuChatID  = "feishu_chat_id"
+	KeyNotificationEmailHost        = "email_host"
+	KeyNotificationEmailPort        = "email_port"
+	KeyNotificationEmailSecure      = "email_secure"
+	KeyNotificationEmailUsername    = "email_username"
+	KeyNotificationEmailFrom        = "email_from"
+	KeyNotificationEmailPassword    = "email_password"
+	KeyNotificationFeishuWebhookURL = "feishu_webhook_url"
+	KeyNotificationFeishuSecret     = "feishu_secret"
+	KeyNotificationTelegramBotToken = "telegram_bot_token" //nolint:gosec // 不是凭据，是配置项键名
+	KeyNotificationTelegramChatID   = "telegram_chat_id"
 )
 
 // 配置键常量 - Upload 相关
@@ -105,7 +106,6 @@ const (
 	KeyOAuthWechatEnabled         = "wechat.enabled" // 微信小程序是否启用
 	KeyOAuthWechatAppID           = "wechat.appid"   // 微信小程序 AppID
 	KeyOAuthWechatSecret          = "wechat.secret"  // 微信小程序 AppSecret
-	KeyOAuthWorkerProxy           = "worker_proxy"   // OAuth Worker 代理地址
 )
 
 // SettingService 配置服务
@@ -336,6 +336,10 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 		if v, ok := basicSettings[KeyBasicCoverMakerAPI]; ok && v != "" {
 			cfg.Basic.CoverMakerAPI = v
 		}
+		if v, ok := basicSettings[KeyBasicWorkerProxy]; ok {
+			cfg.Basic.WorkerProxy = v
+			auth.SetWorkerProxy(v)
+		}
 	}
 
 	// 加载 Notification 配置
@@ -366,14 +370,17 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 		if v, ok := notificationSettings[KeyNotificationEmailPassword]; ok && v != "" {
 			cfg.Notification.EmailPassword = v
 		}
-		if v, ok := notificationSettings[KeyNotificationFeishuAppID]; ok && v != "" {
-			cfg.Notification.FeishuAppID = v
+		if v, ok := notificationSettings[KeyNotificationFeishuWebhookURL]; ok && v != "" {
+			cfg.Notification.FeishuWebhookURL = v
 		}
 		if v, ok := notificationSettings[KeyNotificationFeishuSecret]; ok && v != "" {
 			cfg.Notification.FeishuSecret = v
 		}
-		if v, ok := notificationSettings[KeyNotificationFeishuChatID]; ok && v != "" {
-			cfg.Notification.FeishuChatID = v
+		if v, ok := notificationSettings[KeyNotificationTelegramBotToken]; ok && v != "" {
+			cfg.Notification.TelegramBotToken = v
+		}
+		if v, ok := notificationSettings[KeyNotificationTelegramChatID]; ok && v != "" {
+			cfg.Notification.TelegramChatID = v
 		}
 	}
 
@@ -555,10 +562,6 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 		if v, ok := oauthSettings[KeyOAuthOIDCRedirectURL]; ok && v != "" {
 			cfg.OAuth.OIDC.RedirectURL = v
 		}
-		if v, ok := oauthSettings[KeyOAuthWorkerProxy]; ok && v != "" {
-			cfg.OAuth.WorkerProxy = v
-			auth.SetWorkerProxy(v)
-		}
 	}
 
 	// 应用 OAuth 配置到 Goth (热重载)
@@ -566,9 +569,6 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 
 	// 应用邮件配置 (热重载)
 	email.Reload(cfg)
-
-	// 应用 Feishu 配置 (热重载)
-	feishu.Reload(cfg.Notification.FeishuAppID, cfg.Notification.FeishuSecret, cfg.Notification.FeishuChatID)
 
 	return nil
 }

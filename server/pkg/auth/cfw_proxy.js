@@ -1,5 +1,5 @@
 /**
- * Cloudflare Worker - OAuth 代理
+ * Cloudflare Worker - 外站 API 反向代理
  * 用于代理 GitHub、Google 和 Microsoft 的 OAuth API 请求
  *
  * 部署地址: https://proxy.flec.top
@@ -12,6 +12,7 @@
  *   /google/*      -> https://accounts.google.com/*
  *   /microsoft-graph/* -> https://graph.microsoft.com/*
  *   /microsoft/*   -> https://login.microsoftonline.com/*
+ *   /telegram/*    -> https://api.telegram.org/*
  */
 export default {
   async fetch(request) {
@@ -37,6 +38,7 @@ export default {
       ['/google', 'https://accounts.google.com'],
       ['/microsoft-graph', 'https://graph.microsoft.com'],
       ['/microsoft', 'https://login.microsoftonline.com'],
+      ['/telegram', 'https://api.telegram.org'],
     ];
 
     let targetBase = null, matchedPrefix = null;

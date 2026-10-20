@@ -134,19 +134,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-
-export interface UploadForm {
-  storage_type: string;
-  max_file_size: number;
-  path_pattern: string;
-  access_key: string;
-  secret_key: string;
-  region: string;
-  bucket: string;
-  endpoint: string;
-  domain: string;
-  use_ssl: boolean;
-}
+import type { UploadForm } from '@/types/setting';
 
 const form = defineModel<UploadForm>('form', { required: true });
 

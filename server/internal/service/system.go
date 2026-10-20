@@ -12,7 +12,6 @@ import (
 
 	"flec_blog/internal/dto"
 	"flec_blog/pkg/email"
-	feishupkg "flec_blog/pkg/feishu"
 	"flec_blog/pkg/logger"
 	"flec_blog/pkg/panel"
 	"flec_blog/pkg/upload"
@@ -42,7 +41,6 @@ type SystemService struct {
 	db                  *gorm.DB
 	uploadManager       *upload.Manager
 	emailClient         *email.Client
-	feishuClient        *feishupkg.Client
 	notificationService *NotificationService
 	panelClient         *panel.Client
 	mu                  sync.RWMutex
@@ -56,12 +54,11 @@ type parsedVersion struct {
 }
 
 // NewSystemService 创建系统服务
-func NewSystemService(db *gorm.DB, uploadManager *upload.Manager, emailClient *email.Client, feishuClient *feishupkg.Client, notificationService *NotificationService) *SystemService {
+func NewSystemService(db *gorm.DB, uploadManager *upload.Manager, emailClient *email.Client, notificationService *NotificationService) *SystemService {
 	return &SystemService{
 		db:                  db,
 		uploadManager:       uploadManager,
 		emailClient:         emailClient,
-		feishuClient:        feishuClient,
 		notificationService: notificationService,
 		panelClient:         panel.New(),
 	}
@@ -130,7 +127,6 @@ func (s *SystemService) GetStaticInfo() *dto.SystemStaticInfo {
 	info.DbTables = s.getTableCount()
 	info.StorageStatus = s.checkStorage()
 	info.EmailStatus = s.checkEmail()
-	info.FeishuStatus = s.checkFeishu()
 	info.PanelStatus = s.checkPanel()
 	info.AppVersion = currentVersion()
 
@@ -154,30 +150,6 @@ func (s *SystemService) GetDynamicInfo() *dto.SystemDynamicInfo {
 	go s.maybeSyncPanelInfo()
 
 	return info
-}
-
-// GetSystemStatus 获取飞书系统状态
-func (s *SystemService) GetSystemStatus(_ context.Context) (*feishupkg.SystemStatus, error) {
-	status := &feishupkg.SystemStatus{
-		DBStatus:      s.checkDB(),
-		StorageStatus: s.checkStorage(),
-		EmailStatus:   s.checkEmail(),
-		FeishuStatus:  s.checkFeishu(),
-	}
-
-	if p, err := cpu.Percent(time.Second, false); err == nil && len(p) > 0 {
-		status.CPUUsage = p[0]
-	}
-	if m, err := mem.VirtualMemory(); err == nil {
-		status.MemoryTotal = m.Total
-		status.MemoryUsed = m.Used
-	}
-	if usage, err := disk.Usage(systemDiskPath()); err == nil {
-		status.DiskTotal = usage.Total
-		status.DiskUsed = usage.Used
-	}
-
-	return status, nil
 }
 
 // CheckForUpdates 检查是否有新版本
@@ -422,17 +394,6 @@ func (s *SystemService) checkPanel() string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := s.panelClient.Ping(ctx); err != nil {
-		return "异常"
-	}
-	return "正常"
-}
-
-// checkFeishu 检查飞书状态
-func (s *SystemService) checkFeishu() string {
-	if s.feishuClient == nil {
-		return "未配置"
-	}
-	if err := s.feishuClient.HealthCheck(); err != nil {
 		return "异常"
 	}
 	return "正常"

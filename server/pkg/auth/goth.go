@@ -21,17 +21,15 @@ import (
 
 var (
 	// workerProxy Cloudflare Worker 的代理地址
-	workerProxy = "https://proxy.flec.top"
+	workerProxy string
 	workerMu    sync.RWMutex
 )
 
-// SetWorkerProxy 设置 OAuth Worker 代理地址
+// SetWorkerProxy 设置 Cloudflare Worker 代理地址
 func SetWorkerProxy(proxy string) {
-	if proxy != "" {
-		workerMu.Lock()
-		workerProxy = proxy
-		workerMu.Unlock()
-	}
+	workerMu.Lock()
+	workerProxy = proxy
+	workerMu.Unlock()
 }
 
 // UpdateConfig 根据配置动态更新 OAuth 配置
@@ -118,12 +116,16 @@ func (t *workerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return t.base.RoundTrip(req)
 	}
 
-	newReq := req.Clone(req.Context())
 	workerMu.RLock()
 	proxy := workerProxy
 	workerMu.RUnlock()
-	workerURL, _ := url.Parse(proxy)
 
+	workerURL, err := url.Parse(proxy)
+	if err != nil || workerURL.Host == "" {
+		return t.base.RoundTrip(req)
+	}
+
+	newReq := req.Clone(req.Context())
 	newReq.URL.Scheme = workerURL.Scheme
 	newReq.URL.Host = workerURL.Host
 	newReq.URL.Path = prefix + req.URL.Path

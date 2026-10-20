@@ -99,7 +99,7 @@ sections:
         description: 7 种存储后端，文件使用追踪，定时清理未使用文件
         icon: i-ri-upload-cloud-line
   - title: 稳定可靠的技术底座
-    description: Go + Gin + GORM 高性能后端。MCP Server 暴露全量管理能力给 AI Agent，飞书机器人深度集成，Docker Compose 部署运维。
+    description: Go + Gin + GORM 高性能后端。MCP Server 暴露全量管理能力给 AI Agent，多平台通知渠道，Docker Compose 部署运维。
     orientation: horizontal
     image: /images/preview.png
     features:
@@ -109,12 +109,12 @@ sections:
       - name: 7 合 1 对象存储
         description: S3/COS/OSS/Kodo/R2/MinIO/本地，工厂模式统一接口
         icon: i-ri-cloud-line
-      - name: 飞书机器人集成
-        description: 交互式卡片消息，斜杠命令，友链/评论即时通知
-        icon: i-ri-message-3-line
       - name: 多通道通知
-        description: 邮件+飞书双通道推送，评论与友链即时提醒
+        description: 多种消息推送渠道任意组合，让通知内容即时送达
         icon: i-ri-notification-3-line
+      - name: 自动维护
+        description: 订阅源定时刷新、文件与 Token 自动清理、友链状态定期检测，长期免人工干预
+        icon: i-ri-time-line
       - name: Docker Compose 部署
         description: 一行命令启动，Docker 全生命周期管理
         icon: i-ri-terminal-box-line
@@ -132,7 +132,7 @@ features:
       description: 集成 OpenAI，支持 AI 摘要生成、智能问答、MCP 工具调用。
       icon: i-ri-magic-line
     - title: 多渠道通知
-      description: 邮件通知、飞书推送，评论提醒不错过。
+      description: 多种消息推送渠道按需启用，评论提醒不错过。
       icon: i-ri-notification-3-line
     - title: RSS 订阅
       description: 内置 RSS/Atom Feed，支持 RSS 源聚合阅读，内容订阅更便捷。
@@ -163,7 +163,7 @@ testimonials:
         description: AI 应用开发者
         avatar:
           src: https://i.pravatar.cc/120?img=8
-    - quote: 飞书机器人收到评论通知后直接在群里处理审核，不用打开后台，社区运营效率高了很多。
+    - quote: 评论通知直接推到飞书群，不用一直盯着后台，社区运营效率高了很多。
       user:
         name: Starfall
         description: 技术社区运营

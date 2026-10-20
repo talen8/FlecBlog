@@ -186,6 +186,17 @@
       />
     </el-form-item>
 
+    <el-form-item>
+      <template #label>
+        <span :class="{ 'field-modified': isFieldModified('worker_proxy') }">Worker 代理</span>
+      </template>
+      <el-input
+        v-model="form.worker_proxy"
+        placeholder="Cloudflare Worker 代理地址，如 https://proxy.flec.top"
+        :disabled="loading"
+      />
+    </el-form-item>
+
     <el-divider content-position="left">系统地址</el-divider>
 
     <el-form-item>
@@ -243,31 +254,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import ImageUploader from '@/components/common/ImageUploader.vue';
-
-interface BasicForm {
-  author: string;
-  author_email: string;
-  author_desc: string;
-  home_url: string;
-  author_avatar: string;
-  icp: string;
-  police_record: string;
-  admin_url: string;
-  blog_url: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  keywords: string;
-  favicon: string;
-  established: string;
-  custom_head: string;
-  custom_body: string;
-  emojis: string;
-  meting_api: string;
-  cravatar_url: string;
-  ip_api_url: string;
-  cover_maker_api: string;
-}
+import type { BasicForm } from '@/types/setting';
 
 const form = defineModel<BasicForm>('form', { required: true });
 

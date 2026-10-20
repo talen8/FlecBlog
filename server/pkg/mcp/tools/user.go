@@ -696,9 +696,6 @@ func extractLinkedOAuthsFromList(user dto.UserListResponse) []string {
 	if user.MicrosoftID != "" {
 		linked = append(linked, "microsoft")
 	}
-	if user.FeishuOpenID != "" {
-		linked = append(linked, "feishu")
-	}
 	return linked
 }
 

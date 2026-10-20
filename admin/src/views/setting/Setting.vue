@@ -86,9 +86,8 @@ import UploadSettingsTab from './components/UploadSettingsTab.vue';
 import AISettingsTab from './components/AISettingsTab.vue';
 import OAuthSettingsTab from './components/OAuthSettingsTab.vue';
 import ImportExportTab from './components/ImportExportTab.vue';
+import type { AIForm, BasicForm, NotificationForm, OAuthForm, UploadForm } from '@/types/setting';
 import type { SettingGroupType } from '@/types/sysconfig';
-import type { NotificationForm } from './components/NotificationSettingsTab.vue';
-import type { UploadForm } from './components/UploadSettingsTab.vue';
 
 // 页面状态
 const activeTab = ref('basic');
@@ -108,7 +107,7 @@ const originalAiForm = ref<Record<string, string>>({});
 const originalOAuthForm = ref<Record<string, string>>({});
 
 // 基本配置表单
-const basicForm = ref({
+const basicForm = ref<BasicForm>({
   author: '',
   author_email: '',
   author_desc: '',
@@ -131,6 +130,7 @@ const basicForm = ref({
   cravatar_url: '',
   ip_api_url: '',
   cover_maker_api: '',
+  worker_proxy: '',
 });
 
 // 通知配置表单
@@ -141,9 +141,10 @@ const notificationForm = ref<NotificationForm>({
   email_username: '',
   email_from: '',
   email_password: '',
-  feishu_app_id: '',
+  feishu_webhook_url: '',
   feishu_secret: '',
-  feishu_chat_id: '',
+  telegram_bot_token: '',
+  telegram_chat_id: '',
 });
 
 // 上传配置表单
@@ -161,7 +162,7 @@ const uploadForm = ref<UploadForm>({
 });
 
 // AI 配置表单
-const aiForm = ref({
+const aiForm = ref<AIForm>({
   base_url: '',
   api_key: '',
   model: '',
@@ -172,7 +173,7 @@ const aiForm = ref({
 });
 
 // OAuth 配置表单
-const oauthForm = ref({
+const oauthForm = ref<OAuthForm>({
   'github.enabled': 'false',
   'github.client_id': '',
   'github.client_secret': '',
@@ -197,7 +198,6 @@ const oauthForm = ref({
   'wechat.enabled': 'false',
   'wechat.appid': '',
   'wechat.secret': '',
-  worker_proxy: '',
 });
 
 // 通用配置加载函数
@@ -242,6 +242,7 @@ const loadBasicConfigs = async () => {
       cravatar_url: configs.cravatar_url || '',
       ip_api_url: configs.ip_api_url || '',
       cover_maker_api: configs.cover_maker_api || '',
+      worker_proxy: configs.worker_proxy || '',
     };
     Object.assign(basicForm.value, data);
     originalBasicForm.value = { ...data };
@@ -261,9 +262,10 @@ const loadNotificationConfigs = async () => {
       email_username: configs.email_username || '',
       email_from: configs.email_from || '',
       email_password: configs.email_password || '',
-      feishu_app_id: configs.feishu_app_id || '',
+      feishu_webhook_url: configs.feishu_webhook_url || '',
       feishu_secret: configs.feishu_secret || '',
-      feishu_chat_id: configs.feishu_chat_id || '',
+      telegram_bot_token: configs.telegram_bot_token || '',
+      telegram_chat_id: configs.telegram_chat_id || '',
     };
     Object.assign(notificationForm.value, data);
     originalNotificationForm.value = { ...data };
@@ -344,7 +346,6 @@ const loadOAuthConfigs = async () => {
       'wechat.enabled': configs['wechat.enabled'] || 'false',
       'wechat.appid': configs['wechat.appid'] || '',
       'wechat.secret': configs['wechat.secret'] || '',
-      worker_proxy: configs['worker_proxy'] || '',
     };
     Object.assign(oauthForm.value, data);
     originalOAuthForm.value = { ...data };
@@ -460,6 +461,7 @@ const handleSave = async () => {
       cravatar_url: basicForm.value.cravatar_url,
       ip_api_url: basicForm.value.ip_api_url,
       cover_maker_api: basicForm.value.cover_maker_api,
+      worker_proxy: basicForm.value.worker_proxy,
     };
 
     // 通知配置
@@ -470,9 +472,10 @@ const handleSave = async () => {
       email_username: notificationForm.value.email_username,
       email_from: notificationForm.value.email_from,
       email_password: notificationForm.value.email_password,
-      feishu_app_id: notificationForm.value.feishu_app_id,
+      feishu_webhook_url: notificationForm.value.feishu_webhook_url,
       feishu_secret: notificationForm.value.feishu_secret,
-      feishu_chat_id: notificationForm.value.feishu_chat_id,
+      telegram_bot_token: notificationForm.value.telegram_bot_token,
+      telegram_chat_id: notificationForm.value.telegram_chat_id,
     };
 
     // 上传配置
@@ -525,7 +528,6 @@ const handleSave = async () => {
       'wechat.enabled': oauthForm.value['wechat.enabled'],
       'wechat.appid': oauthForm.value['wechat.appid'],
       'wechat.secret': oauthForm.value['wechat.secret'],
-      worker_proxy: oauthForm.value['worker_proxy'],
     };
 
     // 构建需要保存的配置组列表

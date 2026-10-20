@@ -75,7 +75,7 @@ By separating the public blog, the admin console, and the backend service into c
 - **Authentication**: JWT, OAuth2, Goth
 - **API Docs**: Swagger
 - **Scheduled Jobs**: [Cron](https://github.com/robfig/cron)
-- **Other Integrations**: User-Agent parsing, Feishu SDK, WeChat QR login
+- **Other Integrations**: User-Agent parsing, multi-channel notifications, WeChat QR login
 
 ### Admin
 

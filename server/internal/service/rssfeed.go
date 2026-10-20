@@ -12,8 +12,8 @@ import (
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
-	"flec_blog/pkg/feishu"
 	"flec_blog/pkg/logger"
+	"flec_blog/pkg/notification"
 	"flec_blog/pkg/utils"
 
 	"github.com/mmcdole/gofeed"
@@ -279,12 +279,6 @@ func (s *RssFeedService) MarkAllRead(ctx context.Context) (int64, error) {
 	return s.repo.MarkAllRead(ctx)
 }
 
-// MarkAllReadFromFeishu 从飞书调用全部标记已读
-func (s *RssFeedService) MarkAllReadFromFeishu(ctx context.Context) error {
-	_, err := s.repo.MarkAllRead(ctx)
-	return err
-}
-
 // RefreshAllFeeds 刷新所有RSS订阅源
 func (s *RssFeedService) RefreshAllFeeds() error {
 	ctx := context.Background()
@@ -491,13 +485,13 @@ func (s *RssFeedService) SendDailyPush() error {
 		return err
 	}
 
-	var articleItems []feishu.RssArticleItem
+	var articleItems []notification.RssArticleItem
 	for _, article := range articles {
 		friendName := ""
 		if article.Friend != nil {
 			friendName = article.Friend.Name
 		}
-		articleItems = append(articleItems, feishu.RssArticleItem{
+		articleItems = append(articleItems, notification.RssArticleItem{
 			Title:      article.Title,
 			Link:       article.Link,
 			FriendName: friendName,

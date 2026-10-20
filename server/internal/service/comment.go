@@ -1093,31 +1093,3 @@ func normalizePageKey(path string) string {
 		return strings.TrimPrefix(path, "/")
 	}
 }
-
-// ============ 飞书回复评论 ============
-
-// ReplyCommentFromFeishu 从飞书回复评论
-func (s *CommentService) ReplyCommentFromFeishu(ctx context.Context, commentID uint, content, openID string) error {
-	// 通过 OpenID 获取用户
-	user, err := s.userRepo.GetByOAuthID("feishu", openID)
-	if err != nil {
-		return fmt.Errorf("未绑定飞书账号")
-	}
-
-	// 获取原评论
-	comment, err := s.repo.Get(ctx, commentID)
-	if err != nil {
-		return fmt.Errorf("评论不存在")
-	}
-
-	// 创建回复
-	req := &dto.CreateCommentRequest{
-		Content:    content,
-		TargetType: comment.TargetType,
-		TargetKey:  comment.TargetKey,
-		ParentID:   &commentID,
-	}
-
-	_, err = s.Create(ctx, req, user.ID)
-	return err
-}
