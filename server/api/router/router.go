@@ -9,7 +9,7 @@ import (
 	"flec_blog/internal/service"
 	"flec_blog/pkg/database"
 	"flec_blog/pkg/email"
-	mcpserver "flec_blog/pkg/mcp"
+	"flec_blog/pkg/mcp"
 	"flec_blog/pkg/notification"
 	"flec_blog/pkg/scheduler"
 	"flec_blog/pkg/upload"
@@ -120,10 +120,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	rssFeedController := v1.NewRssFeedController(rssFeedService)
 
 	// MCP 接口
-	mcpHandler := gin.WrapH(mcpserver.NewPublicHandler(
-		articleService, categoryService, tagService, commentService, friendService, rssFeedService, momentService,
-		userService, statsService,
-	))
+	mcpHandler := gin.WrapH(mcp.NewHandler(articleService))
 	r.Any("/mcp", middleware.MCPAuth(settingService.MCPSecret), mcpHandler)
 
 	// Atom 订阅

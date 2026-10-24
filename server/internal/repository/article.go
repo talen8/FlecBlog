@@ -360,6 +360,21 @@ func (r *ArticleRepository) Update(article *model.Article, tagIDs []uint) error 
 	})
 }
 
+// UpdateForMcp 仅更新文章的标题与正文
+func (r *ArticleRepository) UpdateForMcp(id uint, title, content *string) error {
+	updates := map[string]interface{}{}
+	if title != nil {
+		updates["title"] = *title
+	}
+	if content != nil {
+		updates["content"] = *content
+	}
+	if len(updates) == 0 {
+		return nil
+	}
+	return r.db.Model(&model.Article{}).Where("id = ?", id).Updates(updates).Error
+}
+
 // Delete 删除文章
 func (r *ArticleRepository) Delete(id uint) error {
 	return r.db.Unscoped().Delete(&model.Article{}, id).Error

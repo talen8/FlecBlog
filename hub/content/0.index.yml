@@ -99,12 +99,12 @@ sections:
         description: 7 种存储后端，文件使用追踪，定时清理未使用文件
         icon: i-ri-upload-cloud-line
   - title: 稳定可靠的技术底座
-    description: Go + Gin + GORM 高性能后端。MCP Server 暴露全量管理能力给 AI Agent，多平台通知渠道，Docker Compose 部署运维。
+    description: Go + Gin + GORM 高性能后端。MCP Server 暴露文章管理能力给 AI Agent，多平台通知渠道，Docker Compose 部署运维。
     orientation: horizontal
     image: /images/preview.png
     features:
       - name: MCP Server
-        description: 20 个 MCP Tool，AI Agent 可直接管理博客内容
+        description: 6 个 MCP Tool，AI Agent 可直接管理文章
         icon: i-ri-robot-2-line
       - name: 7 合 1 对象存储
         description: S3/COS/OSS/Kodo/R2/MinIO/本地，工厂模式统一接口

@@ -577,6 +577,25 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 	return s.Get(ctx, id)
 }
 
+// UpdateForMcp 仅更新文章的标题与正文
+func (s *ArticleService) UpdateForMcp(ctx context.Context, id uint, title, content *string) (*dto.ArticleAdminDetailResponse, error) {
+	article, err := s.articleRepo.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	oldContent := article.Content
+
+	if err := s.articleRepo.UpdateForMcp(id, title, content); err != nil {
+		return nil, err
+	}
+
+	if content != nil {
+		s.updateContentFileStatus(oldContent, *content)
+	}
+
+	return s.Get(ctx, id)
+}
+
 // Delete 删除文章
 func (s *ArticleService) Delete(ctx context.Context, id uint) error {
 	article, err := s.articleRepo.Get(id)
