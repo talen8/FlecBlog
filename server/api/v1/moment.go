@@ -93,37 +93,6 @@ func (c *MomentController) List(ctx *gin.Context) {
 	response.PageSuccess(ctx, moments, total, req.Page, req.PageSize)
 }
 
-// Get 获取动态详情
-//
-//	@Summary		动态详情
-//	@Description	获取动态详细信息
-//	@Tags			动态管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"动态 ID"
-//	@Success		200	{object}	response.Response{data=dto.MomentListResponse}
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/admin/moments/{id} [get]
-func (c *MomentController) Get(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		response.ValidateFailed(ctx, err.Error())
-		return
-	}
-
-	moment, err := c.momentService.Get(ctx.Request.Context(), uint(id))
-	if err != nil {
-		response.Failed(ctx, err.Error())
-		return
-	}
-
-	response.Success(ctx, moment)
-}
-
 // Create 创建动态
 //
 //	@Summary		创建动态

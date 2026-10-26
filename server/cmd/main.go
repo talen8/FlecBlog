@@ -13,7 +13,6 @@ import (
 	"flec_blog/internal/service"
 	"flec_blog/pkg/database"
 	"flec_blog/pkg/logger"
-	"flec_blog/pkg/utils"
 
 	_ "flec_blog/docs" // swagger docs
 )
@@ -73,10 +72,6 @@ func main() {
 	settingService := service.NewSettingService(db.DB)
 	settingService.SetConfig(cfg)               // 设置全局配置对象，用于热重载
 	_ = settingService.ApplyDatabaseConfig(cfg) // 应用数据库配置
-
-	// 初始化 IP 地理位置
-	_ = utils.InitIPSearcher("")
-	defer utils.CloseIPSearcher()
 
 	// 初始化路由
 	r := router.InitRouter(db, cfg)

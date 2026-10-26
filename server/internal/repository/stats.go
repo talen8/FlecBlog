@@ -107,16 +107,6 @@ func (r *StatsRepository) GetTotalPublishedArticles() (int64, error) {
 	return count, err
 }
 
-// GetTodayArticles 获取今日发布文章数
-func (r *StatsRepository) GetTodayArticles() (int64, error) {
-	var count int64
-	today := time.Now().Format("2006-01-02")
-	err := r.db.Model(&model.Article{}).
-		Where("is_publish = ? AND DATE(publish_time) = ?", true, today).
-		Count(&count).Error
-	return count, err
-}
-
 // ============ 动态统计 ============
 
 // GetTotalMoments 获取公开动态总数

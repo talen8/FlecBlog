@@ -1040,7 +1040,7 @@ const SANITIZE_CONFIG = {
 };
 
 // 渲染 Markdown 为 HTML
-export function renderMarkdown(markdown: string): string {
+function renderMarkdown(markdown: string): string {
   if (!markdown) return '';
 
   const rawHtml = md.render(markdown);
@@ -1336,25 +1336,6 @@ export function extractToc(markdown: string): TocItem[] {
   }
 
   return headings;
-}
-
-// 简单 Markdown 渲染（用于评论）
-export function renderSimpleMarkdown(markdown: string): string {
-  if (!markdown) return '';
-
-  const simpleMd = new MarkdownIt({
-    html: false,
-    breaks: true,
-    linkify: true,
-  });
-
-  const simpleHtml = simpleMd.render(markdown);
-
-  return DOMPurify.sanitize(simpleHtml, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'pre', 'ul', 'ol', 'li', 'blockquote', 'a'],
-    ALLOWED_ATTR: ['href', 'title'],
-    ALLOW_DATA_ATTR: false,
-  });
 }
 
 // 复制代码块功能
@@ -1793,12 +1774,3 @@ if (typeof window !== 'undefined') {
     observeAudioPlayers();
   }
 }
-
-export default {
-  render: renderMarkdown,
-  renderSimple: renderSimpleMarkdown,
-  countWords,
-  estimateReadingTime,
-  extractToc,
-  copyCodeBlock,
-};

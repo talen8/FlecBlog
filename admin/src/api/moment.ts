@@ -17,15 +17,6 @@ export function getMoments(params: MomentListQuery): Promise<MomentListData> {
 }
 
 /**
- * 获取动态详情
- * @param id 动态ID
- * @returns Promise<Moment>
- */
-export function getMoment(id: number): Promise<Moment> {
-  return request.get(`/admin/moments/${id}`);
-}
-
-/**
  * 创建动态
  * @param data 动态数据
  * @returns Promise<Moment>

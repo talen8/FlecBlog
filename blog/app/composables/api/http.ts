@@ -37,7 +37,7 @@ const doRefreshToken = async (): Promise<boolean> => {
  * @returns 响应数据
  */
 /* eslint-disable @typescript-eslint/no-explicit-any -- 通用请求封装，返回类型由调用方指定 */
-export async function apiRequest<T = any>(
+async function apiRequest<T = any>(
   url: string,
   options: Omit<FetchOptions, 'method'> & { method?: HttpMethod; _retry?: boolean } = {}
 ): Promise<T> {

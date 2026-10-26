@@ -12,15 +12,6 @@ export function getCategories(params?: PaginationQuery): Promise<CategoryListDat
 }
 
 /**
- * 获取分类详情
- * @param id 分类ID
- * @returns Promise<Category>
- */
-export function getCategory(id: number): Promise<Category> {
-  return request.get(`/admin/categories/${id}`);
-}
-
-/**
  * 创建分类
  * @param data 分类数据
  * @returns Promise<Category>

@@ -141,58 +141,6 @@ func (r *ArticleRepository) GetNextArticle(publishTime interface{}) (*model.Arti
 	return &article, nil
 }
 
-// GetByTag 根据标签查询文章列表
-func (r *ArticleRepository) GetByTag(tagID uint, offset, limit int) ([]model.Article, int64, error) {
-	var articles []model.Article
-	var total int64
-
-	subQuery := r.db.Table("article_tags").
-		Select("article_id").
-		Where("tag_id = ?", tagID)
-
-	if err := r.db.Model(&model.Article{}).
-		Where("id IN (?) AND is_publish = ?", subQuery, true).
-		Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
-	if err := r.db.Where("id IN (?) AND is_publish = ?", subQuery, true).
-		Order("is_top DESC, created_at DESC").
-		Preload("Category").
-		Preload("Tags").
-		Offset(offset).
-		Limit(limit).
-		Find(&articles).Error; err != nil {
-		return nil, 0, err
-	}
-
-	return articles, total, nil
-}
-
-// GetByCategory 根据分类查询文章列表
-func (r *ArticleRepository) GetByCategory(categoryID uint, offset, limit int) ([]model.Article, int64, error) {
-	var articles []model.Article
-	var total int64
-
-	if err := r.db.Model(&model.Article{}).
-		Where("category_id = ? AND is_publish = ?", categoryID, true).
-		Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
-	if err := r.db.Where("category_id = ? AND is_publish = ?", categoryID, true).
-		Order("is_top DESC, created_at DESC").
-		Preload("Category").
-		Preload("Tags").
-		Offset(offset).
-		Limit(limit).
-		Find(&articles).Error; err != nil {
-		return nil, 0, err
-	}
-
-	return articles, total, nil
-}
-
 // CountByCategory 统计分类下的文章数量
 func (r *ArticleRepository) CountByCategory(categoryID uint, onlyPublished bool) (int64, error) {
 	var count int64

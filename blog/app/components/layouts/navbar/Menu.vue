@@ -11,10 +11,6 @@ const { getMenus } = useTheme();
 const navigationMenus = getMenus('navigation');
 const { currentArticle } = useCurrentArticle();
 
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
 const displayTitle = computed(() => {
   return currentArticle.value?.title || basicConfig.value.title;
 });

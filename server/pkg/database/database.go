@@ -17,10 +17,6 @@ type Database struct {
 	DB *gorm.DB
 }
 
-func (d *Database) GetDB() *gorm.DB {
-	return d.DB
-}
-
 // escapeConnInfoValue 按 libpq 规则转义 keyword/value 连接串中的值
 func escapeConnInfoValue(value string) string {
 	return "'" + strings.NewReplacer(`\`, `\\`, `'`, `\'`).Replace(value) + "'"

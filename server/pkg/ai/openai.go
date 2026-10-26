@@ -37,16 +37,7 @@ type OpenAIResponse struct {
 }
 
 // NewOpenAIClient 创建 OpenAI 兼容客户端
-func NewOpenAIClient(baseURL, apiKey, model string) *OpenAIClient {
-	return &OpenAIClient{
-		BaseURL: strings.TrimRight(baseURL, "/"),
-		APIKey:  apiKey,
-		Model:   model,
-	}
-}
-
-// NewOpenAIClientWithConfig creates an OpenAI-compatible client with custom prompts.
-func NewOpenAIClientWithConfig(cfg *config.AIConfig) *OpenAIClient {
+func NewOpenAIClient(cfg *config.AIConfig) *OpenAIClient {
 	if cfg == nil {
 		return &OpenAIClient{}
 	}

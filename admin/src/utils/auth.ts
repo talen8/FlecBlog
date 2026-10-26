@@ -27,7 +27,7 @@ export const setAccessToken = (token: string): void => {
 /**
  * 清除 access token
  */
-export const clearAccessToken = (): void => {
+const clearAccessToken = (): void => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
 };
 
@@ -51,7 +51,7 @@ export const clearAuthState = (): void => {
 /**
  * 设置当前登录用户信息
  */
-export const setUserInfo = (user: User | null): void => {
+const setUserInfo = (user: User | null): void => {
   currentUser.value = user;
 };
 

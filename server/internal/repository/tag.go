@@ -46,16 +46,6 @@ func (r *TagRepository) List(ctx context.Context, page, pageSize int) ([]model.T
 	return tags, total, nil
 }
 
-// Get 获取标签
-func (r *TagRepository) Get(ctx context.Context, id uint) (*model.Tag, error) {
-	var tag model.Tag
-	err := r.db.WithContext(ctx).First(&tag, id).Error
-	if err != nil {
-		return nil, err
-	}
-	return &tag, nil
-}
-
 // GetBySlug 根据slug获取标签
 func (r *TagRepository) GetBySlug(ctx context.Context, slug string) (*model.Tag, error) {
 	var tag model.Tag

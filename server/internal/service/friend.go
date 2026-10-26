@@ -69,11 +69,6 @@ func (s *FriendService) ListTypes(ctx context.Context, page, pageSize int) ([]dt
 	return result, total, nil
 }
 
-// GetType 获取友链类型详情
-func (s *FriendService) GetType(ctx context.Context, id uint) (*model.FriendType, error) {
-	return s.repo.GetTypeByID(ctx, id)
-}
-
 // CreateType 创建友链类型
 func (s *FriendService) CreateType(ctx context.Context, req *dto.CreateFriendTypeRequest) error {
 	friendType := &model.FriendType{
@@ -233,11 +228,6 @@ func (s *FriendService) List(ctx context.Context, req *dto.ListFriendRequest) ([
 	}
 
 	return result, total, nil
-}
-
-// Get 获取友链详情
-func (s *FriendService) Get(ctx context.Context, id uint) (*model.Friend, error) {
-	return s.repo.Get(ctx, id)
 }
 
 // Create 创建友链
@@ -430,21 +420,6 @@ func (s *FriendService) ApplyFriend(ctx context.Context, req *dto.ApplyFriendReq
 	}
 
 	return nil
-}
-
-// ApproveFriend 通过友链申请（将待审核状态改为已通过）
-func (s *FriendService) ApproveFriend(ctx context.Context, id uint) error {
-	// 检查友链是否存在
-	friend, err := s.repo.Get(ctx, id)
-	if err != nil {
-		return errors.New("友链不存在")
-	}
-
-	// 将待审核状态改为 false
-	friend.IsPending = false
-	friend.UpdatedAt = time.Now()
-
-	return s.repo.Update(ctx, friend)
 }
 
 // ============ 友链检测 ============

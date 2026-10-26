@@ -44,19 +44,8 @@ export const setAccessToken = (access: string): void => {
   accessToken.value = access;
 };
 
-/**
- * 读取访问令牌（优先从 localStorage 读取）
- * @returns 访问令牌字符串或 null
- */
-export const getAccessToken = (): string | null => {
-  if (import.meta.client) {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
-  }
-  return accessToken.value;
-};
-
 /** 清除访问令牌（删除 localStorage 并重置响应式状态） */
-export const clearAccessToken = (): void => {
+const clearAccessToken = (): void => {
   if (import.meta.client) {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
   }

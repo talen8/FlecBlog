@@ -252,16 +252,6 @@ func (s *CommentService) List(ctx context.Context, req *dto.CommentQueryRequest)
 	return result, total, nil
 }
 
-// Get 获取评论详情
-func (s *CommentService) Get(ctx context.Context, id uint) (*dto.CommentListResponse, error) {
-	comment, err := s.repo.Get(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.toDTO(comment), nil
-}
-
 // ToggleStatus 切换评论状态
 func (s *CommentService) ToggleStatus(ctx context.Context, id uint) error {
 	comment, err := s.repo.Get(ctx, id)

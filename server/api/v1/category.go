@@ -109,37 +109,6 @@ func (c *CategoryController) List(ctx *gin.Context) {
 	response.PageSuccess(ctx, categories, total, req.Page, req.PageSize)
 }
 
-// Get 获取分类信息
-//
-//	@Summary		分类详情
-//	@Description	获取分类的详细信息
-//	@Tags			分类管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"分类 ID"
-//	@Success		200	{object}	response.Response
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/admin/categories/{id} [get]
-func (c *CategoryController) Get(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		response.ValidateFailed(ctx, err.Error())
-		return
-	}
-
-	category, err := c.categoryService.Get(ctx.Request.Context(), uint(id))
-	if err != nil {
-		response.Failed(ctx, err.Error())
-		return
-	}
-
-	response.Success(ctx, category)
-}
-
 // Create 创建分类
 //
 //	@Summary		创建分类

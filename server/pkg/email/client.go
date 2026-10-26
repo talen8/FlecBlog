@@ -19,18 +19,6 @@ const (
 	emailSecureSTARTTLS = "starttls" // STARTTLS (端口 587)
 )
 
-var (
-	globalClient *Client
-	globalMu     sync.RWMutex
-)
-
-// GetClient 获取全局邮件客户端实例
-func GetClient() *Client {
-	globalMu.RLock()
-	defer globalMu.RUnlock()
-	return globalClient
-}
-
 // Client 邮件客户端
 type Client struct {
 	config      *config.Config // 全局配置对象引用（支持热重载）
@@ -87,13 +75,7 @@ type Config struct {
 
 // Initialize 从全局配置创建邮件客户端
 func Initialize(conf *config.Config) *Client {
-	c := newClient(conf)
-
-	globalMu.Lock()
-	globalClient = c
-	globalMu.Unlock()
-
-	return c
+	return newClient(conf)
 }
 
 // newClient 创建邮件客户端实例
@@ -106,14 +88,6 @@ func newClient(conf *config.Config) *Client {
 		config:      conf,
 		rateLimiter: NewRateLimiter(5, time.Hour), // 5次/小时
 	}
-}
-
-// Reload 重新加载邮件配置（热重载）
-func Reload(conf *config.Config) {
-	globalMu.Lock()
-	defer globalMu.Unlock()
-
-	globalClient = newClient(conf)
 }
 
 // SendEmail 发送邮件

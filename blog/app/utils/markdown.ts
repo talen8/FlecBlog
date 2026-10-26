@@ -1643,12 +1643,3 @@ if (typeof window !== 'undefined') {
     observeAudioPlayers();
   }
 }
-
-export default {
-  render: renderMarkdown,
-  renderSimple: renderSimpleMarkdown,
-  countWords,
-  estimateReadingTime,
-  extractToc,
-  copyCodeBlock,
-};

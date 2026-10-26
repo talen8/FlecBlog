@@ -119,13 +119,6 @@ const checkMobile = () => {
   isMobile.value = window.innerWidth <= 900;
 };
 
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth',
-  });
-};
-
 const toggleReadingMode = () => {
   isReadingMode.value = !isReadingMode.value;
   document.documentElement.setAttribute(

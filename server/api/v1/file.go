@@ -168,37 +168,6 @@ func (ctrl *FileController) List(c *gin.Context) {
 	response.PageSuccess(c, fileList, total, req.Page, req.PageSize)
 }
 
-// Get 获取文件详情
-//
-//	@Summary		文件详情
-//	@Description	获取文件详细信息
-//	@Tags			文件管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"文件 ID"
-//	@Success		200	{object}	response.Response
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/admin/files/{id} [get]
-func (ctrl *FileController) Get(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
-	if err != nil {
-		response.Error(c, errcode.InvalidParams.WithDetails(err.Error()))
-		return
-	}
-
-	fileInfo, err := ctrl.fileService.Get(uint(id))
-	if err != nil {
-		response.Error(c, errcode.FileNotFound)
-		return
-	}
-
-	response.Success(c, fileInfo)
-}
-
 // Delete 删除文件
 //
 //	@Summary		删除文件

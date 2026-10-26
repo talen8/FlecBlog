@@ -15,10 +15,6 @@ const contactsLeft = computed(() => {
 const contactsRight = computed(() => {
   return allContacts.value.filter(item => item.position === 'right' || item.position === '右');
 });
-
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
 </script>
 
 <template>

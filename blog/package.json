@@ -18,7 +18,6 @@
     "@vueuse/core": "15.0.0",
     "@vueuse/nuxt": "15.0.0",
     "dayjs": "1.11.23",
-    "dompurify": "3.4.16",
     "highlight.js": "11.12.0",
     "isomorphic-dompurify": "3.19.0",
     "katex": "0.16.47",

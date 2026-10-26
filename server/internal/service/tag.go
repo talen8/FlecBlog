@@ -96,25 +96,6 @@ func (s *TagService) List(ctx context.Context, page, pageSize int) ([]dto.TagRes
 	return result, total, nil
 }
 
-// Get 获取标签详情
-func (s *TagService) Get(ctx context.Context, id uint) (*dto.TagResponse, error) {
-	tag, err := s.repo.Get(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	count, _ := s.articleRepo.CountByTag(tag.ID, false)
-	return &dto.TagResponse{
-		ID:          tag.ID,
-		Name:        tag.Name,
-		Slug:        tag.Slug,
-		Description: tag.Description,
-		Count:       int(count),
-		CreatedAt:   tag.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:   tag.UpdatedAt.Format("2006-01-02 15:04:05"),
-	}, nil
-}
-
 // Create 创建标签
 func (s *TagService) Create(ctx context.Context, tag *model.Tag) error {
 	// 使用name作为slug

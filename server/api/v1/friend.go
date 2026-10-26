@@ -106,36 +106,6 @@ func (c *FriendController) ListTypes(ctx *gin.Context) {
 	response.PageSuccess(ctx, types, total, req.Page, req.PageSize)
 }
 
-// GetType 获取友链类型详情
-//
-//	@Summary		友链类型详情 [类型]
-//	@Description	获取友链类型详细信息
-//	@Tags			友链管理
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"类型 ID"
-//	@Success		200	{object}	response.Response
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/admin/friends/types/{id} [get]
-func (c *FriendController) GetType(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		response.ValidateFailed(ctx, err.Error())
-		return
-	}
-
-	friendType, err := c.friendService.GetType(ctx.Request.Context(), uint(id))
-	if err != nil {
-		response.Failed(ctx, err.Error())
-		return
-	}
-
-	response.Success(ctx, friendType)
-}
-
 // CreateType 创建友链类型
 //
 //	@Summary		创建友链类型 [类型]
@@ -268,37 +238,6 @@ func (c *FriendController) List(ctx *gin.Context) {
 	}
 
 	response.PageSuccess(ctx, friends, total, req.Page, req.PageSize)
-}
-
-// Get 获取友链信息
-//
-//	@Summary		友链详情
-//	@Description	获取友链详细信息
-//	@Tags			友链管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"友链 ID"
-//	@Success		200	{object}	response.Response
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/admin/friends/{id} [get]
-func (c *FriendController) Get(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		response.ValidateFailed(ctx, err.Error())
-		return
-	}
-
-	friend, err := c.friendService.Get(ctx.Request.Context(), uint(id))
-	if err != nil {
-		response.Failed(ctx, err.Error())
-		return
-	}
-
-	response.Success(ctx, friend)
 }
 
 // Create 创建友链

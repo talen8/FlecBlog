@@ -29,7 +29,7 @@ function processData(data: any, options: ApiFactoryOptions, isBody: boolean) {
  * 创建 RESTful API 工厂实例
  * @param endpoint - API 端点路径，如 '/articles'
  * @param options - 可选配置 { stringifyTargetKey, transformParams, transformBody }
- * @returns API 对象，含 getList / getOne / create / update / patch / delete / get / post / put / patchRequest / deleteRequest
+ * @returns API 对象，含 getList / getOne / create / delete / get / post / put / patchRequest / deleteRequest
  */
 export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) {
   return {
@@ -48,24 +48,6 @@ export function createApi<T>(endpoint: string, options: ApiFactoryOptions = {}) 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
     create: async (data: any): Promise<T> => {
       const response = await post<ApiResponse<T>>(endpoint, processData(data, options, true));
-      return response.data;
-    },
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
-    update: async (id: number | string, data: any): Promise<T> => {
-      const response = await put<ApiResponse<T>>(
-        `${endpoint}/${id}`,
-        processData(data, options, true)
-      );
-      return response.data;
-    },
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 数据类型由调用方决定
-    patch: async (id: number | string, data: any): Promise<T> => {
-      const response = await patch<ApiResponse<T>>(
-        `${endpoint}/${id}`,
-        processData(data, options, true)
-      );
       return response.data;
     },
 

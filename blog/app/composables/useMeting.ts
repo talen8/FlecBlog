@@ -8,7 +8,7 @@ const DEFAULT_METING_API = 'https://meting.flec.top/api';
  * @param lrcText - LRC 文本内容
  * @returns 歌词行数组，按时间升序排列
  */
-export function parseLyrics(lrcText: string): LyricLine[] {
+function parseLyrics(lrcText: string): LyricLine[] {
   if (!lrcText) return [];
   const result: LyricLine[] = [];
   for (const line of lrcText.split('\n')) {

@@ -9,7 +9,6 @@ import (
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
 	"flec_blog/pkg/auth"
-	"flec_blog/pkg/email"
 	"flec_blog/pkg/random"
 	"flec_blog/pkg/utils"
 
@@ -566,9 +565,6 @@ func (s *SettingService) ApplyDatabaseConfig(cfg *config.Config) error {
 
 	// 应用 OAuth 配置到 Goth (热重载)
 	auth.UpdateConfig(&cfg.OAuth)
-
-	// 应用邮件配置 (热重载)
-	email.Reload(cfg)
 
 	return nil
 }

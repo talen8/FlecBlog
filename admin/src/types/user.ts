@@ -29,11 +29,6 @@ export interface LoginResponse {
   user?: User;
 }
 
-// 重置密码请求
-export interface ResetPasswordRequest {
-  new_password: string;
-}
-
 // 创建用户请求
 export interface CreateUserRequest {
   password: string;
@@ -78,9 +73,4 @@ export interface UserListData {
   total: number;
   page: number;
   page_size: number;
-}
-
-// 刷新Token响应
-export interface RefreshTokenResponse {
-  access_token: string;
 }

@@ -5,7 +5,6 @@ import type {
   RegisterResponse,
   ForgotPasswordParams,
   ResetPasswordParams,
-  RefreshTokenResponse,
 } from '../../../types/auth';
 import { createApi } from './createApi';
 
@@ -19,11 +18,6 @@ export const login = async (data: LoginParams) => {
 /** 用户注册 */
 export const register = async (data: RegisterParams) => {
   return authApi.post<RegisterResponse>('/register', data);
-};
-
-/** 刷新Token */
-export const refreshToken = async () => {
-  return authApi.post<RefreshTokenResponse>('/refresh');
 };
 
 /** 忘记密码 */

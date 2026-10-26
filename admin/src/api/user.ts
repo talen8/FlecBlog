@@ -5,10 +5,8 @@ import type {
   User,
   UserListData,
   UserListQuery,
-  ResetPasswordRequest,
   CreateUserRequest,
   UpdateUserRequest,
-  RefreshTokenResponse,
 } from '@/types/user';
 
 /**
@@ -29,14 +27,6 @@ export function getProfile(): Promise<User> {
 }
 
 /**
- * 刷新Token
- * @returns Promise<RefreshTokenResponse>
- */
-export function refreshToken(): Promise<RefreshTokenResponse> {
-  return request.post('/auth/refresh');
-}
-
-/**
  * 用户登出
  * @returns Promise<void>
  */
@@ -54,31 +44,12 @@ export function getUsers(params: UserListQuery): Promise<UserListData> {
 }
 
 /**
- * 获取用户详情
- * @param id 用户ID
- * @returns Promise<User>
- */
-export function getUserById(id: number): Promise<User> {
-  return request.get(`/admin/users/${id}`);
-}
-
-/**
  * 删除用户
  * @param id 用户ID
  * @returns Promise<void>
  */
 export function deleteUser(id: number): Promise<void> {
   return request.delete(`/admin/users/${id}`);
-}
-
-/**
- * 管理员重置用户密码
- * @param id 用户ID
- * @param data 重置密码数据
- * @returns Promise<void>
- */
-export function resetUserPassword(id: number, data: ResetPasswordRequest): Promise<void> {
-  return request.put(`/admin/users/${id}/password`, data);
 }
 
 /**

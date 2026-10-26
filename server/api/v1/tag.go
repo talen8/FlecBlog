@@ -111,37 +111,6 @@ func (c *TagController) List(ctx *gin.Context) {
 	response.PageSuccess(ctx, tags, total, req.Page, req.PageSize)
 }
 
-// Get 获取标签信息
-//
-//	@Summary		标签详情
-//	@Description	获取标签详细信息
-//	@Tags			标签管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"标签 ID"
-//	@Success		200	{object}	response.Response
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/admin/tags/{id} [get]
-func (c *TagController) Get(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		response.ValidateFailed(ctx, err.Error())
-		return
-	}
-
-	tag, err := c.tagService.Get(ctx.Request.Context(), uint(id))
-	if err != nil {
-		response.Failed(ctx, err.Error())
-		return
-	}
-
-	response.Success(ctx, tag)
-}
-
 // Create 创建标签
 //
 //	@Summary		创建标签

@@ -99,26 +99,6 @@ func (s *CategoryService) List(ctx context.Context, page, pageSize int) ([]dto.C
 	return result, total, nil
 }
 
-// Get 获取分类详情
-func (s *CategoryService) Get(ctx context.Context, id uint) (*dto.CategoryResponse, error) {
-	category, err := s.repo.Get(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	count, _ := s.articleRepo.CountByCategory(category.ID, false)
-	return &dto.CategoryResponse{
-		ID:          category.ID,
-		Name:        category.Name,
-		Slug:        category.Slug,
-		Description: category.Description,
-		Count:       int(count),
-		Sort:        category.Sort,
-		CreatedAt:   category.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:   category.UpdatedAt.Format("2006-01-02 15:04:05"),
-	}, nil
-}
-
 // Create 创建分类
 func (s *CategoryService) Create(ctx context.Context, category *model.Category) error {
 	// 使用name作为slug

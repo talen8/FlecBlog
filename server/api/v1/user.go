@@ -838,36 +838,6 @@ func (c *UserController) List(ctx *gin.Context) {
 	response.PageSuccess(ctx, users, total, req.Page, req.PageSize)
 }
 
-// Get 获取用户详情
-//
-//	@Summary		用户详情
-//	@Description	查看用户详细信息
-//	@Tags			用户管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"用户 ID"
-//	@Success		200	{object}	response.Response{data=dto.UserResponse}
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Router			/admin/users/{id} [get]
-func (c *UserController) Get(ctx *gin.Context) {
-	userID, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		response.ValidateFailed(ctx, "无效的用户ID")
-		return
-	}
-
-	userInfo, err := c.userService.Get(uint(userID))
-	if err != nil {
-		response.Failed(ctx, err.Error())
-		return
-	}
-
-	response.Success(ctx, userInfo)
-}
-
 // Create 创建用户
 //
 //	@Summary		创建用户

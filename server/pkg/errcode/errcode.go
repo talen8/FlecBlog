@@ -29,15 +29,6 @@ func (e *Error) GetMsg() string {
 	return e.Msg
 }
 
-// Msgf 格式化错误信息
-func (e *Error) Msgf(args ...interface{}) *Error {
-	return &Error{
-		Code:    e.Code,
-		Msg:     fmt.Sprintf(e.Msg, args...),
-		Details: []string{},
-	}
-}
-
 // WithDetails 添加错误详情
 func (e *Error) WithDetails(details ...string) *Error {
 	newError := *e

@@ -25,6 +25,7 @@ tmp/
 .nitro/
 .cache/
 flec_blog
+.wrangler/
 
 # 日志
 logs/

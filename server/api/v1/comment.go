@@ -206,37 +206,6 @@ func (c *CommentController) List(ctx *gin.Context) {
 	response.PageSuccess(ctx, comments, total, req.Page, req.PageSize)
 }
 
-// Get 获取评论详情
-//
-//	@Summary		评论详情
-//	@Description	查看评论详细信息
-//	@Tags			评论管理
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id	path		int	true	"评论 ID"
-//	@Success		200	{object}	response.Response{data=dto.CommentListResponse}
-//	@Failure		400	{object}	response.Response
-//	@Failure		401	{object}	response.Response
-//	@Failure		403	{object}	response.Response
-//	@Failure		404	{object}	response.Response
-//	@Router			/admin/comments/{id} [get]
-func (c *CommentController) Get(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		response.ValidateFailed(ctx, err.Error())
-		return
-	}
-
-	comment, err := c.commentService.Get(ctx.Request.Context(), uint(id))
-	if err != nil {
-		response.Failed(ctx, err.Error())
-		return
-	}
-
-	response.Success(ctx, comment)
-}
-
 // ToggleStatus 切换评论状态
 //
 //	@Summary		切换评论状态

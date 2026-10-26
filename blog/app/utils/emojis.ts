@@ -15,7 +15,7 @@ export async function loadEmojiGroups(emojisUrl: string): Promise<EmojiGroup[]> 
 
   groupsPromise = (async () => {
     try {
-      const response = await fetch(emojisUrl);
+      const response = await fetch(emojisUrl, { cache: 'no-cache' });
       if (!response.ok) throw new Error('加载表情包失败');
       groupsCache = (await response.json()) as EmojiGroup[];
       return groupsCache;
@@ -53,15 +53,6 @@ export async function loadEmojiMap(emojisUrl: string): Promise<Map<string, strin
  */
 export function getEmojiMapSync(): Map<string, string> | null {
   return emojiMapCache;
-}
-
-/**
- * 清除表情缓存
- */
-export function clearEmojiCache(): void {
-  emojiMapCache = null;
-  groupsCache = null;
-  groupsPromise = null;
 }
 
 /**

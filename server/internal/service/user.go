@@ -46,16 +46,6 @@ func (s *UserService) Get(id uint) (*dto.UserResponse, error) {
 	return dto.NewUserResponse(user), nil
 }
 
-// GetByEmail 通过邮箱获取用户
-func (s *UserService) GetByEmail(email string) (*dto.UserResponse, error) {
-	user, err := s.repo.GetByEmail(email)
-	if err != nil {
-		return nil, err
-	}
-
-	return dto.NewUserResponse(user), nil
-}
-
 // ValidateToken 验证token并返回用户信息
 func (s *UserService) ValidateToken(token string) (*model.User, error) {
 	claims, err := utils.ParseToken(token, &s.config.JWT)
@@ -534,11 +524,6 @@ func (s *UserService) Logout(accessToken, refreshToken string) error {
 // CleanupExpiredTokens 清理过期的黑名单token（定时任务调用）
 func (s *UserService) CleanupExpiredTokens() error {
 	return s.repo.CleanupExpiredTokens()
-}
-
-// RevokeAllUserTokens 撤销用户所有token（强制所有设备重新登录）
-func (s *UserService) RevokeAllUserTokens(userID uint) error {
-	return s.repo.IncrementTokenVersion(userID)
 }
 
 // UpdateForWeb 更新用户信息

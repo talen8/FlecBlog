@@ -37,8 +37,3 @@ export interface ResetPasswordParams {
   code: string;
   password: string;
 }
-
-/** 刷新Token响应数据 */
-export interface RefreshTokenResponse {
-  access_token: string;
-}

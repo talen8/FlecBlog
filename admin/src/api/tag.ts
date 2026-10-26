@@ -12,15 +12,6 @@ export function getTags(params?: PaginationQuery): Promise<TagListData> {
 }
 
 /**
- * 获取标签详情
- * @param id 标签ID
- * @returns Promise<Tag>
- */
-export function getTag(id: number): Promise<Tag> {
-  return request.get(`/admin/tags/${id}`);
-}
-
-/**
  * 创建标签
  * @param data 标签数据
  * @returns Promise<Tag>

@@ -57,7 +57,7 @@ jobs:
         if: matrix.target != 'server'
         uses: actions/setup-node@v6
         with:
-          node-version: "22"
+          node-version: "24"
 
       - name: 构建前端项目
         if: matrix.target != 'server'

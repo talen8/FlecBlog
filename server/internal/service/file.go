@@ -141,22 +141,6 @@ func (s *FileService) MarkAsUsed(fileUrl string) error {
 	return s.fileRepo.UpdateStatus(fileUrl, 1)
 }
 
-// MarkAsUsedWithType 标记文件为使用中并设置上传类型
-func (s *FileService) MarkAsUsedWithType(fileUrl string, uploadType string) error {
-	if fileUrl == "" {
-		return nil
-	}
-	// 先标记为使用中
-	if err := s.fileRepo.UpdateStatus(fileUrl, 1); err != nil {
-		return err
-	}
-	// 再更新上传类型
-	if uploadType != "" {
-		return s.fileRepo.UpdateUploadType(fileUrl, uploadType)
-	}
-	return nil
-}
-
 // MarkAsUnused 标记文件为未使用
 func (s *FileService) MarkAsUnused(fileUrl string) error {
 	if fileUrl == "" {
@@ -248,18 +232,14 @@ func (s *FileService) Upload(req *upload.Request, host string) (*dto.FileRespons
 func (s *FileService) List(req *dto.ListFilesRequest) ([]dto.FileResponse, int64, error) {
 	offset := (req.Page - 1) * req.PageSize
 
-	filter := &repository.FileListFilter{
-		Keyword:    req.Keyword,
-		FileType:   req.FileType,
-		Status:     req.Status,
-		UploadType: req.UploadType,
-		MinSize:    req.MinSize,
-		MaxSize:    req.MaxSize,
-		StartTime:  req.StartTime,
-		EndTime:    req.EndTime,
-	}
-
-	files, total, err := s.fileRepo.GetByFilter(filter, offset, req.PageSize)
+	files, total, err := s.fileRepo.List(
+		offset, req.PageSize,
+		req.Keyword, req.FileType,
+		req.Status,
+		req.UploadType,
+		req.MinSize, req.MaxSize,
+		req.StartTime, req.EndTime,
+	)
 	if err != nil {
 		return nil, 0, fmt.Errorf("获取文件列表失败: %w", err)
 	}
@@ -281,27 +261,6 @@ func (s *FileService) List(req *dto.ListFilesRequest) ([]dto.FileResponse, int64
 	}
 
 	return fileResponses, total, nil
-}
-
-// Get 获取文件详情
-func (s *FileService) Get(id uint) (*dto.FileResponse, error) {
-	file, err := s.fileRepo.Get(id)
-	if err != nil {
-		return nil, fmt.Errorf("文件不存在: %w", err)
-	}
-
-	return &dto.FileResponse{
-		ID:           file.ID,
-		OriginalName: file.OriginalName,
-		FileName:     file.FileName,
-		FileSize:     file.FileSize,
-		FileType:     file.FileType,
-		FileURL:      file.FileURL,
-		UploadType:   upload.Type(file.UploadType),
-		UserID:       file.UserID,
-		Status:       file.Status,
-		UploadTime:   utils.NewJSONTime(file.CreatedAt),
-	}, nil
 }
 
 // Delete 删除文件

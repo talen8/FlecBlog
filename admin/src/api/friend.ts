@@ -22,15 +22,6 @@ export function getFriendTypes(): Promise<FriendTypeListData> {
 }
 
 /**
- * 获取友链类型详情
- * @param id 类型ID
- * @returns Promise<FriendType>
- */
-export function getFriendTypeDetail(id: number): Promise<FriendType> {
-  return request.get(`/admin/friends/types/${id}`);
-}
-
-/**
  * 创建友链类型
  * @param data 类型数据
  * @returns Promise<FriendType>
@@ -67,15 +58,6 @@ export function deleteFriendType(id: number): Promise<void> {
  */
 export function getFriends(params?: FriendQuery): Promise<FriendListData> {
   return request.get('/admin/friends', { params });
-}
-
-/**
- * 获取友链详情
- * @param id 友链ID
- * @returns Promise<Friend>
- */
-export function getFriendDetail(id: number): Promise<Friend> {
-  return request.get(`/admin/friends/${id}`);
 }
 
 /**

@@ -6,9 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
-
-	"flec_blog/pkg/random"
 )
 
 // ============================================
@@ -154,35 +151,6 @@ type Helper struct {
 // NewHelper 创建辅助工具
 func NewHelper(storage Storage) *Helper {
 	return &Helper{storage: storage}
-}
-
-// GenerateFilePath 生成文件路径（uploadType作为字符串传入）
-func (h *Helper) GenerateFilePath(uploadType string, userID uint, originalName string, pathPattern string) string {
-	now := time.Now()
-
-	// 获取文件信息
-	ext := filepath.Ext(originalName)
-	filename := strings.TrimSuffix(originalName, ext)
-	timestamp := now.Format("20060102150405")
-	randomStr := random.Code(8)
-
-	result := pathPattern
-
-	// 时间占位符
-	result = strings.ReplaceAll(result, "YYYY", now.Format("2006"))
-	result = strings.ReplaceAll(result, "MM", now.Format("01"))
-	result = strings.ReplaceAll(result, "DD", now.Format("02"))
-	result = strings.ReplaceAll(result, "HH", now.Format("15"))
-	result = strings.ReplaceAll(result, "mm", now.Format("04"))
-	result = strings.ReplaceAll(result, "ss", now.Format("05"))
-	result = strings.ReplaceAll(result, "{type}", uploadType)
-	result = strings.ReplaceAll(result, "{userid}", fmt.Sprintf("%d", userID))
-	result = strings.ReplaceAll(result, "{timestamp}", timestamp)
-	result = strings.ReplaceAll(result, "{random}", randomStr)
-	result = strings.ReplaceAll(result, "{filename}", filename)
-	result = strings.ReplaceAll(result, "{ext}", ext)
-
-	return result
 }
 
 // CreateUploadDir 创建上传目录

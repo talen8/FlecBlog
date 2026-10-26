@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"crypto/subtle"
-	"net"
 	"strings"
 
 	"flec_blog/internal/service"
@@ -114,47 +113,6 @@ func MCPAuth(secretProvider func() string) gin.HandlerFunc {
 
 		// 认证失败
 		response.Error(c, errcode.Unauthorized.WithDetails("MCP 认证失败"))
-		c.Abort()
-	}
-}
-
-// IPWhitelist IP白名单中间件
-// 只允许指定IP段的请求通过
-// 使用: router.POST("/_sync", middleware.IPWhitelist([]string{"127.0.0.1", "::1"}), handler)
-func IPWhitelist(allowedCIDRs []string) gin.HandlerFunc {
-	var allowedNets []*net.IPNet
-	for _, cidr := range allowedCIDRs {
-		_, ipNet, err := net.ParseCIDR(cidr)
-		if err != nil {
-			ip := net.ParseIP(cidr)
-			if ip != nil {
-				ipNet = &net.IPNet{
-					IP:   ip,
-					Mask: net.CIDRMask(128, 128),
-				}
-			} else {
-				continue
-			}
-		}
-		allowedNets = append(allowedNets, ipNet)
-	}
-
-	return func(c *gin.Context) {
-		clientIP := net.ParseIP(c.ClientIP())
-		if clientIP == nil {
-			response.Error(c, errcode.Forbidden.WithDetails("无法解析客户端IP"))
-			c.Abort()
-			return
-		}
-
-		for _, ipNet := range allowedNets {
-			if ipNet.Contains(clientIP) {
-				c.Next()
-				return
-			}
-		}
-
-		response.Error(c, errcode.Forbidden.WithDetails("IP不在白名单中"))
 		c.Abort()
 	}
 }

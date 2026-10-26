@@ -19,7 +19,7 @@ func GetProvider(cfg *config.AIConfig) (Provider, error) {
 	hasLocalCfg := cfg != nil && cfg.BaseURL != "" && cfg.APIKey != "" && cfg.Model != ""
 
 	if hasLocalCfg {
-		return NewOpenAIClientWithConfig(cfg), nil
+		return NewOpenAIClient(cfg), nil
 	}
 
 	if os.Getenv("PANEL_API_KEY") != "" {

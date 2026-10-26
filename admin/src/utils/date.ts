@@ -1,15 +1,13 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 // 配置 dayjs
 dayjs.locale('zh-cn');
-dayjs.extend(relativeTime);
 dayjs.extend(customParseFormat);
 
 // 后端统一格式
-export const BACKEND_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+const BACKEND_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 /**
  * 格式化日期为完整的日期时间
@@ -50,16 +48,6 @@ export function parseBackendDate(dateString: string | null | undefined): Date | 
 export function formatForBackend(date: Date | null | undefined): string {
   if (!date) return '';
   return dayjs(date).format(BACKEND_DATE_FORMAT);
-}
-
-/**
- * 判断日期是否有效
- * @param date 日期字符串或 Date 对象
- * @returns 是否有效
- */
-export function isValidDate(date: string | Date | null | undefined): boolean {
-  if (!date) return false;
-  return dayjs(date).isValid();
 }
 
 /**
