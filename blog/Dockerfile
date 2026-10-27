@@ -12,7 +12,7 @@ ARG APP_VERSION=dev
 COPY package*.json ./
 
 # 安装依赖
-RUN npm install
+RUN npm ci
 
 # 复制源代码
 COPY . .

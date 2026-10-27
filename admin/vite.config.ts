@@ -108,7 +108,7 @@ export default defineConfig(({ mode }) => {
             // 其他工具库
             'utils': ['axios', 'dayjs', 'dompurify', '@vueuse/core'],
             // 图表库
-            'echarts': ['echarts', 'echarts-wordcloud']
+            'echarts': ['echarts', '@modernized/echarts-wordcloud']
           }
         }
       }

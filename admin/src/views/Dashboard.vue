@@ -295,7 +295,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ECharts } from 'echarts/core';
-import 'echarts-wordcloud';
+import '@modernized/echarts-wordcloud';
 import { getToday, getDaysAgo, getMonthsAgo, generateDateSeries } from '@/utils/date';
 
 // 注册需要的组件
@@ -501,7 +501,6 @@ const renderTrendChart = () => {
       right: '4%',
       bottom: '60px',
       top: '40px',
-      containLabel: true,
     },
     xAxis: {
       type: 'category',

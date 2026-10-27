@@ -10,7 +10,6 @@ docker.env
 node_modules/
 miniprogram_npm/
 vendor/
-blog/package-lock.json
 
 # 构建产物
 dist/

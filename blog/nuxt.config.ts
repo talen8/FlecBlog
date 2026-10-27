@@ -85,7 +85,9 @@ export default defineNuxtConfig({
   // 运行时配置
   runtimeConfig: {
     public: {
-      apiUrl: '',
+      apiUrl:
+        process.env.NUXT_PUBLIC_API_URL ??
+        (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8080/api/v1'),
       appVersion: process.env.FLECBLOG_VERSION || '1.0.0',
     },
   },

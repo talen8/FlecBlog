@@ -1,8 +1,7 @@
 {
   "name": "flec-admin",
-  "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "private": true,
   "scripts": {
     "dev": "vite --mode development",
     "build": "vue-tsc -b && vite build",
@@ -25,8 +24,8 @@
     "codemirror": "^6.0.2",
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.1",
-    "echarts": "^5.6.0",
-    "echarts-wordcloud": "^2.1.0",
+    "echarts": "^6.1.0",
+    "@modernized/echarts-wordcloud": "^4.0.1",
     "element-plus": "~2.13.7",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.45",
