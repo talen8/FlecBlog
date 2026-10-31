@@ -4,12 +4,11 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
+	"log/slog"
 	"sort"
 	"strings"
 
 	"gorm.io/gorm"
-
-	"flec_blog/pkg/logger"
 )
 
 //go:embed sql/*.sql
@@ -45,20 +44,20 @@ func RunMigrations(gormDB *gorm.DB) error {
 			continue
 		}
 
-		logger.Info("执行迁移: %s", migration)
+		slog.Info("执行迁移", slog.String("migration", migration))
 
 		if err := executeMigration(db, migration); err != nil {
-			return fmt.Errorf("迁移 %s 执行失败: %w", migration, err)
+			return fmt.Errorf("迁移 %s: %w", migration, err)
 		}
 
 		if err := recordMigration(db, migration); err != nil {
-			return fmt.Errorf("记录迁移 %s 失败: %w", migration, err)
+			return fmt.Errorf("记录迁移 %s: %w", migration, err)
 		}
 
-		logger.Info("迁移 %s 执行成功", migration)
+		slog.Info("迁移执行成功", slog.String("migration", migration))
 	}
 
-	logger.Info("所有迁移执行完成")
+	slog.Info("所有迁移执行完成")
 	return nil
 }
 
@@ -77,7 +76,7 @@ func createMigrationTable(db *sql.DB) error {
 func loadMigrations() ([]string, error) {
 	entries, err := sqlFiles.ReadDir("sql")
 	if err != nil {
-		return nil, fmt.Errorf("读取迁移目录失败: %w", err)
+		return nil, fmt.Errorf("读取迁移目录: %w", err)
 	}
 
 	var migrations []string
@@ -139,9 +138,9 @@ func handleLegacyDatabase(db *sql.DB) error {
 	}
 
 	if exists {
-		logger.Info("检测到老版本数据库，自动标记初始迁移为已执行")
+		slog.Info("检测到老版本数据库，自动标记初始迁移为已执行")
 		if err := recordMigration(db, "001_init_database.sql"); err != nil {
-			return fmt.Errorf("标记初始迁移失败: %w", err)
+			return fmt.Errorf("标记初始迁移: %w", err)
 		}
 	}
 

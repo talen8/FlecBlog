@@ -35,9 +35,9 @@ func NewService(emailClient *email.Client, cfg *config.Config) *Service {
 }
 
 // SendEmail 发送邮件通知
-func (s *Service) SendEmail(email string, msg Message) error {
+func (s *Service) SendEmail(ctx context.Context, email string, msg Message) error {
 	if email != "" && s.emailNotifier != nil {
-		return s.emailNotifier.Send(email, msg)
+		return s.emailNotifier.Send(ctx, email, msg)
 	}
 	return nil
 }
@@ -52,7 +52,11 @@ func (s *Service) Broadcast(ctx context.Context, msg Message) {
 		go func() {
 			defer logsetup.RecoverContext(ctx, "通知投递", slog.String("channel", ch.ID()), slog.String("type", msg.Type))
 			if err := ch.Send(ctx, msg); err != nil {
-				logger.Warn("通知渠道 %s 投递失败 (类型: %s): %v", ch.ID(), msg.Type, err)
+				slog.WarnContext(ctx, "通知投递失败",
+					slog.String("channel", ch.ID()),
+					slog.String("type", msg.Type),
+					slog.Any("err", err),
+				)
 			}
 		}()
 	}

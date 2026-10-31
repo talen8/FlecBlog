@@ -3,7 +3,7 @@ package auth
 import (
 	"flec_blog/config"
 	"flec_blog/pkg/auth/providers/qq"
-	"flec_blog/pkg/logger"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -83,7 +83,10 @@ func UpdateConfig(cfg *config.OAuthConfig) {
 			p.HTTPClient = httpClient
 			providers = append(providers, p)
 		} else {
-			logger.Error("OIDC provider 注册失败: issuerURL=%s err=%v", cfg.OIDC.IssuerURL, err)
+			slog.Error("OIDC 注册失败",
+				slog.String("issuer", cfg.OIDC.IssuerURL),
+				slog.Any("err", err),
+			)
 		}
 	}
 

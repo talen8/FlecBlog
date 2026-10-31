@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 
 	"flec_blog/config"
@@ -47,12 +48,8 @@ func (s *SubscriberService) Subscribe(ctx context.Context, email string) error {
 		if err := s.repo.Update(ctx, sub); err != nil {
 			return err
 		}
-		// 异步发送欢迎邮件，邮件失败不影响订阅成功
-		go func() {
-			if err := s.sendWelcomeEmail(sub); err != nil {
-				logger.Warn("发送欢迎邮件失败 (邮箱: %s): %v", sub.Email, err)
-			}
-		}()
+		// 重新激活后异步发送欢迎邮件
+		s.sendWelcomeEmailAsync(ctx, sub)
 		return nil
 	}
 
@@ -108,7 +105,7 @@ func (s *SubscriberService) Unsubscribe(ctx context.Context, token string) error
 }
 
 // sendWelcomeEmail 发送欢迎邮件
-func (s *SubscriberService) sendWelcomeEmail(sub *model.Subscriber) error {
+func (s *SubscriberService) sendWelcomeEmail(ctx context.Context, sub *model.Subscriber) error {
 	if s.emailClient == nil {
 		return errors.New("邮件服务未配置")
 	}
@@ -132,7 +129,7 @@ func (s *SubscriberService) sendWelcomeEmail(sub *model.Subscriber) error {
 		</div>
 	`, s.config.Basic.Title, unsubscribeURL)
 
-	return s.emailClient.SendEmail(sub.Email, subject, htmlBody, "")
+	return s.emailClient.SendEmail(ctx, sub.Email, subject, htmlBody, "")
 }
 
 // SendArticleNotification 发送文章推送通知（并发发送）
@@ -163,8 +160,11 @@ func (s *SubscriberService) SendArticleNotification(ctx context.Context, article
 			defer func() { <-semaphore }() // 释放信号量
 			defer logsetup.RecoverContext(ctx, "发送文章推送邮件", slog.String("email", subscriber.Email), slog.Any("article_id", article.ID))
 
-			if err := s.sendArticleEmail(subscriber, article); err != nil {
-				logger.Warn("发送文章推送失败 (邮箱: %s): %v", subscriber.Email, err)
+			if err := s.sendArticleEmail(ctx, subscriber, article); err != nil {
+				slog.WarnContext(ctx, "发送文章推送失败",
+					slog.String("email", subscriber.Email),
+					slog.Any("err", err),
+				)
 			} else {
 				mu.Lock()
 				successCount++
@@ -176,12 +176,15 @@ func (s *SubscriberService) SendArticleNotification(ctx context.Context, article
 	// 等待所有邮件发送完成
 	wg.Wait()
 
-	logger.Info("文章推送完成: 成功 %d/%d", successCount, len(subscribers))
+	slog.InfoContext(ctx, "文章推送完成",
+		slog.Int("success", successCount),
+		slog.Int("total", len(subscribers)),
+	)
 	return nil
 }
 
 // sendArticleEmail 发送文章推送邮件
-func (s *SubscriberService) sendArticleEmail(sub *model.Subscriber, article *model.Article) error {
+func (s *SubscriberService) sendArticleEmail(ctx context.Context, sub *model.Subscriber, article *model.Article) error {
 	if s.emailClient == nil {
 		return errors.New("邮件服务未配置")
 	}
@@ -211,14 +214,14 @@ func (s *SubscriberService) sendArticleEmail(sub *model.Subscriber, article *mod
 		</div>
 	`, article.Title, article.Summary, articleURL, s.config.Basic.Title, unsubscribeURL)
 
-	return s.emailClient.SendEmail(sub.Email, subject, htmlBody, "")
+	return s.emailClient.SendEmail(ctx, sub.Email, subject, htmlBody, "")
 }
 
 // generateToken 生成随机令牌
 func generateToken() string {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
-		logger.Error("生成随机令牌失败: %v", err)
+		slog.Error("生成随机令牌失败", slog.Any("err", err))
 	}
 	return hex.EncodeToString(b)
 }

@@ -1,14 +1,15 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"time"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
-	"flec_blog/pkg/logger"
 	"flec_blog/pkg/upload"
 	"flec_blog/pkg/utils"
 )
@@ -264,7 +265,7 @@ func (s *FileService) List(req *dto.ListFilesRequest) ([]dto.FileResponse, int64
 }
 
 // Delete 删除文件
-func (s *FileService) Delete(id uint) error {
+func (s *FileService) Delete(ctx context.Context, id uint) error {
 	file, err := s.fileRepo.Get(id)
 	if err != nil {
 		return fmt.Errorf("文件不存在: %w", err)
@@ -277,8 +278,11 @@ func (s *FileService) Delete(id uint) error {
 
 	// 删除物理文件
 	if err := s.uploadManager.DeleteFile(file.FilePath, file.StorageType); err != nil {
-		fmt.Printf("删除文件失败，文件路径: %s, 存储类型: %s, 错误: %v\n",
-			file.FilePath, file.StorageType, err)
+		slog.ErrorContext(ctx, "删除物理文件失败",
+			slog.String("path", file.FilePath),
+			slog.String("storage", file.StorageType),
+			slog.Any("err", err),
+		)
 	}
 
 	return nil
@@ -354,12 +358,15 @@ func (s *FileService) DeleteUnusedFiles() error {
 	for _, file := range files {
 		used, source, err := s.usageChecker.IsActuallyUsed(file.FileURL)
 		if err != nil {
-			logger.Warn("检查文件引用失败 %s: %v", file.FileURL, err)
+			slog.Warn("检查文件引用失败", slog.String("url", file.FileURL), slog.Any("err", err))
 			continue
 		}
 		if used {
 			usedURLs = append(usedURLs, file.FileURL)
-			logger.Info("文件引用自检纠正成功 %s -> %s", file.FileURL, source)
+			slog.Info("文件引用自检纠正成功",
+				slog.String("url", file.FileURL),
+				slog.String("source", source),
+			)
 			continue
 		}
 
@@ -375,7 +382,11 @@ func (s *FileService) DeleteUnusedFiles() error {
 	deletedIDs := make([]uint, 0, len(deletableFiles))
 	for _, file := range deletableFiles {
 		if err := s.uploadManager.DeleteFile(file.FilePath, file.StorageType); err != nil {
-			logger.Warn("删除物理文件失败 %s: %v", file.FilePath, err)
+			slog.Warn("删除未使用文件失败",
+				slog.String("path", file.FilePath),
+				slog.String("storage", file.StorageType),
+				slog.Any("err", err),
+			)
 			continue
 		}
 		deletedIDs = append(deletedIDs, file.ID)

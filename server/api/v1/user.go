@@ -512,7 +512,7 @@ func (c *UserController) ForgotPassword(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.verificationService.SendPasswordReset(&req); err != nil {
+	if err := c.verificationService.SendPasswordReset(ctx, &req); err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}

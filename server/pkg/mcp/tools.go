@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/service"
-	"flec_blog/pkg/logger"
 
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -154,7 +154,7 @@ func (w *Wrapper) GetTool(
 	}
 	article, err := w.articleService.Get(ctx, input.ID)
 	if err != nil {
-		return nil, ItemOutput{}, toolError("获取文章", err)
+		return nil, ItemOutput{}, toolError(ctx, "获取文章", err)
 	}
 	return nil, ItemOutput{Item: convertToDetailItem(*article)}, nil
 }
@@ -179,7 +179,7 @@ func (w *Wrapper) CreateTool(
 		IsPublish: &isPublish,
 	})
 	if err != nil {
-		return nil, ItemOutput{}, toolError("创建文章", err)
+		return nil, ItemOutput{}, toolError(ctx, "创建文章", err)
 	}
 	return nil, ItemOutput{Item: convertToDetailItem(*article)}, nil
 }
@@ -204,14 +204,14 @@ func (w *Wrapper) UpdateTool(
 	}
 	current, err := w.articleService.Get(ctx, input.ID)
 	if err != nil {
-		return nil, ItemOutput{}, toolError("更新文章", err)
+		return nil, ItemOutput{}, toolError(ctx, "更新文章", err)
 	}
 	if current.IsPublish {
 		return nil, ItemOutput{}, errors.New("文章已发布，MCP 只允许修改草稿文章，请在管理后台处理")
 	}
 	article, err := w.articleService.UpdateForMcp(ctx, input.ID, input.Title, input.Content)
 	if err != nil {
-		return nil, ItemOutput{}, toolError("更新文章", err)
+		return nil, ItemOutput{}, toolError(ctx, "更新文章", err)
 	}
 	return nil, ItemOutput{Item: convertToDetailItem(*article)}, nil
 }
@@ -227,13 +227,13 @@ func (w *Wrapper) DeleteTool(
 	}
 	current, err := w.articleService.Get(ctx, input.ID)
 	if err != nil {
-		return nil, DeleteOutput{}, toolError("删除文章", err)
+		return nil, DeleteOutput{}, toolError(ctx, "删除文章", err)
 	}
 	if current.IsPublish {
 		return nil, DeleteOutput{}, errors.New("文章已发布，MCP 只允许删除草稿文章，请在管理后台处理")
 	}
 	if err := w.articleService.Delete(ctx, input.ID); err != nil {
-		return nil, DeleteOutput{}, toolError("删除文章", err)
+		return nil, DeleteOutput{}, toolError(ctx, "删除文章", err)
 	}
 	return nil, DeleteOutput{
 		Deleted: true,
@@ -246,17 +246,17 @@ func (w *Wrapper) DeleteTool(
 // ============ 辅助函数============
 
 // toolError 将服务层错误转换为供调用方理解的提示
-func toolError(action string, err error) error {
+func toolError(ctx context.Context, action string, err error) error {
 	if err == nil {
 		return nil
 	}
 	msg := err.Error()
 	switch {
 	case strings.Contains(msg, "record not found"), strings.Contains(msg, "未找到"):
-		logger.Warn("MCP %s失败: %v", action, err)
+		slog.WarnContext(ctx, "MCP 调用失败", slog.String("action", action), slog.Any("err", err))
 		return fmt.Errorf("%s失败：文章不存在，可先用 article_search 确认文章 ID", action)
 	default:
-		logger.Error("MCP %s失败: %v", action, err)
+		slog.ErrorContext(ctx, "MCP 调用失败", slog.String("action", action), slog.Any("err", err))
 		return fmt.Errorf("%s失败：请检查参数是否合法后重试", action)
 	}
 }
@@ -268,7 +268,7 @@ func (w *Wrapper) queryArticles(
 ) (*sdkmcp.CallToolResult, CollectionOutput, error) {
 	articles, total, err := w.articleService.List(ctx, req)
 	if err != nil {
-		return nil, CollectionOutput{}, toolError("获取文章列表", err)
+		return nil, CollectionOutput{}, toolError(ctx, "获取文章列表", err)
 	}
 	items := make([]Item, len(articles))
 	for i, article := range articles {

@@ -22,8 +22,8 @@ import (
 // 内网IP白名单，用于本地服务间调用鉴权
 var internalCIDRs = []string{"127.0.0.1/32", "::1/128", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"}
 
-// InitRouter 初始化路由
-func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
+// InitRouter 初始化路由与调度器
+func InitRouter(db *database.Database, conf *config.Config) (*gin.Engine, *scheduler.Scheduler) {
 	// 设置为 release 模式
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -95,7 +95,7 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	systemService.StartRegistration()
 
 	// 初始化并启动定时任务调度器
-	initScheduler(fileService, userService, verificationService, rssFeedService, friendService)
+	s := initScheduler(fileService, userService, verificationService, rssFeedService, friendService)
 
 	// 初始化控制器
 	userController := v1.NewUserController(userService, verificationService, settingService, conf)
@@ -466,11 +466,11 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 		}
 	}
 
-	return r
+	return r, s
 }
 
 // initScheduler 初始化并启动定时任务调度器
-func initScheduler(fileService *service.FileService, userService *service.UserService, verificationService *service.VerificationService, rssFeedService *service.RssFeedService, friendService *service.FriendService) {
+func initScheduler(fileService *service.FileService, userService *service.UserService, verificationService *service.VerificationService, rssFeedService *service.RssFeedService, friendService *service.FriendService) *scheduler.Scheduler {
 	s := scheduler.NewScheduler()
 
 	// 注册清理任务
@@ -487,4 +487,5 @@ func initScheduler(fileService *service.FileService, userService *service.UserSe
 	_ = s.AddJob(scheduler.NewJob("友链状态检测", "0 0 2 * * 3", friendService.CheckAllFriends))
 
 	s.Start()
+	return s
 }

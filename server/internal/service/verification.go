@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -59,7 +60,7 @@ func (s *VerificationService) VerifyCode(email, code string) (*model.Verificatio
 }
 
 // SendPasswordReset 发送密码重置邮件
-func (s *VerificationService) SendPasswordReset(req *dto.ForgotPasswordRequest) error {
+func (s *VerificationService) SendPasswordReset(ctx context.Context, req *dto.ForgotPasswordRequest) error {
 	user, err := s.userRepo.GetByEmail(req.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -89,7 +90,7 @@ func (s *VerificationService) SendPasswordReset(req *dto.ForgotPasswordRequest) 
 
 	// 发送邮件
 	subject := "[" + s.config.Basic.Title + "] 重置密码"
-	if err := s.emailClient.SendEmail(req.Email, subject, htmlBody, ""); err != nil {
+	if err := s.emailClient.SendEmail(ctx, req.Email, subject, htmlBody, ""); err != nil {
 		return err
 	}
 

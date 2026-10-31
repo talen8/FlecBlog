@@ -1,13 +1,15 @@
 package email
 
 import (
+	"context"
 	"crypto/tls"
-	"flec_blog/config"
-	"flec_blog/pkg/logger"
 	"fmt"
+	"log/slog"
 	"strings"
 	"sync"
 	"time"
+
+	"flec_blog/config"
 
 	"gopkg.in/gomail.v2"
 )
@@ -91,7 +93,7 @@ func newClient(conf *config.Config) *Client {
 }
 
 // SendEmail 发送邮件
-func (c *Client) SendEmail(to, subject, htmlBody, fromName string) error {
+func (c *Client) SendEmail(ctx context.Context, to, subject, htmlBody, fromName string) error {
 	if c == nil || c.config == nil {
 		return fmt.Errorf("邮件服务未初始化")
 	}
@@ -145,11 +147,15 @@ func (c *Client) SendEmail(to, subject, htmlBody, fromName string) error {
 	}
 
 	if err := dialer.DialAndSend(msg); err != nil {
-		logger.Error("邮件发送失败 to=%s err=%v", to, err)
+		slog.ErrorContext(ctx, "邮件发送失败", slog.String("to", to), slog.Any("err", err))
 		return err
 	}
 
-	logger.Info("邮件发送成功 to=%s subject=%s from=%s", to, subject, fromName)
+	slog.InfoContext(ctx, "邮件发送成功",
+		slog.String("to", to),
+		slog.String("subject", subject),
+		slog.String("from", fromName),
+	)
 	return nil
 }
 

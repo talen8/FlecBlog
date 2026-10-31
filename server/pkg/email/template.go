@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
-
-	"flec_blog/pkg/logger"
 )
 
 // TemplateManager 邮件模板管理器
@@ -63,7 +62,7 @@ func (tm *TemplateManager) LoadTemplate(name string) error {
 func (tm *TemplateManager) LoadTemplates(names []string) {
 	for _, name := range names {
 		if err := tm.LoadTemplate(name); err != nil {
-			logger.Warn("加载邮件模板失败: %v", err)
+			slog.Warn("加载邮件模板失败", slog.String("template", name), slog.Any("err", err))
 		}
 	}
 }

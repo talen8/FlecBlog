@@ -503,7 +503,7 @@ func (s *RssFeedService) SendDailyPush() error {
 		go func() {
 			defer logsetup.RecoverContext(ctx, "RSS 推送", slog.Int("unread_count", int(unreadCount)))
 			if err := s.notificationSvc.NotifyRssFeedDaily(int(unreadCount), articleItems); err != nil {
-				slog.ErrorContext(ctx, "发送每日通知失败", slog.Any("err", err))
+				slog.ErrorContext(ctx, "RSS 推送失败", slog.Any("err", err))
 			}
 		}()
 	}

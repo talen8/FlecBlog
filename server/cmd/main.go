@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/subosito/gotenv"
 
@@ -74,13 +80,34 @@ func main() {
 	settingService.SetConfig(cfg)               // 设置全局配置对象，用于热重载
 	_ = settingService.ApplyDatabaseConfig(cfg) // 应用数据库配置
 
-	// 初始化路由
-	r := router.InitRouter(db, cfg)
+	// 初始化路由与调度器
+	r, sched := router.InitRouter(db, cfg)
+
+	defer sched.Stop()
 
 	// 启动服务器
 	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Server.Port)
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           r,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+
+	go func() {
+		defer logsetup.Recover("退出信号处理")
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+		<-sig
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := srv.Shutdown(ctx); err != nil {
+			slog.ErrorContext(ctx, "HTTP 服务关闭失败", slog.Any("err", err))
+		}
+	}()
+
 	slog.Info("服务已启动", slog.String("addr", addr))
-	if err := r.Run(addr); err != nil {
+	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		fatal("启动服务器失败", slog.Any("err", err))
 	}
 }

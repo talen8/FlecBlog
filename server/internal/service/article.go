@@ -576,7 +576,7 @@ func (s *ArticleService) pushArticleAsync(ctx context.Context, article *model.Ar
 	go func(ctx context.Context, articleID uint) {
 		defer logsetup.RecoverContext(ctx, "文章推送", slog.Any("article_id", articleID))
 		if err := s.subscriberService.SendArticleNotification(ctx, article); err != nil {
-			slog.WarnContext(ctx, "发送文章推送失败",
+			slog.WarnContext(ctx, "文章推送未执行",
 				slog.Any("article_id", articleID),
 				slog.Any("err", err),
 			)
@@ -1103,9 +1103,7 @@ func (s *ArticleService) uploadSingleImage(ctx context.Context, imgURL string, h
 		return imgURL, fmt.Errorf("上传图片失败: %w", err)
 	}
 
-	if err := s.fileService.MarkAsUsed(uploadedURL); err != nil {
-		logger.Warn("标记文件状态失败: %v", err)
-	}
+	_ = s.fileService.MarkAsUsed(uploadedURL)
 
 	return uploadedURL, nil
 }

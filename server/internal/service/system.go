@@ -84,7 +84,7 @@ func (s *SystemService) StartRegistration() {
 		}
 
 		if err := s.panelClient.Register(ctx, siteURL, AppVersion); err != nil {
-			logger.Warn("Panel 注册已跳过")
+			slog.WarnContext(ctx, "Panel 注册已跳过", slog.Any("err", err))
 			return
 		}
 

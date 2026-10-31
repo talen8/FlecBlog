@@ -204,7 +204,10 @@ func (s *NotificationService) SyncAnnouncements(ctx context.Context, announcemen
 	for _, ann := range announcements {
 		exists, err := s.repo.ExistsAnnouncementNotification(ctx, ann.ID)
 		if err != nil {
-			logger.Warn("检查公告通知失败 (ID: %d): %v", ann.ID, err)
+			slog.WarnContext(ctx, "检查公告通知失败",
+				slog.Any("announcement_id", ann.ID),
+				slog.Any("err", err),
+			)
 			continue
 		}
 		if exists {
@@ -218,10 +221,16 @@ func (s *NotificationService) SyncAnnouncements(ctx context.Context, announcemen
 		}
 
 		if err := s.sendInApp(ctx, model.TypeSystemAlert, ann.Title, ann.Content, ann.Link, data, nil, nil, userIDs); err != nil {
-			logger.Warn("同步公告失败 (ID: %d): %v", ann.ID, err)
+			slog.WarnContext(ctx, "同步公告失败",
+				slog.Any("announcement_id", ann.ID),
+				slog.Any("err", err),
+			)
 			continue
 		}
-		logger.Info("同步公告成功: %s", ann.Title)
+		slog.InfoContext(ctx, "同步公告成功",
+			slog.Any("announcement_id", ann.ID),
+			slog.String("title", ann.Title),
+		)
 	}
 
 	return nil
@@ -410,8 +419,11 @@ func (s *NotificationService) sendEmails(notification *model.Notification, recei
 			Data:       data,
 		}
 
-		if err := s.notificationSvc.SendEmail(user.Email, notifMsg); err != nil {
-			logger.Warn("发送邮件通知失败 (用户ID: %d): %v", userID, err)
+		if err := s.notificationSvc.SendEmail(ctx, user.Email, notifMsg); err != nil {
+			slog.WarnContext(ctx, "发送邮件通知失败",
+				slog.Any("user_id", userID),
+				slog.Any("err", err),
+			)
 		}
 	}
 }

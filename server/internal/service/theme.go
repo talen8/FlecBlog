@@ -215,9 +215,7 @@ func (s *ThemeService) updateConfigImageUsage(oldConfig map[string]interface{}, 
 
 	for _, url := range changed {
 		if nextRefs[url] {
-			if err := s.fileService.MarkAsUsed(url); err != nil {
-				return err
-			}
+			_ = s.fileService.MarkAsUsed(url)
 		} else {
 			_ = s.fileService.MarkAsUnused(url)
 		}
