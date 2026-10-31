@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -100,14 +101,14 @@ func (s *UserService) buildLoginResponse(user *model.User) (*dto.LoginResponse, 
 // ============ 前台服务 ============
 
 // Register 用户注册
-func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.LoginResponse, string, error) {
+func (s *UserService) Register(ctx context.Context, req *dto.RegisterRequest, host string) (*dto.LoginResponse, string, error) {
 	// 检查邮箱是否存在
 	existingUser, err := s.repo.GetByEmail(req.Email)
 	if err == nil {
 		// 邮箱已存在，检查是否为游客用户
 		if existingUser.Role == model.RoleGuest {
 			// 游客账户升级为正式用户
-			return s.upgradeGuest(existingUser, req, host)
+			return s.upgradeGuest(ctx, existingUser, req, host)
 		}
 		// 已是正式用户，不能重复注册
 		return nil, "", errors.New("邮箱已被注册")
@@ -143,11 +144,16 @@ func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.Logi
 	// 异步下载Cravatar头像
 	s.downloadAvatarAsync(user.ID, req.Email, "", host)
 
+	slog.InfoContext(ctx, "用户注册成功",
+		slog.Any("user_id", user.ID),
+		slog.String("email", user.Email),
+	)
+
 	return s.buildLoginResponse(user)
 }
 
 // upgradeGuest 将游客账户升级为正式用户
-func (s *UserService) upgradeGuest(guestUser *model.User, req *dto.RegisterRequest, host string) (*dto.LoginResponse, string, error) {
+func (s *UserService) upgradeGuest(ctx context.Context, guestUser *model.User, req *dto.RegisterRequest, host string) (*dto.LoginResponse, string, error) {
 	// 密码加密
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -176,18 +182,28 @@ func (s *UserService) upgradeGuest(guestUser *model.User, req *dto.RegisterReque
 		s.downloadAvatarAsync(guestUser.ID, req.Email, "", host)
 	}
 
+	slog.InfoContext(ctx, "用户注册成功",
+		slog.Any("user_id", guestUser.ID),
+		slog.String("email", guestUser.Email),
+	)
+
 	return s.buildLoginResponse(guestUser)
 }
 
 // LoginBySocial 第三方登录逻辑
-func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avatarURL, host string) (*dto.LoginResponse, string, error) {
+func (s *UserService) LoginBySocial(ctx context.Context, provider, providerID, email, nickname, avatarURL, host string) (*dto.LoginResponse, string, error) {
 	// 1. 先通过 OAuth ID 查找用户
 	user, err := s.repo.GetByOAuthID(provider, providerID)
 	if err == nil {
 		// OAuth ID 已绑定，直接登录
 		now := utils.Now().Time
 		user.LastLogin = &now
-		_ = s.repo.Update(user)
+		if err := s.repo.Update(user); err != nil {
+			slog.ErrorContext(ctx, "用户信息更新失败",
+				slog.Any("user_id", user.ID),
+				slog.Any("err", err),
+			)
+		}
 		return s.buildLoginResponse(user)
 	}
 
@@ -255,7 +271,12 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 			s.downloadAvatarAsync(user.ID, email, avatarURL, host)
 		}
 
-		_ = s.repo.Update(user)
+		if err := s.repo.Update(user); err != nil {
+			slog.ErrorContext(ctx, "用户信息更新失败",
+				slog.Any("user_id", user.ID),
+				slog.Any("err", err),
+			)
+		}
 	}
 
 	// 5. 签发 Token
@@ -263,14 +284,19 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 }
 
 // LoginByWechat 微信小程序登录
-func (s *UserService) LoginByWechat(openID string) (*dto.LoginResponse, string, error) {
+func (s *UserService) LoginByWechat(ctx context.Context, openID string) (*dto.LoginResponse, string, error) {
 	// 1. 通过 openid 查找用户
 	user, err := s.repo.GetByOAuthID("wechat", openID)
 	if err == nil {
 		// 已绑定，直接登录
 		now := utils.Now().Time
 		user.LastLogin = &now
-		_ = s.repo.Update(user)
+		if err := s.repo.Update(user); err != nil {
+			slog.ErrorContext(ctx, "用户信息更新失败",
+				slog.Any("user_id", user.ID),
+				slog.Any("err", err),
+			)
+		}
 		return s.buildLoginResponse(user)
 	}
 
@@ -332,14 +358,19 @@ func (s *UserService) BindWechatToUser(userID uint, openID string) error {
 }
 
 // GetLoginResponseByUserID 通过用户 ID 构建登录响应（用于扫码确认后 blog 端获取 token）
-func (s *UserService) GetLoginResponseByUserID(userID uint) (*dto.LoginResponse, string, error) {
+func (s *UserService) GetLoginResponseByUserID(ctx context.Context, userID uint) (*dto.LoginResponse, string, error) {
 	user, err := s.repo.Get(userID)
 	if err != nil {
 		return nil, "", err
 	}
 	now := utils.Now().Time
 	user.LastLogin = &now
-	_ = s.repo.Update(user)
+	if err := s.repo.Update(user); err != nil {
+		slog.ErrorContext(ctx, "用户信息更新失败",
+			slog.Any("user_id", user.ID),
+			slog.Any("err", err),
+		)
+	}
 	return s.buildLoginResponse(user)
 }
 
@@ -441,7 +472,7 @@ func hashToken(token string) string {
 }
 
 // RefreshToken 刷新token
-func (s *UserService) RefreshToken(refreshToken string) (*dto.LoginResponse, string, error) {
+func (s *UserService) RefreshToken(ctx context.Context, refreshToken string) (*dto.LoginResponse, string, error) {
 	// 解析并验证refresh token
 	claims, err := utils.ParseRefreshToken(refreshToken, &s.config.JWT)
 	if err != nil {
@@ -483,7 +514,12 @@ func (s *UserService) RefreshToken(refreshToken string) (*dto.LoginResponse, str
 
 	// 将旧的refresh token加入黑名单（Refresh Token轮换）
 	expiresAt := claims.ExpiresAt.Time
-	_ = s.repo.AddTokenToBlacklist(tokenHash, user.ID, expiresAt)
+	if err := s.repo.AddTokenToBlacklist(tokenHash, user.ID, expiresAt); err != nil {
+		slog.ErrorContext(ctx, "token 加入黑名单失败",
+			slog.Any("user_id", user.ID),
+			slog.Any("err", err),
+		)
+	}
 
 	return &dto.LoginResponse{
 		AccessToken: accessToken,
@@ -491,7 +527,7 @@ func (s *UserService) RefreshToken(refreshToken string) (*dto.LoginResponse, str
 }
 
 // Logout 用户登出
-func (s *UserService) Logout(accessToken, refreshToken string) error {
+func (s *UserService) Logout(ctx context.Context, accessToken, refreshToken string) error {
 	// 解析并验证 access token
 	claims, err := utils.ParseToken(accessToken, &s.config.JWT)
 	if err != nil {
@@ -510,7 +546,12 @@ func (s *UserService) Logout(accessToken, refreshToken string) error {
 		if refreshClaims, err := utils.ParseRefreshToken(refreshToken, &s.config.JWT); err == nil {
 			refreshTokenHash := hashToken(refreshToken)
 			refreshExpiresAt := refreshClaims.ExpiresAt.Time
-			_ = s.repo.AddTokenToBlacklist(refreshTokenHash, claims.UserID, refreshExpiresAt)
+			if err := s.repo.AddTokenToBlacklist(refreshTokenHash, claims.UserID, refreshExpiresAt); err != nil {
+				slog.ErrorContext(ctx, "token 加入黑名单失败",
+					slog.Any("user_id", claims.UserID),
+					slog.Any("err", err),
+				)
+			}
 		}
 	}
 

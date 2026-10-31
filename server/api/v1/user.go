@@ -176,7 +176,7 @@ func (c *UserController) AuthCallback(ctx *gin.Context) {
 		ctx.Redirect(http.StatusFound, frontendBaseURL+targetPath+"?bind=success&provider="+provider)
 	} else {
 		// 处理登录
-		loginResp, refreshToken, err := c.userService.LoginBySocial(provider, oauthUser.UserID, email, nickname, oauthUser.AvatarURL, host)
+		loginResp, refreshToken, err := c.userService.LoginBySocial(ctx.Request.Context(), provider, oauthUser.UserID, email, nickname, oauthUser.AvatarURL, host)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "登录失败: " + err.Error()})
 			return
@@ -213,7 +213,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 	}
 
 	host := upload.ExtractHostFromContext(ctx)
-	loginResp, refreshToken, err := c.userService.Register(&req, host)
+	loginResp, refreshToken, err := c.userService.Register(ctx.Request.Context(), &req, host)
 	if err != nil {
 		response.Failed(ctx, err.Error())
 		return
@@ -316,7 +316,7 @@ func (c *UserController) WechatLogin(ctx *gin.Context) {
 	}
 
 	// 登录或创建用户
-	loginResp, refreshToken, err := c.userService.LoginByWechat(openID)
+	loginResp, refreshToken, err := c.userService.LoginByWechat(ctx.Request.Context(), openID)
 	if err != nil {
 		response.Failed(ctx, err.Error())
 		return
@@ -394,7 +394,7 @@ func (c *UserController) PollWechatScene(ctx *gin.Context) {
 	case "pending":
 		response.Success(ctx, dto.WechatPollResponse{Status: "pending"})
 	case "confirmed":
-		loginResp, refreshToken, err := c.userService.GetLoginResponseByUserID(userID)
+		loginResp, refreshToken, err := c.userService.GetLoginResponseByUserID(ctx.Request.Context(), userID)
 		if err != nil {
 			response.Failed(ctx, "获取用户信息失败")
 			return
@@ -448,7 +448,7 @@ func (c *UserController) ConfirmWechatLogin(ctx *gin.Context) {
 	}
 
 	// 通过 openid 查找或创建用户
-	loginResp, _, err := c.userService.LoginByWechat(openID)
+	loginResp, _, err := c.userService.LoginByWechat(ctx.Request.Context(), openID)
 	if err != nil {
 		response.Failed(ctx, "微信登录失败")
 		return
@@ -480,7 +480,7 @@ func (c *UserController) RefreshToken(ctx *gin.Context) {
 		return
 	}
 
-	refreshResp, newRefreshToken, err := c.userService.RefreshToken(refreshToken)
+	refreshResp, newRefreshToken, err := c.userService.RefreshToken(ctx.Request.Context(), refreshToken)
 	if err != nil {
 		response.Failed(ctx, err.Error())
 		return
@@ -540,7 +540,7 @@ func (c *UserController) ResetPassword(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.verificationService.ResetPassword(&req); err != nil {
+	if err := c.verificationService.ResetPassword(ctx.Request.Context(), &req); err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}
@@ -573,7 +573,7 @@ func (c *UserController) Logout(ctx *gin.Context) {
 	// 从 Cookie 获取 refresh token
 	refreshToken := auth.GetRefreshTokenFromCookie(ctx)
 
-	if err := c.userService.Logout(token, refreshToken); err != nil {
+	if err := c.userService.Logout(ctx.Request.Context(), token, refreshToken); err != nil {
 		response.Failed(ctx, err.Error())
 		return
 	}

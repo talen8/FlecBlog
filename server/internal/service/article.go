@@ -469,6 +469,13 @@ func (s *ArticleService) Create(ctx context.Context, req *dto.CreateArticleReque
 		s.pushArticleAsync(ctx, article)
 	}
 
+	if article.IsPublish {
+		slog.InfoContext(ctx, "文章发布成功",
+			slog.Any("article_id", article.ID),
+			slog.String("title", article.Title),
+		)
+	}
+
 	return s.Get(ctx, article.ID)
 }
 
@@ -566,6 +573,14 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 	// 如果从草稿变为发布状态，异步发送订阅推送
 	if !oldIsPublish && article.IsPublish && s.subscriberService != nil {
 		s.pushArticleAsync(ctx, article)
+	}
+
+	// 从草稿变为发布状态时记一条发布成功
+	if !oldIsPublish && article.IsPublish {
+		slog.InfoContext(ctx, "文章发布成功",
+			slog.Any("article_id", article.ID),
+			slog.String("title", article.Title),
+		)
 	}
 
 	return s.Get(ctx, id)

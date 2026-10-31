@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"flec_blog/config"
@@ -32,13 +33,18 @@ func NewVerificationService(repo *repository.VerificationRepository, userRepo *r
 // ============ 通用服务 ============
 
 // VerifyCode 验证验证码
-func (s *VerificationService) VerifyCode(email, code string) (*model.Verification, error) {
+func (s *VerificationService) VerifyCode(ctx context.Context, email, code string) (*model.Verification, error) {
 	verification, err := s.repo.GetByEmailAndCode(email, code)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 增加失败次数
 			if latest, _ := s.repo.GetLatestByEmail(email); latest != nil {
-				_ = s.repo.IncrementFailedCount(latest.ID)
+				if err := s.repo.IncrementFailedCount(latest.ID); err != nil {
+					slog.WarnContext(ctx, "验证码失败次数未记录",
+						slog.String("email", email),
+						slog.Any("err", err),
+					)
+				}
 			}
 			return nil, errors.New("验证码错误")
 		}
@@ -105,9 +111,9 @@ func (s *VerificationService) SendPasswordReset(ctx context.Context, req *dto.Fo
 }
 
 // ResetPassword 重置密码
-func (s *VerificationService) ResetPassword(req *dto.ResetPasswordRequest) error {
+func (s *VerificationService) ResetPassword(ctx context.Context, req *dto.ResetPasswordRequest) error {
 	// 验证验证码
-	verification, err := s.VerifyCode(req.Email, req.Code)
+	verification, err := s.VerifyCode(ctx, req.Email, req.Code)
 	if err != nil {
 		return err
 	}
