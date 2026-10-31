@@ -19,7 +19,7 @@ var sqlFiles embed.FS
 func RunMigrations(gormDB *gorm.DB) error {
 	db, err := gormDB.DB()
 	if err != nil {
-		return fmt.Errorf("获取数据库连接失败: %w", err)
+		return fmt.Errorf("获取数据库连接: %w", err)
 	}
 
 	if err := createMigrationTable(db); err != nil {

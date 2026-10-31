@@ -52,10 +52,10 @@ func InitRouter(db *database.Database, conf *config.Config) *gin.Engine {
 	uploadManager := upload.InitializeUploadSystem(conf)
 
 	// 使用中间件
-	r.Use(middleware.CORS(conf))              // CORS跨域
-	r.Use(middleware.Logger())                // 日志记录
-	r.Use(middleware.RateLimit(500, 1, "ip")) // 全局IP限流: 500次/分钟
 	r.Use(middleware.Recovery())              // 错误恢复
+	r.Use(middleware.CORS(conf))              // CORS跨域
+	r.Use(middleware.RequestLogger())         // 请求日志
+	r.Use(middleware.RateLimit(500, 1, "ip")) // 全局IP限流: 500次/分钟
 
 	// 注册本地静态文件服务
 	r.Static("/uploads", "/app/data/uploads")

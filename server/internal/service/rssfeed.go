@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"math/rand"
 	"net/url"
 	"strings"
@@ -12,7 +13,7 @@ import (
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
-	"flec_blog/pkg/logger"
+	"flec_blog/pkg/logsetup"
 	"flec_blog/pkg/notification"
 	"flec_blog/pkg/utils"
 
@@ -500,8 +501,9 @@ func (s *RssFeedService) SendDailyPush() error {
 
 	if s.notificationSvc != nil {
 		go func() {
+			defer logsetup.RecoverContext(ctx, "RSS 推送", slog.Int("unread_count", int(unreadCount)))
 			if err := s.notificationSvc.NotifyRssFeedDaily(int(unreadCount), articleItems); err != nil {
-				logger.Error("发送每日通知失败: %v", err)
+				slog.ErrorContext(ctx, "发送每日通知失败", slog.Any("err", err))
 			}
 		}()
 	}

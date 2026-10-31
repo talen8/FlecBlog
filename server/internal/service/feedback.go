@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
+	"flec_blog/pkg/logsetup"
 	"flec_blog/pkg/random"
 	"flec_blog/pkg/utils"
 )
@@ -60,9 +62,11 @@ func (s *FeedbackService) Submit(ctx context.Context, req *dto.SubmitFeedbackReq
 		return nil, err
 	}
 
-	go s.markFilesAsUsed(req)
-	//nolint:gosec // 异步通知使用独立 context，避免请求取消影响通知发送
-	go s.notifyAdmins(feedback)
+	go func() {
+		defer logsetup.Recover("反馈处理", slog.Any("feedback_id", feedback.ID))
+		s.markFilesAsUsed(req)
+		s.notifyAdmins(feedback)
+	}()
 
 	return s.toDTO(feedback), nil
 }

@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
-	"flec_blog/pkg/logger"
+	"flec_blog/pkg/logsetup"
 	notifier "flec_blog/pkg/notification"
 	"flec_blog/pkg/panel"
 	"flec_blog/pkg/utils"
@@ -289,7 +290,10 @@ func (s *NotificationService) send(ctx context.Context, notifType model.Notifica
 			return err
 		}
 		notification.Data = string(dataJSON)
-		go s.sendEmails(notification, receiverIDs) // #nosec G118 - 邮件发送使用独立上下文
+		go func() {
+			defer logsetup.Recover("邮件通知发送", slog.Any("notification_id", notification.ID), slog.String("notification_type", string(notification.Type)))
+			s.sendEmails(notification, receiverIDs)
+		}() // #nosec G118 - 邮件发送使用独立上下文
 	}
 
 	return nil

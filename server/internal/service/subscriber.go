@@ -13,7 +13,7 @@ import (
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
 	"flec_blog/pkg/email"
-	"flec_blog/pkg/logger"
+	"flec_blog/pkg/logsetup"
 	"flec_blog/pkg/utils"
 
 	"gorm.io/gorm"
@@ -71,13 +71,22 @@ func (s *SubscriberService) Subscribe(ctx context.Context, email string) error {
 		return err
 	}
 
-	// 异步发送欢迎邮件，邮件失败不影响订阅成功
+	// 新订阅后异步发送欢迎邮件
+	s.sendWelcomeEmailAsync(ctx, newSub)
+	return nil
+}
+
+// sendWelcomeEmailAsync 异步发送欢迎邮件
+func (s *SubscriberService) sendWelcomeEmailAsync(ctx context.Context, sub *model.Subscriber) {
 	go func() {
-		if err := s.sendWelcomeEmail(newSub); err != nil {
-			logger.Warn("发送欢迎邮件失败 (邮箱: %s): %v", newSub.Email, err)
+		defer logsetup.RecoverContext(ctx, "欢迎邮件", slog.String("email", sub.Email))
+		if err := s.sendWelcomeEmail(ctx, sub); err != nil {
+			slog.WarnContext(ctx, "发送欢迎邮件失败",
+				slog.String("email", sub.Email),
+				slog.Any("err", err),
+			)
 		}
 	}()
-	return nil
 }
 
 // Unsubscribe 退订
@@ -152,6 +161,7 @@ func (s *SubscriberService) SendArticleNotification(ctx context.Context, article
 		go func(subscriber *model.Subscriber) {
 			defer wg.Done()
 			defer func() { <-semaphore }() // 释放信号量
+			defer logsetup.RecoverContext(ctx, "发送文章推送邮件", slog.String("email", subscriber.Email), slog.Any("article_id", article.ID))
 
 			if err := s.sendArticleEmail(subscriber, article); err != nil {
 				logger.Warn("发送文章推送失败 (邮箱: %s): %v", subscriber.Email, err)

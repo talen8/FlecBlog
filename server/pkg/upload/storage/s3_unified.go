@@ -109,6 +109,9 @@ func (s *S3UnifiedStorage) Delete(filePath string) error {
 
 // GetURL 实现 Storage 接口 - 获取文件访问 URL
 func (s *S3UnifiedStorage) GetURL(filePath string, _ string) string {
+	if err := s.ensureClient(); err != nil {
+		return ""
+	}
 	objectKey := s.buildObjectKey(filePath)
 
 	if s.baseURL != "" {
@@ -119,54 +122,11 @@ func (s *S3UnifiedStorage) GetURL(filePath string, _ string) string {
 	return fmt.Sprintf("%s://%s/%s", endpointURL.Scheme, endpointURL.Host, objectKey)
 }
 
-// GetPreSignedURL 获取预签名URL（用于临时访问）
-func (s *S3UnifiedStorage) GetPreSignedURL(filePath string, expires time.Duration) (string, error) {
-	objectKey := s.buildObjectKey(filePath)
-	presignedURL, err := s.client.PresignedGetObject(context.Background(), s.bucketName, objectKey, expires, nil)
-	if err != nil {
-		return "", err
-	}
-	return presignedURL.String(), nil
-}
-
-// BatchDelete 批量删除文件
-func (s *S3UnifiedStorage) BatchDelete(filePaths []string) error {
-	if len(filePaths) == 0 {
-		return nil
-	}
-
-	ctx := context.Background()
-	objectsCh := make(chan minio.ObjectInfo)
-
-	go func() {
-		defer close(objectsCh)
-		for _, filePath := range filePaths {
-			objectKey := s.buildObjectKey(filePath)
-			objectsCh <- minio.ObjectInfo{Key: objectKey}
-		}
-	}()
-
-	opts := minio.RemoveObjectsOptions{
-		GovernanceBypass: true,
-	}
-	errorCh := s.client.RemoveObjects(ctx, s.bucketName, objectsCh, opts)
-
-	var errors []string
-	for err := range errorCh {
-		if err.Err != nil {
-			errors = append(errors, fmt.Sprintf("删除 %s 失败: %v", err.ObjectName, err.Err))
-		}
-	}
-
-	if len(errors) > 0 {
-		return fmt.Errorf("批量删除部分失败: %s", strings.Join(errors, "; "))
-	}
-
-	return nil
-}
-
 // Exists 实现 Storage 接口 - 检查文件是否存在
 func (s *S3UnifiedStorage) Exists(filePath string) bool {
+	if err := s.ensureClient(); err != nil {
+		return false
+	}
 	objectKey := s.buildObjectKey(filePath)
 	_, err := s.client.StatObject(context.Background(), s.bucketName, objectKey, minio.StatObjectOptions{})
 	return err == nil
@@ -184,32 +144,6 @@ func (s *S3UnifiedStorage) HealthCheck() error {
 		return fmt.Errorf("存储桶不可访问: %w", err)
 	}
 	return nil
-}
-
-// GetObjectInfo 获取对象信息
-func (s *S3UnifiedStorage) GetObjectInfo(filePath string) (*ObjectInfo, error) {
-	objectKey := s.buildObjectKey(filePath)
-	objInfo, err := s.client.StatObject(context.Background(), s.bucketName, objectKey, minio.StatObjectOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	return &ObjectInfo{
-		Key:          objInfo.Key,
-		Size:         objInfo.Size,
-		LastModified: objInfo.LastModified,
-		ContentType:  objInfo.ContentType,
-		ETag:         objInfo.ETag,
-	}, nil
-}
-
-// ObjectInfo 对象信息
-type ObjectInfo struct {
-	Key          string    `json:"key"`
-	Size         int64     `json:"size"`
-	LastModified time.Time `json:"last_modified"`
-	ContentType  string    `json:"content_type"`
-	ETag         string    `json:"etag"`
 }
 
 // getContentType 根据文件扩展名获取Content-Type

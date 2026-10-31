@@ -2,10 +2,11 @@ package notification
 
 import (
 	"context"
+	"log/slog"
 
 	"flec_blog/config"
 	"flec_blog/pkg/email"
-	"flec_blog/pkg/logger"
+	"flec_blog/pkg/logsetup"
 )
 
 // Service 通知服务（多渠道）
@@ -49,6 +50,7 @@ func (s *Service) Broadcast(ctx context.Context, msg Message) {
 
 	for _, ch := range s.registry.Enabled() {
 		go func() {
+			defer logsetup.RecoverContext(ctx, "通知投递", slog.String("channel", ch.ID()), slog.String("type", msg.Type))
 			if err := ch.Send(ctx, msg); err != nil {
 				logger.Warn("通知渠道 %s 投递失败 (类型: %s): %v", ch.ID(), msg.Type, err)
 			}

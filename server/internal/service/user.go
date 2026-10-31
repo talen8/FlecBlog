@@ -5,11 +5,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"flec_blog/config"
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
+	"flec_blog/pkg/logsetup"
 	"flec_blog/pkg/random"
 	"flec_blog/pkg/utils"
 	"flec_blog/pkg/wechat"
@@ -139,14 +141,7 @@ func (s *UserService) Register(req *dto.RegisterRequest, host string) (*dto.Logi
 	}
 
 	// 异步下载Cravatar头像
-	go func() {
-		avatarURL, err := s.downloadAndSaveCravatarAvatar(req.Email, user.ID, host)
-		if err == nil && avatarURL != "" {
-			if err := s.repo.UpdateAvatar(user.ID, avatarURL); err == nil && s.fileService != nil {
-				_ = s.fileService.MarkAsUsed(avatarURL)
-			}
-		}
-	}()
+	s.downloadAvatarAsync(user.ID, req.Email, "", host)
 
 	return s.buildLoginResponse(user)
 }
@@ -178,14 +173,7 @@ func (s *UserService) upgradeGuest(guestUser *model.User, req *dto.RegisterReque
 
 	// 如果游客没有头像，异步下载Cravatar头像
 	if guestUser.Avatar == "" {
-		go func() {
-			avatarURL, err := s.downloadAndSaveCravatarAvatar(req.Email, guestUser.ID, host)
-			if err == nil && avatarURL != "" {
-				if err := s.repo.UpdateAvatar(guestUser.ID, avatarURL); err == nil && s.fileService != nil {
-					_ = s.fileService.MarkAsUsed(avatarURL)
-				}
-			}
-		}()
+		s.downloadAvatarAsync(guestUser.ID, req.Email, "", host)
 	}
 
 	return s.buildLoginResponse(guestUser)
@@ -241,7 +229,7 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 		}
 
 		// 异步下载头像：优先使用第三方头像，否则使用 Cravatar
-		go s.downloadSocialAvatar(user.ID, email, avatarURL, host)
+		s.downloadAvatarAsync(user.ID, email, avatarURL, host)
 
 	} else {
 		// 4. 邮箱存在 -> 绑定 OAuth 并登录
@@ -264,7 +252,7 @@ func (s *UserService) LoginBySocial(provider, providerID, email, nickname, avata
 
 		// 如果用户没有头像，异步下载
 		if user.Avatar == "" {
-			go s.downloadSocialAvatar(user.ID, email, avatarURL, host)
+			s.downloadAvatarAsync(user.ID, email, avatarURL, host)
 		}
 
 		_ = s.repo.Update(user)
@@ -353,6 +341,14 @@ func (s *UserService) GetLoginResponseByUserID(userID uint) (*dto.LoginResponse,
 	user.LastLogin = &now
 	_ = s.repo.Update(user)
 	return s.buildLoginResponse(user)
+}
+
+// downloadAvatarAsync 异步下载并保存用户头像
+func (s *UserService) downloadAvatarAsync(userID uint, email, avatarURL, host string) {
+	go func() {
+		defer logsetup.Recover("头像下载", slog.Any("user_id", userID), slog.String("email", email))
+		s.downloadSocialAvatar(userID, email, avatarURL, host)
+	}()
 }
 
 // downloadSocialAvatar 下载第三方登录头像（优先用第三方头像，否则用 Cravatar）
@@ -731,15 +727,7 @@ func (s *UserService) Create(operator *model.User, req *dto.AdminCreateUserReque
 
 	// 如果没有提供头像，使用Cravatar
 	if user.Avatar == "" {
-		go func() {
-			avatarURL, err := s.downloadAndSaveCravatarAvatar(req.Email, user.ID, host)
-			if err == nil && avatarURL != "" {
-				_ = s.repo.UpdateAvatar(user.ID, avatarURL)
-				if s.fileService != nil {
-					_ = s.fileService.MarkAsUsed(avatarURL)
-				}
-			}
-		}()
+		s.downloadAvatarAsync(user.ID, req.Email, "", host)
 	} else if user.Avatar != "" {
 		// 标记手动设置的头像为使用中
 		if s.fileService != nil {
@@ -1010,7 +998,7 @@ func (s *UserService) BindOAuth(userID uint, provider, providerID, email, avatar
 
 	// 如果用户没有头像，下载第三方头像
 	if user.Avatar == "" && avatarURL != "" {
-		go s.downloadSocialAvatar(userID, email, avatarURL, host)
+		s.downloadAvatarAsync(userID, email, avatarURL, host)
 	}
 
 	// 返回更新后的用户信息

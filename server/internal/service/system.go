@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"runtime"
 	"strconv"
@@ -12,7 +13,7 @@ import (
 
 	"flec_blog/internal/dto"
 	"flec_blog/pkg/email"
-	"flec_blog/pkg/logger"
+	"flec_blog/pkg/logsetup"
 	"flec_blog/pkg/panel"
 	"flec_blog/pkg/upload"
 
@@ -69,6 +70,7 @@ func (s *SystemService) StartRegistration() {
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
+		defer logsetup.RecoverContext(ctx, "Panel 注册")
 
 		siteURL := os.Getenv("API_URL")
 		if siteURL == "" {
@@ -147,7 +149,10 @@ func (s *SystemService) GetDynamicInfo() *dto.SystemDynamicInfo {
 	info.VersionLatestVersion = status.LatestVersion
 	info.VersionLastCheckError = status.LastCheckError
 
-	go s.maybeSyncPanelInfo()
+	go func() {
+		defer logsetup.Recover("Panel 信息同步")
+		s.maybeSyncPanelInfo()
+	}()
 
 	return info
 }
@@ -224,7 +229,10 @@ func (s *SystemService) maybeSyncPanelInfo() {
 	}
 
 	s.lastPanelSyncTime = time.Now()
-	go func() { _ = s.SyncPanelInfo() }()
+	go func() {
+		defer logsetup.Recover("Panel 同步")
+		_ = s.SyncPanelInfo()
+	}()
 }
 
 // CheckUpdate 检查更新并返回详细信息

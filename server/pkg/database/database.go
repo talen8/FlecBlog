@@ -40,7 +40,7 @@ func NewDB(config *config.DatabaseConfig) (*Database, error) {
 
 	db, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {
-		return nil, fmt.Errorf("数据库连接失败: %v", err)
+		return nil, err
 	}
 
 	sqlDB, err := db.DB()

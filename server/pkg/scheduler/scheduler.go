@@ -5,7 +5,7 @@ import (
 
 	"github.com/robfig/cron/v3"
 
-	"flec_blog/pkg/logger"
+	"flec_blog/pkg/logsetup"
 )
 
 // Job 定时任务接口
@@ -59,6 +59,7 @@ func (s *Scheduler) AddJob(job Job) error {
 
 	// 包装任务执行函数，添加日志和错误处理
 	wrappedFunc := func() {
+		defer logsetup.Recover("定时任务", slog.String("job", name))
 		startTime := time.Now()
 		logger.Info("[Scheduler] 开始执行任务: %s", name)
 
