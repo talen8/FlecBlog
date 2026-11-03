@@ -17,8 +17,8 @@ const appLogName = "app.log"
 // requestIDKey request_id 在 context 中的键
 type requestIDKey struct{}
 
-// logFile 日志文件句柄，由 Setup 创建、Close 关闭
-var logFile *os.File
+// logWriter 日志文件写入器，由 Setup 创建、Close 关闭
+var logWriter *rotatingWriter
 
 // WithRequestID 把 request_id 写入 context
 func WithRequestID(ctx context.Context, id string) context.Context {
@@ -40,14 +40,14 @@ func Setup() error {
 		return fmt.Errorf("创建日志目录 %s: %w", logDir, err)
 	}
 
-	file, err := os.OpenFile(filepath.Join(logDir, appLogName), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	writer, err := newRotatingWriter(filepath.Join(logDir, appLogName), maxLogSize, maxLogBackups)
 	if err != nil {
 		return fmt.Errorf("打开日志文件 %s: %w", appLogName, err)
 	}
-	logFile = file
+	logWriter = writer
 
 	console := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo})
-	logFileHandler := slog.NewJSONHandler(file, &slog.HandlerOptions{Level: slog.LevelInfo})
+	logFileHandler := slog.NewJSONHandler(writer, &slog.HandlerOptions{Level: slog.LevelInfo})
 
 	slog.SetDefault(slog.New(&fanoutHandler{handlers: []slog.Handler{console, logFileHandler}}))
 	return nil
@@ -55,8 +55,8 @@ func Setup() error {
 
 // Close 关闭日志文件句柄
 func Close() {
-	if logFile != nil {
-		_ = logFile.Close()
-		logFile = nil
+	if logWriter != nil {
+		_ = logWriter.Close()
+		logWriter = nil
 	}
 }

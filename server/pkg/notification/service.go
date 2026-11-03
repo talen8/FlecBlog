@@ -50,6 +50,7 @@ func (s *Service) Broadcast(ctx context.Context, msg Message) {
 
 	for _, ch := range s.registry.Enabled() {
 		go func() {
+			ctx := context.WithoutCancel(ctx)
 			defer logsetup.RecoverContext(ctx, "通知投递", slog.String("channel", ch.ID()), slog.String("type", msg.Type))
 			if err := ch.Send(ctx, msg); err != nil {
 				slog.WarnContext(ctx, "通知投递失败",

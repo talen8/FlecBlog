@@ -589,6 +589,7 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 // pushArticleAsync 异步把文章推送给订阅者
 func (s *ArticleService) pushArticleAsync(ctx context.Context, article *model.Article) {
 	go func(ctx context.Context, articleID uint) {
+		ctx = context.WithoutCancel(ctx)
 		defer logsetup.RecoverContext(ctx, "文章推送", slog.Any("article_id", articleID))
 		if err := s.subscriberService.SendArticleNotification(ctx, article); err != nil {
 			slog.WarnContext(ctx, "文章推送未执行",
@@ -1053,10 +1054,10 @@ func (s *ArticleService) uploadContentImages(ctx context.Context, content string
 			continue
 		}
 
+		sem <- struct{}{}
 		wg.Add(1)
 		go func(imgURL string) {
 			defer wg.Done()
-			sem <- struct{}{}
 			defer func() { <-sem }()
 			defer logsetup.RecoverContext(ctx, "内容图片上传", slog.String("img_url", imgURL))
 
@@ -1459,8 +1460,8 @@ func (s *ArticleService) DownloadZip(ctx context.Context, id uint) ([]byte, stri
 
 	// 并发下载
 	for _, url := range uniqueURLs {
+		sem <- struct{}{}
 		go func(imgURL string) {
-			sem <- struct{}{}
 			defer func() { <-sem }()
 			defer logsetup.RecoverContext(ctx, "封面图下载", slog.String("img_url", imgURL))
 

@@ -77,8 +77,10 @@ func main() {
 
 	// 从数据库加载运行时配置（邮箱、上传等）
 	settingService := service.NewSettingService(db.DB)
-	settingService.SetConfig(cfg)               // 设置全局配置对象，用于热重载
-	_ = settingService.ApplyDatabaseConfig(cfg) // 应用数据库配置
+	settingService.SetConfig(cfg)
+	if err := settingService.ApplyDatabaseConfig(cfg); err != nil {
+		slog.Warn("应用数据库配置失败", slog.Any("err", err))
+	}
 
 	// 初始化路由与调度器
 	r, sched := router.InitRouter(db, cfg)

@@ -33,6 +33,7 @@ type RateLimiter struct {
 	records map[string][]time.Time
 	limit   int
 	window  time.Duration
+	lastGC  time.Time
 }
 
 // NewRateLimiter 创建限流器
@@ -44,6 +45,8 @@ func NewRateLimiter(limit int, window time.Duration) *RateLimiter {
 func (r *RateLimiter) Allow(email string) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
+	r.gcLocked()
 
 	now := time.Now()
 	times := r.records[email]
@@ -65,6 +68,31 @@ func (r *RateLimiter) Allow(email string) bool {
 	validTimes = append(validTimes, now)
 	r.records[email] = validTimes
 	return true
+}
+
+// gcLocked 清理窗口外的过期记录
+func (r *RateLimiter) gcLocked() {
+	now := time.Now()
+	if now.Sub(r.lastGC) < r.window {
+		return
+	}
+	r.lastGC = now
+
+	cutoff := now.Add(-r.window)
+	for email, times := range r.records {
+		// 原地过滤，复用底层数组
+		kept := times[:0]
+		for _, t := range times {
+			if t.After(cutoff) {
+				kept = append(kept, t)
+			}
+		}
+		if len(kept) == 0 {
+			delete(r.records, email)
+			continue
+		}
+		r.records[email] = kept
+	}
 }
 
 // Config 邮件配置

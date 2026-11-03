@@ -75,7 +75,8 @@ func (s *SubscriberService) Subscribe(ctx context.Context, email string) error {
 
 // sendWelcomeEmailAsync 异步发送欢迎邮件
 func (s *SubscriberService) sendWelcomeEmailAsync(ctx context.Context, sub *model.Subscriber) {
-	go func() {
+	go func(ctx context.Context) {
+		ctx = context.WithoutCancel(ctx)
 		defer logsetup.RecoverContext(ctx, "欢迎邮件", slog.String("email", sub.Email))
 		if err := s.sendWelcomeEmail(ctx, sub); err != nil {
 			slog.WarnContext(ctx, "发送欢迎邮件失败",
@@ -83,7 +84,7 @@ func (s *SubscriberService) sendWelcomeEmailAsync(ctx context.Context, sub *mode
 				slog.Any("err", err),
 			)
 		}
-	}()
+	}(ctx)
 }
 
 // Unsubscribe 退订
