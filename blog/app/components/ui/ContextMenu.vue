@@ -10,7 +10,7 @@ interface MenuItem {
 }
 
 const router = useRouter();
-const { info, success, error } = useToast();
+const toast = useToast();
 const { toggleTheme } = useDarkMode();
 
 // ========== 状态管理 ==========
@@ -30,9 +30,10 @@ const target = ref<{
 const copy = async (text: string, msg: string) => {
   try {
     await navigator.clipboard.writeText(text);
-    success(msg);
-  } catch {
-    error('复制失败');
+    toast.success(msg);
+  } catch (error) {
+    console.error('复制失败:', error);
+    toast.error('复制失败');
   }
 };
 
@@ -100,7 +101,7 @@ const showFirstTimeTooltip = () => {
 
   // 如果从未显示过，或者距离上次显示已超过3分钟
   if (!lastShown || now - parseInt(lastShown) > TOOLTIP_DURATION) {
-    info('按住 Ctrl 再点击右键，即可恢复原界面哦');
+    toast.info('按住 Ctrl 再点击右键，即可恢复原界面哦');
     localStorage.setItem(TOOLTIP_KEY, now.toString());
   }
 };
@@ -233,8 +234,9 @@ const mediaItems = computed(() => {
       });
       a.click();
       URL.revokeObjectURL(a.href);
-    } catch {
-      error('保存失败');
+    } catch (error) {
+      console.error('保存失败:', error);
+      toast.error('保存失败');
     }
   };
 
@@ -307,7 +309,7 @@ const inputItems = computed(() => {
 
   // 剪切选中文本
   const cut = async () => {
-    if (!hasSel()) return error('请先选中文本');
+    if (!hasSel()) return toast.warning('请先选中文本');
     try {
       const s = el.selectionStart || 0,
         e = el.selectionEnd || 0,
@@ -316,20 +318,22 @@ const inputItems = computed(() => {
       el.value = v.substring(0, s) + v.substring(e);
       el.setSelectionRange(s, s);
       emit();
-    } catch {
-      error('剪切失败');
+    } catch (error) {
+      console.error('剪切失败:', error);
+      toast.error('剪切失败');
     }
   };
 
   const copyText = async () => {
-    if (!hasSel()) return error('请先选中文本');
+    if (!hasSel()) return toast.warning('请先选中文本');
     try {
       await navigator.clipboard.writeText(
         (el.value || '').substring(el.selectionStart || 0, el.selectionEnd || 0)
       );
-      success('已复制文本');
-    } catch {
-      error('复制失败');
+      toast.success('已复制文本');
+    } catch (error) {
+      console.error('复制失败:', error);
+      toast.error('复制失败');
     }
   };
 
@@ -344,8 +348,9 @@ const inputItems = computed(() => {
       el.value = v.substring(0, s) + text + v.substring(e);
       el.setSelectionRange(s + text.length, s + text.length);
       emit();
-    } catch {
-      error('粘贴失败，请检查剪贴板权限');
+    } catch (error) {
+      console.error('粘贴失败:', error);
+      toast.error('粘贴失败，请检查剪贴板权限');
     }
   };
 

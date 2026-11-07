@@ -11,6 +11,7 @@ const context = useCommentContext();
 const { userInfo } = useUser();
 const { getAvatarUrl } = useAvatar();
 const isLoggedIn = useAuth();
+const toast = useToast();
 
 /** 判断当前登录用户是否为该评论的作者 */
 const isCommentOwner = computed(
@@ -37,6 +38,7 @@ const handleDeleteConfirm = async () => {
     await context.deleteComment(props.comment.id);
   } catch (error) {
     console.error('删除评论失败:', error);
+    toast.error((error as Error).message);
   } finally {
     isDeleting.value = false;
     showDeleteDialog.value = false;

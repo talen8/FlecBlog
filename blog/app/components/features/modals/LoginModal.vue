@@ -177,8 +177,7 @@ const sendCode = async () => {
     startCountdown();
     setTimeout(() => (successMessage.value = ''), 2000);
   } catch (error: unknown) {
-    const err = error as Error & { response?: { data?: { message?: string } } };
-    errorMessage.value = err.message || err.response?.data?.message || '发送失败';
+    errorMessage.value = (error as Error).message;
   } finally {
     sendingCode.value = false;
   }
@@ -287,8 +286,7 @@ const handleSubmit = async () => {
       }, 2000);
     }
   } catch (error: unknown) {
-    const err = error as Error & { response?: { data?: { message?: string } } };
-    errorMessage.value = err.message || err.response?.data?.message || '操作失败，请稍后重试';
+    errorMessage.value = (error as Error).message;
   } finally {
     loading.value = false;
   }

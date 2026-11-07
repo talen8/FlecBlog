@@ -9,7 +9,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { success, info } = useToast();
+const toast = useToast();
 const { triggerOnComment } = useBindEmail();
 
 // 获取评论上下文
@@ -157,7 +157,7 @@ const handleSubmitComment = async () => {
       try {
         await uploadPendingImages();
       } catch (error: unknown) {
-        info((error as Error).message || '图片上传失败');
+        toast.error((error as Error).message);
         return;
       } finally {
         isUploading.value = false;
@@ -198,12 +198,11 @@ const handleSubmitComment = async () => {
       );
     }
 
-    success('评论发表成功');
+    toast.success('评论发表成功');
 
     if (isLoggedIn.value) triggerOnComment();
   } catch (error: unknown) {
-    const err = error as Error & { response?: { data?: { message?: string } } };
-    errors.value.email = err.message || err.response?.data?.message || '评论发表失败';
+    toast.error((error as Error).message);
   } finally {
     isSubmitting.value = false;
   }
@@ -252,9 +251,9 @@ const handleFileSelect = (event: Event) => {
 };
 
 const insertImagePlaceholder = (file: File) => {
-  const error = validate(file, '评论贴图');
-  if (error) {
-    info(error);
+  const validationError = validate(file, '评论贴图');
+  if (validationError) {
+    toast.warning(validationError);
     return;
   }
 
@@ -614,6 +613,7 @@ textarea {
   transition: border-color 0.2s;
   padding: 8px 12px;
   font-size: 0.9rem;
+  width: 100%;
 
   &:focus {
     border-color: var(--theme-color);

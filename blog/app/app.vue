@@ -1,5 +1,4 @@
 <script setup lang="ts">
-const { toasts } = useToast();
 const { showLoginModal } = useLoginModal();
 const { showBindEmailModal, triggerGlobal, onBindSuccess } = useBindEmail();
 
@@ -120,13 +119,7 @@ useHead({
   </NuxtLayout>
 
   <!-- Toast 消息提示 -->
-  <UiToast
-    v-for="toast in toasts"
-    :key="toast.id"
-    :message="toast.message"
-    :type="toast.type"
-    :show="toast.show"
-  />
+  <UiToast />
 
   <!-- 登录弹窗 -->
   <FeaturesModalsLoginModal v-model="showLoginModal" />

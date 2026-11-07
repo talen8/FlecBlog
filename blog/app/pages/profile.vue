@@ -11,7 +11,7 @@ const { title } = usePageSeo({
 
 const router = useRouter();
 const route = useRoute();
-const { success: showSuccess, error: showError } = useToast();
+const toast = useToast();
 const { upload } = useUpload();
 const { getAvatarUrl } = useAvatar();
 const {
@@ -72,8 +72,11 @@ const getRoleName = (role: UserRole): string => {
 };
 
 const fetchProfile = async () => {
-  const data = await getUserProfile();
-  userInfo.value = data;
+  try {
+    userInfo.value = await getUserProfile();
+  } catch (error) {
+    toast.error((error as Error).message);
+  }
 };
 
 const handleLogout = () => {
@@ -113,8 +116,7 @@ const handleAvatarUpload = async () => {
       const result = await upload(file, '用户头像');
       editForm.value.avatar = result.file_url;
     } catch (error: unknown) {
-      const err = error as Error;
-      editErrors.value.avatar = err.message || '头像上传失败';
+      editErrors.value.avatar = (error as Error).message;
     } finally {
       uploading.value = false;
     }
@@ -143,14 +145,13 @@ const handleEditSubmit = async () => {
       website: website.trim() || undefined,
       avatar: editForm.value.avatar || undefined,
     });
-    showSuccess('保存成功');
+    toast.success('保存成功');
     setTimeout(() => {
       userInfo.value = data;
       showEditDialog.value = false;
     }, 1000);
   } catch (error: unknown) {
-    const err = error as Error;
-    showError(err.message || '保存失败');
+    toast.error((error as Error).message);
   } finally {
     editLoading.value = false;
   }
@@ -179,14 +180,13 @@ const handleBadgeSubmit = async () => {
       email: userInfo.value!.email,
       badge: badge.value.trim() || undefined,
     });
-    showSuccess('铭牌设置成功');
+    toast.success('铭牌设置成功');
     setTimeout(() => {
       userInfo.value = data;
       showBadgeDialog.value = false;
     }, 1000);
   } catch (error: unknown) {
-    const err = error as Error;
-    showError(err.message || '设置失败');
+    toast.error((error as Error).message);
   } finally {
     badgeLoading.value = false;
   }
@@ -220,19 +220,18 @@ const handlePasswordSubmit = async () => {
   passwordLoading.value = true;
   try {
     await changePassword({ old_password, new_password });
-    showSuccess('密码修改成功，请重新登录');
+    toast.success('密码修改成功，请重新登录');
     showPasswordDialog.value = false;
     setTimeout(() => {
       logoutUser();
       router.push('/');
     }, 1500);
   } catch (error: unknown) {
-    const err = error as Error & { message?: string };
-    const errorMsg = err?.message || '密码修改失败';
-    if (errorMsg.includes('旧密码')) {
+    const errorMsg = (error as Error).message;
+    if (errorMsg.includes('原密码')) {
       passwordErrors.value.old_password = '原密码错误';
     } else {
-      showError(errorMsg);
+      toast.error(errorMsg);
     }
   } finally {
     passwordLoading.value = false;
@@ -263,12 +262,11 @@ const handleSetPasswordSubmit = async () => {
   setPasswordLoading.value = true;
   try {
     await setPassword({ password, confirm_password });
-    showSuccess('密码设置成功');
+    toast.success('密码设置成功');
     showSetPasswordDialog.value = false;
     await fetchProfile(); // 刷新用户信息
   } catch (error: unknown) {
-    const err = error as Error;
-    showError(err?.message || '密码设置失败');
+    toast.error((error as Error).message);
   } finally {
     setPasswordLoading.value = false;
   }
@@ -307,7 +305,7 @@ const handleLoginMethodClick = (provider: string, enabled: boolean) => {
     // 已绑定，检查是否可以解绑
     const loginCount = getLoginMethodCount();
     if (loginCount <= 1) {
-      showError('至少保留一种登录方式，无法解绑');
+      toast.warning('至少保留一种登录方式，无法解绑');
       return;
     }
     // 显示解绑对话框
@@ -361,12 +359,11 @@ const handleUnbindSubmit = async () => {
   unbindLoading.value = true;
   try {
     await unbindOAuth(unbindProvider.value);
-    showSuccess(`已解绑 ${getProviderName(unbindProvider.value)}`);
+    toast.success(`已解绑 ${getProviderName(unbindProvider.value)}`);
     showUnbindDialog.value = false;
     await fetchProfile();
   } catch (error: unknown) {
-    const err = error as Error;
-    showError(err?.message || '解绑失败');
+    toast.error((error as Error).message);
   } finally {
     unbindLoading.value = false;
   }
@@ -381,19 +378,18 @@ const handleDeactivateSubmit = async () => {
   deactivateLoading.value = true;
   try {
     await deactivateAccount({ password: deactivatePassword.value });
-    showSuccess('账户注销成功');
+    toast.success('账户注销成功');
     showDeactivateDialog.value = false;
     setTimeout(() => {
       logoutUser();
       router.push('/');
     }, 1500);
   } catch (error: unknown) {
-    const err = error as Error;
-    const errorMsg = err?.message || '账户注销失败';
+    const errorMsg = (error as Error).message;
     if (errorMsg.includes('密码') || errorMsg.includes('password')) {
       deactivateErrors.value.password = '密码错误，请重新输入';
     } else {
-      showError(errorMsg);
+      toast.error(errorMsg);
     }
   } finally {
     deactivateLoading.value = false;
@@ -415,12 +411,12 @@ onMounted(async () => {
     const provider = route.query.provider as string;
 
     if (bindStatus === 'success' && provider) {
-      showSuccess(`已成功绑定 ${getProviderName(provider)}`);
+      toast.success(`已成功绑定 ${getProviderName(provider)}`);
       // 清除 URL 参数
       router.replace({ path: '/profile' });
     } else if (bindStatus === 'error') {
       const message = route.query.message as string;
-      showError(message || '绑定失败');
+      toast.error(message || '绑定失败');
       router.replace({ path: '/profile' });
     }
   }
