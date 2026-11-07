@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -17,7 +18,7 @@ import (
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
-	"flec_blog/pkg/logger"
+	"flec_blog/pkg/logsetup"
 	"flec_blog/pkg/random"
 	"flec_blog/pkg/utils"
 
@@ -207,6 +208,7 @@ func (s *ArticleService) GetBySlug(ctx context.Context, slug string) (*dto.Artic
 
 	// 异步增加浏览数
 	go func() {
+		defer logsetup.RecoverContext(ctx, "浏览数统计", slog.Any("article_id", article.ID))
 		_ = s.articleRepo.IncrementViewCount(article.ID)
 	}()
 
@@ -464,11 +466,14 @@ func (s *ArticleService) Create(ctx context.Context, req *dto.CreateArticleReque
 
 	// 如果是发布状态，异步发送订阅推送
 	if article.IsPublish && s.subscriberService != nil {
-		go func(ctx context.Context, articleID uint) {
-			if err := s.subscriberService.SendArticleNotification(ctx, article); err != nil {
-				logger.Warn("发送文章推送失败 (文章ID: %d): %v", articleID, err)
-			}
-		}(ctx, article.ID)
+		s.pushArticleAsync(ctx, article)
+	}
+
+	if article.IsPublish {
+		slog.InfoContext(ctx, "文章发布成功",
+			slog.Any("article_id", article.ID),
+			slog.String("title", article.Title),
+		)
 	}
 
 	return s.Get(ctx, article.ID)
@@ -567,14 +572,32 @@ func (s *ArticleService) Update(ctx context.Context, id uint, req *dto.UpdateArt
 
 	// 如果从草稿变为发布状态，异步发送订阅推送
 	if !oldIsPublish && article.IsPublish && s.subscriberService != nil {
-		go func(ctx context.Context, articleID uint) {
-			if err := s.subscriberService.SendArticleNotification(ctx, article); err != nil {
-				logger.Warn("发送文章推送失败 (文章ID: %d): %v", articleID, err)
-			}
-		}(ctx, article.ID)
+		s.pushArticleAsync(ctx, article)
+	}
+
+	// 从草稿变为发布状态时记一条发布成功
+	if !oldIsPublish && article.IsPublish {
+		slog.InfoContext(ctx, "文章发布成功",
+			slog.Any("article_id", article.ID),
+			slog.String("title", article.Title),
+		)
 	}
 
 	return s.Get(ctx, id)
+}
+
+// pushArticleAsync 异步把文章推送给订阅者
+func (s *ArticleService) pushArticleAsync(ctx context.Context, article *model.Article) {
+	go func(ctx context.Context, articleID uint) {
+		ctx = context.WithoutCancel(ctx)
+		defer logsetup.RecoverContext(ctx, "文章推送", slog.Any("article_id", articleID))
+		if err := s.subscriberService.SendArticleNotification(ctx, article); err != nil {
+			slog.WarnContext(ctx, "文章推送未执行",
+				slog.Any("article_id", articleID),
+				slog.Any("err", err),
+			)
+		}
+	}(ctx, article.ID)
 }
 
 // UpdateForMcp 仅更新文章的标题与正文
@@ -1031,11 +1054,12 @@ func (s *ArticleService) uploadContentImages(ctx context.Context, content string
 			continue
 		}
 
+		sem <- struct{}{}
 		wg.Add(1)
 		go func(imgURL string) {
 			defer wg.Done()
-			sem <- struct{}{}
 			defer func() { <-sem }()
+			defer logsetup.RecoverContext(ctx, "内容图片上传", slog.String("img_url", imgURL))
 
 			if newURL, err := s.uploadSingleImage(ctx, imgURL, host); err == nil {
 				mu.Lock()
@@ -1095,9 +1119,7 @@ func (s *ArticleService) uploadSingleImage(ctx context.Context, imgURL string, h
 		return imgURL, fmt.Errorf("上传图片失败: %w", err)
 	}
 
-	if err := s.fileService.MarkAsUsed(uploadedURL); err != nil {
-		logger.Warn("标记文件状态失败: %v", err)
-	}
+	_ = s.fileService.MarkAsUsed(uploadedURL)
 
 	return uploadedURL, nil
 }
@@ -1438,9 +1460,10 @@ func (s *ArticleService) DownloadZip(ctx context.Context, id uint) ([]byte, stri
 
 	// 并发下载
 	for _, url := range uniqueURLs {
+		sem <- struct{}{}
 		go func(imgURL string) {
-			sem <- struct{}{}
 			defer func() { <-sem }()
+			defer logsetup.RecoverContext(ctx, "封面图下载", slog.String("img_url", imgURL))
 
 			result := imageDownloadResult{url: imgURL}
 			if data, ext, err := s.fetchImage(ctx, imgURL); err == nil {

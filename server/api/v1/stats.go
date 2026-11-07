@@ -1,8 +1,11 @@
 package v1
 
 import (
+	"log/slog"
+
 	"flec_blog/internal/dto"
 	"flec_blog/internal/service"
+	"flec_blog/pkg/logsetup"
 	"flec_blog/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -44,6 +47,7 @@ func (h *StatsHandler) Collect(c *gin.Context) {
 
 	if req.Type == "pageview" || req.Type == "" {
 		go func() {
+			defer logsetup.RecoverContext(c.Request.Context(), "访问统计", slog.String("url", req.URL))
 			_ = h.statsService.RecordVisit(ip, req.URL, userAgent, req.Referrer, req.ArticleID)
 		}()
 	}

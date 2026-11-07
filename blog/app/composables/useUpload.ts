@@ -62,8 +62,7 @@ export const useUpload = () => {
     try {
       return await uploadFile(file, type);
     } catch (error: unknown) {
-      const err = error as { message?: string; response?: { data?: { message?: string } } };
-      throw new Error(err?.message || err?.response?.data?.message || '文件上传失败', {
+      throw new Error((error as Error).message, {
         cause: error,
       });
     }

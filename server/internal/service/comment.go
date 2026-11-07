@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"flec_blog/internal/dto"
 	"flec_blog/internal/model"
 	"flec_blog/internal/repository"
+	"flec_blog/pkg/logsetup"
 	"flec_blog/pkg/utils"
 
 	"gorm.io/gorm"
@@ -377,8 +379,10 @@ func (s *CommentService) createComment(ctx context.Context, req *dto.CreateComme
 	s.markImagesAsUsed(comment.Content)
 
 	// 异步发送通知
-	//nolint:gosec // 异步通知使用独立 context，避免请求取消影响通知发送
-	go s.sendNotifications(comment, userID)
+	go func() {
+		defer logsetup.Recover("评论通知", slog.Any("comment_id", comment.ID))
+		s.sendNotifications(comment, userID)
+	}()
 
 	return s.GetForWeb(ctx, comment.ID)
 }

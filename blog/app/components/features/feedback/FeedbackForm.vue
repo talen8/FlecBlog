@@ -8,7 +8,7 @@ interface Emits {
 }
 
 const emit = defineEmits<Emits>();
-const { success, error: errorToast, warning } = useToast();
+const toast = useToast();
 const { submit, queryByTicket } = useFeedback();
 
 // 提交成功状态
@@ -118,7 +118,7 @@ const handleFileUpload = (event: Event, targetKey: keyof typeof fileArrayMap) =>
   for (const file of files) {
     const validationError = validate(file, '反馈投诉');
     if (validationError) {
-      warning(validationError);
+      toast.warning(validationError);
       continue;
     }
     validFiles.push(file);
@@ -143,29 +143,29 @@ const removeFile = (index: number, targetKey: keyof typeof fileArrayMap) => {
 const validateForm = (): boolean => {
   // 检查公共必填项
   if (!formData.reportUrl.trim() || !formData.reportType) {
-    warning('请完整填写表单必填项');
+    toast.warning('请完整填写表单必填项');
     return false;
   }
 
   // 检查各类型独立的必填项
   if (formData.reportType === 'copyright') {
     if (!formData.copyrightDescription.trim()) {
-      warning('请完整填写表单必填项');
+      toast.warning('请完整填写表单必填项');
       return false;
     }
   } else if (formData.reportType === 'inappropriate') {
     if (formData.inappropriateReasons.length === 0 || !formData.inappropriateDescription.trim()) {
-      warning('请完整填写表单必填项');
+      toast.warning('请完整填写表单必填项');
       return false;
     }
   } else if (formData.reportType === 'summary') {
     if (!formData.summaryIssueType || !formData.summaryDescription.trim()) {
-      warning('请完整填写表单必填项');
+      toast.warning('请完整填写表单必填项');
       return false;
     }
   } else if (formData.reportType === 'suggestion') {
     if (!formData.suggestionDescription.trim() || !formData.suggestionReason.trim()) {
-      warning('请完整填写表单必填项');
+      toast.warning('请完整填写表单必填项');
       return false;
     }
   }
@@ -240,8 +240,7 @@ const handleSubmit = async () => {
     resetForm();
     emit('success');
   } catch (error: unknown) {
-    const err = error as Error;
-    errorToast(err.message || '提交失败，请稍后重试');
+    toast.error((error as Error).message);
   } finally {
     submitting.value = false;
   }
@@ -299,17 +298,16 @@ const closeQueryDialog = () => {
 // 查询工单
 const handleQueryTicket = async () => {
   if (!queryTicketNo.value.trim()) {
-    warning('请输入工单号');
+    toast.warning('请输入工单号');
     return;
   }
 
   queryLoading.value = true;
   try {
     queryResult.value = await queryByTicket(queryTicketNo.value.trim());
-    success('查询成功');
+    toast.success('查询成功');
   } catch (error: unknown) {
-    const err = error as Error;
-    errorToast(err.message || '未找到该工单，请检查工单号是否正确');
+    toast.error((error as Error).message);
     queryResult.value = null;
   } finally {
     queryLoading.value = false;

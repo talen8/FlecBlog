@@ -11,7 +11,6 @@ const { title } = usePageSeo({
 
 const route = useRoute();
 const { subscribe, unsubscribe } = useSubscribe();
-const { success, error: errorToast } = useToast();
 const { themeConfig } = useTheme();
 const { copy: copyToClipboard } = useClipboard();
 
@@ -23,10 +22,16 @@ const showRSSDialog = ref(false);
 const rss2Url = computed(() => `${import.meta.client ? window.location.origin : ''}/rss.xml`);
 const atomUrl = computed(() => `${import.meta.client ? window.location.origin : ''}/atom.xml`);
 
+// RSS 地址复制反馈
+const copyLabel = ref<Record<string, string>>({});
+let copyTimer: ReturnType<typeof setTimeout> | undefined;
+
 // 订阅
 const showSubscribeDialog = ref(false);
 const email = ref('');
 const subscribeLoading = ref(false);
+const subscribeDone = ref(false);
+const subscribeError = ref('');
 
 // 退订
 const showUnsubscribeDialog = ref(false);
@@ -43,27 +48,32 @@ onMounted(() => {
   }
 });
 
-const handleCopy = async (text: string) => {
+const handleCopy = async (text: string, key: string) => {
   try {
     await copyToClipboard(text);
-    success('已复制到剪贴板');
+    copyLabel.value[key] = '已复制';
   } catch {
-    errorToast('复制失败');
+    copyLabel.value[key] = '复制失败';
   }
+
+  clearTimeout(copyTimer);
+  copyTimer = setTimeout(() => (copyLabel.value = {}), 2000);
 };
 
 const handleSubscribe = async () => {
+  if (subscribeDone.value) {
+    showSubscribeDialog.value = false;
+    return;
+  }
   if (!email.value) return;
 
+  subscribeError.value = '';
   subscribeLoading.value = true;
   try {
     await subscribe(email.value);
-    showSubscribeDialog.value = false;
-    email.value = '';
-    success('订阅成功！');
+    subscribeDone.value = true;
   } catch (error: unknown) {
-    const err = error as Error & { data?: { message?: string } };
-    errorToast(err.data?.message || err.message || '订阅失败');
+    subscribeError.value = (error as Error).message;
   } finally {
     subscribeLoading.value = false;
   }
@@ -77,9 +87,8 @@ const handleUnsubscribe = async (token: string) => {
     unsubscribeSuccess.value = true;
     unsubscribeMessage.value = '退订成功！';
   } catch (error: unknown) {
-    const err = error as Error & { data?: { message?: string } };
     unsubscribeSuccess.value = false;
-    unsubscribeMessage.value = err.data?.message || err.message || '退订失败';
+    unsubscribeMessage.value = (error as Error).message;
   } finally {
     unsubscribeLoading.value = false;
   }
@@ -121,6 +130,8 @@ const closeUnsubscribeDialog = () => {
         @click="
           showSubscribeDialog = true;
           email = '';
+          subscribeDone = false;
+          subscribeError = '';
         "
       >
         <div class="subscribe-description">推送全部文章<br />推送简介</div>
@@ -193,14 +204,18 @@ const closeUnsubscribeDialog = () => {
           <span class="url-label">RSS 2.0</span>
           <div class="url-copy-box">
             <code class="url-text">{{ rss2Url }}</code>
-            <button class="copy-btn" @click="handleCopy(rss2Url)">复制</button>
+            <button class="copy-btn" @click="handleCopy(rss2Url, 'rss2')">
+              {{ copyLabel.rss2 || '复制' }}
+            </button>
           </div>
         </div>
         <div class="rss-url-item">
           <span class="url-label">Atom</span>
           <div class="url-copy-box">
             <code class="url-text">{{ atomUrl }}</code>
-            <button class="copy-btn" @click="handleCopy(atomUrl)">复制</button>
+            <button class="copy-btn" @click="handleCopy(atomUrl, 'atom')">
+              {{ copyLabel.atom || '复制' }}
+            </button>
           </div>
         </div>
 
@@ -225,7 +240,7 @@ const closeUnsubscribeDialog = () => {
     <UiBaseDialog
       v-model="showSubscribeDialog"
       title="邮件订阅"
-      confirm-text="确认订阅"
+      :confirm-text="subscribeDone ? '确定' : '确认订阅'"
       :loading="subscribeLoading"
       @confirm="handleSubscribe"
     >
@@ -245,6 +260,8 @@ const closeUnsubscribeDialog = () => {
             :disabled="subscribeLoading"
             @keyup.enter="handleSubscribe"
           />
+          <p v-if="subscribeError" class="error-message">{{ subscribeError }}</p>
+          <p v-else-if="subscribeDone" class="success-message">订阅成功！</p>
         </div>
       </div>
     </UiBaseDialog>
@@ -502,7 +519,9 @@ const closeUnsubscribeDialog = () => {
   }
 
   .input-group {
+    position: relative;
     margin-bottom: 16px;
+    padding-bottom: 24px;
 
     label {
       display: block;
@@ -538,6 +557,23 @@ const closeUnsubscribeDialog = () => {
         color: var(--theme-meta-color);
       }
     }
+  }
+
+  .error-message,
+  .success-message {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 0.875rem;
+  }
+
+  .error-message {
+    color: var(--toast-error);
+  }
+
+  .success-message {
+    color: var(--toast-success);
   }
 }
 

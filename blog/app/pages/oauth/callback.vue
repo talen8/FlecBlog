@@ -2,6 +2,7 @@
 const router = useRouter();
 const route = useRoute();
 const { loginWithToken } = useAuthActions();
+const toast = useToast();
 
 onMounted(async () => {
   // 只在客户端执行
@@ -12,7 +13,14 @@ onMounted(async () => {
 
   if (token) {
     // 保存 Access Token 并获取用户信息
-    await loginWithToken(token);
+    try {
+      await loginWithToken(token);
+    } catch (error) {
+      console.error('登录失败:', error);
+      toast.error('登录失败');
+      router.push('/');
+      return;
+    }
 
     // 跳转回原页面，如果有 redirect 参数则使用，否则回首页
     if (redirect) {
@@ -22,6 +30,7 @@ onMounted(async () => {
     }
   } else {
     // 失败处理：跳转首页
+    toast.error('登录失败');
     router.push('/');
   }
 });

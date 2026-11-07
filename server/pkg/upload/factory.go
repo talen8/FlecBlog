@@ -2,6 +2,7 @@ package upload
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"flec_blog/config"
@@ -57,7 +58,12 @@ func InitializeUploadSystem(globalCfg *config.Config) *Manager {
 	uploadStorage := MustNewStorage(&globalCfg.Upload)
 
 	// 使用与存储路径一致的绝对路径创建目录
-	_ = storage.NewHelper(uploadStorage).CreateUploadDir("/app/data/uploads")
+	if err := storage.NewHelper(uploadStorage).CreateUploadDir("/app/data/uploads"); err != nil {
+		slog.Error("创建上传目录失败",
+			slog.String("path", "/app/data/uploads"),
+			slog.Any("err", err),
+		)
+	}
 
 	return NewManager(uploadStorage, NewValidator(), globalCfg)
 }

@@ -65,8 +65,8 @@ async function apiRequest<T = any>(
       'code' in response &&
       (response as any).code !== 0
     ) {
-      const err = new Error((response as any).message || '请求失败') as any;
-      err.response = { data: response };
+      const err = new Error() as any;
+      err.data = response;
       throw err;
     }
 
@@ -88,6 +88,10 @@ async function apiRequest<T = any>(
       }
       logoutUser();
     }
+    const msg = error?.data?.message;
+    const isBusinessMessage = Boolean(msg && /[\u4e00-\u9fa5]/.test(msg));
+    if (!isBusinessMessage) console.error('请求失败:', error);
+    error.message = isBusinessMessage ? msg : '请求失败';
     throw error;
   }
 }

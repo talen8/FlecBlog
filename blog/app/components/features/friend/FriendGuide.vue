@@ -2,7 +2,7 @@
 import type { FriendApplyRequest } from '~~/types';
 const activeTab = ref<'yaml' | 'json' | 'html' | 'table'>('yaml');
 const activeApplyTab = ref<'form' | 'format1' | 'format2'>('format1');
-const { success } = useToast();
+const toast = useToast();
 const { basicConfig } = useSysConfig();
 const { themeConfig } = useTheme();
 const isLoggedIn = useAuth();
@@ -23,9 +23,10 @@ const siteConfig = computed(() => ({
 const copyToClipboard = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text);
-    success('已复制到剪贴板！');
+    toast.success('已复制到剪贴板！');
   } catch (err) {
     console.error('复制失败:', err);
+    toast.error('复制失败');
   }
 };
 
@@ -100,14 +101,13 @@ const showApplyForm = () => {
 const submitApplyForm = async () => {
   try {
     await apply(formData.value);
-    success('友链申请已提交！感谢您的申请，我们会尽快处理。');
+    toast.success('友链申请已提交！感谢您的申请，我们会尽快处理。');
 
     // 关闭弹窗（表单会被watch自动重置）
     showForm.value = false;
   } catch (error: unknown) {
     console.error('申请失败:', error);
-    // 这里应该用error toast，暂时用alert
-    alert((error as Error).message || '申请失败，请稍后重试');
+    toast.error((error as Error).message);
   }
 };
 

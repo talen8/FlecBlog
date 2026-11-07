@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"context"
 	"fmt"
 
 	"flec_blog/config"
@@ -19,7 +20,7 @@ func NewEmailNotifier(client *email.Client, cfg *config.Config) *EmailNotifier {
 }
 
 // Send 发送邮件通知
-func (e *EmailNotifier) Send(to string, msg Message) error {
+func (e *EmailNotifier) Send(ctx context.Context, to string, msg Message) error {
 	if e.client == nil || e.config == nil {
 		return nil // 邮件服务未配置，静默返回
 	}
@@ -58,7 +59,7 @@ func (e *EmailNotifier) Send(to string, msg Message) error {
 	}
 
 	// 发送邮件
-	return e.client.SendEmail(to, subject, htmlBody, fromName)
+	return e.client.SendEmail(ctx, to, subject, htmlBody, fromName)
 }
 
 // generateSubject 生成邮件主题

@@ -8,7 +8,7 @@ const emit = defineEmits<{
   (e: 'success'): void;
 }>();
 
-const { success: showSuccess, error: showError } = useToast();
+const toast = useToast();
 const { onSkip } = useBindEmail();
 const { updateUserProfile } = useUser();
 
@@ -33,11 +33,11 @@ const handleSubmit = async () => {
     await updateUserProfile({
       email: email.value.trim(),
     });
-    showSuccess('邮箱绑定成功');
+    toast.success('邮箱绑定成功');
     emit('success');
     emit('update:modelValue', false);
   } catch (error: unknown) {
-    showError((error as Error).message || '绑定失败');
+    toast.error((error as Error).message);
   } finally {
     loading.value = false;
   }

@@ -1,11 +1,12 @@
 package scheduler
 
 import (
+	"log/slog"
 	"time"
 
 	"github.com/robfig/cron/v3"
 
-	"flec_blog/pkg/logger"
+	"flec_blog/pkg/logsetup"
 )
 
 // Job 定时任务接口
@@ -59,14 +60,15 @@ func (s *Scheduler) AddJob(job Job) error {
 
 	// 包装任务执行函数，添加日志和错误处理
 	wrappedFunc := func() {
+		defer logsetup.Recover("定时任务", slog.String("job", name))
 		startTime := time.Now()
-		logger.Info("[Scheduler] 开始执行任务: %s", name)
+		slog.Info("调度任务开始执行", slog.String("job", name))
 
 		if err := job.Execute(); err != nil {
-			logger.Error("[Scheduler] 任务执行失败 %s: %v", name, err)
+			slog.Error("调度任务执行失败", slog.String("job", name), slog.Any("err", err))
 		} else {
 			duration := time.Since(startTime)
-			logger.Info("[Scheduler] 任务执行成功 %s (耗时: %v)", name, duration)
+			slog.Info("调度任务执行成功", slog.String("job", name), slog.Duration("cost", duration))
 		}
 	}
 
@@ -87,12 +89,16 @@ func (s *Scheduler) Start() {
 
 // Stop 停止调度器
 func (s *Scheduler) Stop() {
-	logger.Info("[Scheduler] 停止调度器")
+	slog.Info("调度器已停止")
 	ctx := s.cron.Stop()
 	<-ctx.Done()
 }
 
 // GetJobs 获取所有已注册的任务
 func (s *Scheduler) GetJobs() map[string]Job {
-	return s.jobs
+	jobs := make(map[string]Job, len(s.jobs))
+	for name, job := range s.jobs {
+		jobs[name] = job
+	}
+	return jobs
 }

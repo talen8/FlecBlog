@@ -52,6 +52,12 @@
   --flec-subscribe-wechat: #27c125;
   --flec-subscribe-mail: #425aef;
   --flec-subscribe-rss: #e38100;
+
+  /* Toast 提示 */
+  --toast-success: #2e7d32;
+  --toast-error: #b5342a;
+  --toast-warning: #856404;
+  --toast-info: #1c6ea4;
 }
 
 /* 暗色主题 */
@@ -98,4 +104,9 @@
   --flec-subscribe-wechat: #28c125bb;
   --flec-subscribe-mail: #425aefbb;
   --flec-subscribe-rss: #e38100bb;
+
+  --toast-success: #7fd18a;
+  --toast-error: #ff8a80;
+  --toast-warning: #ffc46b;
+  --toast-info: #7cc4f0;
 }

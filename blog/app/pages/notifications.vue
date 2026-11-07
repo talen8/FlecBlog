@@ -14,6 +14,7 @@ const {
   resetPage,
 } = useNotifications();
 const router = useRouter();
+const toast = useToast();
 
 definePageMeta({});
 
@@ -31,8 +32,12 @@ const loadNotifications = async () => {
 };
 
 const handleMarkAllAsRead = async () => {
-  await markAllNotificationsAsRead();
-  await loadNotifications();
+  try {
+    await markAllNotificationsAsRead();
+    await loadNotifications();
+  } catch (error) {
+    toast.error((error as Error).message);
+  }
 };
 
 const handlePageChange = (page: number) => {

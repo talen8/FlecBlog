@@ -190,7 +190,7 @@ func (ctrl *FileController) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.fileService.Delete(uint(id)); err != nil {
+	if err := ctrl.fileService.Delete(c.Request.Context(), uint(id)); err != nil {
 		if strings.Contains(err.Error(), "文件不存在") {
 			response.Error(c, errcode.FileNotFound)
 			return
